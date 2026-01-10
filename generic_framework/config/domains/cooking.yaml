@@ -1,0 +1,46 @@
+# Cooking Domain Configuration
+domain:
+  domain_id: "cooking"
+  domain_name: "Cooking & Recipes"
+  version: "1.0.0"
+  description: "Culinary knowledge, recipes, and cooking techniques"
+
+  # Data sources (currently using existing pattern files)
+  data_sources:
+    - "/expertise_scanner/data/patterns/cooking"
+
+  # Pattern storage
+  pattern_storage_path: "/expertise_scanner/data/patterns/cooking"
+  pattern_format: "json"
+  default_collector_type: "file_system"
+
+  # Taxonomy
+  categories:
+    - "technique"
+    - "preparation"
+    - "cooking_method"
+    - "ingredient_substitution"
+    - "troubleshooting"
+    - "equipment"
+    - "procedure"
+
+  tags:
+    - "baking"
+    - "grilling"
+    - "sautéing"
+    - "roasting"
+    - "chicken"
+    - "vegetarian"
+    - "quick"
+    - "healthy"
+
+  # Feature flags
+  enabled_features:
+    - "pattern_search"
+    - "specialist_routing"
+    - "feedback_learning"
+
+  # Domain-specific settings
+  domain_settings:
+    temperature_unit: "F"
+    serving_size_unit: "servings"

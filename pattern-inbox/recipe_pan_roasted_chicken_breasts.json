@@ -1,0 +1,31 @@
+{
+  "title": "Pan-Roasted Chicken Breasts",
+  "url": "https://www.allrecipes.com/recipe/245367/pan-roasted-chicken-breasts/",
+  "description": "This chicken breast skillet recipe is Chef John's version of pan-roasted chicken breasts that cook fast and stay juicy for an easy weeknight meal.",
+  "ingredients": [
+    {"amount": "4", "item": "boneless chicken breast halves with skin", "notes": ""},
+    {"amount": "", "item": "salt and freshly ground black pepper", "notes": "to taste"},
+    {"amount": "2 tablespoons", "item": "olive oil", "notes": ""},
+    {"amount": "1 tablespoon", "item": "chopped fresh herbs (thyme, parsley, rosemary)", "notes": "Optional"},
+    {"amount": "¼ cup", "item": "apple cider vinegar", "notes": ""},
+    {"amount": "4 tablespoons", "item": "cold butter, cut into small pieces", "notes": ""},
+    {"amount": "1 tablespoon", "item": "chicken broth (or water)", "notes": "if needed to thin sauce"}
+  ],
+  "steps": [
+    "Gather all ingredients.",
+    "Season chicken on both sides with salt and pepper.",
+    "Heat olive oil in a heavy skillet over medium-high heat until it starts to shimmer.",
+    "Place chicken breasts skin-side down in the skillet. Sprinkle with fresh herbs.",
+    "Cook until the bottoms are well seared and golden brown, 5 to 6 minutes.",
+    "Flip chicken breasts over and continue cooking until an instant-read thermometer inserted into the center reads 150°F (66°C), about 5 minutes.",
+    "Add vinegar and cold butter to the pan with chicken. Shake the pan gently until butter melts and internal temperature reaches at least 165°F (74°C), 2 to 3 minutes.",
+    "Stir in 1 tablespoon chicken broth to thin sauce."
+  ],
+  "prep_time": "5 mins",
+  "cook_time": "15 mins",
+  "total_time": "20 mins",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["skillet chicken", "chef john", "quick", "pan-seared", "chicken breast"],
+  "rating": 4.6
+}

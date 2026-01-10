@@ -1,0 +1,803 @@
+[
+  {
+    "id": "cooking_001",
+    "name": "Mise en Place Setup",
+    "pattern_type": "preparation",
+    "description": "Prepare and organize all ingredients before cooking",
+    "problem": "Ingredients not ready when needed, steps get delayed",
+    "solution": "Gather, measure, and prepare all ingredients before starting cooking",
+    "steps": [
+      "Read recipe completely",
+      "Gather all ingredients",
+      "Wash, peel, chop vegetables",
+      "Measure spices and liquids into small bowls",
+      "Arrange ingredients in cooking order"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "cooking_002"
+    ],
+    "prerequisites": [],
+    "alternatives": [
+      "cooking_003"
+    ],
+    "confidence": 0.95,
+    "sources": [
+      "https://www.allrecipes.com/howto/mise-en-place/"
+    ],
+    "tags": [
+      "preparation",
+      "organization",
+      "workflow"
+    ],
+    "examples": [
+      "Professional chefs always use mise en place"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-01-06T04:34:38.244351",
+    "updated_at": "2026-01-06T04:34:38.244394",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "cooking_002",
+    "name": "Knife Skills: Basic Cuts",
+    "pattern_type": "procedure",
+    "description": "Fundamental knife techniques for consistent cooking",
+    "problem": "Uneven pieces cook unevenly, affecting texture and timing",
+    "solution": "Use proper knife techniques for consistent, uniform cuts",
+    "steps": [
+      "Hold knife properly (pinch grip)",
+      "Use claw grip for holding food",
+      "Rock chop for herbs",
+      "Straight slice for round vegetables",
+      "Keep knives sharp"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "cooking_001",
+      "cooking_004"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.9,
+    "sources": [],
+    "tags": [
+      "knife",
+      "skills",
+      "technique",
+      "safety"
+    ],
+    "examples": [
+      "Dice onions into 1/4 inch pieces",
+      "Mince garlic finely"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-01-06T04:34:38.244400",
+    "updated_at": "2026-01-06T04:34:38.244402",
+    "times_accessed": 1,
+    "user_rating": null
+  },
+  {
+    "id": "cooking_003",
+    "name": "Batch Preparation Alternative",
+    "pattern_type": "preparation",
+    "description": "Prepare ingredients in batches for multiple meals",
+    "problem": "Same ingredients prepared repeatedly across meals",
+    "solution": "Prep larger quantities once, use across multiple recipes",
+    "steps": [
+      "Plan meals for the week",
+      "Identify common ingredients",
+      "Batch chop vegetables",
+      "Store in airtight containers",
+      "Use within 3-5 days"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [
+      "cooking_001"
+    ],
+    "confidence": 0.8,
+    "sources": [],
+    "tags": [
+      "meal-prep",
+      "batching",
+      "efficiency"
+    ],
+    "examples": [],
+    "domain": "cooking",
+    "created_at": "2026-01-06T04:34:38.244404",
+    "updated_at": "2026-01-06T04:34:38.244406",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "cooking_004",
+    "name": "Temperature Control: Sear then Bake",
+    "pattern_type": "procedure",
+    "description": "Start with high heat for searing, finish with lower heat",
+    "problem": "Food burns on outside before inside is cooked",
+    "solution": "Use two-stage cooking: high heat sear, then finish in oven",
+    "steps": [
+      "Preheat oven to finishing temperature (350-400\u00b0F)",
+      "Heat pan on high heat with oil",
+      "Sear food 2-3 minutes per side",
+      "Transfer to oven",
+      "Cook until internal temperature reached"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "cooking_002"
+    ],
+    "prerequisites": [
+      "cooking_001"
+    ],
+    "alternatives": [
+      "cooking_005"
+    ],
+    "confidence": 0.92,
+    "sources": [],
+    "tags": [
+      "temperature",
+      "technique",
+      "searing",
+      "baking"
+    ],
+    "examples": [
+      "Steak: sear in cast iron, finish at 400\u00b0F",
+      "Chicken thighs: crispy skin, moist interior"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-01-06T04:34:38.244408",
+    "updated_at": "2026-01-06T04:34:38.244410",
+    "times_accessed": 6,
+    "user_rating": null
+  },
+  {
+    "id": "cooking_005",
+    "name": "Reverse Sear Method",
+    "pattern_type": "procedure",
+    "description": "Cook low and slow first, then sear at the end",
+    "problem": "Traditional sear creates overcooked outer layer",
+    "solution": "Reverse order: slow cook to temperature, then quick sear",
+    "steps": [
+      "Season meat and let rest at room temperature",
+      "Cook in low oven (225-250\u00b0F) until 10-15\u00b0F below target",
+      "Rest 10 minutes",
+      "Sear in hot pan 1 minute per side",
+      "Serve immediately"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "cooking_004"
+    ],
+    "prerequisites": [],
+    "alternatives": [
+      "cooking_004"
+    ],
+    "confidence": 0.88,
+    "sources": [],
+    "tags": [
+      "temperature",
+      "steak",
+      "technique"
+    ],
+    "examples": [
+      "Thick steak (1.5+ inches)",
+      "Prime rib"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-01-06T04:34:38.244411",
+    "updated_at": "2026-01-06T04:34:38.244413",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "cooking_009",
+    "domain": "cooking",
+    "name": "Test Casserole Recipe",
+    "pattern_type": "procedure",
+    "description": "A step-by-step recipe: test casserole recipe",
+    "problem": "How to make recipe: test casserole recipe",
+    "solution": "Follow these steps to create recipe: test casserole recipe",
+    "steps": [
+      "cooked chicken (diced)\n\nSteps:\n1.",
+      "Preheat oven to 350\u00b0F.",
+      "Mix soup and milk in a bowl.",
+      "Add chicken and stir to combine.",
+      "Bake for 30 minutes until bubbly."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/test/12345"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:23:23.648887",
+    "updated_at": "2026-01-06T08:23:23.648889",
+    "times_accessed": 6,
+    "user_rating": null,
+    "rating": 4.5
+  },
+  {
+    "id": "cooking_023",
+    "domain": "cooking",
+    "name": "Test Casserole Recipe",
+    "pattern_type": "procedure",
+    "description": "A step-by-step recipe: test casserole recipe",
+    "problem": "How to make recipe: test casserole recipe",
+    "solution": "Follow these steps to create recipe: test casserole recipe",
+    "steps": [
+      "cooked chicken (diced)\n\nSteps:\n1.",
+      "Preheat oven to 350\u00b0F.",
+      "Mix soup and milk in a bowl.",
+      "Add chicken and stir to combine.",
+      "Bake for 30 minutes until bubbly."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/test/12345"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:26:34.479378",
+    "updated_at": "2026-01-06T08:26:34.479380",
+    "times_accessed": 2,
+    "user_rating": null,
+    "rating": 4.5
+  },
+  {
+    "id": "cooking_037",
+    "domain": "cooking",
+    "name": "Test Casserole Recipe",
+    "pattern_type": "procedure",
+    "description": "A step-by-step recipe: test casserole recipe",
+    "problem": "How to make recipe: test casserole recipe",
+    "solution": "Follow these steps to create recipe: test casserole recipe",
+    "steps": [
+      "cooked chicken (diced)\n\nSteps:\n1.",
+      "Preheat oven to 350\u00b0F.",
+      "Mix soup and milk in a bowl.",
+      "Add chicken and stir to combine.",
+      "Bake for 30 minutes until bubbly."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/test/12345"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:26:53.406607",
+    "updated_at": "2026-01-06T08:26:53.406609",
+    "times_accessed": 6,
+    "user_rating": null,
+    "rating": 4.5
+  },
+  {
+    "id": "cooking_012",
+    "domain": "cooking",
+    "name": "Easy Mediterranean Baked Chicken Breast",
+    "pattern_type": "procedure",
+    "description": "A step-by-step easy mediterranean baked chicken breast",
+    "problem": "How to make easy mediterranean baked chicken breast",
+    "solution": "Follow these steps to create easy mediterranean baked chicken breast",
+    "steps": [
+      "Baked Chicken Breast\nDescription: An easy recipe for baked chicken breast for two that is marinated in Mediterranean flavors like lemon juice, olive oil, garlic, and herbs.",
+      "place in a bowl or lidded container.",
+      "Combine olive oil, lemon juice, garlic, oregano, and thyme in a small bowl and pour marinade over chicken breasts.",
+      "Preheat oven to 400\u00b0F (200\u00b0C).",
+      "heat source.",
+      "Place chicken breasts into a baking dish and pour marinade on top.",
+      "Bake chicken on the middle rack until no longer pink in the center and juices run clear, 35 to 45 minutes.",
+      "baked, chicken breast, lemon, garlic, herbs"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/260445/easy-mediterranean-baked-chicken-breast/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.073050",
+    "updated_at": "2026-01-06T08:38:05.073054",
+    "times_accessed": 39,
+    "user_rating": null,
+    "rating": 4.5
+  },
+  {
+    "id": "cooking_013",
+    "domain": "cooking",
+    "name": "Spicy Garlic Lime Chicken",
+    "pattern_type": "procedure",
+    "description": "A step-by-step spicy garlic lime chicken",
+    "problem": "How to make spicy garlic lime chicken",
+    "solution": "Follow these steps to create spicy garlic lime chicken",
+    "steps": [
+      "Mix together salt, black pepper, cayenne, 1/4 teaspoon garlic powder, thyme, parsley, paprika, and onion powder in a small bowl.",
+      "mixture generously on both sides of chicken breasts.",
+      "Heat butter and olive oil in a large heavy skillet over medium heat.",
+      "Saut\u00e9 chicken until golden brown, about 6 minutes on each side.",
+      "Cook 5 minutes more, stirring frequently to coat evenly with cooking juices."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/44868/spicy-garlic-lime-chicken/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "saut\u00e9ing",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.074794",
+    "updated_at": "2026-01-06T08:38:05.074796",
+    "times_accessed": 34,
+    "user_rating": null,
+    "rating": 4.6
+  },
+  {
+    "id": "cooking_014",
+    "domain": "cooking",
+    "name": "Creamy Tuscan Chicken",
+    "pattern_type": "procedure",
+    "description": "A step-by-step creamy tuscan chicken",
+    "problem": "How to make creamy tuscan chicken",
+    "solution": "Follow these steps to create creamy tuscan chicken",
+    "steps": [
+      "Heat 1 tablespoon olive oil in a large skillet over medium-high heat.",
+      "Cook chicken in batches until golden brown and cooked through, about 5-7 minutes per batch.",
+      "Add remaining olive oil and butter to the same skillet.",
+      "Add onion and cook for 3-4 minutes until softened.",
+      "Add garlic and cook for 30 seconds until fragrant.",
+      "Pour in chicken broth and scrape up any browned bits from the bottom of the pan.",
+      "heat to medium-low and stir in heavy cream and Parmesan cheese.",
+      "Simmer for 2-3 minutes until sauce begins to thicken."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/285238/creamy-tuscan-chicken/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "simmering",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.076446",
+    "updated_at": "2026-01-06T08:38:05.076448",
+    "times_accessed": 34,
+    "user_rating": null,
+    "rating": 4.7
+  },
+  {
+    "id": "cooking_015",
+    "domain": "cooking",
+    "name": "Test Casserole Recipe",
+    "pattern_type": "procedure",
+    "description": "A step-by-step test casserole recipe",
+    "problem": "How to make test casserole recipe",
+    "solution": "Follow these steps to create test casserole recipe",
+    "steps": [
+      "cooked chicken (diced)\n\nSteps:\n1.",
+      "Preheat oven to 350\u00b0F.",
+      "Mix soup and milk in a bowl.",
+      "Add chicken and stir to combine.",
+      "Bake for 30 minutes until bubbly."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/test/12345"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.077653",
+    "updated_at": "2026-01-06T08:38:05.077655",
+    "times_accessed": 1,
+    "user_rating": null,
+    "rating": 4.5
+  },
+  {
+    "id": "cooking_016",
+    "domain": "cooking",
+    "name": "Quick Chicken Piccata",
+    "pattern_type": "procedure",
+    "description": "A step-by-step quick chicken piccata",
+    "problem": "How to make quick chicken piccata",
+    "solution": "Follow these steps to create quick chicken piccata",
+    "steps": [
+      "Place chicken breasts between 2 sheets of heavy plastic on a solid, level surface.",
+      "Heat olive oil in a skillet over medium-high heat.",
+      "Place chicken in the pan, reduce heat to medium, and cook until browned and cooked through, about 5 minutes per side; transfer to a plate.",
+      "Cook capers in reserved oil, smashing them lightly to release brine, until warmed through, about 30 seconds.",
+      "Pour white wine into the skillet and bring to a boil while scraping the browned bits off the bottom of the pan.",
+      "Cook wine until reduced by half, about 2 minutes.",
+      "Stir lemon juice, water, and butter into the reduced wine mixture; cook and stir continuously to form a thick sauce, about 2 minutes.",
+      "heat to low and stir parsley through the sauce."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/220751/quick-chicken-piccata/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "boiling",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.079506",
+    "updated_at": "2026-01-06T08:38:05.079508",
+    "times_accessed": 21,
+    "user_rating": null,
+    "rating": 4.7
+  },
+  {
+    "id": "cooking_017",
+    "domain": "cooking",
+    "name": "Easy Creamy Chicken Casserole",
+    "pattern_type": "procedure",
+    "description": "A step-by-step easy creamy chicken casserole",
+    "problem": "How to make easy creamy chicken casserole",
+    "solution": "Follow these steps to create easy creamy chicken casserole",
+    "steps": [
+      "baked with a buttery cracker crust.",
+      "Preheat the oven to 350\u00b0F (175\u00b0C).",
+      "Combine crackers and melted butter in a bowl; set aside.",
+      "boil in a pot over high heat; season with salt and pepper.",
+      "Add chicken; reduce heat to a simmer, and cook until no longer pink, 5 to 7 minutes.",
+      "Whisk cream of chicken soup and sour cream together in a large bowl.",
+      "Stir in cooked chicken, then transfer mixture into a 9x13-inch baking dish.",
+      "mixture on top."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/218621/easy-creamy-chicken-casserole/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "boiling",
+      "simmering"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.081115",
+    "updated_at": "2026-01-06T08:38:05.081117",
+    "times_accessed": 0,
+    "user_rating": null,
+    "rating": 4.1
+  },
+  {
+    "id": "cooking_018",
+    "domain": "cooking",
+    "name": "Pan-Roasted Chicken Breasts",
+    "pattern_type": "procedure",
+    "description": "A step-by-step pan-roasted chicken breasts",
+    "problem": "How to make pan-roasted chicken breasts",
+    "solution": "Follow these steps to create pan-roasted chicken breasts",
+    "steps": [
+      "Roasted Chicken Breasts\nDescription: This chicken breast skillet recipe is Chef John's version of pan-roasted chicken breasts that cook fast and stay juicy for an easy weeknight meal.",
+      "Heat olive oil in a heavy skillet over medium-high heat until it starts to shimmer.",
+      "Place chicken breasts skin-side down in the skillet.",
+      "Cook until the bottoms are well seared and golden brown, 5 to 6 minutes.",
+      "cooking until an instant-read thermometer inserted into the center reads 150\u00b0F (66\u00b0C), about 5 minutes.",
+      "Add vinegar and cold butter to the pan with chicken.",
+      "Stir in 1 tablespoon chicken broth to thin sauce."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/245367/pan-roasted-chicken-breasts/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "roasting",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.082808",
+    "updated_at": "2026-01-06T08:38:05.082810",
+    "times_accessed": 18,
+    "user_rating": null,
+    "rating": 4.6
+  },
+  {
+    "id": "cooking_019",
+    "domain": "cooking",
+    "name": "A Good and Easy Garlic Chicken",
+    "pattern_type": "procedure",
+    "description": "A step-by-step a good and easy garlic chicken",
+    "problem": "How to make a good and easy garlic chicken",
+    "solution": "Follow these steps to create a good and easy garlic chicken",
+    "steps": [
+      "saut\u00e9s tender chicken breasts in butter with garlic powder and simple seasonings for a quick and easy meal.",
+      "Add chicken and sprinkle with garlic powder, seasoning salt, and onion powder.",
+      "Saut\u00e9 until chicken is cooked through and juices run clear, about 7 to 10 minutes on each side."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/23998/a-good-easy-garlic-chicken/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "saut\u00e9ing",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.084323",
+    "updated_at": "2026-01-06T08:38:05.084325",
+    "times_accessed": 1,
+    "user_rating": null,
+    "rating": 4.5
+  },
+  {
+    "id": "cooking_020",
+    "domain": "cooking",
+    "name": "Easy Chicken Casserole",
+    "pattern_type": "procedure",
+    "description": "A step-by-step easy chicken casserole",
+    "problem": "How to make easy chicken casserole",
+    "solution": "Follow these steps to create easy chicken casserole",
+    "steps": [
+      "cooked in a creamy condensed soup sauce for a meal the whole family will love.",
+      "Preheat oven to 350\u00b0F (175\u00b0C).",
+      "Cook chicken in boiling water until no longer pink inside, 20 to 30 minutes.",
+      "place in a 9x13-inch baking dish.",
+      "Combine condensed soup, sour cream, onion, and mushrooms in a bowl.",
+      "Pour mixture over chicken and top with crumbled crackers.",
+      "bake in the preheated oven until top is lightly browned, about 30 minutes."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/8594/easy-chicken-casserole/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "boiling",
+      "chicken"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.085862",
+    "updated_at": "2026-01-06T08:38:05.085864",
+    "times_accessed": 0,
+    "user_rating": null,
+    "rating": 4.2
+  },
+  {
+    "id": "cooking_021",
+    "domain": "cooking",
+    "name": "Honey Glazed Chicken",
+    "pattern_type": "procedure",
+    "description": "A step-by-step honey glazed chicken",
+    "problem": "How to make honey glazed chicken",
+    "solution": "Follow these steps to create honey glazed chicken",
+    "steps": [
+      "Whisk honey, soy sauce, and red pepper flakes in a bowl; set aside.",
+      "Heat olive oil in a skillet over medium heat; cook and stir chicken in hot oil until lightly brown, about 5 minutes.",
+      "Pour honey mixture into the skillet; continue to cook and stir until chicken is no longer pink in the center and sauce is thickened, about 5 minutes more."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/231939/honey-glazed-chicken/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.087428",
+    "updated_at": "2026-01-06T08:38:05.087430",
+    "times_accessed": 0,
+    "user_rating": null,
+    "rating": 4.6
+  },
+  {
+    "id": "cooking_022",
+    "domain": "cooking",
+    "name": "Three-Ingredient Baked Chicken Breasts",
+    "pattern_type": "procedure",
+    "description": "A step-by-step three-ingredient baked chicken breasts",
+    "problem": "How to make three-ingredient baked chicken breasts",
+    "solution": "Follow these steps to create three-ingredient baked chicken breasts",
+    "steps": [
+      "Baked Chicken Breasts\nDescription: Juicy and tender baked chicken breasts flavored with butter and simple seasonings; great for an easy dinner or any recipe using cooked chicken breast.",
+      "Preheat the oven to 350 degrees F (175 degrees C).",
+      "Stir together melted butter and salt in a bowl.",
+      "Arrange chicken in the prepared baking dish.",
+      "mixture onto chicken until thoroughly coated, pouring any extra over chicken.",
+      "Bake in the preheated oven until no longer pink in the center and juices run clear, 30 to 45 minutes.",
+      "baked chicken, chicken breast, 5 ingredients, easy, oven"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/239137/three-ingredient-baked-chicken-breasts/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.089007",
+    "updated_at": "2026-01-06T08:38:05.089009",
+    "times_accessed": 28,
+    "user_rating": null,
+    "rating": 4.6
+  },
+  {
+    "id": "cooking_024",
+    "domain": "cooking",
+    "name": "Eggplant Parmesan Casserole",
+    "pattern_type": "procedure",
+    "description": "A step-by-step eggplant parmesan casserole",
+    "problem": "How to make eggplant parmesan casserole",
+    "solution": "Follow these steps to create eggplant parmesan casserole",
+    "steps": [
+      "cooking eggplant slices)\n- 1 pinch salt (or as needed)\n- 1 tablespoon olive oil (for garlic)\n- 2 cloves garlic, sliced\n- 0.",
+      "Preheat oven to 375 degrees F (190 degrees C).",
+      "Heat 2 tablespoons olive oil in a large skillet over medium-high heat until oil is very hot.",
+      "cook in hot skillet in batches until slightly softened, about 3 minutes per side.",
+      "Heat 1 tablespoon olive oil in skillet and cook garlic for about 10 seconds; add diced eggplant and season with a pinch of salt and red pepper flakes.",
+      "Pour in marinara sauce and water.",
+      "heat to medium-low and cook until eggplant is tender, about 15 minutes; stir occasionally.",
+      "add a little more water."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/235794/eggplant-parmesan-casserole/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "vegetarian",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.092925",
+    "updated_at": "2026-01-06T08:38:05.092927",
+    "times_accessed": 0,
+    "user_rating": null,
+    "rating": 4.6
+  },
+  {
+    "id": "cooking_026",
+    "domain": "cooking",
+    "name": "Simple Lemon Herb Chicken",
+    "pattern_type": "procedure",
+    "description": "A step-by-step simple lemon herb chicken",
+    "problem": "How to make simple lemon herb chicken",
+    "solution": "Follow these steps to create simple lemon herb chicken",
+    "steps": [
+      "Place chicken in a bowl; pour 1/2 of the lemon juice over chicken and season with salt.",
+      "Heat olive oil in a medium skillet over medium-low heat.",
+      "Place chicken into hot oil.",
+      "Add remaining lemon juice and oregano; season with black pepper.",
+      "Cook chicken until golden brown and juices run clear, 5 to 10 minutes per side."
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.7,
+    "sources": [
+      "https://www.allrecipes.com/recipe/9011/simple-lemon-herb-chicken/"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chicken",
+      "dinner"
+    ],
+    "examples": [],
+    "created_at": "2026-01-06T08:38:05.094797",
+    "updated_at": "2026-01-06T08:38:05.094799",
+    "times_accessed": 0,
+    "user_rating": null,
+    "rating": 4.6
+  }
+]

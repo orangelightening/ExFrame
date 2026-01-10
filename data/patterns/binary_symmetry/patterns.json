@@ -1,0 +1,954 @@
+[
+  {
+    "id": "binary_001",
+    "name": "Bitwise Complement (NOT)",
+    "pattern_type": "symmetry",
+    "category": "transformation",
+    "problem": "Find the complete opposite of an 8-bit value - every bit flipped",
+    "solution": "Apply bitwise NOT: result = input XOR 0xFF. This creates a perfect photographic negative of the binary pattern.",
+    "examples": [
+      {
+        "input": "0xFF (11111111)",
+        "output": "0x00 (00000000)",
+        "notes": "Complete inversion"
+      },
+      {
+        "input": "0x55 (01010101)",
+        "output": "0xAA (10101010)",
+        "notes": "Checkerboard flip"
+      },
+      {
+        "input": "0x0F (00001111)",
+        "output": "0xF0 (11110000)",
+        "notes": "Half-byte swap"
+      },
+      {
+        "input": "0x81 (10000001)",
+        "output": "0x7E (01111110)",
+        "notes": "Ones become zeros"
+      }
+    ],
+    "mathematical_property": "Involution - applying twice returns original: NOT(NOT(x)) = x",
+    "risk_factors": [
+      "sign_bit_flips",
+      "magnitude_dramatically_changes"
+    ],
+    "confidence": 0.98,
+    "tags": [
+      "not",
+      "complement",
+      "inversion",
+      "basic"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_002",
+    "name": "XOR Mirror Pair",
+    "pattern_type": "symmetry",
+    "category": "relationship",
+    "problem": "Find pairs of numbers that XOR to 0xFF (all ones)",
+    "solution": "Two numbers form an XOR mirror if: A XOR B = 0xFF. This means B = A XOR 0xFF (the complement). These pairs always sum to 255 when added.",
+    "examples": [
+      {
+        "pair": [
+          "0x00",
+          "0xFF"
+        ],
+        "xor": "0xFF",
+        "sum": 255
+      },
+      {
+        "pair": [
+          "0x34",
+          "0xCB"
+        ],
+        "xor": "0xFF",
+        "sum": 255
+      },
+      {
+        "pair": [
+          "0x5A",
+          "0xA5"
+        ],
+        "xor": "0xFF",
+        "sum": 255,
+        "notes": "Symmetric nibbles"
+      },
+      {
+        "pair": [
+          "0x12",
+          "0xED"
+        ],
+        "xor": "0xFF",
+        "sum": 255
+      }
+    ],
+    "mathematical_property": "Complementary pairs partition the 8-bit space into 128 pairs",
+    "risk_factors": [
+      "none",
+      "deterministic"
+    ],
+    "confidence": 0.99,
+    "tags": [
+      "xor",
+      "pair",
+      "mirror",
+      "complement"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_003",
+    "name": "Bit Reversal Symmetry",
+    "pattern_type": "symmetry",
+    "category": "transformation",
+    "problem": "Reverse the order of bits in a byte - read it backwards",
+    "solution": "Mirror the bits across the center. Bit 7 becomes bit 0, bit 6 becomes bit 1, etc. Some numbers are palindromic - they read the same forwards and backwards.",
+    "examples": [
+      {
+        "input": "0b10000000 (0x80)",
+        "output": "0b00000001 (0x01)",
+        "notes": "Edge bit travels"
+      },
+      {
+        "input": "0b11000000 (0xC0)",
+        "output": "0b00000011 (0x03)",
+        "notes": "Two bits shift"
+      },
+      {
+        "input": "0b10011001 (0x99)",
+        "output": "0b10011001 (0x99)",
+        "notes": "PALINDROME - symmetric!"
+      },
+      {
+        "input": "0b11111111 (0xFF)",
+        "output": "0b11111111 (0xFF)",
+        "notes": "All ones = trivial palindrome"
+      },
+      {
+        "input": "0b10100101 (0xA5)",
+        "output": "0b10100101 (0xA5)",
+        "notes": "Non-trivial palindrome"
+      }
+    ],
+    "palindromic_bytes": "0x00, 0xFF, 0x55, 0xAA, 0x33, 0xCC, 0x99, 0x66, 0x11, 0x22, 0x44, 0x88, 0x77, 0xBB, 0xDD, 0xEE",
+    "mathematical_property": "Bit reversal is also an involution: reverse(reverse(x)) = x",
+    "risk_factors": [
+      "non_linear",
+      "hard_to_predict"
+    ],
+    "confidence": 0.92,
+    "tags": [
+      "reverse",
+      "palindrome",
+      "mirror",
+      "bits"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_004",
+    "name": "Hamming Distance",
+    "pattern_type": "metric",
+    "category": "distance",
+    "problem": "Measure how different two bytes are by counting differing bit positions",
+    "solution": "Count bits set to 1 in (A XOR B). This gives the number of positions where the bits differ. Range: 0-8 for 8-bit numbers.",
+    "examples": [
+      {
+        "a": "0xFF",
+        "b": "0x00",
+        "distance": 8,
+        "notes": "Maximum distance - complete opposites"
+      },
+      {
+        "a": "0x55",
+        "b": "0xAA",
+        "distance": 8,
+        "notes": "Checkerboard mismatch"
+      },
+      {
+        "a": "0x34",
+        "b": "0x34",
+        "distance": 0,
+        "notes": "Identical - minimum distance"
+      },
+      {
+        "a": "0x0F",
+        "b": "0xF0",
+        "distance": 8,
+        "notes": "Half-byte flip"
+      },
+      {
+        "a": "0x12",
+        "b": "0x13",
+        "distance": 1,
+        "notes": "Single bit difference"
+      },
+      {
+        "a": "0x81",
+        "b": "0x42",
+        "distance": 3,
+        "notes": "Three differing bits"
+      }
+    ],
+    "applications": [
+      "error_detection",
+      "dna_sequencing",
+      "clustering"
+    ],
+    "mathematical_property": "Triangle inequality: d(A,C) \u2264 d(A,B) + d(B,C)",
+    "risk_factors": [
+      "can_be_zero_for_different_values_in_larger_spaces"
+    ],
+    "confidence": 0.97,
+    "tags": [
+      "distance",
+      "xor",
+      "metric",
+      "difference"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_005",
+    "name": "Gray Code Symmetry",
+    "pattern_type": "encoding",
+    "category": "sequence",
+    "problem": "Create a sequence where only ONE bit changes between consecutive numbers",
+    "solution": "Gray code: G(i) = i XOR (i >> 1). This creates a Hamiltonian path on an 8-dimensional hypercube. Each step changes exactly one bit.",
+    "examples": [
+      {
+        "decimal": 0,
+        "binary": "00000000",
+        "gray": "00000000"
+      },
+      {
+        "decimal": 1,
+        "binary": "00000001",
+        "gray": "00000001",
+        "notes": "Bit 0 flips"
+      },
+      {
+        "decimal": 2,
+        "binary": "00000010",
+        "gray": "00000011",
+        "notes": "Bit 1 flips"
+      },
+      {
+        "decimal": 3,
+        "binary": "00000011",
+        "gray": "00000010",
+        "notes": "Bit 0 flips"
+      },
+      {
+        "decimal": 128,
+        "binary": "10000000",
+        "gray": "11000000",
+        "notes": "Higher bits"
+      }
+    ],
+    "symmetry_property": "The Gray code sequence is symmetric - first half mirrors second half with MSB flipped",
+    "applications": [
+      "rotary_encoders",
+      "error_minimization",
+      "k-maps"
+    ],
+    "mathematical_property": "Adjacent values differ by exactly one bit (Hamming distance = 1)",
+    "risk_factors": [
+      "non_linear_transformation",
+      "hard_to_arithmetic_on"
+    ],
+    "confidence": 0.94,
+    "tags": [
+      "gray",
+      "sequence",
+      "single_bit",
+      "encoding"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_006",
+    "name": "Population Count (Popcount) Symmetry",
+    "pattern_type": "distribution",
+    "category": "property",
+    "problem": "Count the number of set bits (1s) in a byte - group bytes by their 'weight'",
+    "solution": "Popcount ranges from 0 to 8. The distribution is symmetric: C(n,k) = C(n,8-k). There's exactly 1 byte with 0 bits (0x00), 8 bytes with 1 bit, 28 bytes with 2 bits, etc.",
+    "examples": [
+      {
+        "value": "0x00",
+        "popcount": 0,
+        "group": "empty"
+      },
+      {
+        "value": "0x01",
+        "popcount": 1,
+        "group": "single_bit",
+        "notes": "8 total in this group"
+      },
+      {
+        "value": "0x11",
+        "popcount": 2,
+        "group": "double",
+        "notes": "28 total in this group"
+      },
+      {
+        "value": "0xFF",
+        "popcount": 8,
+        "group": "full",
+        "notes": "Only 0xFF has 8 bits"
+      },
+      {
+        "value": "0xF0",
+        "popcount": 4,
+        "group": "half",
+        "notes": "70 bytes have exactly 4 bits"
+      }
+    ],
+    "distribution": [
+      1,
+      8,
+      28,
+      56,
+      70,
+      56,
+      28,
+      8,
+      1
+    ],
+    "mathematical_property": "Binomial coefficients: popcount(k) appears C(8,k) times",
+    "risk_factors": [
+      "collision_risk",
+      "many_to_one_mapping"
+    ],
+    "confidence": 0.96,
+    "tags": [
+      "popcount",
+      "weight",
+      "distribution",
+      "bits"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_007",
+    "name": "Rotation Symmetry",
+    "pattern_type": "transformation",
+    "category": "cyclic",
+    "problem": "Rotate bits left or right - bits that fall off reappear on the other side",
+    "solution": "Circular shift: ROL(x,n) = ((x << n) | (x >> (8-n))) AND 0xFF. Creates cyclic groups. After 8 rotations, you return to the original.",
+    "examples": [
+      {
+        "input": "0b10000001",
+        "rotate_left": 1,
+        "output": "0b00000011",
+        "notes": "Carry bit wraps"
+      },
+      {
+        "input": "0x81",
+        "rotate_left": 2,
+        "output": "0x06",
+        "notes": "Two positions"
+      },
+      {
+        "input": "0x55",
+        "rotate_left": 1,
+        "output": "0xAB",
+        "notes": "Checkerboard shifts"
+      },
+      {
+        "input": "0xAA",
+        "rotate_left": 1,
+        "output": "0x55",
+        "notes": "AA and 55 are 1-rotation pairs"
+      },
+      {
+        "input": "0b11011011",
+        "rotate_left": 4,
+        "output": "0b11011011",
+        "notes": "4-bit periodicity"
+      }
+    ],
+    "cycle_lengths": "Some bytes have cycle length 8, others 4, 2, or 1 (0x00, 0xFF)",
+    "mathematical_property": "Rotations form cyclic subgroups of Z_256",
+    "risk_factors": [
+      "information_preserved",
+      "non_linear"
+    ],
+    "confidence": 0.93,
+    "tags": [
+      "rotation",
+      "circular",
+      "shift",
+      "cycle"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_008",
+    "name": "Nibble Swap",
+    "pattern_type": "symmetry",
+    "category": "transformation",
+    "problem": "Exchange the upper and lower 4 bits (nibbles) of a byte",
+    "solution": "SWAP(x) = ((x << 4) | (x >> 4)) AND 0xFF. This is a specific 4-bit rotation. Some values are symmetric - they remain unchanged after swap.",
+    "examples": [
+      {
+        "input": "0x12",
+        "output": "0x21",
+        "notes": "Digits swap places"
+      },
+      {
+        "input": "0xAB",
+        "output": "0xBA",
+        "notes": "Nibbles exchange"
+      },
+      {
+        "input": "0x33",
+        "output": "0x33",
+        "notes": "SYMMETRIC - same nibbles"
+      },
+      {
+        "input": "0xFF",
+        "output": "0xFF",
+        "notes": "All ones"
+      },
+      {
+        "input": "0x0F",
+        "output": "0xF0",
+        "notes": "Inverted nibbles"
+      },
+      {
+        "input": "0x5A",
+        "output": "0xA5",
+        "notes": "A5 and 5A are swap pairs"
+      }
+    ],
+    "symmetric_values": "0x00, 0xFF, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE",
+    "mathematical_property": "Involution: swap(swap(x)) = x. 16 symmetric values are fixed points.",
+    "risk_factors": [
+      "information_preserved",
+      "reversible"
+    ],
+    "confidence": 0.95,
+    "tags": [
+      "nibble",
+      "swap",
+      "half-byte",
+      "symmetric"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_009",
+    "name": "Power of Two Detection",
+    "pattern_type": "property",
+    "category": "detection",
+    "problem": "Identify if a number is a power of two using bitwise tricks",
+    "solution": "A number is a power of two if: (x > 0) AND ((x AND (x-1)) == 0). Powers of two have exactly ONE bit set.",
+    "examples": [
+      {
+        "value": 1,
+        "binary": "00000001",
+        "is_power_of_two": true,
+        "notes": "2^0"
+      },
+      {
+        "value": 2,
+        "binary": "00000010",
+        "is_power_of_two": true,
+        "notes": "2^1"
+      },
+      {
+        "value": 4,
+        "binary": "00000100",
+        "is_power_of_two": true,
+        "notes": "2^2"
+      },
+      {
+        "value": 8,
+        "binary": "00001000",
+        "is_power_of_two": true,
+        "notes": "2^3"
+      },
+      {
+        "value": 128,
+        "binary": "10000000",
+        "is_power_of_two": true,
+        "notes": "2^7"
+      },
+      {
+        "value": 3,
+        "binary": "00000011",
+        "is_power_of_two": false,
+        "notes": "Two bits set"
+      },
+      {
+        "value": 0,
+        "binary": "00000000",
+        "is_power_of_two": false,
+        "notes": "Zero is not a power of two"
+      }
+    ],
+    "all_8bit_powers": "1, 2, 4, 8, 16, 32, 64, 128",
+    "mathematical_property": "Powers of two are the generators of the cyclic group Z_256 under multiplication modulo 256",
+    "risk_factors": [
+      "zero_false_positive",
+      "overflow_in_computers"
+    ],
+    "confidence": 0.99,
+    "tags": [
+      "power",
+      "detection",
+      "single_bit",
+      "algorithm"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_010",
+    "name": "AND-OR Symmetry (De Morgan's Laws)",
+    "pattern_type": "duality",
+    "category": "logic",
+    "problem": "Understanding the duality between AND and OR operations through bitwise negation",
+    "solution": "NOT(A AND B) = NOT(A) OR NOT(B) and NOT(A OR B) = NOT(A) AND NOT(B). AND and OR are duals under complement.",
+    "examples": [
+      {
+        "a": "0b10101010",
+        "b": "0b11001100",
+        "operation": "AND",
+        "result": "0b10001000",
+        "not_result": "0b01110111"
+      },
+      {
+        "not_a": "0b01010101",
+        "not_b": "0b00110011",
+        "operation": "OR",
+        "result": "0b01110111",
+        "notes": "Matches NOT(AND)"
+      },
+      {
+        "a": "0b11110000",
+        "b": "0b10101010",
+        "operation": "OR",
+        "result": "0b11111010",
+        "not_result": "0b00000101"
+      },
+      {
+        "not_a": "0b00001111",
+        "not_b": "0b01010101",
+        "operation": "AND",
+        "result": "0b00000101",
+        "notes": "Matches NOT(OR)"
+      }
+    ],
+    "intuition": "AND asks 'are both bits 1?', OR asks 'is either bit 1?'. Complementing flips between these questions.",
+    "mathematical_property": "Boolean algebras have dual operations - exchanging AND/OR while negating preserves truth",
+    "risk_factors": [
+      "easy_to_confuse",
+      "order_matters"
+    ],
+    "confidence": 0.97,
+    "tags": [
+      "demorgan",
+      "logic",
+      "duality",
+      "and",
+      "or"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_011",
+    "name": "Byte Pairing via Addition",
+    "pattern_type": "relationship",
+    "category": "arithmetic",
+    "problem": "Find pairs of bytes that sum to 0xFF (255) - additive complements",
+    "solution": "For any byte A, its additive complement is (0xFF - A). These pairs are different from XOR complements. (A + B) AND 0xFF = 0xFF.",
+    "examples": [
+      {
+        "pair": [
+          "0x00",
+          "0xFF"
+        ],
+        "sum": 255,
+        "xor_also_255": true,
+        "notes": "Special case - both same"
+      },
+      {
+        "pair": [
+          "0x01",
+          "0xFE"
+        ],
+        "sum": 255,
+        "xor_result": "0xFF",
+        "notes": "XOR also works here"
+      },
+      {
+        "pair": [
+          "0x80",
+          "0x7F"
+        ],
+        "sum": 255,
+        "xor_result": "0xFF",
+        "notes": "128 + 127 = 255"
+      },
+      {
+        "pair": [
+          "0x34",
+          "0xCB"
+        ],
+        "sum": 255,
+        "xor_result": "0xFF",
+        "notes": "XOR and ADD complements differ!"
+      },
+      {
+        "pair": [
+          "0x55",
+          "0xAA"
+        ],
+        "sum": 255,
+        "xor_result": "0xFF",
+        "notes": "Special: 01010101 + 10101010"
+      }
+    ],
+    "insight": "XOR and ADD complements are equal only when there's no carry propagation: when A AND B = 0",
+    "mathematical_property": "For XOR complement: B = A XOR 0xFF. For ADD complement: B = (0xFF - A). These differ when carries occur.",
+    "risk_factors": [
+      "carry_propagation",
+      "overflow_possible"
+    ],
+    "confidence": 0.91,
+    "tags": [
+      "addition",
+      "complement",
+      "pair",
+      "sum"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_012",
+    "name": "Sign Bit Symmetry (Two's Complement)",
+    "pattern_type": "signed_arithmetic",
+    "category": "representation",
+    "problem": "Understanding how the MSB (bit 7) determines signed interpretation in two's complement",
+    "solution": "If bit 7 is 0: value is 0 to 127 (positive). If bit 7 is 1: value is -128 to -1 (negative). To negate: invert bits, add 1.",
+    "examples": [
+      {
+        "hex": "0x7F",
+        "binary": "01111111",
+        "unsigned": 127,
+        "signed": 127,
+        "notes": "Maximum positive"
+      },
+      {
+        "hex": "0x80",
+        "binary": "10000000",
+        "unsigned": 128,
+        "signed": -128,
+        "notes": "Minimum negative"
+      },
+      {
+        "hex": "0xFF",
+        "binary": "11111111",
+        "unsigned": 255,
+        "signed": -1,
+        "notes": "All ones = -1"
+      },
+      {
+        "hex": "0x81",
+        "binary": "10000001",
+        "unsigned": 129,
+        "signed": -127,
+        "notes": "Negative through sign bit"
+      },
+      {
+        "negate": 5,
+        "binary": "00000101",
+        "negated": "11111011",
+        "hex": "0xFB",
+        "signed": -5
+      }
+    ],
+    "range": "Signed 8-bit: -128 to 127. Unsigned 8-bit: 0 to 255",
+    "mathematical_property": "Two's complement uses modular arithmetic: -x \u2261 (2^n - x) mod 2^n",
+    "risk_factors": [
+      "overflow_danger",
+      "interpretation_ambiguity",
+      "comparison_changes"
+    ],
+    "confidence": 0.96,
+    "tags": [
+      "signed",
+      "twos_complement",
+      "sign_bit",
+      "negative"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_013",
+    "name": "Bit Isolation (Masking)",
+    "pattern_type": "extraction",
+    "category": "technique",
+    "problem": "Extract specific bits from a byte while ignoring others using AND masks",
+    "solution": "Use AND with a mask: result = value AND mask. Mask has 1s where you want to keep bits, 0s elsewhere.",
+    "examples": [
+      {
+        "value": "0b11011010",
+        "mask": "0b00001111",
+        "result": "0b00001010",
+        "notes": "Extract lower nibble"
+      },
+      {
+        "value": "0b11011010",
+        "mask": "0b11110000",
+        "result": "0b11010000",
+        "notes": "Extract upper nibble"
+      },
+      {
+        "value": "0b11011010",
+        "mask": "0b00000100",
+        "result": "0b00000000",
+        "notes": "Test bit 2 (not set)"
+      },
+      {
+        "value": "0b11011010",
+        "mask": "0b00010000",
+        "result": "0b00010000",
+        "notes": "Test bit 4 (is set)"
+      },
+      {
+        "value": "0b10111011",
+        "mask": "0b10101010",
+        "result": "0b10101010",
+        "notes": "Extract even positions"
+      }
+    ],
+    "common_masks": {
+      "lower_nibble": "0x0F",
+      "upper_nibble": "0xF0",
+      "even_bits": "0xAA",
+      "odd_bits": "0x55",
+      "low_3_bits": "0x07"
+    },
+    "applications": [
+      "modulo_powers_of_2",
+      "bit_testing",
+      "field_extraction"
+    ],
+    "risk_factors": [
+      "information_loss",
+      "irreversible"
+    ],
+    "confidence": 0.98,
+    "tags": [
+      "mask",
+      "and",
+      "extract",
+      "isolate"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_014",
+    "name": "XOR Swap Property",
+    "pattern_type": "algorithm",
+    "category": "technique",
+    "problem": "Swap two values without a temporary variable using XOR",
+    "solution": "a = a XOR b; b = a XOR b; a = a XOR b. Works because XOR is its own inverse: (A XOR B) XOR B = A.",
+    "examples": [
+      {
+        "a": "0x12",
+        "b": "0x34",
+        "step1": "a XOR b = 0x26",
+        "step2": "0x26 XOR b = 0x12 (new b)",
+        "step3": "0x26 XOR 0x12 = 0x34 (new a)"
+      },
+      {
+        "a": "0xFF",
+        "b": "0x00",
+        "step1": "a XOR b = 0xFF",
+        "step2": "0xFF XOR 0x00 = 0xFF (new b)",
+        "step3": "0xFF XOR 0xFF = 0x00 (new a)"
+      },
+      {
+        "a": "0x55",
+        "b": "0x55",
+        "step1": "a XOR b = 0x00",
+        "step2": "0x00 XOR b = 0x55 (new b)",
+        "step3": "0x00 XOR 0x55 = 0x55 (new a)",
+        "notes": "Same values work"
+      },
+      {
+        "a": "0xAA",
+        "b": "0x55",
+        "step1": "a XOR b = 0xFF",
+        "step2": "0xFF XOR b = 0xAA (new b)",
+        "step3": "0xFF XOR 0xAA = 0x55 (new a)"
+      }
+    ],
+    "caution": "Don't XOR-swap a variable with itself! If a and b reference the same memory, you get zero.",
+    "mathematical_property": "XOR forms an abelian group where each element is its own inverse",
+    "risk_factors": [
+      "same_variable_bug",
+      "harder_to_read",
+      "modern_compilers_better"
+    ],
+    "confidence": 0.89,
+    "tags": [
+      "xor",
+      "swap",
+      "algorithm",
+      "trick"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_015",
+    "name": "Majority Function",
+    "pattern_type": "computation",
+    "category": "logic",
+    "problem": "Determine the majority bit (0 or 1) across three inputs - essentially 3-input voting",
+    "solution": "MAJ(A,B,C) = (A AND B) OR (A AND C) OR (B AND C). The output is 1 if at least two inputs are 1. Equivalent to: (A AND B) XOR (A AND C) XOR (B AND C) for no carries.",
+    "examples": [
+      {
+        "a": "0xFF",
+        "b": "0xFF",
+        "c": "0xFF",
+        "result": "0xFF",
+        "notes": "Unanimous 1s"
+      },
+      {
+        "a": "0x00",
+        "b": "0x00",
+        "c": "0x00",
+        "result": "0x00",
+        "notes": "Unanimous 0s"
+      },
+      {
+        "a": "0xFF",
+        "b": "0xFF",
+        "c": "0x00",
+        "result": "0xFF",
+        "notes": "Two 1s win"
+      },
+      {
+        "a": "0xAA",
+        "b": "0x55",
+        "c": "0xFF",
+        "result": "0xFF",
+        "notes": "Bitwise majority"
+      },
+      {
+        "a": "0b10101010",
+        "b": "0b01010101",
+        "c": "0b11110000",
+        "result": "0b11111010",
+        "notes": "Per-bit voting"
+      }
+    ],
+    "applications": [
+      "error_correction",
+      "voting_systems",
+      "fault_tolerance",
+      "median_filters"
+    ],
+    "mathematical_property": "MAJ is a monotone Boolean function - changing any input from 0 to 1 cannot decrease output",
+    "risk_factors": [
+      "computationally_expensive",
+      "requires_multiple_operations"
+    ],
+    "confidence": 0.93,
+    "tags": [
+      "majority",
+      "voting",
+      "logic",
+      "threshold"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  },
+  {
+    "id": "binary_016",
+    "name": "Parity and XOR Accumulation",
+    "pattern_type": "property",
+    "category": "error_detection",
+    "problem": "Determine if a byte has an even or odd number of set bits - the parity function",
+    "solution": "Parity = XOR of all bits. Can compute iteratively: p = 0; for each bit: p = p XOR bit. Final p is 0 (even) or 1 (odd). Or use reduction: (((x XOR (x>>4)) XOR (x>>2)) XOR (x>>1)) AND 1.",
+    "examples": [
+      {
+        "value": "0b00000000",
+        "ones": 0,
+        "parity": "even (0)",
+        "notes": "No bits set"
+      },
+      {
+        "value": "0b00000001",
+        "ones": 1,
+        "parity": "odd (1)",
+        "notes": "One bit"
+      },
+      {
+        "value": "0b00000011",
+        "ones": 2,
+        "parity": "even (0)",
+        "notes": "Two bits"
+      },
+      {
+        "value": "0b10101010",
+        "ones": 4,
+        "parity": "even (0)",
+        "notes": "Four bits"
+      },
+      {
+        "value": "0b11111111",
+        "ones": 8,
+        "parity": "even (0)",
+        "notes": "Even number of bits"
+      },
+      {
+        "value": "0b11111110",
+        "ones": 7,
+        "parity": "odd (1)",
+        "notes": "Odd number of bits"
+      }
+    ],
+    "distribution": "128 bytes have even parity, 128 have odd parity",
+    "applications": [
+      "error_detection",
+      "raid_arrays",
+      "communication_protocols",
+      "checksums"
+    ],
+    "mathematical_property": "Parity is a homomorphism: parity(A XOR B) = parity(A) XOR parity(B)",
+    "risk_factors": [
+      "single_bit_detection_only",
+      "cant_correct_errors"
+    ],
+    "confidence": 0.98,
+    "tags": [
+      "parity",
+      "xor",
+      "error_detection",
+      "even_odd"
+    ],
+    "domain": "binary_symmetry",
+    "times_accessed": 0
+  }
+]

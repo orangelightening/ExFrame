@@ -1,0 +1,48 @@
+{
+  "domain_id": "diy",
+  "domain_name": "Auto-loaded: diy",
+  "description": "Dynamically loaded domain: diy",
+  "version": "1.0.0",
+  "created_at": "2026-01-09T22:43:14.965287",
+  "updated_at": "2026-01-09T22:43:14.965290",
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "DIY Generalist",
+      "description": "General expert for DIY",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "DIY",
+        "keywords": ["diy", "build", "make", "repair", "fix"],
+        "categories": [],
+        "threshold": 0.25
+      }
+    }
+  ],
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "General Specialist",
+      "description": "General expert for diy",
+      "expertise_keywords": [],
+      "expertise_categories": [],
+      "confidence_threshold": 0.6,
+      "response_template": "structured"
+    }
+  ],
+  "categories": [],
+  "tags": [],
+  "ui_config": {
+    "placeholder_text": "Ask about auto-loaded: diy...",
+    "example_queries": [],
+    "icon": "\ud83d\udcda",
+    "color": "#2196F3"
+  },
+  "links": {
+    "related_domains": [],
+    "imports_patterns_from": [],
+    "suggest_on_confidence_below": 0.3
+  }
+}

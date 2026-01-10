@@ -1,0 +1,145 @@
+# Prometheus recording rules for OMV Co-Pilot
+
+groups:
+  - name: omv_storage_rules
+    interval: 30s
+    rules:
+      # Aggregate disk usage by mountpoint type
+      - record: instance:node_filesystem_usage:ratio
+        expr: |
+          1 - (
+            node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"}
+            /
+            node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"}
+          )
+
+      # Disk usage percent per filesystem
+      - record: omv:filesystem:usage_percent
+        expr: |
+          100 * (
+            1 - (
+              node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"}
+              /
+              node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"}
+            )
+          )
+
+      # Predict disk exhaustion (simple linear)
+      - record: omv:disk:days_until_full
+        expr: |
+          (
+            node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"}
+            /
+            avg_over_time(node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"}[7d])
+            -
+            avg_over_time(node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"}[7d])
+          ) / 86400
+
+  - name: omv_network_rules
+    interval: 30s
+    rules:
+      # Total network traffic rate
+      - record: omv:network:total_rate
+        expr: |
+          sum(rate(node_network_receive_bytes_total[5m]))
+          +
+          sum(rate(node_network_transmit_bytes_total[5m]))
+
+  - name: omv_performance_rules
+    interval: 30s
+    rules:
+      # CPU usage excluding idle time
+      - record: omv:cpu:usage_percent
+        expr: |
+          100 * (
+            1 -
+            avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))
+          )
+
+      # Memory usage percent
+      - record: omv:memory:usage_percent
+        expr: |
+          100 * (
+            1 -
+            (
+              node_memory_MemAvailable_bytes
+              /
+              node_memory_MemTotal_bytes
+            )
+          )
+
+      # Load average per CPU
+      - record: omv:load:per_cpu
+        expr: |
+          node_load1
+          /
+          count(node_cpu_seconds_total{mode="idle"}) by (instance)
+
+  - name: omv_alert_rules
+    interval: 60s
+    rules:
+      # High disk usage alert
+      - alert: HighDiskUsage
+        expr: omv:filesystem:usage_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: omv-copilot
+        annotations:
+          summary: "High disk usage on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value }}% on {{ $labels.mountpoint }}"
+
+      # Disk nearly full
+      - alert: DiskNearlyFull
+        expr: omv:filesystem:usage_percent > 95
+        for: 5m
+        labels:
+          severity: critical
+          service: omv-copilot
+        annotations:
+          summary: "Disk nearly full on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value }}% on {{ $labels.mountpoint }}"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: omv:memory:usage_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: omv-copilot
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}%"
+
+      # High load average
+      - alert: HighLoadAverage
+        expr: omv:load:per_cpu > 2
+        for: 10m
+        labels:
+          severity: warning
+          service: omv-copilot
+        annotations:
+          summary: "High load average on {{ $labels.instance }}"
+          description: "Load average is {{ $value }} per CPU"
+
+      # System unreachable
+      - alert: SystemUnreachable
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: omv-copilot
+        annotations:
+          summary: "{{ $labels.instance }} is unreachable"
+          description: "Target has been down for more than 5 minutes"
+
+      # Disk will be full soon
+      - alert: DiskWillFillSoon
+        expr: omv:disk:days_until_full < 7
+        for: 1h
+        labels:
+          severity: warning
+          service: omv-copilot
+        annotations:
+          summary: "Disk will fill in less than 7 days"
+          description: "{{ $labels.mountpoint }} will be full in approximately {{ $value | humanize }} days"

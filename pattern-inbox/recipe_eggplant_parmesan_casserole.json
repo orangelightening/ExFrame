@@ -1,0 +1,39 @@
+{
+  "title": "Eggplant Parmesan Casserole",
+  "url": "https://www.allrecipes.com/recipe/235794/eggplant-parmesan-casserole/",
+  "description": "Use Chef John's simple techniques to make an eggplant casserole that has all the flavor and texture of the traditional version with fewer calories and a lot less oil.",
+  "ingredients": [
+    {"amount": "2 large", "item": "eggplants", "notes": ""},
+    {"amount": "2 tablespoons", "item": "olive oil", "notes": "for cooking eggplant slices"},
+    {"amount": "1 pinch", "item": "salt", "notes": "or as needed"},
+    {"amount": "1 tablespoon", "item": "olive oil", "notes": "for garlic"},
+    {"amount": "2 cloves", "item": "garlic, sliced", "notes": ""},
+    {"amount": "0.5 teaspoon", "item": "red pepper flakes", "notes": ""},
+    {"amount": "3 cups", "item": "prepared marinara sauce", "notes": ""},
+    {"amount": "0.5 cup", "item": "water", "notes": "plus more as needed"},
+    {"amount": "0.75 cup", "item": "ricotta cheese", "notes": ""},
+    {"amount": "0.5 cup", "item": "grated Parmesan cheese", "notes": "for filling"},
+    {"amount": "0.25 cup", "item": "shredded pepperjack cheese", "notes": ""},
+    {"amount": "", "item": "salt and freshly ground black pepper", "notes": "to taste"},
+    {"amount": "0.75 cup", "item": "dry bread crumbs", "notes": ""},
+    {"amount": "0.5 cup", "item": "grated Parmesan cheese", "notes": "for topping"},
+    {"amount": "2 tablespoons", "item": "olive oil", "notes": "for topping"}
+  ],
+  "steps": [
+    "Preheat oven to 375 degrees F (190 degrees C).",
+    "Cut 5 crosswise slices from center area of each eggplant, about 1/2-inch thick, to total 10 slices. Peel and dice remaining pieces of eggplant.",
+    "Heat 2 tablespoons olive oil in a large skillet over medium-high heat until oil is very hot. Sprinkle eggplant slices lightly with a pinch of salt and cook in hot skillet in batches until slightly softened, about 3 minutes per side. Set eggplant slices aside on paper towels.",
+    "Heat 1 tablespoon olive oil in skillet and cook garlic for about 10 seconds; add diced eggplant and season with a pinch of salt and red pepper flakes. Saute until eggplant is softened, about 5 minutes. Pour in marinara sauce and water. Turn heat to medium-low and cook until eggplant is tender, about 15 minutes; stir occasionally. If sauce gets too thick, add a little more water.",
+    "Combine ricotta cheese, 1/2 cup Parmesan cheese, pepperjack cheese, a pinch of salt, and a pinch black pepper in a bowl until thoroughly combined. Spread about 2 tablespoons cheese mixture over each eggplant slice. Fold eggplant slices in half to enclose the cheese mixture.",
+    "Spread about half the sauce into an 8x8-inch baking dish. Lay folded eggplant slices in a single layer into the dish. Spread remaining sauce over eggplant slices.",
+    "Combine bread crumbs, 1/2 cup Parmesan cheese, and 2 tablespoons olive oil in a bowl; mix thoroughly. Spread crumb mixture over eggplant casserole.",
+    "Bake in the preheated oven until casserole is bubbling and crumbs are browned, 35 to 40 minutes."
+  ],
+  "prep_time": "15 minutes",
+  "cook_time": "65 minutes",
+  "total_time": "80 minutes",
+  "servings": "6",
+  "category": "dinner",
+  "tags": ["casserole", "eggplant", "italian", "vegetarian", "comfort food"],
+  "rating": 4.6
+}

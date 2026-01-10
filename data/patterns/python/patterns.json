@@ -1,0 +1,221 @@
+[
+  {
+    "id": "python_001",
+    "name": "List Comprehension Pattern",
+    "pattern_type": "optimization",
+    "description": "Replace loop+append with list comprehension for readability",
+    "problem": "Verbose for loop with append clutters code",
+    "solution": "Use list comprehension for concise, readable transformation",
+    "steps": [
+      "Identify loop that builds a list",
+      "Extract transformation logic",
+      "Rewrite as [expr for item in iterable if condition]",
+      "Test that output matches original"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "python_002"
+    ],
+    "prerequisites": [],
+    "alternatives": [
+      "python_003"
+    ],
+    "confidence": 0.92,
+    "sources": [
+      "https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions"
+    ],
+    "tags": [
+      "lists",
+      "readability",
+      "optimization",
+      "functional"
+    ],
+    "examples": [
+      "[x*2 for x in range(10)]",
+      "[s.upper() for s in strings if s]"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244838",
+    "updated_at": "2026-01-06T04:34:38.244843",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "python_002",
+    "name": "Generator Expression for Memory",
+    "pattern_type": "optimization",
+    "description": "Use generator expressions instead of list comprehensions for large datasets",
+    "problem": "List comprehension loads entire result into memory",
+    "solution": "Use generator expression (no brackets) for lazy evaluation",
+    "steps": [
+      "Identify large data processing",
+      "Replace list comprehension with generator",
+      "Pass directly to consuming function (sum, max, etc.)",
+      "Or use with next() for iteration"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "python_001"
+    ],
+    "prerequisites": [
+      "python_001"
+    ],
+    "alternatives": [],
+    "confidence": 0.9,
+    "sources": [],
+    "tags": [
+      "memory",
+      "generators",
+      "optimization"
+    ],
+    "examples": [
+      "sum(x*2 for x in range(1000000))",
+      "max(len(s) for s in large_list)"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244845",
+    "updated_at": "2026-01-06T04:34:38.244847",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "python_003",
+    "name": "Map Function for Transformations",
+    "pattern_type": "optimization",
+    "description": "Use map() for applying functions to sequences",
+    "problem": "Need to apply function to all elements",
+    "solution": "Use map(function, iterable) for functional transformation",
+    "steps": [
+      "Define transformation function",
+      "Apply map(function, sequence)",
+      "Convert to list if needed: list(map(...))",
+      "Or use directly in iteration"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "python_001"
+    ],
+    "prerequisites": [],
+    "alternatives": [
+      "python_001"
+    ],
+    "confidence": 0.75,
+    "sources": [],
+    "tags": [
+      "functional",
+      "map",
+      "transform"
+    ],
+    "examples": [
+      "list(map(str.upper, names))",
+      "map(int, string_numbers)"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244849",
+    "updated_at": "2026-01-06T04:34:38.244850",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "python_004",
+    "name": "Try-Except-Else Pattern",
+    "pattern_type": "procedure",
+    "description": "Use else clause with try-except for no-exception flow",
+    "problem": "Unclear control flow when exception doesn't occur",
+    "solution": "Put normal flow in else block, only exceptions in except",
+    "steps": [
+      "Put risky code in try block",
+      "Handle specific exceptions in except",
+      "Put no-exception flow in else block",
+      "Cleanup in finally if needed"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.85,
+    "sources": [],
+    "tags": [
+      "exception-handling",
+      "control-flow",
+      "readability"
+    ],
+    "examples": [
+      "try: risky() except Error: handle() else: success()"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244852",
+    "updated_at": "2026-01-06T04:34:38.244854",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "python_005",
+    "name": "Context Manager for Resources",
+    "pattern_type": "procedure",
+    "description": "Use 'with' statement for automatic resource cleanup",
+    "problem": "Resources not properly closed, leading to leaks",
+    "solution": "Use context managers to ensure cleanup happens",
+    "steps": [
+      "Identify resource that needs cleanup (file, lock, connection)",
+      "Wrap in 'with' statement",
+      "Indent all usage inside with block",
+      "Cleanup happens automatically on exit"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [
+      "python_006"
+    ],
+    "confidence": 0.98,
+    "sources": [],
+    "tags": [
+      "resources",
+      "cleanup",
+      "files",
+      "best-practice"
+    ],
+    "examples": [
+      "with open('file.txt') as f: content = f.read()"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244855",
+    "updated_at": "2026-01-06T04:34:38.244857",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "python_006",
+    "name": "Explicit Close Pattern",
+    "pattern_type": "procedure",
+    "description": "Manually close resources when context manager unavailable",
+    "problem": "Resources not closed in all code paths",
+    "solution": "Use try-finally to ensure close is always called",
+    "steps": [
+      "Open resource before try block",
+      "Use resource in try block",
+      "Call close() in finally block",
+      "Handle exceptions appropriately"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [
+      "python_005"
+    ],
+    "confidence": 0.7,
+    "sources": [],
+    "tags": [
+      "resources",
+      "cleanup",
+      "legacy"
+    ],
+    "examples": [],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244858",
+    "updated_at": "2026-01-06T04:34:38.244860",
+    "times_accessed": 0,
+    "user_rating": null
+  }
+]

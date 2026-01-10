@@ -1,0 +1,48 @@
+{
+  "domain_id": "first_aid",
+  "domain_name": "Auto-loaded: first_aid",
+  "description": "Dynamically loaded domain: first_aid",
+  "version": "1.0.0",
+  "created_at": "2026-01-09T22:43:14.963349",
+  "updated_at": "2026-01-09T22:43:14.963356",
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "First Aid Generalist",
+      "description": "General expert for First Aid",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "First Aid",
+        "keywords": ["first", "aid", "emergency", "injury", "treatment"],
+        "categories": [],
+        "threshold": 0.25
+      }
+    }
+  ],
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "General Specialist",
+      "description": "General expert for first_aid",
+      "expertise_keywords": [],
+      "expertise_categories": [],
+      "confidence_threshold": 0.6,
+      "response_template": "structured"
+    }
+  ],
+  "categories": [],
+  "tags": [],
+  "ui_config": {
+    "placeholder_text": "Ask about auto-loaded: first_aid...",
+    "example_queries": [],
+    "icon": "\ud83d\udcda",
+    "color": "#2196F3"
+  },
+  "links": {
+    "related_domains": [],
+    "imports_patterns_from": [],
+    "suggest_on_confidence_below": 0.3
+  }
+}

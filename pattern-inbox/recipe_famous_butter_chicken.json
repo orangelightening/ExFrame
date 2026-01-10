@@ -1,0 +1,28 @@
+{
+  "title": "Famous Butter Chicken",
+  "url": "https://www.allrecipes.com/recipe/24002/famous-butter-chicken/",
+  "description": "These butter chicken breasts are dipped in beaten eggs and cracker crumbs, then baked with butter. These chicken breasts are really tender and moist with excellent flavor! I never have leftovers.",
+  "ingredients": [
+    {"amount": "1 cup", "item": "crushed buttery round cracker crumbs", "notes": ""},
+    {"amount": "2 large", "item": "eggs, beaten", "notes": ""},
+    {"amount": "½ teaspoon", "item": "garlic salt", "notes": ""},
+    {"amount": "", "item": "ground black pepper", "notes": "to taste"},
+    {"amount": "4", "item": "skinless, boneless chicken breast halves", "notes": ""},
+    {"amount": "½ cup", "item": "butter, cut into pieces", "notes": ""}
+  ],
+  "steps": [
+    "Gather all ingredients. Preheat the oven to 375 degrees F (190 degrees C).",
+    "Place cracker crumbs and eggs into 2 separate shallow bowls. Mix cracker crumbs with garlic salt and pepper.",
+    "Dip chicken in eggs, then dredge in crumb mixture to coat.",
+    "Arrange coated chicken in a 9x13-inch baking dish. Scatter butter around chicken.",
+    "Bake in the preheated oven until chicken is no longer pink in the center and the juices run clear, about 40 minutes. An instant-read thermometer inserted into the center should read at least 165 degrees F (74 degrees C).",
+    "Serve hot and enjoy!"
+  ],
+  "prep_time": "15 minutes",
+  "cook_time": "40 minutes",
+  "total_time": "55 minutes",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["chicken", "baked", "easy", "family-friendly", "comfort food"],
+  "rating": 4.5
+}

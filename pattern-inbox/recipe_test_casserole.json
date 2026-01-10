@@ -1,0 +1,23 @@
+{
+  "title": "Test Casserole Recipe",
+  "url": "https://www.allrecipes.com/test/12345",
+  "description": "A simple test casserole recipe",
+  "ingredients": [
+    {"amount": "1 can", "item": "cream of mushroom soup", "notes": "10.75 oz"},
+    {"amount": "1 cup", "item": "milk", "notes": ""},
+    {"amount": "2 cups", "item": "cooked chicken", "notes": "diced"}
+  ],
+  "steps": [
+    "Preheat oven to 350°F.",
+    "Mix soup and milk in a bowl.",
+    "Add chicken and stir to combine.",
+    "Bake for 30 minutes until bubbly."
+  ],
+  "prep_time": "10 minutes",
+  "cook_time": "30 minutes",
+  "total_time": "40 minutes",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["casserole", "chicken", "easy"],
+  "rating": 4.5
+}

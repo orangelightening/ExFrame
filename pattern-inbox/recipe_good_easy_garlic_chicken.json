@@ -1,0 +1,27 @@
+{
+  "title": "A Good and Easy Garlic Chicken",
+  "url": "https://www.allrecipes.com/recipe/23998/a-good-easy-garlic-chicken/",
+  "description": "This garlic chicken recipe sautés tender chicken breasts in butter with garlic powder and simple seasonings for a quick and easy meal.",
+  "ingredients": [
+    {"amount": "3 tablespoons", "item": "butter", "notes": ""},
+    {"amount": "4", "item": "skinless, boneless chicken breast halves", "notes": ""},
+    {"amount": "2 teaspoons", "item": "garlic powder", "notes": "or to taste"},
+    {"amount": "1 teaspoon", "item": "seasoning salt", "notes": "or to taste"},
+    {"amount": "1 teaspoon", "item": "onion powder", "notes": "or to taste"}
+  ],
+  "steps": [
+    "Gather all ingredients.",
+    "Melt butter in a large skillet over medium heat.",
+    "Add chicken and sprinkle with garlic powder, seasoning salt, and onion powder.",
+    "Sauté until chicken is cooked through and juices run clear, about 7 to 10 minutes on each side.",
+    "An instant-read thermometer inserted into the center should read at least 165°F (74°C).",
+    "Serve hot and enjoy!"
+  ],
+  "prep_time": "10 mins",
+  "cook_time": "15 mins",
+  "total_time": "25 mins",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["garlic", "chicken breast", "pan-fried", "quick and easy", "5 ingredients"],
+  "rating": 4.5
+}

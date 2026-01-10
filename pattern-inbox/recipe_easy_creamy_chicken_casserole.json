@@ -1,0 +1,31 @@
+{
+  "title": "Easy Creamy Chicken Casserole",
+  "url": "https://www.allrecipes.com/recipe/218621/easy-creamy-chicken-casserole/",
+  "description": "This creamy chicken casserole is baked with a buttery cracker crust. It's easy to prepare in advance for a comforting meal on busy weeknights.",
+  "ingredients": [
+    {"amount": "1 sleeve", "item": "buttery round crackers", "notes": "crushed (like Ritz)"},
+    {"amount": "2 tablespoons", "item": "butter", "notes": "melted"},
+    {"amount": "4 cups", "item": "water", "notes": ""},
+    {"amount": "1 (32 fl oz)", "item": "chicken stock", "notes": ""},
+    {"amount": "", "item": "salt and ground black pepper", "notes": "to taste"},
+    {"amount": "3", "item": "skinless, boneless chicken breast halves", "notes": "cubed"},
+    {"amount": "1 (26 oz)", "item": "condensed cream of chicken soup", "notes": "can"},
+    {"amount": "1 (24 oz)", "item": "sour cream", "notes": ""},
+    {"amount": "", "item": "onion", "notes": "¼ cup chopped (optional)"},
+    {"amount": "", "item": "mushrooms", "notes": "¼ cup chopped (optional)"}
+  ],
+  "steps": [
+    "Preheat the oven to 350°F (175°C). Combine crackers and melted butter in a bowl; set aside.",
+    "Bring water and chicken stock to a boil in a pot over high heat; season with salt and pepper. Add chicken; reduce heat to a simmer, and cook until no longer pink, 5 to 7 minutes. Drain and set aside.",
+    "Whisk cream of chicken soup and sour cream together in a large bowl. Stir in cooked chicken, then transfer mixture into a 9x13-inch baking dish.",
+    "Sprinkle cracker mixture on top.",
+    "Bake in the preheated oven until bubbly and top is lightly browned, 25 to 30 minutes."
+  ],
+  "prep_time": "10 mins",
+  "cook_time": "35 mins",
+  "total_time": "45 mins",
+  "servings": "6",
+  "category": "dinner",
+  "tags": ["casserole", "comfort food", "creamy", "easy"],
+  "rating": 4.1
+}

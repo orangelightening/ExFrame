@@ -1,0 +1,17 @@
+Collecting asyncssh
+  Downloading asyncssh-2.22.0-py3-none-any.whl.metadata (9.5 kB)
+Collecting cryptography>=39.0 (from asyncssh)
+  Downloading cryptography-46.0.3-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+Requirement already satisfied: typing_extensions>=4.0.0 in ./venv/lib/python3.13/site-packages (from asyncssh) (4.15.0)
+Collecting cffi>=2.0.0 (from cryptography>=39.0->asyncssh)
+  Using cached cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=39.0->asyncssh)
+  Using cached pycparser-2.23-py3-none-any.whl.metadata (993 bytes)
+Downloading asyncssh-2.22.0-py3-none-any.whl (374 kB)
+Downloading cryptography-46.0.3-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 14.6 MB/s  0:00:00
+Using cached cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (219 kB)
+Using cached pycparser-2.23-py3-none-any.whl (118 kB)
+Installing collected packages: pycparser, cffi, cryptography, asyncssh
+
+Successfully installed asyncssh-2.22.0 cffi-2.0.0 cryptography-46.0.3 pycparser-2.23

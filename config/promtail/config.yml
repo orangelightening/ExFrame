@@ -1,0 +1,63 @@
+# Promtail configuration for shipping logs to Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # System logs
+  - job_name: syslog
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
+
+  # Authentication logs
+  - job_name: auth
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: auth
+          __path__: /var/log/auth.log
+
+  # Kernel messages
+  - job_name: kern
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: kern
+          __path__: /var/log/kern.log
+
+  # OMV-specific logs
+  - job_name: openmediavault
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: openmediavault
+          __path__: /var/log/openmediavault/*.log
+
+  # Systemd journal (if available)
+  - job_name: systemd-journal
+    journal:
+      max_age: 12h
+      labels:
+        job: systemd-journal
+        instance: "{{.MachineID}}"
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'
+      - source_labels: ['__journal__hostname']
+        target_label: 'hostname'
+      - source_labels: ['__journal__transport']
+        target_label: 'transport'

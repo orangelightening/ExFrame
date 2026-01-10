@@ -1,0 +1,50 @@
+# LLM Consciousness Domain Configuration
+domain:
+  domain_id: "llm_consciousness"
+  domain_name: "LLM Consciousness & Failure Modes"
+  version: "1.0.0"
+  description: "Patterns of LLM consciousness lapses, failure modes in autonomous operation, and mitigation strategies"
+
+  # Data sources (currently using existing pattern files)
+  data_sources:
+    - "/home/peter/development/eeframe/expertise_scanner/data/patterns/llm_consciousness"
+
+  # Pattern storage
+  pattern_storage_path: "/home/peter/development/eeframe/expertise_scanner/data/patterns/llm_consciousness"
+  pattern_format: "json"
+  default_collector_type: "file_system"
+
+  # Taxonomy
+  categories:
+    - "failure_mode"
+    - "solution"
+    - "monitoring"
+    - "architecture"
+    - "detection"
+    - "recovery"
+    - "prevention"
+
+  tags:
+    - "hallucination"
+    - "tool_failure"
+    - "loops"
+    - "amnesia"
+    - "confidence"
+    - "quality_drift"
+    - "monitoring"
+    - "orchestration"
+    - "llm"
+    - "autonomous_agents"
+
+  # Feature flags
+  enabled_features:
+    - "pattern_search"
+    - "specialist_routing"
+    - "feedback_learning"
+
+  # Domain-specific settings
+  domain_settings:
+    context_window: "128K"
+    model_family: "transformer"
+    deployment_environment: "production"
+    risk_level: "high"

@@ -1,0 +1,30 @@
+{
+  "title": "Easy Mediterranean Baked Chicken Breast",
+  "url": "https://www.allrecipes.com/recipe/260445/easy-mediterranean-baked-chicken-breast/",
+  "description": "An easy recipe for baked chicken breast for two that is marinated in Mediterranean flavors like lemon juice, olive oil, garlic, and herbs.",
+  "ingredients": [
+    {"amount": "2 (8 ounce)", "item": "skinless, boneless chicken breasts", "notes": ""},
+    {"amount": "", "item": "salt and freshly ground black pepper", "notes": "to taste"},
+    {"amount": "¼ cup", "item": "olive oil", "notes": ""},
+    {"amount": "¼ cup", "item": "freshly squeezed lemon juice", "notes": ""},
+    {"amount": "1 clove", "item": "garlic", "notes": "minced"},
+    {"amount": "½ teaspoon", "item": "dried oregano", "notes": "or more to taste"},
+    {"amount": "¼ teaspoon", "item": "dried thyme", "notes": "or more to taste"}
+  ],
+  "steps": [
+    "Season chicken breasts with salt and pepper on all sides and place in a bowl or lidded container.",
+    "Combine olive oil, lemon juice, garlic, oregano, and thyme in a small bowl and pour marinade over chicken breasts.",
+    "Marinate for 10 minutes at room temperature.",
+    "Preheat oven to 400°F (200°C). Set one oven rack about 6 inches from the heat source.",
+    "Place chicken breasts into a baking dish and pour marinade on top.",
+    "Bake chicken on the middle rack until no longer pink in the center and juices run clear, 35 to 45 minutes.",
+    "Move baking dish to the top rack and broil chicken until well browned, about 5 minutes."
+  ],
+  "prep_time": "10 mins",
+  "cook_time": "40 mins",
+  "total_time": "1 hr",
+  "servings": "2",
+  "category": "dinner",
+  "tags": ["mediterranean", "baked", "chicken breast", "lemon", "garlic", "herbs"],
+  "rating": 4.5
+}

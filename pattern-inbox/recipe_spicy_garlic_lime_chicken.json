@@ -1,0 +1,34 @@
+{
+  "title": "Spicy Garlic Lime Chicken",
+  "url": "https://www.allrecipes.com/recipe/44868/spicy-garlic-lime-chicken/",
+  "description": "A lime chicken recipe ready in less than 30 minutes. These skillet chicken breasts are perfect for a weeknight meal with rice and vegetables. A delightful lime chicken recipe with a little spicy kick.",
+  "ingredients": [
+    {"amount": "¾ teaspoon", "item": "salt", "notes": ""},
+    {"amount": "¼ teaspoon", "item": "black pepper", "notes": ""},
+    {"amount": "¼ teaspoon", "item": "cayenne pepper", "notes": ""},
+    {"amount": "2 ¼ teaspoons", "item": "garlic powder", "notes": "divided"},
+    {"amount": "¼ teaspoon", "item": "dried thyme", "notes": ""},
+    {"amount": "¼ teaspoon", "item": "dried parsley", "notes": ""},
+    {"amount": "⅛ teaspoon", "item": "paprika", "notes": ""},
+    {"amount": "⅛ teaspoon", "item": "onion powder", "notes": ""},
+    {"amount": "4", "item": "boneless, skinless chicken breast halves", "notes": ""},
+    {"amount": "2 tablespoons", "item": "butter", "notes": ""},
+    {"amount": "1 tablespoon", "item": "olive oil", "notes": ""},
+    {"amount": "3 tablespoons", "item": "lime juice", "notes": ""}
+  ],
+  "steps": [
+    "Mix together salt, black pepper, cayenne, 1/4 teaspoon garlic powder, thyme, parsley, paprika, and onion powder in a small bowl.",
+    "Sprinkle spice mixture generously on both sides of chicken breasts.",
+    "Heat butter and olive oil in a large heavy skillet over medium heat.",
+    "Sauté chicken until golden brown, about 6 minutes on each side.",
+    "Sprinkle with remaining 2 teaspoons garlic powder and lime juice.",
+    "Cook 5 minutes more, stirring frequently to coat evenly with cooking juices."
+  ],
+  "prep_time": "5 mins",
+  "cook_time": "20 mins",
+  "total_time": "25 mins",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["skillet chicken", "quick and easy", "chicken breast", "30-minute meal", "family-friendly"],
+  "rating": 4.6
+}

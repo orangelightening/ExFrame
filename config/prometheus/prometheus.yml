@@ -1,0 +1,55 @@
+# Prometheus configuration for OMV Co-Pilot
+
+global:
+  scrape_interval: 15s  # Default scrape interval
+  evaluation_interval: 15s  # Rule evaluation interval
+  external_labels:
+    cluster: 'omv-copilot'
+    monitor: 'omv-copilot-monitor'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "recording_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: 'prometheus'
+
+  # OMV server metrics via node_exporter
+  # Install node_exporter on your OMV server:
+  # wget https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+  # tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz
+  # sudo mv node_exporter-1.7.0.linux-amd64/node_exporter /usr/local/bin/
+  # sudo useradd -rs /bin/false node_exporter
+  # sudo chown node_exporter:node_exporter /usr/local/bin/node_exporter
+  # Then create a systemd service for it
+  - job_name: 'omv_server'
+    static_configs:
+      # Replace with your OMV server IP
+      - targets: ['YOUR_OMV_SERVER_IP:9100']
+        labels:
+          instance: 'omv-server'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Optional: Monitor Docker containers
+  # Requires cAdvisor to be running
+  # - job_name: 'cadvisor'
+  #   static_configs:
+  #     - targets: ['cadvisor:8080']
+
+  # Optional: Process exporter for service monitoring
+  # - job_name: 'process_exporter'
+  #   static_configs:
+  #     - targets: ['localhost:9256']

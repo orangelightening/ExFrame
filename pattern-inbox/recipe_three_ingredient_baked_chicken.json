@@ -1,0 +1,24 @@
+{
+  "title": "Three-Ingredient Baked Chicken Breasts",
+  "url": "https://www.allrecipes.com/recipe/239137/three-ingredient-baked-chicken-breasts/",
+  "description": "Juicy and tender baked chicken breasts flavored with butter and simple seasonings; great for an easy dinner or any recipe using cooked chicken breast.",
+  "ingredients": [
+    {"amount": "¼ cup", "item": "butter, melted", "notes": ""},
+    {"amount": "1 teaspoon", "item": "salt", "notes": ""},
+    {"amount": "4", "item": "skinless, boneless chicken breast halves", "notes": ""}
+  ],
+  "steps": [
+    "Gather all ingredients. Preheat the oven to 350 degrees F (175 degrees C). Lightly butter a baking dish.",
+    "Stir together melted butter and salt in a bowl.",
+    "Arrange chicken in the prepared baking dish. Brush butter mixture onto chicken until thoroughly coated, pouring any extra over chicken.",
+    "Bake in the preheated oven until no longer pink in the center and juices run clear, 30 to 45 minutes. An instant-read thermometer inserted into the center should read at least 165 degrees F (74 degrees C).",
+    "Serve and enjoy!"
+  ],
+  "prep_time": "10 mins",
+  "cook_time": "30 mins",
+  "total_time": "40 mins",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["baked chicken", "chicken breast", "5 ingredients", "easy", "oven"],
+  "rating": 4.6
+}

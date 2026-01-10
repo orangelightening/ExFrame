@@ -1,0 +1,1265 @@
+# OMV Co-Pilot Manual Patterns
+# Add your curated OMV issue/solution patterns here
+
+patterns:
+  - pattern_id: "omv-001"
+    title: "SMB share inaccessible from Windows"
+    category: "services"
+
+    symptoms:
+      - "Windows cannot access \\\\server\\share"
+      - "Network path not found error"
+      - "Timeout when connecting"
+
+    triggers:
+      - "smb not working"
+      - "can't access share"
+      - "windows network error"
+
+    diagnostics:
+      - name: "Check SMB service status"
+        command: "systemctl status smbd"
+        expected_output: "active (running)"
+
+      - name: "Verify share exists"
+        command: "smbstatus -s"
+        expected_output: "share listed"
+
+    solutions:
+      - priority: 1
+        action: "Restart SMB service"
+        command: "systemctl restart smbd"
+        explanation: "Service may be hung"
+
+      - priority: 2
+        action: "Check firewall rules"
+        command: "iptables -L -n | grep 445"
+        explanation: "Port 445 may be blocked"
+
+    related_patterns: []
+    references: []
+    confidence: 0.9
+
+  - pattern_id: "omv-002"
+    title: "High disk usage warning"
+    category: "storage"
+
+    symptoms:
+      - "Disk usage above 90%"
+      - "Cannot write files"
+      - "Out of space errors"
+
+    triggers:
+      - "disk full"
+      - "no space"
+      - "disk usage high"
+
+    diagnostics:
+      - name: "Check disk usage"
+        command: "df -h"
+        expected_output: "usage percentages"
+
+      - name: "Find large files"
+        command: "du -ah / | sort -rh | head -20"
+        expected_output: "list of large files"
+
+    solutions:
+      - priority: 1
+        action: "Clean package cache"
+        command: "apt clean"
+        explanation: "Free up space from package cache"
+
+      - priority: 2
+        action: "Remove old logs"
+        command: "journalctl --vacuum-time=7d"
+        explanation: "Remove systemd journal logs older than 7 days"
+
+      - priority: 3
+        action: "Find and remove large duplicates"
+        command: "find / -type f -size +100M 2>/dev/null"
+        explanation: "Locate large files for review"
+
+    related_patterns: []
+    references: []
+    confidence: 0.95
+
+  # ========== STORAGE PATTERNS ==========
+
+  - pattern_id: "omv-003"
+    title: "RAID array degraded"
+    category: "storage"
+
+    symptoms:
+      - "RAID shows degraded state"
+      - "One or more drives failed"
+      - "Missing drive in array"
+      - "mdadm shows degraded"
+
+    triggers:
+      - "raid degraded"
+      - "raid failed"
+      - "drive failed"
+      - "array degraded"
+
+    diagnostics:
+      - name: "Check RAID status"
+        command: "cat /proc/mdstat"
+        expected_output: "RAID status and devices"
+
+      - name: "Check mdadm detail"
+        command: "mdadm --detail /dev/mdX"
+        expected_output: "RAID array details"
+
+      - name: "Check SMART status"
+        command: "smartctl -a /dev/sdX"
+        expected_output: "Drive health information"
+
+    solutions:
+      - priority: 1
+        action: "Identify failed drive"
+        command: "mdadm --detail /dev/mdX | grep -i failed"
+        explanation: "Determine which drive has failed"
+
+      - priority: 2
+        action: "Remove failed drive from array"
+        command: "mdadm /dev/mdX --remove /dev/sdX"
+        explanation: "Remove the failed drive"
+
+      - priority: 3
+        action: "Add replacement drive"
+        command: "mdadm /dev/mdX --add /dev/sdX"
+        explanation: "Add new drive and rebuild will start"
+
+      - priority: 4
+        action: "Monitor rebuild progress"
+        command: "cat /proc/mdstat"
+        explanation: "Watch rebuild progress"
+
+    related_patterns: ["omv-015", "omv-016"]
+    references: []
+    confidence: 0.95
+
+  - pattern_id: "omv-004"
+    title: "ZFS pool degraded or faulted"
+    category: "storage"
+
+    symptoms:
+      - "ZFS pool shows degraded"
+      - "Pool is unavailable"
+      - "ZFS faulted state"
+      - "Missing ZFS device"
+
+    triggers:
+      - "zfs degraded"
+      - "zfs faulted"
+      - "zfs pool error"
+      - "zfs unavailable"
+
+    diagnostics:
+      - name: "Check ZFS pool status"
+        command: "zpool status"
+        expected_output: "Pool health and device status"
+
+      - name: "List ZFS datasets"
+        command: "zfs list"
+        expected_output: "All datasets and mountpoints"
+
+      - name: "Check ZFS events"
+        command: "zpool events"
+        expected_output: "Recent ZFS events"
+
+    solutions:
+      - priority: 1
+        action: "Replace failed disk"
+        command: "zpool replace poolname /dev/sdX"
+        explanation: "Replace failed disk in ZFS pool"
+
+      - priority: 2
+        action: "Online disk again"
+        command: "zpool online poolname /dev/sdX"
+        explanation: "Bring disk back online if temporarily disconnected"
+
+      - priority: 3
+        action: "Clear pool errors"
+        command: "zpool clear poolname"
+        explanation: "Clear transient errors"
+
+      - priority: 4
+        action: "Scrub the pool"
+        command: "zpool scrub poolname"
+        explanation: "Check and repair data integrity"
+
+    related_patterns: ["omv-015"]
+    references: []
+    confidence: 0.9
+
+  - pattern_id: "omv-005"
+    title: "Filesystem corruption detected"
+    category: "storage"
+
+    symptoms:
+      - "Filesystem errors in dmesg"
+      - "Read-only filesystem"
+      - "I/O errors on disk"
+      - "Filesystem check required"
+
+    triggers:
+      - "filesystem corruption"
+      - "fsck required"
+      - "i/o error"
+      - "read only filesystem"
+
+    diagnostics:
+      - name: "Check dmesg for errors"
+        command: "dmesg | grep -i error"
+        expected_output: "Kernel error messages"
+
+      - name: "Check filesystem type"
+        command: "blkid /dev/sdX"
+        expected_output: "Filesystem type"
+
+      - name: "Test disk health"
+        command: "smartctl -a /dev/sdX"
+        expected_output: "SMART attributes"
+
+    solutions:
+      - priority: 1
+        action: "Unmount filesystem"
+        command: "umount /dev/sdX"
+        explanation: "Unmount before running fsck"
+
+      - priority: 2
+        action: "Run filesystem check (ext4)"
+        command: "fsck.ext4 -y /dev/sdX"
+        explanation: "Repair ext4 filesystem"
+
+      - priority: 3
+        action: "Run filesystem check (btrfs)"
+        command: "btrfs scrub start /mountpoint"
+        explanation: "Scrub and repair btrfs"
+
+      - priority: 4
+        action: "Run filesystem check (xfs)"
+        command: "xfs_repair -L /dev/sdX"
+        explanation: "Repair XFS filesystem"
+
+    related_patterns: ["omv-015"]
+    references: []
+    confidence: 0.85
+
+  - pattern_id: "omv-006"
+    title: "Disk not showing up in OMV"
+    category: "storage"
+
+    symptoms:
+      - "New disk not detected"
+      - "Disk missing from web interface"
+      - "Can't see drive"
+
+    triggers:
+      - "disk not detected"
+      - "disk not showing"
+      - "can't see drive"
+      - "missing disk"
+
+    diagnostics:
+      - name: "List all disks"
+        command: "lsblk"
+        expected_output: "All block devices"
+
+      - name: "Check for USB devices"
+        command: "lsusb"
+        expected_output: "USB devices list"
+
+      - name: "Check kernel messages"
+        command: "dmesg | grep -i sd"
+        expected_output: "Disk detection messages"
+
+    solutions:
+      - priority: 1
+        action: "Rescan SCSI bus"
+        command: "echo '- - -' > /sys/class/scsi_host/host0/scan"
+        explanation: "Trigger SCSI bus rescan"
+
+      - priority: 2
+        action: "Check disk controller"
+        command: "lspci | grep -i storage"
+        explanation: "Verify controller is detected"
+
+      - priority: 3
+        action: "Install file system tools"
+        command: "apt install ntfs-3g exfat-fuse"
+        explanation: "Install support for common filesystems"
+
+      - priority: 4
+        action: "Reset USB controller"
+        command: "echo '1-1' > /sys/bus/usb/drivers/usb/unbind; echo '1-1' > /sys/bus/usb/drivers/usb/bind"
+        explanation: "Reset USB for external drives"
+
+    related_patterns: ["omv-015"]
+    references: []
+    confidence: 0.8
+
+  - pattern_id: "omv-007"
+    title: "SMART drive error reported"
+    category: "storage"
+
+    symptoms:
+      - "SMART error warning"
+      - "Drive predicted to fail"
+      - "Bad sectors detected"
+      - "Reallocated sector count"
+
+    triggers:
+      - "smart error"
+      - "drive failing"
+      - "bad sectors"
+      - "predicted failure"
+
+    diagnostics:
+      - name: "Check SMART status"
+        command: "smartctl -a /dev/sdX"
+        expected_output: "Full SMART attributes"
+
+      - name: "Run SMART test"
+        command: "smartctl -t long /dev/sdX"
+        expected_output: "Test initiated"
+
+      - name: "Check test results"
+        command: "smartctl -l selftest /dev/sdX"
+        expected_output: "Previous test results"
+
+    solutions:
+      - priority: 1
+        action: "Backup immediately"
+        command: "rsync -av /mountpoint/ /backup/"
+        explanation: "Critical: backup data before drive fails"
+
+      - priority: 2
+        action: "Replace drive"
+        command: "omv-rpc DiskMgmt removeDisk '{\"devicename\": \"/dev/sdX\"}'"
+        explanation: "Schedule drive replacement"
+
+      - priority: 3
+        action: "Monitor for more errors"
+        command: "watch smartctl -a /dev/sdX"
+        explanation: "Watch SMART attributes closely"
+
+    related_patterns: ["omv-003", "omv-015"]
+    references: []
+    confidence: 0.95
+
+  - pattern_id: "omv-008"
+    title: "Filesystem mount failed"
+    category: "storage"
+
+    symptoms:
+      - "Mount failed in boot"
+      - "Emergency mode"
+      - "Cannot access data"
+      - "Mount point empty"
+
+    triggers:
+      - "mount failed"
+      - "emergency mode"
+      - "can't mount"
+      - "filesystem not mounted"
+
+    diagnostics:
+      - name: "Check mount status"
+        command: "mount | grep /srv"
+        expected_output: "Current mounts"
+
+      - name: "Check /etc/fstab"
+        command: "cat /etc/fstab"
+        expected_output: "Filesystem table"
+
+      - name: "Check systemd mount units"
+        command: "systemctl list-units | grep mount"
+        expected_output: "Mount service status"
+
+    solutions:
+      - priority: 1
+        action: "Manually mount filesystem"
+        command: "mount /dev/sdX /mountpoint"
+        explanation: "Attempt manual mount"
+
+      - priority: 2
+        action: "Fix UUID in fstab"
+        command: "blkid /dev/sdX"
+        explanation: "Verify and update UUID in fstab"
+
+      - priority: 3
+        action: "Check filesystem"
+        command: "fsck -y /dev/sdX"
+        explanation: "Repair filesystem errors"
+
+      - priority: 4
+        action: "Comment out bad entry"
+        command: "sed -i '/mountpoint/s/^/#/' /etc/fstab"
+        explanation: "Disable problem mount temporarily"
+
+    related_patterns: ["omv-005"]
+    references: []
+    confidence: 0.85
+
+  # ========== NETWORK PATTERNS ==========
+
+  - pattern_id: "omv-009"
+    title: "Network interface not working"
+    category: "network"
+
+    symptoms:
+      - "No network connectivity"
+      - "Interface shows down"
+      - "Can't ping server"
+      - "No IP address assigned"
+
+    triggers:
+      - "no network"
+      - "interface down"
+      - "can't connect"
+      - "no ip address"
+
+    diagnostics:
+      - name: "List interfaces"
+        command: "ip link show"
+        expected_output: "All network interfaces"
+
+      - name: "Check IP addresses"
+        command: "ip addr show"
+        expected_output: "Assigned IP addresses"
+
+      - name: "Check interface status"
+        command: "cat /sys/class/net/eth0/operstate"
+        expected_output: "up or down"
+
+    solutions:
+      - priority: 1
+        action: "Bring interface up"
+        command: "ip link set eth0 up"
+        explanation: "Enable the network interface"
+
+      - priority: 2
+        action: "Request DHCP"
+        command: "dhclient eth0"
+        explanation: "Request IP via DHCP"
+
+      - priority: 3
+        action: "Restart networking"
+        command: "systemctl restart networking"
+        explanation: "Restart network service"
+
+      - priority: 4
+        action: "Check cable connection"
+        command: "ethtool eth0"
+        explanation: "Verify physical link"
+
+    related_patterns: ["omv-010"]
+    references: []
+    confidence: 0.85
+
+  - pattern_id: "omv-010"
+    title: "Cannot access OMV web interface"
+    category: "network"
+
+    symptoms:
+      - "Web UI won't load"
+      - "Connection refused on port 80"
+      - "Can't reach OMV admin panel"
+
+    triggers:
+      - "web ui not working"
+      - "can't access web"
+      - "admin panel down"
+      - "port 80 not working"
+
+    diagnostics:
+      - name: "Check nginx status"
+        command: "systemctl status nginx"
+        expected_output: "Service status"
+
+      - name: "Check web ports"
+        command: "netstat -tlnp | grep -E ':(80|443)'"
+        expected_output: "Listening ports"
+
+      - name: "Check nginx logs"
+        command: "tail -50 /var/log/nginx/error.log"
+        expected_output: "Recent errors"
+
+    solutions:
+      - priority: 1
+        action: "Restart nginx"
+        command: "systemctl restart nginx"
+        explanation: "Restart web server"
+
+      - priority: 2
+        action: "Restart PHP-FPM"
+        command: "systemctl restart php7.4-fpm"
+        explanation: "Restart PHP backend"
+
+      - priority: 3
+        action: "Check nginx config"
+        command: "nginx -t"
+        explanation: "Test configuration syntax"
+
+      - priority: 4
+        action: "Check firewall"
+        command: "iptables -L -n | grep -E '(80|443)'"
+        explanation: "Verify firewall allows web traffic"
+
+    related_patterns: ["omv-019"]
+    references: []
+    confidence: 0.9
+
+  - pattern_id: "omv-011"
+    title: "Firewall blocking access"
+    category: "network"
+
+    symptoms:
+      - "Can't connect from network"
+      - "Connection timeout"
+      - "Ports filtered"
+      - "Works locally but not remotely"
+
+    triggers:
+      - "firewall blocking"
+      - "can't connect"
+      - "port blocked"
+      - "connection timeout"
+
+    diagnostics:
+      - name: "Check iptables rules"
+        command: "iptables -L -n -v"
+        expected_output: "Firewall rules"
+
+      - name: "Check UFW status"
+        command: "ufw status"
+        expected_output: "UFW firewall status"
+
+      - name: "Check open ports"
+        command: "ss -tlnp"
+        expected_output: "Listening ports"
+
+    solutions:
+      - priority: 1
+        action: "Allow SMB port"
+        command: "ufw allow 445/tcp"
+        explanation: "Allow SMB traffic"
+
+      - priority: 2
+        action: "Allow SSH port"
+        command: "ufw allow 22/tcp"
+        explanation: "Allow SSH access"
+
+      - priority: 3
+        action: "Allow web ports"
+        command: "ufw allow 80/tcp && ufw allow 443/tcp"
+        explanation: "Allow web UI access"
+
+      - priority: 4
+        action: "Disable firewall temporarily"
+        command: "ufw disable"
+        explanation: "Disable for testing only"
+
+    related_patterns: ["omv-001"]
+    references: []
+    confidence: 0.85
+
+  - pattern_id: "omv-012"
+    title: "DNS resolution not working"
+    category: "network"
+
+    symptoms:
+      - "Can't resolve hostnames"
+      - "Network works but no DNS"
+      - "Unknown host errors"
+
+    triggers:
+      - "dns not working"
+      - "can't resolve"
+      - "unknown host"
+      - "name resolution failed"
+
+    diagnostics:
+      - name: "Check DNS config"
+        command: "cat /etc/resolv.conf"
+        expected_output: "DNS servers"
+
+      - name: "Test DNS query"
+        command: "nslookup google.com"
+        expected_output: "DNS resolution test"
+
+      - name: "Ping DNS server"
+        command: "ping -c 3 8.8.8.8"
+        expected_output: "Connectivity to DNS"
+
+    solutions:
+      - priority: 1
+        action: "Set Google DNS"
+        command: "echo 'nameserver 8.8.8.8' > /etc/resolv.conf"
+        explanation: "Use reliable DNS server"
+
+      - priority: 2
+        action: "Restart systemd-resolved"
+        command: "systemctl restart systemd-resolved"
+        explanation: "Restart DNS resolver"
+
+      - priority: 3
+        action: "Flush DNS cache"
+        command: "systemd-resolve --flush-caches"
+        explanation: "Clear DNS cache"
+
+      - priority: 4
+        action: "Configure via OMV web UI"
+        command: "Navigate to Network > DNS"
+        explanation: "Set DNS in web interface"
+
+    related_patterns: []
+    references: []
+    confidence: 0.8
+
+  - pattern_id: "omv-013"
+    title: "Slow network transfer speeds"
+    category: "network"
+
+    symptoms:
+      - "Very slow file copies"
+      - "Network bottleneck"
+      - "Not getting full speed"
+
+    triggers:
+      - "slow network"
+      - "slow transfer"
+      - "network bottleneck"
+      - "slow speed"
+
+    diagnostics:
+      - name: "Check interface speed"
+        command: "ethtool eth0"
+        expected_output: "Link speed and duplex"
+
+      - name: "Test network speed"
+        command: "iperf3 -s"
+        expected_output: "Bandwidth test server"
+
+      - name: "Check for errors"
+        command: "ip -s link show eth0"
+        expected_output: "Interface statistics"
+
+    solutions:
+      - priority: 1
+        action: "Verify gigabit negotiation"
+        command: "ethtool -s eth0 speed 1000 duplex full autoneg on"
+        explanation: "Force gigabit speed"
+
+      - priority: 2
+        action: "Disable offloading"
+        command: "ethtool -K eth0 tso off"
+        explanation: "Disable TCP segmentation offload"
+
+      - priority: 3
+        action: "Check cable quality"
+        command: "dmesg | grep -i eth0"
+        explanation: "Check for cable errors in logs"
+
+      - priority: 4
+        action: "Enable SMB multichannel"
+        command: "omv-config setf 'smb.multichannel' 'true'"
+        explanation: "Enable SMB3 multichannel"
+
+    related_patterns: ["omv-020"]
+    references: []
+    confidence: 0.75
+
+  # ========== SERVICE PATTERNS ==========
+
+  - pattern_id: "omv-014"
+    title: "NFS share not accessible"
+    category: "services"
+
+    symptoms:
+      - "Can't mount NFS share"
+      - "Permission denied on NFS"
+      - "NFS timeout"
+
+    triggers:
+      - "nfs not working"
+      - "can't mount nfs"
+      - "nfs timeout"
+      - "nfs permission denied"
+
+    diagnostics:
+      - name: "Check NFS server status"
+        command: "systemctl status nfs-server"
+        expected_output: "NFS service status"
+
+      - name: "Check exports"
+        command: "exportfs -v"
+        expected_output: "Exported shares"
+
+      - name: "Check showmount"
+        command: "showmount -e localhost"
+        expected_output: "Available NFS exports"
+
+    solutions:
+      - priority: 1
+        action: "Restart NFS server"
+        command: "systemctl restart nfs-server"
+        explanation: "Restart NFS service"
+
+      - priority: 2
+        action: "Re-export shares"
+        command: "exportfs -ra"
+        explanation: "Refresh NFS exports"
+
+      - priority: 3
+        action: "Check exports syntax"
+        command: "cat /etc/exports"
+        explanation: "Verify export configuration"
+
+      - priority: 4
+        action: "Allow NFS through firewall"
+        command: "ufw allow from 192.168.0.0/24 to any port nfs"
+        explanation: "Allow NFS traffic"
+
+    related_patterns: ["omv-001"]
+    references: []
+    confidence: 0.85
+
+  - pattern_id: "omv-015"
+    title: "SSH access denied"
+    category: "services"
+
+    symptoms:
+      - "Permission denied (publickey)"
+      - "Can't SSH to server"
+      - "Authentication failed"
+
+    triggers:
+      - "ssh denied"
+      - "can't ssh"
+      - "authentication failed"
+      - "ssh not working"
+
+    diagnostics:
+      - name: "Check SSH status"
+        command: "systemctl status ssh"
+        expected_output: "SSH service status"
+
+      - name: "Check SSH logs"
+        command: "tail -50 /var/log/auth.log"
+        expected_output: "Authentication logs"
+
+      - name: "Verify SSH config"
+        command: "sshd -t"
+        expected_output: "Config test results"
+
+    solutions:
+      - priority: 1
+        action: "Restart SSH service"
+        command: "systemctl restart ssh"
+        explanation: "Restart SSH daemon"
+
+      - priority: 2
+        action: "Check password auth"
+        command: "grep PasswordAuthentication /etc/ssh/sshd_config"
+        explanation: "Verify password auth is enabled"
+
+      - priority: 3
+        action: "Enable password auth"
+        command: "sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config"
+        explanation: "Enable password authentication"
+
+      - priority: 4
+        action: "Check user permissions"
+        command: "groups username"
+        explanation: "Verify user has SSH access"
+
+    related_patterns: []
+    references: []
+    confidence: 0.9
+
+  - pattern_id: "omv-016"
+    title: "OMV web interface shows errors"
+    category: "services"
+
+    symptoms:
+      - "PHP errors in web UI"
+      - "White page in browser"
+      - "RPC errors in interface"
+      - "Can't save settings"
+
+    triggers:
+      - "web ui error"
+      - "php error"
+      - "rpc error"
+      - "can't save settings"
+
+    diagnostics:
+      - name: "Check PHP-FPM status"
+        command: "systemctl status php*-fpm"
+        expected_output: "PHP service status"
+
+      - name: "Check PHP error log"
+        command: "tail -100 /var/log/php*-fpm.log"
+        expected_output: "PHP errors"
+
+      - name: "Check OMV RPC"
+        command: "curl -s http://localhost/rpc.php"
+        expected_output: "RPC response"
+
+    solutions:
+      - priority: 1
+        action: "Restart PHP-FPM"
+        command: "systemctl restart php*-fpm"
+        explanation: "Restart PHP backend"
+
+      - priority: 2
+        action: "Clear OMV cache"
+        command: "rm -rf /var/cache/openmediavault/*"
+        explanation: "Clear OMV cache files"
+
+      - priority: 3
+        action: "Fix permissions"
+        command: "omv-mkconf nginx"
+        explanation: "Regenerate nginx configuration"
+
+      - priority: 4
+        action: "Restart openmediavault"
+        command: "systemctl restart openmediavault-engined"
+        explanation: "Restart OMV engine"
+
+    related_patterns: ["omv-010"]
+    references: []
+    confidence: 0.85
+
+  - pattern_id: "omv-017"
+    title: "Docker service not starting"
+    category: "services"
+
+    symptoms:
+      - "Docker won't start"
+      - "Containers not running"
+      - "Can't access Portainer"
+
+    triggers:
+      - "docker not working"
+      - "docker won't start"
+      - "containers not running"
+      - "portainer down"
+
+    diagnostics:
+      - name: "Check Docker status"
+        command: "systemctl status docker"
+        expected_output: "Docker service status"
+
+      - name: "List containers"
+        command: "docker ps -a"
+        expected_output: "All containers"
+
+      - name: "Check Docker logs"
+        command: "journalctl -u docker -n 50"
+        expected_output: "Docker service logs"
+
+    solutions:
+      - priority: 1
+        action: "Restart Docker"
+        command: "systemctl restart docker"
+        explanation: "Restart Docker daemon"
+
+      - priority: 2
+        action: "Clean Docker system"
+        command: "docker system prune -f"
+        explanation: "Remove unused Docker data"
+
+      - priority: 3
+        action: "Check disk space"
+        command: "df /var/lib/docker"
+        explanation: "Verify Docker has disk space"
+
+      - priority: 4
+        action: "Verify Docker daemon config"
+        command: "docker info"
+        explanation: "Check Docker configuration"
+
+    related_patterns: ["omv-002"]
+    references: []
+    confidence: 0.85
+
+  # ========== PERFORMANCE PATTERNS ==========
+
+  - pattern_id: "omv-018"
+    title: "High CPU usage"
+    category: "performance"
+
+    symptoms:
+      - "CPU at 100%"
+      - "System slow to respond"
+      - "High load average"
+
+    triggers:
+      - "high cpu"
+      - "cpu 100"
+      - "slow system"
+      - "high load"
+
+    diagnostics:
+      - name: "Check CPU usage"
+        command: "top -bn1 | head -20"
+        expected_output: "CPU usage and top processes"
+
+      - name: "Check load average"
+        command: "uptime"
+        expected_output: "Load average"
+
+      - name: "Find CPU intensive processes"
+        command: "ps aux --sort=-%cpu | head -10"
+        expected_output: "Top CPU consumers"
+
+    solutions:
+      - priority: 1
+        action: "Kill runaway process"
+        command: "kill -9 PID"
+        explanation: "Stop process consuming CPU"
+
+      - priority: 2
+        action: "Check for cron jobs"
+        command: "crontab -l"
+        explanation: "Check for scheduled tasks"
+
+      - priority: 3
+        action: "Reduce Docker limits"
+        command: "docker update --cpus=2 container_name"
+        explanation: "Limit container CPU usage"
+
+      - priority: 4
+        action: "Check for malware"
+        command: "ps aux | grep -v grep | grep -v root"
+        explanation: "Look for suspicious processes"
+
+    related_patterns: ["omv-020"]
+    references: []
+    confidence: 0.8
+
+  - pattern_id: "omv-019"
+    title: "Memory exhaustion"
+    category: "performance"
+
+    symptoms:
+      - "Out of memory errors"
+      - "System swapping"
+      - "Processes killed by OOM"
+      - "Very slow response"
+
+    triggers:
+      - "out of memory"
+      - "oom killer"
+      - "memory full"
+      - "high memory usage"
+
+    diagnostics:
+      - name: "Check memory usage"
+        command: "free -h"
+        expected_output: "Memory and swap usage"
+
+      - name: "Check swap usage"
+        command: "swapon --show"
+        expected_output: "Swap devices and usage"
+
+      - name: "Find memory hogs"
+        command: "ps aux --sort=-%mem | head -10"
+        expected_output: "Top memory consumers"
+
+    solutions:
+      - priority: 1
+        action: "Clear page cache"
+        command: "sync; echo 3 > /proc/sys/vm/drop_caches"
+        explanation: "Free page cache"
+
+      - priority: 2
+        action: "Stop memory hungry process"
+        command: "kill -9 PID"
+        explanation: "Stop process consuming RAM"
+
+      - priority: 3
+        action: "Reduce Docker memory"
+        command: "docker update --memory=4g container_name"
+        explanation: "Limit container memory"
+
+      - priority: 4
+        action: "Add swap"
+        command: "fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
+        explanation: "Create and enable swap file"
+
+    related_patterns: ["omv-018"]
+    references: []
+    confidence: 0.85
+
+  - pattern_id: "omv-020"
+    title: "Slow disk I/O performance"
+    category: "performance"
+
+    symptoms:
+      - "Very slow disk operations"
+      - "High iowait"
+      - "Disk bottleneck"
+
+    triggers:
+      - "slow disk"
+      - "high iowait"
+      - "disk bottleneck"
+      - "slow i/o"
+
+    diagnostics:
+      - name: "Check disk I/O"
+        command: "iostat -x 1 5"
+        expected_output: "Disk I/O statistics"
+
+      - name: "Check iowait"
+        command: "top -bn1 | grep -i wa"
+        expected_output: "CPU iowait percentage"
+
+      - name: "Test disk speed"
+        command: "hdparm -Tt /dev/sdX"
+        expected_output: "Disk read speed"
+
+    solutions:
+      - priority: 1
+        action: "Check for failing disk"
+        command: "smartctl -a /dev/sdX"
+        explanation: "Verify disk health"
+
+      - priority: 2
+        action: "Use noop scheduler for SSD"
+        command: "echo noop > /sys/block/sdX/queue/scheduler"
+        explanation: "Optimize I/O scheduler"
+
+      - priority: 3
+        action: "Align partitions"
+        command: "parted /dev/sdX align-check opt 1"
+        explanation: "Verify partition alignment"
+
+      - priority: 4
+        action: "Enable write-back cache"
+        command: "hdparm -W1 /dev/sdX"
+        explanation: "Enable disk write cache"
+
+    related_patterns: ["omv-007", "omv-013"]
+    references: []
+    confidence: 0.75
+
+  # ========== SECURITY PATTERNS ==========
+
+  - pattern_id: "omv-021"
+    title: "Permission denied on share"
+    category: "security"
+
+    symptoms:
+      - "Access denied to files"
+      - "Can't write to share"
+      - "Permission errors"
+
+    triggers:
+      - "permission denied"
+      - "access denied"
+      - "can't write"
+      - "permission error"
+
+    diagnostics:
+      - name: "Check file permissions"
+        command: "ls -la /path/to/share"
+        expected_output: "File permissions"
+
+      - name: "Check ownership"
+        command: "stat /path/to/share"
+        expected_output: "Owner and group"
+
+      - name: "Check user groups"
+        command: "groups username"
+        expected_output: "User's group memberships"
+
+    solutions:
+      - priority: 1
+        action: "Fix permissions"
+        command: "chmod -R 770 /path/to/share"
+        explanation: "Set proper permissions"
+
+      - priority: 2
+        action: "Fix ownership"
+        command: "chown -R user:group /path/to/share"
+        explanation: "Set proper owner and group"
+
+      - priority: 3
+        action: "Check ACLs"
+        command: "getfacl /path/to/share"
+        explanation: "Check Access Control Lists"
+
+      - priority: 4
+        action: "Set default ACL"
+        command: "setfacl -d -m g:group:rwx /path/to/share"
+        explanation: "Set default permissions for new files"
+
+    related_patterns: []
+    references: []
+    confidence: 0.9
+
+  - pattern_id: "omv-022"
+    title: "SSH brute force attack detected"
+    category: "security"
+
+    symptoms:
+      - "Many failed SSH logins"
+      - "High auth log activity"
+      - "Dictionary attack"
+
+    triggers:
+      - "ssh attack"
+      - "brute force"
+      - "failed logins"
+      - "dictionary attack"
+
+    diagnostics:
+      - name: "Count failed logins"
+        command: "grep 'Failed password' /var/log/auth.log | wc -l"
+        expected_output: "Number of failed attempts"
+
+      - name: "Show top attackers"
+        command: "grep 'Failed password' /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | head -10"
+        expected_output: "Top attacking IPs"
+
+      - name: "Check recent failures"
+        command: "tail -100 /var/log/auth.log | grep Failed"
+        expected_output: "Recent failed attempts"
+
+    solutions:
+      - priority: 1
+        action: "Install fail2ban"
+        command: "apt install fail2ban"
+        explanation: "Install intrusion prevention"
+
+      - priority: 2
+        action: "Block specific IP"
+        command: "iptables -A INPUT -s IP_ADDRESS -j DROP"
+        explanation: "Block attacker IP"
+
+      - priority: 3
+        action: "Change SSH port"
+        command: "sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config"
+        explanation: "Use non-standard SSH port"
+
+      - priority: 4
+        action: "Disable password auth"
+        command: "sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config"
+        explanation: "Require key-based authentication"
+
+    related_patterns: []
+    references: []
+    confidence: 0.95
+
+  - pattern_id: "omv-023"
+    title: "Ransomware or malware detected"
+    category: "security"
+
+    symptoms:
+      - "Files being encrypted"
+      - "Strange file extensions"
+      - "Ransom notes appearing"
+      - "Files disappearing"
+
+    triggers:
+      - "ransomware"
+      - "files encrypted"
+      - "malware"
+      - "virus"
+
+    diagnostics:
+      - name: "Check for encrypted files"
+        command: "find /srv -name '*.encrypted' 2>/dev/null | head -20"
+        expected_output: "Encrypted files"
+
+      - name: "Check for ransom notes"
+        command: "find /srv -name '*RECOVER*' -o -name '*README*' 2>/dev/null"
+        expected_output: "Ransom note files"
+
+      - name: "Check recent file changes"
+        command: "find /srv -mtime -1 -type f | head -50"
+        expected_output: "Recently modified files"
+
+    solutions:
+      - priority: 1
+        action: "STOP: Disconnect network immediately"
+        command: "ifconfig eth0 down"
+        explanation: "Isolate infected system from network"
+
+      - priority: 2
+        action: "Shutdown SMB shares"
+        command: "systemctl stop smbd"
+        explanation: "Stop file sharing to prevent spread"
+
+      - priority: 3
+        action: "Do NOT reboot yet"
+        command: "Save memory dump for forensics"
+        explanation: "Preserve evidence before reboot"
+
+      - priority: 4
+        action: "Contact security professional"
+        command: "Document all symptoms and logs"
+        explanation: "Get professional help for recovery"
+
+    related_patterns: []
+    references: []
+    confidence: 0.95
+
+  - pattern_id: "omv-024"
+    title: "User cannot login to web UI"
+    category: "security"
+
+    symptoms:
+      - "Login failed on web interface"
+      - "Wrong password error"
+      - "Account locked"
+
+    triggers:
+      - "can't login"
+      - "login failed"
+      - "wrong password"
+      - "account locked"
+
+    diagnostics:
+      - name: "Check user exists"
+        command: "grep username /etc/passwd"
+        expected_output: "User account info"
+
+      - name: "Check web UI logs"
+        command: "tail -50 /var/log/openmediavault/openmediavault.log"
+        expected_output: "Authentication logs"
+
+      - name: "Verify password"
+        command: "omv-rpc UserMgmt getUser '{\"username\": \"admin\"}'"
+        expected_output: "User information"
+
+    solutions:
+      - priority: 1
+        action: "Reset admin password"
+        command: "omv-firstaid"
+        explanation: "Use OMV first aid tool to reset password"
+
+      - priority: 2
+        action: "Reset via command line"
+        command: "omv-rpc UserMgmt setUser '{\"username\": \"admin\", \"password\": \"newpass\"}'"
+        explanation: "Set new password via RPC"
+
+      - priority: 3
+        action: "Clear browser cache"
+        command: "Clear cookies and cache"
+        explanation: "Browser may have stale session"
+
+      - priority: 4
+        action: "Check for failed login attempts"
+        command: "fail2ban-client status sshd"
+        explanation: "Check if IP is blocked"
+
+    related_patterns: ["omv-022"]
+    references: []
+    confidence: 0.85

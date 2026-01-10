@@ -1,0 +1,27 @@
+{
+  "title": "Simple Lemon Herb Chicken",
+  "url": "https://www.allrecipes.com/recipe/9011/simple-lemon-herb-chicken/",
+  "description": "This lemon herb chicken is a quick and easy main dish of juicy chicken breasts flavored with lemon, oregano, and parsley—ready in just 15 minutes.",
+  "ingredients": [
+    {"amount": "2 (5 ounce)", "item": "skinless, boneless chicken breast halves", "notes": ""},
+    {"amount": "1 medium", "item": "lemon", "notes": "juiced, divided"},
+    {"amount": "", "item": "salt and freshly ground black pepper", "notes": "to taste"},
+    {"amount": "1 tablespoon", "item": "olive oil", "notes": ""},
+    {"amount": "1 pinch", "item": "dried oregano", "notes": ""},
+    {"amount": "2 sprigs", "item": "fresh parsley", "notes": "chopped, for garnish"}
+  ],
+  "steps": [
+    "Place chicken in a bowl; pour 1/2 of the lemon juice over chicken and season with salt.",
+    "Heat olive oil in a medium skillet over medium-low heat.",
+    "Place chicken into hot oil. Add remaining lemon juice and oregano; season with black pepper.",
+    "Cook chicken until golden brown and juices run clear, 5 to 10 minutes per side. An instant-read thermometer inserted into the center should read at least 165°F (74°C).",
+    "Garnish chicken with parsley to serve."
+  ],
+  "prep_time": "5 mins",
+  "cook_time": "10 mins",
+  "total_time": "15 mins",
+  "servings": "2",
+  "category": "dinner",
+  "tags": ["5 ingredients", "quick", "lemon", "healthy"],
+  "rating": 4.6
+}

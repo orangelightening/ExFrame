@@ -1,0 +1,26 @@
+{
+  "title": "Honey Glazed Chicken",
+  "url": "https://www.allrecipes.com/recipe/231939/honey-glazed-chicken/",
+  "description": "Delicious honey chicken made with pan-fried chicken breast cubes glazed with a sticky-sweet sauce of honey, soy sauce, and red pepper flakes.",
+  "ingredients": [
+    {"amount": "¼ cup", "item": "honey", "notes": ""},
+    {"amount": "2 tablespoons", "item": "soy sauce", "notes": ""},
+    {"amount": "⅛ teaspoon", "item": "red pepper flakes", "notes": ""},
+    {"amount": "1 ½ tablespoons", "item": "olive oil", "notes": ""},
+    {"amount": "2", "item": "skinless, boneless chicken breast halves", "notes": "cut into bite-size pieces"}
+  ],
+  "steps": [
+    "Gather all ingredients.",
+    "Whisk honey, soy sauce, and red pepper flakes in a bowl; set aside.",
+    "Heat olive oil in a skillet over medium heat; cook and stir chicken in hot oil until lightly brown, about 5 minutes.",
+    "Pour honey mixture into the skillet; continue to cook and stir until chicken is no longer pink in the center and sauce is thickened, about 5 minutes more.",
+    "Serve hot and enjoy!"
+  ],
+  "prep_time": "10 mins",
+  "cook_time": "10 mins",
+  "total_time": "20 mins",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["5 ingredients", "quick", "sweet and savory", "honey"],
+  "rating": 4.6
+}

@@ -1,0 +1,163 @@
+# EEFrame - Expertise Framework
+#
+# This Docker Compose file sets up:
+# - EEFrame App: The main expertise framework web application
+# - Prometheus: Metrics collection and storage
+# - Grafana: Visualization dashboards
+# - Loki: Log aggregation
+# - Promtail: Log shipping agent
+
+version: "3.8"
+
+services:
+  eeframe-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eeframe-app
+    ports:
+      - "3000:3000"
+    environment:
+      # Application settings
+      - APP_HOME=/app
+      - PYTHONPATH=/app:$PYTHONPATH
+
+      # LLM API Configuration (set these in .env or override here)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+
+      # Path configuration (optional, defaults shown)
+      - PATTERN_STORAGE_BASE=/app/data/patterns
+      - DOMAIN_REGISTRY_PATH=/app/data
+
+      # Log level
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Persist domain registry
+      - eeframe_data:/app/data
+
+      # Mount host pattern directories (bind mount for live sync)
+      - ./data/patterns:/app/data/patterns:rw
+
+      # Persist logs (optional - container logs also captured)
+      - eeframe_logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: omv-copilot-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/prometheus/recording_rules.yml:/etc/prometheus/recording_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: omv-copilot-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    restart: unless-stopped
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: omv-copilot-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki/config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    container_name: omv-copilot-promtail
+    volumes:
+      - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro  # Mount host logs for collection
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+    networks:
+      - monitoring
+    depends_on:
+      - loki
+
+  # Optional: node_exporter for system metrics
+  # Run this on your OMV server or the host running OMV Co-Pilot
+  # Uncomment if you want to monitor the Co-Pilot host itself
+  # node_exporter:
+  #   image: prom/node-exporter:v1.7.0
+  #   container_name: omv-copilot-node-exporter
+  #   ports:
+  #     - "9100:9100"
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   restart: unless-stopped
+  #   networks:
+  #     - monitoring
+
+volumes:
+  # EEFrame application volumes
+  eeframe_data:
+    driver: local
+    name: eeframe_data
+  eeframe_history:
+    driver: local
+    name: eeframe_history
+  eeframe_logs:
+    driver: local
+    name: eeframe_logs
+
+  # Monitoring volumes
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+
+networks:
+  monitoring:
+    driver: bridge

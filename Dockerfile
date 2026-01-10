@@ -1,0 +1,75 @@
+# Multi-stage Dockerfile for EEFrame - Expertise Framework
+
+# Stage 1: Builder - Install dependencies
+FROM python:3.11-slim AS builder
+
+# Set working directory
+WORKDIR /build
+
+# Install system dependencies needed for building
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install Python dependencies to a temporary location
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Stage 2: Runtime - Final minimal image
+FROM python:3.11-slim
+
+# Set labels
+LABEL maintainer="EEFrame"
+LABEL description="Expertise Framework - Domain-agnostic AI assistant"
+LABEL version="1.0.0"
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    APP_HOME=/app \
+    PYTHONPATH=/app:$PYTHONPATH
+
+# Create a non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Set working directory
+WORKDIR $APP_HOME
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Python dependencies from builder to a shared location
+COPY --from=builder /root/.local /usr/local
+
+# Make sure scripts are accessible
+ENV PATH=/usr/local/bin:$PATH
+
+# Copy application code (includes the frontend/index.html)
+COPY generic_framework/ $APP_HOME/
+COPY expertise_scanner/ $APP_HOME/expertise_scanner/
+
+# Create necessary directories with proper permissions
+RUN mkdir -p $APP_HOME/data \
+    $APP_HOME/logs \
+    $APP_HOME/expertise_scanner/data/patterns \
+    $APP_HOME/expertise_scanner/data/history && \
+    chown -R appuser:appuser $APP_HOME
+
+# Switch to non-root user
+USER appuser
+
+# Expose the application port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Run the application
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "3000"]

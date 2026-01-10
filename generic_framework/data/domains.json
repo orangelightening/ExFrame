@@ -1,0 +1,60 @@
+{
+  "domains": {
+    "cooking": {
+      "domain_id": "cooking",
+      "domain_name": "Cooking & Recipes",
+      "description": "Culinary knowledge and recipes",
+      "version": "1.0.0",
+      "categories": [
+        "technique",
+        "recipe",
+        "cooking_method",
+        "ingredient_substitution"
+      ],
+      "tags": [
+        "baking",
+        "chicken",
+        "quick",
+        "healthy"
+      ],
+      "storage_path": "/home/peter/development/eeframe/expertise_scanner/data/patterns/cooking",
+      "pattern_format": "json",
+      "specialists": [],
+      "created_at": "2026-01-08T05:45:48.298114",
+      "updated_at": "2026-01-08T05:45:48.298126"
+    },
+    "llm_consciousness": {
+      "domain_id": "llm_consciousness",
+      "domain_name": "LLM Consciousness & Failure Modes",
+      "description": "Patterns of LLM consciousness lapses, failure modes in autonomous operation, and mitigation strategies",
+      "version": "1.0.0",
+      "categories": [
+        "failure_mode",
+        "solution",
+        "monitoring",
+        "architecture",
+        "detection",
+        "recovery",
+        "prevention"
+      ],
+      "tags": [
+        "hallucination",
+        "tool_failure",
+        "loops",
+        "amnesia",
+        "confidence",
+        "quality_drift",
+        "monitoring",
+        "orchestration",
+        "llm",
+        "autonomous_agents"
+      ],
+      "storage_path": "/home/peter/development/eeframe/expertise_scanner/data/patterns/llm_consciousness",
+      "pattern_format": "json",
+      "specialists": [],
+      "created_at": "2026-01-08T05:45:48.298732",
+      "updated_at": "2026-01-08T05:45:48.298738"
+    }
+  },
+  "next_id": 1
+}

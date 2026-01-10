@@ -1,0 +1,40 @@
+{
+  "title": "Quick Chicken Piccata",
+  "url": "https://www.allrecipes.com/recipe/220751/quick-chicken-piccata/",
+  "description": "This easy chicken piccata recipe from Chef John pan-fries chicken in a delicious Italian piccata sauce made with lemon, capers, white wine, and parsley.",
+  "ingredients": [
+    {"amount": "4", "item": "skinless, boneless chicken breast halves", "notes": ""},
+    {"amount": "", "item": "cayenne pepper", "notes": "to taste"},
+    {"amount": "", "item": "salt and ground black pepper", "notes": "to taste"},
+    {"amount": "", "item": "all-purpose flour", "notes": "for dredging"},
+    {"amount": "2 tablespoons", "item": "olive oil", "notes": ""},
+    {"amount": "1 tablespoon", "item": "capers", "notes": "drained"},
+    {"amount": "½ cup", "item": "white wine", "notes": ""},
+    {"amount": "¼ cup", "item": "fresh lemon juice", "notes": ""},
+    {"amount": "¼ cup", "item": "water", "notes": ""},
+    {"amount": "3 tablespoons", "item": "cold unsalted butter", "notes": "cut in ¼-inch slices"},
+    {"amount": "2 tablespoons", "item": "chopped fresh Italian parsley", "notes": ""}
+  ],
+  "steps": [
+    "Place chicken breasts between 2 sheets of heavy plastic on a solid, level surface.",
+    "Firmly pound chicken breasts with the smooth side of a meat mallet to a 1/2-inch thickness.",
+    "Season both sides of chicken breasts with cayenne, salt, and black pepper.",
+    "Dredge chicken lightly in flour and shake off any excess.",
+    "Heat olive oil in a skillet over medium-high heat.",
+    "Place chicken in the pan, reduce heat to medium, and cook until browned and cooked through, about 5 minutes per side; transfer to a plate.",
+    "Cook capers in reserved oil, smashing them lightly to release brine, until warmed through, about 30 seconds.",
+    "Pour white wine into the skillet and bring to a boil while scraping the browned bits off the bottom of the pan.",
+    "Cook wine until reduced by half, about 2 minutes.",
+    "Stir lemon juice, water, and butter into the reduced wine mixture; cook and stir continuously to form a thick sauce, about 2 minutes.",
+    "Reduce heat to low and stir parsley through the sauce.",
+    "Return chicken breasts to the pan and cook until heated through, 1 to 2 minutes.",
+    "Serve with sauce spooned over the top."
+  ],
+  "prep_time": "10 mins",
+  "cook_time": "15 mins",
+  "total_time": "25 mins",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["italian", "chicken piccata", "chef john", "lemon", "capers", "quick"],
+  "rating": 4.7
+}

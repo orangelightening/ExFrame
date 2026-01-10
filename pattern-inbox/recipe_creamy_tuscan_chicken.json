@@ -1,0 +1,36 @@
+{
+  "title": "Creamy Tuscan Chicken",
+  "url": "https://www.allrecipes.com/recipe/285238/creamy-tuscan-chicken/",
+  "description": "A creamy, sun-dried tomato and spinach chicken dish that's ready in under 30 minutes. Perfect for a quick weeknight dinner that tastes like it came from a restaurant.",
+  "ingredients": [
+    {"amount": "1.5 pounds", "item": "boneless, skinless chicken breasts", "notes": "cut into bite-sized pieces"},
+    {"amount": "2 tablespoons", "item": "olive oil", "notes": "divided"},
+    {"amount": "1 tablespoon", "item": "butter", "notes": ""},
+    {"amount": "1 medium", "item": "onion, diced", "notes": ""},
+    {"amount": "4 cloves", "item": "garlic, minced", "notes": ""},
+    {"amount": "0.5 cup", "item": "chicken broth", "notes": ""},
+    {"amount": "1 cup", "item": "heavy cream", "notes": ""},
+    {"amount": "0.5 cup", "item": "Parmesan cheese, grated", "notes": "plus more for serving"},
+    {"amount": "0.5 cup", "item": "sun-dried tomatoes, chopped", "notes": "in oil, drained"},
+    {"amount": "3 cups", "item": "fresh spinach", "notes": "chopped"},
+    {"amount": "", "item": "salt and pepper", "notes": "to taste"},
+    {"amount": "0.25 teaspoon", "item": "red pepper flakes", "notes": "optional"}
+  ],
+  "steps": [
+    "Season chicken pieces with salt and pepper. Heat 1 tablespoon olive oil in a large skillet over medium-high heat. Cook chicken in batches until golden brown and cooked through, about 5-7 minutes per batch. Transfer to a plate and set aside.",
+    "Add remaining olive oil and butter to the same skillet. Add onion and cook for 3-4 minutes until softened.",
+    "Add garlic and cook for 30 seconds until fragrant.",
+    "Pour in chicken broth and scrape up any browned bits from the bottom of the pan.",
+    "Reduce heat to medium-low and stir in heavy cream and Parmesan cheese. Simmer for 2-3 minutes until sauce begins to thicken.",
+    "Add sun-dried tomatoes and spinach. Cook for 2-3 minutes until spinach is wilted.",
+    "Return chicken to the skillet and stir to coat with sauce. Cook for 2-3 minutes until heated through.",
+    "Serve hot over pasta, rice, or with crusty bread. Garnish with additional Parmesan cheese if desired."
+  ],
+  "prep_time": "15 minutes",
+  "cook_time": "20 minutes",
+  "total_time": "35 minutes",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["chicken", "quick", "italian-inspired", "creamy", "weeknight dinner"],
+  "rating": 4.7
+}

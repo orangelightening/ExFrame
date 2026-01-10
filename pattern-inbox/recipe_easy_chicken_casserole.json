@@ -1,0 +1,26 @@
+{
+  "title": "Easy Chicken Casserole",
+  "url": "https://www.allrecipes.com/recipe/8594/easy-chicken-casserole/",
+  "description": "An easy chicken casserole with a cracker topping made with chicken cooked in a creamy condensed soup sauce for a meal the whole family will love.",
+  "ingredients": [
+    {"amount": "4", "item": "skinless, boneless chicken breast halves", "notes": ""},
+    {"amount": "1 (10.5 oz)", "item": "condensed cream of chicken soup", "notes": "can"},
+    {"amount": "1 cup", "item": "sour cream", "notes": ""},
+    {"amount": "¼ cup", "item": "chopped onion", "notes": "optional"},
+    {"amount": "¼ cup", "item": "chopped mushrooms", "notes": "optional"},
+    {"amount": "32", "item": "buttery round crackers", "notes": "crumbled"}
+  ],
+  "steps": [
+    "Preheat oven to 350°F (175°C).",
+    "Fill a large pot with water; bring to a boil. Cook chicken in boiling water until no longer pink inside, 20 to 30 minutes. Chop chicken into bite-sized pieces and place in a 9x13-inch baking dish.",
+    "Combine condensed soup, sour cream, onion, and mushrooms in a bowl. Pour mixture over chicken and top with crumbled crackers.",
+    "Cover and bake in the preheated oven until top is lightly browned, about 30 minutes."
+  ],
+  "prep_time": "15 mins",
+  "cook_time": "50 mins",
+  "total_time": "1 hr 5 mins",
+  "servings": "4",
+  "category": "dinner",
+  "tags": ["casserole", "easy", "family-friendly", "leftovers"],
+  "rating": 4.2
+}
