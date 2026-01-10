@@ -17,6 +17,8 @@ from core.domain import Domain, DomainConfig, CollectorType
 from core.specialist import Specialist
 from core.knowledge_base import KnowledgeBase, KnowledgeBaseConfig
 from core.knowledge_base_plugin import KnowledgeBasePlugin
+from core.router_plugin import RouterPlugin, RouteResult
+from core.formatter_plugin import FormatterPlugin, FormattedResponse
 from knowledge.json_kb import JSONKnowledgeBase
 import importlib
 
@@ -34,6 +36,8 @@ class GenericDomain(Domain):
         self._domain_config: Optional[Dict[str, Any]] = None
         self._knowledge_base: Optional[KnowledgeBase] = None
         self._specialists: Dict[str, 'GenericSpecialist'] = {}
+        self._router: Optional[RouterPlugin] = None
+        self._formatter: Optional[FormatterPlugin] = None
 
     @property
     def domain_id(self) -> str:
@@ -64,6 +68,12 @@ class GenericDomain(Domain):
 
         # Initialize specialists from config
         self._initialize_specialists()
+
+        # Initialize router plugin
+        await self._initialize_router()
+
+        # Initialize formatter plugin
+        self._initialize_formatter()
 
         self._initialized = True
 
@@ -212,6 +222,70 @@ class GenericDomain(Domain):
             print(f"Warning: Domain {self.domain_id} has specialists config but no plugins. Plugins are now required.")
             print("Please configure plugins in domain.json")
 
+    async def _initialize_router(self) -> None:
+        """
+        Initialize router plugin from configuration.
+
+        Loads router plugin from domain.json or uses default confidence-based router.
+        """
+        router_config = self._domain_config.get("router", {})
+
+        if router_config:
+            # Load custom router plugin
+            router_module = router_config.get("module", "plugins.routers.confidence_router")
+            router_class = router_config.get("class", "ConfidenceBasedRouter")
+
+            try:
+                # Dynamically import the router plugin
+                module = importlib.import_module(router_module)
+                router_plugin_class = getattr(module, router_class)
+
+                # Instantiate router with config
+                self._router = router_plugin_class(router_config.get("config", {}))
+                print(f"  Router: {self._router.name} (plugin: {router_class})")
+                return
+
+            except (ImportError, AttributeError) as e:
+                print(f"  Warning: Failed to load router plugin {router_class}: {e}")
+                print(f"  Falling back to default confidence-based router")
+
+        # Default: Use ConfidenceBasedRouter
+        from plugins.routers.confidence_router import ConfidenceBasedRouter
+        self._router = ConfidenceBasedRouter()
+        print(f"  Router: {self._router.name} (default)")
+
+    def _initialize_formatter(self) -> None:
+        """
+        Initialize formatter plugin from configuration.
+
+        Loads formatter plugin from domain.json or uses default MarkdownFormatter.
+        """
+        formatter_config = self._domain_config.get("formatter", {})
+
+        if formatter_config:
+            # Load custom formatter plugin
+            formatter_module = formatter_config.get("module", "plugins.formatters.markdown_formatter")
+            formatter_class = formatter_config.get("class", "MarkdownFormatter")
+
+            try:
+                # Dynamically import the formatter plugin
+                module = importlib.import_module(formatter_module)
+                formatter_plugin_class = getattr(module, formatter_class)
+
+                # Instantiate formatter with config
+                self._formatter = formatter_plugin_class(formatter_config.get("config", {}))
+                print(f"  Formatter: {self._formatter.name} (plugin: {formatter_class})")
+                return
+
+            except (ImportError, AttributeError) as e:
+                print(f"  Warning: Failed to load formatter plugin {formatter_class}: {e}")
+                print(f"  Falling back to default Markdown formatter")
+
+        # Default: Use MarkdownFormatter
+        from plugins.formatters.markdown_formatter import MarkdownFormatter
+        self._formatter = MarkdownFormatter()
+        print(f"  Formatter: {self._formatter.name} (default)")
+
     async def health_check(self) -> Dict[str, Any]:
         """Check health of domain services."""
         return {
@@ -238,9 +312,37 @@ class GenericDomain(Domain):
         """
         Select the best specialist for a query.
 
-        Uses confidence scoring to pick the specialist most capable
-        of handling the query.
+        Uses the router plugin to determine which specialist should handle the query.
+        For backward compatibility, returns the first specialist from the route result.
         """
+        if not self._specialists:
+            return None
+
+        # Use router if available
+        if self._router:
+            import asyncio
+            try:
+                # Try to get route result synchronously
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # If loop is running, we can't await - fall back to synchronous
+                    return self._get_specialist_sync(query)
+                else:
+                    # Run the async route method
+                    route_result = loop.run_until_complete(
+                        self._router.route(query, self._specialists)
+                    )
+                    if route_result.specialist_ids:
+                        return self._specialists.get(route_result.specialist_ids[0])
+            except Exception:
+                # Fall back to synchronous method
+                pass
+
+        # Fallback to synchronous method
+        return self._get_specialist_sync(query)
+
+    def _get_specialist_sync(self, query: str) -> Optional[Specialist]:
+        """Synchronous fallback for specialist selection."""
         if not self._specialists:
             return None
 
@@ -263,6 +365,106 @@ class GenericDomain(Domain):
                 best_specialist = specialist
 
         return best_specialist
+
+    async def route_query(self, query: str, context: Optional[Dict[str, Any]] = None) -> RouteResult:
+        """
+        Route a query using the router plugin.
+
+        This is the preferred method for routing queries as it returns
+        full routing information including strategy and reasoning.
+
+        Args:
+            query: The user's query
+            context: Additional context for routing decisions
+
+        Returns:
+            RouteResult with specialist IDs and routing metadata
+        """
+        if not self._router:
+            # Fallback to default router
+            from plugins.routers.confidence_router import ConfidenceBasedRouter
+            self._router = ConfidenceBasedRouter()
+
+        return await self._router.route(query, self._specialists, context)
+
+    def get_router(self) -> Optional[RouterPlugin]:
+        """Get the router plugin instance."""
+        return self._router
+
+    def get_formatter(self) -> Optional[FormatterPlugin]:
+        """Get the default formatter plugin instance."""
+        return self._formatter
+
+    def get_formatter_for_type(self, format_type: str) -> Optional[FormatterPlugin]:
+        """
+        Get a formatter for a specific format type.
+
+        This allows runtime format overrides (e.g., API client requests JSON).
+
+        Args:
+            format_type: The format type (e.g., "json", "compact", "markdown")
+
+        Returns:
+            FormatterPlugin instance or None if format not supported
+        """
+        format_type = format_type.lower()
+
+        # Check if current formatter supports this type
+        if self._formatter and self._formatter.supports_format(format_type):
+            return self._formatter
+
+        # Otherwise, try to load the appropriate formatter
+        formatter_map = {
+            "json": ("plugins.formatters.json_formatter", "JSONFormatter"),
+            "json-compact": ("plugins.formatters.json_formatter", "CompactJSONFormatter"),
+            "compact": ("plugins.formatters.compact_formatter", "CompactFormatter"),
+            "terminal": ("plugins.formatters.compact_formatter", "CompactFormatter"),
+            "cli": ("plugins.formatters.compact_formatter", "CompactFormatter"),
+            "markdown": ("plugins.formatters.markdown_formatter", "MarkdownFormatter"),
+            "md": ("plugins.formatters.markdown_formatter", "MarkdownFormatter"),
+            "table": ("plugins.formatters.compact_formatter", "TableFormatter"),
+        }
+
+        if format_type in formatter_map:
+            module_path, class_name = formatter_map[format_type]
+            try:
+                module = importlib.import_module(module_path)
+                formatter_class = getattr(module, class_name)
+                return formatter_class()
+            except (ImportError, AttributeError):
+                pass
+
+        # Fallback to current formatter
+        return self._formatter
+
+    async def format_response(
+        self,
+        response_data: Dict[str, Any],
+        format_type: Optional[str] = None
+    ) -> FormattedResponse:
+        """
+        Format a response using the appropriate formatter.
+
+        Args:
+            response_data: The response data from a specialist
+            format_type: Optional format override (e.g., "json", "compact")
+
+        Returns:
+            FormattedResponse with formatted content
+        """
+        # Get formatter
+        if format_type:
+            formatter = self.get_formatter_for_type(format_type)
+        else:
+            formatter = self._formatter
+
+        if not formatter:
+            # Ultimate fallback
+            from plugins.formatters.markdown_formatter import MarkdownFormatter
+            formatter = MarkdownFormatter()
+
+        # Format the response
+        return formatter.format(response_data)
 
     def list_specialists(self) -> List[str]:
         """List all specialist IDs."""
