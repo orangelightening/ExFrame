@@ -118,6 +118,59 @@
   "categories": ["symmetry", "transformation", "relationship", "metric", "encoding", "logic", "detection"],
   "tags": ["binary", "bitwise", "xor", "algorithm", "math", "computer_science", "8-bit"],
 
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.related_pattern_enricher",
+      "class": "RelatedPatternEnricher",
+      "enabled": true,
+      "config": {
+        "max_related": 3,
+        "min_similarity": 0.3,
+        "use_tags": true,
+        "use_category": true,
+        "use_keywords": true
+      }
+    },
+    {
+      "module": "plugins.enrichers.example_expander_enricher",
+      "class": "ExampleExpanderEnricher",
+      "enabled": true,
+      "config": {
+        "max_examples": 5,
+        "generate_variations": true,
+        "add_edge_cases": true,
+        "add_explanations": true
+      }
+    },
+    {
+      "module": "plugins.enrichers.code_generator_enricher",
+      "class": "CodeGeneratorEnricher",
+      "enabled": true,
+      "config": {
+        "languages": ["python", "javascript"],
+        "max_examples": 2,
+        "include_tests": true,
+        "include_comments": true
+      }
+    },
+    {
+      "module": "plugins.enrichers.usage_stats_enricher",
+      "class": "UsageStatsEnricher",
+      "enabled": true,
+      "config": {
+        "simulate_data": true,
+        "include_ratings": true,
+        "include_variations": true
+      }
+    },
+    {
+      "module": "plugins.enrichers.usage_stats_enricher",
+      "class": "QualityScoreEnricher",
+      "enabled": true,
+      "config": {}
+    }
+  ],
+
   "ui_config": {
     "placeholder_text": "Ask about binary patterns, bitwise operations, or bit manipulation... (Press Enter to submit)",
     "example_queries": [

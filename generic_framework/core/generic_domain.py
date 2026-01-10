@@ -19,6 +19,7 @@ from core.knowledge_base import KnowledgeBase, KnowledgeBaseConfig
 from core.knowledge_base_plugin import KnowledgeBasePlugin
 from core.router_plugin import RouterPlugin, RouteResult
 from core.formatter_plugin import FormatterPlugin, FormattedResponse
+from core.enrichment_plugin import EnrichmentPlugin, EnrichmentContext
 from knowledge.json_kb import JSONKnowledgeBase
 import importlib
 
@@ -38,6 +39,7 @@ class GenericDomain(Domain):
         self._specialists: Dict[str, 'GenericSpecialist'] = {}
         self._router: Optional[RouterPlugin] = None
         self._formatter: Optional[FormatterPlugin] = None
+        self._enrichers: List[EnrichmentPlugin] = []
 
     @property
     def domain_id(self) -> str:
@@ -74,6 +76,9 @@ class GenericDomain(Domain):
 
         # Initialize formatter plugin
         self._initialize_formatter()
+
+        # Initialize enrichment plugins
+        self._initialize_enrichers()
 
         self._initialized = True
 
@@ -286,6 +291,40 @@ class GenericDomain(Domain):
         self._formatter = MarkdownFormatter()
         print(f"  Formatter: {self._formatter.name} (default)")
 
+    def _initialize_enrichers(self) -> None:
+        """
+        Initialize enrichment plugins from configuration.
+
+        Loads enrichment plugins from domain.json or uses defaults.
+        Enrichers run in sequence between specialist and formatter.
+        """
+        enrichers_config = self._domain_config.get("enrichers", [])
+
+        if not enrichers_config:
+            # No enrichers configured - that's fine
+            return
+
+        for enricher_config in enrichers_config:
+            if not enricher_config.get("enabled", True):
+                continue
+
+            try:
+                # Dynamically import the enricher plugin
+                module_path = enricher_config["module"]
+                class_name = enricher_config["class"]
+
+                module = importlib.import_module(module_path)
+                enricher_class = getattr(module, class_name)
+
+                # Instantiate enricher with config
+                enricher = enricher_class(enricher_config.get("config", {}))
+                self._enrichers.append(enricher)
+
+                print(f"  Enricher: {enricher.name} (plugin: {class_name})")
+
+            except (ImportError, AttributeError) as e:
+                print(f"  Warning: Failed to load enricher plugin {enricher_config.get('class')}: {e}")
+
     async def health_check(self) -> Dict[str, Any]:
         """Check health of domain services."""
         return {
@@ -420,9 +459,20 @@ class GenericDomain(Domain):
             "compact": ("plugins.formatters.compact_formatter", "CompactFormatter"),
             "terminal": ("plugins.formatters.compact_formatter", "CompactFormatter"),
             "cli": ("plugins.formatters.compact_formatter", "CompactFormatter"),
+            "ultra-compact": ("plugins.formatters.compact_formatter", "UltraCompactFormatter"),
+            "minimal": ("plugins.formatters.compact_formatter", "UltraCompactFormatter"),
+            "names-only": ("plugins.formatters.compact_formatter", "UltraCompactFormatter"),
             "markdown": ("plugins.formatters.markdown_formatter", "MarkdownFormatter"),
             "md": ("plugins.formatters.markdown_formatter", "MarkdownFormatter"),
             "table": ("plugins.formatters.compact_formatter", "TableFormatter"),
+            "tabular": ("plugins.formatters.compact_formatter", "TableFormatter"),
+            "html": ("plugins.formatters.html_formatter", "HTMLFormatter"),
+            "htm": ("plugins.formatters.html_formatter", "HTMLFormatter"),
+            "html-simple": ("plugins.formatters.html_formatter", "SimpleHTMLFormatter"),
+            "slack": ("plugins.formatters.slack_formatter", "SlackFormatter"),
+            "slack-blocks": ("plugins.formatters.slack_formatter", "SlackFormatter"),
+            "slack-md": ("plugins.formatters.slack_formatter", "SlackMarkdownFormatter"),
+            "slack-attachment": ("plugins.formatters.slack_formatter", "SlackAttachmentFormatter"),
         }
 
         if format_type in formatter_map:
@@ -445,6 +495,8 @@ class GenericDomain(Domain):
         """
         Format a response using the appropriate formatter.
 
+        Enrichment pipeline: Specialist → [Enrichers] → Formatter
+
         Args:
             response_data: The response data from a specialist
             format_type: Optional format override (e.g., "json", "compact")
@@ -452,6 +504,24 @@ class GenericDomain(Domain):
         Returns:
             FormattedResponse with formatted content
         """
+        # Run enrichment plugins before formatting
+        enriched_data = response_data
+        if self._enrichers:
+            # Create enrichment context
+            context = EnrichmentContext(
+                domain_id=self.domain_id,
+                specialist_id=response_data.get("specialist_id", "unknown"),
+                query=response_data.get("query", ""),
+                knowledge_base=self._knowledge_base,
+                metadata={"format_type": format_type or "default"}
+            )
+
+            # Run each enricher in sequence
+            for enricher in self._enrichers:
+                # Skip enricher if format not supported
+                if enricher.supports_format(format_type or "markdown"):
+                    enriched_data = await enricher.enrich(enriched_data, context)
+
         # Get formatter
         if format_type:
             formatter = self.get_formatter_for_type(format_type)
@@ -463,8 +533,8 @@ class GenericDomain(Domain):
             from plugins.formatters.markdown_formatter import MarkdownFormatter
             formatter = MarkdownFormatter()
 
-        # Format the response
-        return formatter.format(response_data)
+        # Format the enriched response
+        return formatter.format(enriched_data)
 
     def list_specialists(self) -> List[str]:
         """List all specialist IDs."""

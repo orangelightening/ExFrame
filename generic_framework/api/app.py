@@ -2,8 +2,8 @@
 Generic Framework API - FastAPI backend for web interface.
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Response
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -35,6 +35,7 @@ class QueryRequest(BaseModel):
     domain: Optional[str] = "llm_consciousness"
     context: Optional[Dict[str, Any]] = None
     include_trace: Optional[bool] = False
+    format: Optional[str] = None  # Output format: json, markdown, compact, table, etc.
 
 
 class SpecialistConfig(BaseModel):
@@ -431,10 +432,86 @@ async def get_pattern_detail(domain_id: str, pattern_id: str) -> Dict[str, Any]:
     return pattern
 
 
-@app.post("/api/query", response_model=QueryResponse)
-async def process_query(request: QueryRequest) -> QueryResponse:
-    """Process a user query."""
-    domain_id = request.domain or "llm_consciousness"
+@app.post("/api/query")
+async def process_query(request: QueryRequest) -> Response:
+    """
+    Process a user query (POST method).
+
+    Supports multiple output formats via the `format` parameter:
+    - None/missing: Default structured JSON response (backward compatible)
+    - "json": Structured JSON with full pattern details
+    - "markdown": Human-readable Markdown format
+    - "compact": Terminal-friendly compact format
+    - "table": Tabular format
+    - "json-compact": Minified JSON
+    - "ultra-compact": Pattern names only
+
+    Examples:
+        curl -X POST http://localhost:3000/api/query \\
+          -H "Content-Type: application/json" \\
+          -d '{"query": "What is XOR?", "domain": "binary_symmetry", "format": "json"}'
+
+        curl -X POST "http://localhost:3000/api/query" \\
+          -H "Content-Type: application/json" \\
+          -d '{"query": "What is XOR?", "domain": "binary_symmetry", "format": "markdown"}'
+    """
+    return await _process_query_impl(
+        query=request.query,
+        domain_id=request.domain,
+        context=request.context,
+        include_trace=request.include_trace,
+        format_type=request.format
+    )
+
+
+@app.get("/api/query")
+async def process_query_get(
+    query: str,
+    domain: Optional[str] = "llm_consciousness",
+    format: Optional[str] = None,
+    include_trace: Optional[bool] = False
+) -> Response:
+    """
+    Process a user query (GET method).
+
+    Easier to use from browsers and command line without POST body.
+    Format can be specified as query parameter.
+
+    Examples:
+        # Markdown format
+        curl "http://localhost:3000/api/query?query=What+is+XOR?&domain=binary_symmetry&format=markdown"
+
+        # JSON format
+        curl "http://localhost:3000/api/query?query=What+is+XOR?&domain=binary_symmetry&format=json"
+
+        # Compact format
+        curl "http://localhost:3000/api/query?query=What+is+XOR?&domain=binary_symmetry&format=compact"
+
+        # Default format
+        curl "http://localhost:3000/api/query?query=What+is+XOR?&domain=binary_symmetry"
+    """
+    return await _process_query_impl(
+        query=query,
+        domain_id=domain,
+        context=None,
+        include_trace=include_trace,
+        format_type=format
+    )
+
+
+async def _process_query_impl(
+    query: str,
+    domain_id: Optional[str],
+    context: Optional[Dict[str, Any]],
+    include_trace: Optional[bool],
+    format_type: Optional[str]
+) -> Response:
+    """
+    Internal implementation for query processing.
+
+    Used by both GET and POST endpoints.
+    """
+    domain_id = domain_id or "llm_consciousness"
 
     if domain_id not in engines:
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
@@ -442,12 +519,62 @@ async def process_query(request: QueryRequest) -> QueryResponse:
     engine = engines[domain_id]
 
     try:
+        # Process the query
         result = await engine.process_query(
-            request.query,
-            request.context,
-            include_trace=request.include_trace
+            query,
+            context,
+            include_trace=include_trace
         )
-        return QueryResponse(**result)
+
+        # If format is specified, use formatter and return formatted response
+        if format_type:
+            # Prepare response data for formatter
+            response_data = {
+                "query": result.get("query", query),
+                "patterns": result.get("patterns_used", []),  # Note: engine returns pattern IDs
+                "specialist_id": result.get("specialist", "unknown"),
+                "confidence": result.get("confidence", 0.0),
+                "raw_answer": result.get("response", ""),
+                "domain_id": domain_id,
+                "timestamp": result.get("timestamp", datetime.utcnow().isoformat()),
+                "processing_time_ms": result.get("processing_time_ms")
+            }
+
+            # Get patterns from knowledge base for formatter
+            domain = engine.domain
+            if hasattr(domain, '_knowledge_base'):
+                kb = domain._knowledge_base
+                # Get full pattern objects
+                patterns_with_details = []
+                pattern_ids = result.get("patterns_used", [])
+                for pid in pattern_ids:
+                    pattern = await kb.get_by_id(pid)
+                    if pattern:
+                        patterns_with_details.append(pattern)
+                response_data["patterns"] = patterns_with_details
+
+            # Format the response
+            formatted = await domain.format_response(response_data, format_type=format_type)
+
+            # Determine Content-Type based on formatter
+            content_type = f"{formatted.mime_type}; charset={formatted.encoding}"
+
+            # Return appropriate response type based on MIME type
+            if formatted.mime_type == "application/json":
+                return JSONResponse(
+                    content=formatted.content,
+                    media_type=content_type
+                )
+            else:
+                # For markdown, text, etc.
+                return PlainTextResponse(
+                    content=formatted.content,
+                    media_type=content_type
+                )
+        else:
+            # No format specified - return default structured JSON response (backward compatible)
+            return QueryResponse(**result)
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
