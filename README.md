@@ -176,25 +176,47 @@ See [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md) for:
 
 ### Prerequisites
 
-- Docker & Docker Compose
-- OpenAI API key (or compatible LLM like GLM)
+**IMPORTANT**: You must use the official Docker Engine. The snap version of Docker has known issues with bind mounts that will prevent this application from working correctly.
+
+Check your Docker installation:
+```bash
+# Check if you have snap Docker (BAD - will not work properly)
+which snap | grep -q docker && snap list docker
+
+# If snap Docker is installed, remove it first:
+sudo snap remove docker
+
+# Install official Docker Engine:
+curl -fsSL https://get.docker.com | sh
+
+# Add your user to docker group:
+sudo usermod -aG docker $USER
+# Log out and back in for this to take effect
+```
+
+**Additional Requirements:**
+- OpenAI API key (or compatible LLM like GLM) - optional, for LLM enrichment features
 
 ### Installation
 
 ```bash
-# 1. Clone and navigate
-git clone <repository-url>
-cd eeframe
+# 1. Clone the repository
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
 
 # 2. Configure environment (optional)
 cp .env.example .env
-# Edit .env with your API keys
+# Edit .env with your API keys if using LLM features
 
 # 3. Start the application
-docker-compose up -d
+# NOTE: Use "docker compose" (space), NOT "docker-compose" (hyphen)
+docker compose up -d
 
-# 4. Wait for health check to pass
-docker-compose ps
+# 4. Verify containers are running
+docker compose ps
+
+# 5. Check the logs if needed
+docker compose logs -f eeframe-app
 ```
 
 **Access URLs**:
@@ -707,30 +729,83 @@ EEFrame includes 7 production domains demonstrating the plugin architecture:
 
 ## Troubleshooting
 
-### Patterns Not Showing
+### "docker-compose: command not found" or "no configuration file provided"
 
-1. Check if patterns exist in `data/patterns/{domain}/`
-2. Verify domain is loaded: `curl http://localhost:3000/api/domains`
-3. Check container logs: `docker logs eeframe-app`
+**Cause**: You're using the old `docker-compose` (v1) syntax. This project requires Docker Compose v2.
+
+**Solution**: Use `docker compose` (with a space, not a hyphen):
+```bash
+# WRONG (old v1 syntax):
+docker-compose up -d
+
+# CORRECT (v2 syntax):
+docker compose up -d
+```
+
+### Patterns Not Showing / Empty Pattern Directory
+
+**Cause**: Docker snap has known bind mount bugs that cause mounted directories to appear empty inside containers.
+
+**Solution**: Uninstall snap Docker and install official Docker Engine:
+```bash
+# Remove snap Docker
+sudo snap remove docker
+
+# Install official Docker
+curl -fsSL https://get.docker.com | sh
+
+# Restart containers
+docker compose down
+docker compose up -d
+```
 
 ### Container Not Starting
 
-1. Check port conflicts: `lsof -ti:3000`
-2. Check container logs: `docker-compose logs eeframe-app`
+1. Check port conflicts: `sudo lsof -ti:3000`
+2. Check container logs: `docker compose logs eeframe-app`
 3. Verify Docker is running: `docker ps`
+
+### "Address already in use" error
+
+**Cause**: Port 3000 is already in use (possibly by a previous container).
+
+**Solution**:
+```bash
+# Kill any process using port 3000
+sudo lsof -ti:3000 | xargs sudo kill -9
+
+# Restart containers
+docker compose down
+docker compose up -d
+```
+
+### Frontend Shows "Generic Assistant Framework - Frontend not found"
+
+**Cause**: Frontend files not accessible in container.
+
+**Solution**: Check if frontend is mounted correctly:
+```bash
+# Check frontend mount in container
+docker exec eeframe-app ls -la /app/frontend/
+
+# If empty, rebuild container:
+docker compose down
+docker compose build --no-cache eeframe-app
+docker compose up -d
+```
 
 ### Permission Errors
 
 ```bash
 # Fix pattern directory permissions
-chmod -R 777 data/patterns/
+chmod -R 755 data/patterns/
 ```
 
 ### API Returns 404
 
 1. Verify health endpoint works: `curl http://localhost:3000/health`
 2. Check if routes are loaded: Visit `http://localhost:3000/docs`
-3. Restart container: `docker-compose restart eeframe-app`
+3. Restart container: `docker compose restart eeframe-app`
 
 ---
 
