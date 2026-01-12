@@ -1800,9 +1800,19 @@
 
                 async loadAllDomains() {
                     try {
-                        const res = await fetch('/api/admin/domains');
+                        // Get list of domains from the active engines
+                        const res = await fetch('/api/domains');
                         const data = await res.json();
-                        this.allDomains = data.domains || [];
+                        const domainIds = data.domains || [];
+
+                        // Fetch details for each domain
+                        this.allDomains = await Promise.all(
+                            domainIds.map(async (id) => {
+                                const detailRes = await fetch(`/api/domains/${id}`);
+                                const detail = await detailRes.json();
+                                return detail;
+                            })
+                        );
                     } catch (error) {
                         console.error('Failed to load domains:', error);
                         this.allDomains = [];
