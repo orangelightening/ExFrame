@@ -22,6 +22,13 @@ trace_logger = logging.getLogger('query_trace')
 trace_logger.addHandler(trace_handler)
 trace_logger.setLevel(logging.INFO)
 
+# Setup LLM usage logging for risk tracking
+llm_handler = logging.FileHandler(TRACE_DIR / "llm_usage.log")
+llm_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+llm_logger = logging.getLogger('llm_usage')
+llm_logger.addHandler(llm_handler)
+llm_logger.setLevel(logging.INFO)
+
 from core.domain import Domain
 from core.knowledge_base import KnowledgeBaseConfig
 from knowledge.json_kb import JSONKnowledgeBase
@@ -143,7 +150,10 @@ class GenericAssistantEngine:
         # Step 3: Process query through specialist or general processing
         step3_time = datetime.utcnow()
         if specialist:
-            response_data = await specialist.process_query(query, context)
+            # Pass pre-found patterns to specialist via context
+            specialist_context = context or {}
+            specialist_context['prematched_patterns'] = patterns
+            response_data = await specialist.process_query(query, specialist_context)
             response = specialist.format_response(response_data)
             specialist_id = specialist.specialist_id
             processing_method = 'specialist'
@@ -164,6 +174,66 @@ class GenericAssistantEngine:
                 'patterns_used': len(response_data.get('patterns', patterns))
             })
 
+        # Step 3.5: Apply enrichers (LLM fallback, quality scores, etc.)
+        enrich_time = datetime.utcnow()
+        # Prepare response data for enrichers
+        enricher_input = {
+            'query': query,
+            'patterns': patterns,
+            'response': response,
+            'confidence': 0.0,  # Will be calculated later
+            'specialist_id': specialist_id,
+            'processing_method': processing_method
+        }
+
+        # Initialize enriched_data to avoid undefined variable
+        enriched_data = {}
+
+        # Call domain enrichers
+        try:
+            enriched_data = await self.domain.enrich(enricher_input)
+
+            print(f"  DEBUG: After enrichment - llm_used: {enriched_data.get('llm_used')}, keys: {list(enriched_data.keys())}")
+
+            # Update response and result with enriched data
+            if enriched_data.get('llm_used'):
+                print(f"  DEBUG: LLM was used, checking response key...")
+                # LLM was used as fallback or enhancement
+                if 'llm_fallback' in enriched_data:
+                    # LLM fallback response
+                    print(f"  DEBUG: Using llm_fallback as response")
+                    response = enriched_data['llm_fallback']
+                    result_key = 'llm_fallback'
+                elif 'llm_enhancement' in enriched_data:
+                    # LLM enhancement to existing response
+                    print(f"  DEBUG: Using llm_enhancement")
+                    response = enriched_data.get('response', response)
+                    if enriched_data.get('llm_enhancement'):
+                        response += f"\n\n---\n\n{enriched_data['llm_enhancement']}"
+                    result_key = 'llm_enhancement'
+                elif 'llm_response' in enriched_data:
+                    # LLM replaced response
+                    print(f"  DEBUG: Using llm_response as response")
+                    response = enriched_data['llm_response']
+                    result_key = 'llm_response'
+                else:
+                    print(f"  DEBUG: llm_used=True but no response key found!")
+
+                # Add LLM metadata to result
+                enricher_input['llm_used'] = True
+                if result_key:
+                    enricher_input[result_key] = enriched_data.get(result_key)
+            else:
+                # No LLM used, but check if enricher modified response
+                if 'response' in enriched_data:
+                    response = enriched_data['response']
+
+        except Exception as e:
+            print(f"Warning: Enrichment failed: {e}")
+            import traceback
+            traceback.print_exc()
+            # Continue without enrichment if it fails
+
         # Step 4: Record query for learning
         await self._record_query(query, response, specialist_id, patterns)
 
@@ -182,6 +252,50 @@ class GenericAssistantEngine:
             'processing_time_ms': int((end_time - start_time).total_seconds() * 1000)
         }
 
+        # Add enriched data to result
+        if enriched_data.get('llm_used'):
+            result['llm_used'] = True
+            for key in ['llm_fallback', 'llm_enhancement', 'llm_response']:
+                if key in enriched_data:
+                    result[key] = enriched_data[key]
+
+            # Reduce confidence when LLM is used - AI-generated content is less reliable
+            # Set to max 0.7 (70%) to indicate uncertainty and risk
+            result['confidence'] = min(confidence * 0.7, 0.7)
+            print(f"  DEBUG: Reduced confidence from {confidence:.2f} to {result['confidence']:.2f} due to LLM usage")
+
+            # Log LLM usage for risk tracking
+            llm_log_entry = {
+                'timestamp': end_time.isoformat(),
+                'domain': self.domain.domain_id,
+                'query': query,
+                'specialist': specialist_id,
+                'patterns_found': len(patterns),
+                'confidence': confidence,
+                'llm_used': True,
+                'llm_response_type': [k for k in ['llm_fallback', 'llm_enhancement', 'llm_response'] if k in enriched_data],
+                'processing_time_ms': result['processing_time_ms']
+            }
+            llm_logger.info(json.dumps(llm_log_entry))
+
+            # Save LLM response as candidate pattern for future learning
+            llm_response_text = None
+            if 'llm_fallback' in enriched_data:
+                llm_response_text = enriched_data['llm_fallback']
+            elif 'llm_enhancement' in enriched_data:
+                llm_response_text = enriched_data['llm_enhancement']
+            elif 'llm_response' in enriched_data:
+                llm_response_text = enriched_data['llm_response']
+
+            if llm_response_text:
+                await self._save_candidate_pattern(
+                    query=query,
+                    llm_response=llm_response_text,
+                    specialist_id=specialist_id,
+                    patterns_found=len(patterns),
+                    confidence=result['confidence']  # Use reduced confidence
+                )
+
         # Add trace if requested
         if include_trace and trace:
             trace['end_time'] = end_time.isoformat()
@@ -194,6 +308,17 @@ class GenericAssistantEngine:
             trace['confidence'] = confidence
             trace['processing_method'] = processing_method
             trace_logger.info(json.dumps(trace))
+
+        # Add AI-generated flag for risk tracking
+        # Flag as AI-generated if LLM was used OR if any matched pattern is a candidate
+        is_ai_generated = result.get('llm_used', False)
+        if not is_ai_generated:
+            # Check if any matched pattern is a candidate
+            for pattern in patterns:
+                if pattern.get('status') == 'candidate':
+                    is_ai_generated = True
+                    break
+        result['ai_generated'] = is_ai_generated
 
         return result
 
@@ -335,6 +460,109 @@ class GenericAssistantEngine:
                     )
                 except Exception:
                     pass  # Don't fail if recording fails
+
+    async def _save_candidate_pattern(
+        self,
+        query: str,
+        llm_response: str,
+        specialist_id: Optional[str],
+        patterns_found: int,
+        confidence: float
+    ) -> Optional[str]:
+        """
+        Save LLM response as a candidate pattern for later review.
+
+        This captures LLM-generated knowledge that can be promoted to certified patterns.
+        """
+        try:
+            # Check if a pattern with this exact query already exists
+            all_patterns = await self.knowledge_base.get_all_patterns()
+            for existing_pattern in all_patterns:
+                origin_query = existing_pattern.get("origin_query", "").lower().strip()
+                if origin_query == query.lower().strip():
+                    # Pattern exists with this query
+                    if existing_pattern.get("status") == "certified":
+                        # CERTIFIED patterns are sacred - don't overwrite them
+                        print(f"  ✓ Certified pattern exists for query: {query[:40]}... - NOT overwriting with LLM response")
+                        # Update usage count
+                        try:
+                            await self.knowledge_base.record_feedback(
+                                existing_pattern["id"],
+                                {"accessed": True}
+                            )
+                        except:
+                            pass
+                        return existing_pattern["id"]
+                    elif existing_pattern.get("status") == "candidate":
+                        # CANDIDATE patterns can be updated
+                        print(f"  ℹ Candidate already exists for query: {query[:40]}... - Updating usage")
+                        # Update usage count instead of creating duplicate
+                        try:
+                            await self.knowledge_base.record_feedback(
+                                existing_pattern["id"],
+                                {"accessed": True}
+                            )
+                        except:
+                            pass
+                        return existing_pattern["id"]
+
+            # Generate pattern from LLM response
+            now = datetime.utcnow()
+
+            # Extract a name from the query (first ~50 chars)
+            name = query[:50] + ("..." if len(query) > 50 else "")
+
+            # Count existing patterns to generate ID
+            existing_count = len(all_patterns)
+            pattern_id = f"{self.domain.domain_id}_candidate_{existing_count + 1:03d}"
+
+            candidate_pattern = {
+                "id": pattern_id,
+                "name": name,
+                "pattern_type": "candidate",
+                "description": f"Auto-generated from query: {query}",
+                "problem": query,  # The query that triggered the LLM
+                "solution": llm_response,  # The LLM's response
+                "steps": [],  # Could be parsed from response in future
+                "conditions": {},
+                "related_patterns": [],
+                "prerequisites": [],
+                "alternatives": [],
+                "confidence": 0.5,  # Default confidence for candidates
+                "sources": [],
+                "tags": ["candidate", "llm_generated"],
+                "examples": [query],  # Sample question from the query
+                "domain": self.domain.domain_id,
+                "created_at": now.isoformat(),
+                "updated_at": now.isoformat(),
+                "times_accessed": 0,
+                "user_rating": None,
+
+                # Candidate-specific metadata
+                "status": "candidate",
+                "origin": "llm_fallback",
+                "origin_query": query,
+                "generated_at": now.isoformat(),
+                "generated_by": "glm-4.7",  # Could be made configurable
+                "confidence_score": confidence,
+                "reviewed_by": None,
+                "reviewed_at": None,
+                "review_notes": None,
+                "usage_count": 0,
+                "user_feedback": []
+            }
+
+            # Save to knowledge base
+            saved_id = await self.knowledge_base.add_pattern(candidate_pattern)
+
+            print(f"  ✓ Saved candidate pattern: {saved_id} from query: {query[:40]}...")
+            return saved_id
+
+        except Exception as e:
+            print(f"  Warning: Failed to save candidate pattern: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
 
     async def get_domain_status(self) -> Dict[str, Any]:
         """Get status of the domain and engine."""

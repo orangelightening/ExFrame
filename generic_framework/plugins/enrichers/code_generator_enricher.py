@@ -216,25 +216,25 @@ class CodeGeneratorEnricher(EnrichmentPlugin):
             return_var = "value"
             return_type = "int" if language in ["java", "cpp"] else None
 
-        # Format function
+        # Format function (use string formatting to avoid template issues)
+        description_str = solution[:100]
+        body_str = body.strip()
+
         if language == "python":
-            return template["function"].format(
-                function_name=function_name,
-                params=params,
-                description=solution[:100],
-                body=body.strip(),
-                return_var=return_var
-            )
-        else:
+            return f"def {function_name}({params}):\n    \"\"\"{description_str}\"\"\"\n    {body_str}\n    return {return_var}"
+        elif language == "javascript":
+            return f"function {function_name}({params}) {{\n    // {description_str}\n    {body_str}\n    return {return_var};\n}}"
+        elif language == "java":
             return_type_str = return_type or "int"
-            return template["function"].format(
-                return_type=return_type_str,
-                function_name=function_name,
-                params=params,
-                description=solution[:100],
-                body=body.strip(),
-                return_var=return_var
-            )
+            return f"public static {return_type_str} {function_name}({params}) {{\n    // {description_str}\n    {body_str}\n    return {return_var};\n}}"
+        elif language == "cpp":
+            return_type_str = return_type or "int"
+            return f"{return_type_str} {function_name}({params}) {{\n    // {description_str}\n    {body_str}\n    return {return_var};\n}}"
+        elif language == "go":
+            return_type_str = return_type or "int"
+            return f"func {function_name}({params}) {return_type_str} {{\n    // {description_str}\n    {body_str}\n    return {return_var}\n}}"
+        else:
+            return f"# {description_str}\n{body_str}"
 
     def _to_python_line(self, line: str) -> str:
         """Convert pseudocode line to Python."""
@@ -314,9 +314,9 @@ class CodeGeneratorEnricher(EnrichmentPlugin):
         function_name = self._to_function_name(pattern_name, language)
 
         if language == "python":
-            return f"# Example usage\nresult = {function_name}(0x55, 0xFF)\nprint(f\"Result: {{result}}\")"
+            return f"# Example usage\nresult = {function_name}(0x55, 0xFF)\nprint(f\"Result: {{{{result}}}}\")"
         elif language == "javascript":
-            return f"// Example usage\nconst result = {function_name}(0x55, 0xFF);\nconsole.log(`Result: ${result}`);"
+            return f"// Example usage\nconst result = {function_name}(0x55, 0xFF);\nconsole.log(`Result: ${{result}}`);"
         elif language == "java":
             return f"// Example usage\nint result = {function_name}(0x55, 0xFF);\nSystem.out.println(\"Result: \" + result);"
         elif language == "cpp":

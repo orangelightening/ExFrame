@@ -1,87 +1,84 @@
 import { useQuery } from '@tanstack/react-query';
-import api from '../services/api';
+import { domainsAPI } from '../services/api';
 import { Link } from 'react-router-dom';
 
 function Dashboard() {
-  const { data: domains } = useQuery({
+  const { data: domainsData } = useQuery({
     queryKey: ['domains'],
-    queryFn: () => api.getDomains(),
+    queryFn: () => domainsAPI.listDomains(),
   });
 
-  const totalPatterns = domains?.domains?.reduce((sum, d) => sum + d.pattern_count, 0) || 0;
+  // Get pattern counts from the universe API
+  const { data: universeData } = useQuery({
+    queryKey: ['universes'],
+    queryFn: () => fetch('/api/universes').then(r => r.json()),
+  });
+
+  const totalPatterns = universeData?.universes?.[0]?.total_patterns || 0;
+  const domainCount = universeData?.universes?.[0]?.domain_count || 0;
+  const domains = domainsData?.domains || [];
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
-        <p className="text-gray-600 mt-1">Overview of the expertise scanner system</p>
-      </div>
-
+    <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-3xl font-bold text-blue-600">{domains?.domains?.length || 0}</div>
-          <div className="text-gray-600 mt-1">Domains</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="card">
+          <div className="text-3xl font-bold text-blue-400">{domainCount}</div>
+          <div className="text-gray-400 mt-1">Domains</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-3xl font-bold text-green-600">{totalPatterns}</div>
-          <div className="text-gray-600 mt-1">Total Patterns</div>
+        <div className="card">
+          <div className="text-3xl font-bold text-green-400">{totalPatterns}</div>
+          <div className="text-gray-400 mt-1">Total Patterns</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-3xl font-bold text-purple-600">0</div>
-          <div className="text-gray-600 mt-1">Universal Patterns</div>
+        <div className="card">
+          <div className="text-3xl font-bold text-purple-400">0</div>
+          <div className="text-gray-400 mt-1">Universal Patterns</div>
         </div>
       </div>
 
       {/* Domains */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b">
-          <h3 className="text-lg font-semibold">Domains</h3>
-        </div>
-        <div className="p-6">
-          {domains?.domains?.length === 0 ? (
-            <p className="text-gray-500">No domains configured yet.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {domains?.domains?.map((domain) => (
-                <Link
-                  key={domain.id}
-                  to={`/patterns?domain=${domain.id}`}
-                  className="block p-4 border rounded-lg hover:border-blue-500 hover:shadow-md transition"
-                >
-                  <h4 className="font-semibold text-lg">{domain.name}</h4>
-                  <p className="text-gray-600">{domain.pattern_count} patterns</p>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="card">
+        <h3 className="text-lg font-semibold text-gray-100 mb-4">Domains</h3>
+        {domains.length === 0 ? (
+          <p className="text-gray-400">No domains configured yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {domains.map((domain) => (
+              <Link
+                key={domain}
+                to={`/patterns?domain=${domain}`}
+                className="block p-4 rounded-lg bg-gray-700/50 border border-gray-600 hover:border-primary-500 hover:bg-gray-700 transition"
+              >
+                <h4 className="font-semibold text-lg text-gray-100">{domain}</h4>
+                <p className="text-gray-400">View patterns</p>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-8 bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b">
-          <h3 className="text-lg font-semibold">Quick Actions</h3>
-        </div>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="card">
+        <h3 className="text-lg font-semibold text-gray-100 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Link
             to="/ingestion"
-            className="flex items-center p-4 border rounded-lg hover:bg-blue-50 transition"
+            className="flex items-center p-4 rounded-lg bg-gray-700/50 border border-gray-600 hover:bg-gray-700 transition"
           >
             <span className="text-2xl mr-3">📥</span>
             <div>
-              <div className="font-semibold">Ingest Content</div>
-              <div className="text-sm text-gray-600">Add patterns from URLs or text</div>
+              <div className="font-semibold text-gray-100">Ingest Content</div>
+              <div className="text-sm text-gray-400">Add patterns from URLs or text</div>
             </div>
           </Link>
           <Link
             to="/domains"
-            className="flex items-center p-4 border rounded-lg hover:bg-purple-50 transition"
+            className="flex items-center p-4 rounded-lg bg-gray-700/50 border border-gray-600 hover:bg-gray-700 transition"
           >
             <span className="text-2xl mr-3">🔍</span>
             <div>
-              <div className="font-semibold">Explore Domains</div>
-              <div className="text-sm text-gray-600">Browse patterns by domain</div>
+              <div className="font-semibold text-gray-100">Explore Domains</div>
+              <div className="text-sm text-gray-400">Browse patterns by domain</div>
             </div>
           </Link>
         </div>

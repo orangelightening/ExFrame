@@ -66,15 +66,19 @@ class GeneralistPlugin(SpecialistPlugin):
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Process the query."""
-        # Search across all configured categories (or all if none specified)
-        if self.categories:
-            all_patterns = []
-            for category in self.categories:
-                patterns = await self.kb.search(query, category=category, limit=5)
-                all_patterns.extend(patterns)
+        # Use prematched patterns from engine if available (more efficient)
+        if context and 'prematched_patterns' in context:
+            all_patterns = context['prematched_patterns']
         else:
-            # Search all patterns if no categories specified
-            all_patterns = await self.kb.search(query, limit=10)
+            # Search across all configured categories (or all if none specified)
+            if self.categories:
+                all_patterns = []
+                for category in self.categories:
+                    patterns = await self.kb.search(query, category=category, limit=5)
+                    all_patterns.extend(patterns)
+            else:
+                # Search all patterns if no categories specified
+                all_patterns = await self.kb.search(query, limit=10)
 
         # Deduplicate
         seen = set()

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/Layout';
+import { UniverseProvider } from './contexts/UniverseContext';
 
 // Generic Framework Pages
 import Dashboard from './pages/Dashboard';
@@ -18,6 +19,9 @@ import PatternDetail from './pages/PatternDetail';
 import Ingestion from './pages/Ingestion';
 import BatchIngestion from './pages/BatchIngestion';
 
+// Universe Management
+import Universes from './pages/Universes';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -31,17 +35,22 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
+      <UniverseProvider>
+        <Router>
         <Routes>
           <Route path="/" element={<Layout />}>
+            {/* Assistant - Default landing page */}
+            <Route index element={<Assistant />} />
+
             {/* Dashboard */}
-            <Route index element={<Dashboard />} />
-            
+            <Route path="dashboard" element={<Dashboard />} />
+
             {/* Generic Framework Routes */}
             <Route path="assistant" element={<Assistant />} />
             <Route path="knowledge" element={<KnowledgeBase />} />
             <Route path="diagnostics" element={<Diagnostics />} />
             <Route path="traces" element={<Traces />} />
+            <Route path="universes" element={<Universes />} />
             
             {/* Pattern Management Routes (from Expertise Scanner) */}
             <Route path="domains" element={<Domains />} />
@@ -56,6 +65,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
+      </UniverseProvider>
     </QueryClientProvider>
   );
 }

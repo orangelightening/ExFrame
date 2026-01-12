@@ -16,6 +16,10 @@ Available enrichers:
 - TrendingEnricher: Add trending info
 - FeedbackEnricher: Add user feedback
 - QualityScoreEnricher: Calculate quality scores
+- LLMEnricher: Use LLM to enhance responses
+- LLMFallbackEnricher: LLM as fallback for low-confidence queries
+- LLMSummarizerEnricher: Summarize multiple patterns
+- LLMExplanationEnricher: Add LLM explanations to patterns
 """
 
 from plugins.enrichers.related_pattern_enricher import (
@@ -38,6 +42,12 @@ from plugins.enrichers.usage_stats_enricher import (
     FeedbackEnricher,
     QualityScoreEnricher
 )
+from plugins.enrichers.llm_enricher import (
+    LLMEnricher,
+    LLMFallbackEnricher,
+    LLMSummarizerEnricher,
+    LLMExplanationEnricher
+)
 
 __all__ = [
     "RelatedPatternEnricher",
@@ -52,4 +62,8 @@ __all__ = [
     "TrendingEnricher",
     "FeedbackEnricher",
     "QualityScoreEnricher",
+    "LLMEnricher",
+    "LLMFallbackEnricher",
+    "LLMSummarizerEnricher",
+    "LLMExplanationEnricher",
 ]

@@ -87,18 +87,23 @@ class BitwiseMasterPlugin(SpecialistPlugin):
 
         Search for relevant patterns and synthesize an answer.
         """
-        # Search across all our categories
-        all_patterns = []
-        for category in self.categories:
-            patterns = await self.kb.search(query, category=category, limit=5)
-            all_patterns.extend(patterns)
+        # Use prematched patterns from engine if available (more efficient)
+        if context and 'prematched_patterns' in context:
+            all_patterns = context['prematched_patterns']
+        else:
+            # Fall back to category-based search (legacy behavior)
+            all_patterns = []
+            for category in self.categories:
+                patterns = await self.kb.search(query, category=category, limit=5)
+                all_patterns.extend(patterns)
 
         # Deduplicate by pattern_id
         seen = set()
         unique_patterns = []
         for pattern in all_patterns:
-            if pattern.get("pattern_id") not in seen:
-                seen.add(pattern.get("pattern_id"))
+            pattern_id = pattern.get("pattern_id") or pattern.get("id")
+            if pattern_id and pattern_id not in seen:
+                seen.add(pattern_id)
                 unique_patterns.append(pattern)
 
         return {

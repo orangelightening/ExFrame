@@ -72,6 +72,20 @@ class JSONFormatter(FormatterPlugin):
         if self.include_raw_answer and "raw_answer" in response_data:
             structured["raw_answer"] = response_data["raw_answer"]
 
+        # Add LLM enrichment fields if available
+        if response_data.get("llm_used"):
+            structured["llm_used"] = True
+        if "llm_response" in response_data:
+            structured["llm_response"] = response_data["llm_response"]
+        if "llm_fallback" in response_data:
+            structured["llm_fallback"] = response_data["llm_fallback"]
+        if "llm_enhancement" in response_data:
+            structured["llm_enhancement"] = response_data["llm_enhancement"]
+        if "llm_summary" in response_data:
+            structured["llm_summary"] = response_data["llm_summary"]
+        if "llm_explanation" in response_data:
+            structured["llm_explanation"] = response_data["llm_explanation"]
+
         # Add aggregation info for multi-specialist
         aggregation = response_data.get("aggregation_strategy")
         if aggregation:

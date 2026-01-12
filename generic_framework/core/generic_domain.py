@@ -291,6 +291,30 @@ class GenericDomain(Domain):
         self._formatter = MarkdownFormatter()
         print(f"  Formatter: {self._formatter.name} (default)")
 
+    def _add_default_llm_fallback(self) -> None:
+        """
+        Add default LLM fallback enricher for all domains.
+
+        This ensures every domain has LLM fallback capability when pattern matching fails.
+        """
+        try:
+            from plugins.enrichers.llm_enricher import LLMFallbackEnricher
+
+            # Default config for all domains
+            default_config = {
+                "mode": "fallback",
+                "min_confidence": 0.30,
+                "model": "glm-4.7",
+                "max_patterns": 3
+            }
+
+            enricher = LLMFallbackEnricher(default_config)
+            self._enrichers.append(enricher)
+            print(f"  Enricher: {enricher.name} (default LLM fallback)")
+
+        except ImportError as e:
+            print(f"  Warning: Could not load default LLM fallback: {e}")
+
     def _initialize_enrichers(self) -> None:
         """
         Initialize enrichment plugins from configuration.
@@ -300,12 +324,22 @@ class GenericDomain(Domain):
         """
         enrichers_config = self._domain_config.get("enrichers", [])
 
+        # DEBUG: Print what we found
+        print(f"  DEBUG: Domain {self.domain_id} - enrichers in config: {len(enrichers_config)}")
+
         if not enrichers_config:
-            # No enrichers configured - that's fine
+            # No enrichers configured - add default LLM fallback
+            print(f"  No enrichers configured - adding default LLM fallback")
+            self._add_default_llm_fallback()
             return
 
-        for enricher_config in enrichers_config:
+        # Load configured enrichers
+        has_llm_fallback = False
+        for idx, enricher_config in enumerate(enrichers_config):
+            print(f"  DEBUG: Processing enricher {idx}: enabled={enricher_config.get('enabled', True)}, class={enricher_config.get('class')}")
+
             if not enricher_config.get("enabled", True):
+                print(f"  DEBUG: Skipping disabled enricher {idx}")
                 continue
 
             try:
@@ -313,6 +347,7 @@ class GenericDomain(Domain):
                 module_path = enricher_config["module"]
                 class_name = enricher_config["class"]
 
+                print(f"  DEBUG: Importing {module_path}.{class_name}")
                 module = importlib.import_module(module_path)
                 enricher_class = getattr(module, class_name)
 
@@ -320,10 +355,70 @@ class GenericDomain(Domain):
                 enricher = enricher_class(enricher_config.get("config", {}))
                 self._enrichers.append(enricher)
 
+                # Check if this is an LLM fallback enricher
+                if class_name == 'LLMFallbackEnricher':
+                    has_llm_fallback = True
+
                 print(f"  Enricher: {enricher.name} (plugin: {class_name})")
 
             except (ImportError, AttributeError) as e:
                 print(f"  Warning: Failed to load enricher plugin {enricher_config.get('class')}: {e}")
+            except Exception as e:
+                print(f"  Warning: Unexpected error loading enricher {enricher_config.get('class')}: {e}")
+
+        # ALWAYS add LLM fallback as the last enricher if not already present
+        # This ensures all domains have LLM fallback when patterns are weak or missing
+        if not has_llm_fallback:
+            print(f"  No LLM fallback enricher found - adding default LLM fallback")
+            self._add_default_llm_fallback()
+
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: Optional['EnrichmentContext'] = None
+    ) -> Dict[str, Any]:
+        """
+        Apply all enrichers to the response data.
+
+        Enrichers run in sequence, each can modify the response data.
+        This is called after specialist processing but before formatting.
+
+        Args:
+            response_data: The response data to enrich
+            context: Optional enrichment context with domain info
+
+        Returns:
+            Enriched response data
+        """
+        print(f"  DEBUG: enrich() called for {self.domain_id}, enrichers: {len(self._enrichers)}")
+
+        if not self._enrichers:
+            # No enrichers configured
+            print(f"  DEBUG: No enrichers, returning original data")
+            return response_data
+
+        # Create enrichment context if not provided
+        if context is None:
+            from core.enrichment_plugin import EnrichmentContext
+            context = EnrichmentContext(
+                domain_id=self.domain_id,
+                specialist_id=response_data.get('specialist_id', ''),
+                query=response_data.get('query', ''),
+                knowledge_base=self._knowledge_base
+            )
+
+        # Apply each enricher in sequence
+        for idx, enricher in enumerate(self._enrichers):
+            try:
+                print(f"  DEBUG: Calling enricher {idx}: {enricher.name}")
+                response_data = await enricher.enrich(response_data, context)
+                print(f"  DEBUG: Enricher {idx} completed, llm_used: {response_data.get('llm_used', False)}")
+            except Exception as e:
+                print(f"  Warning: Enricher {enricher.name} failed: {e}")
+                # Continue with other enrichers even if one fails
+
+        print(f"  DEBUG: enrich() finished, returning data")
+        return response_data
 
     async def health_check(self) -> Dict[str, Any]:
         """Check health of domain services."""

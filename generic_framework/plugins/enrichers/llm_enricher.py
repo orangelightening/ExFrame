@@ -1,0 +1,460 @@
+"""
+LLM Enricher Plugin
+
+Uses Large Language Model to enhance responses.
+Perfect for summarization, explanation generation, and handling low-confidence matches.
+"""
+
+import sys
+import os
+from pathlib import Path
+from typing import Dict, List, Any, Optional
+import asyncio
+
+# Add framework to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from core.enrichment_plugin import EnrichmentPlugin, EnrichmentContext
+
+
+class LLMEnricher(EnrichmentPlugin):
+    """
+    Uses LLM to enhance pattern-based responses.
+
+    Use cases:
+    - Summarize multiple patterns into coherent answer
+    - Generate natural language explanations
+    - Fill gaps when pattern match is weak
+    - Provide conversational responses
+
+    Configuration:
+        - api_key: str - OpenAI/Anthropic API key (or env var OPENAI_API_KEY)
+        - base_url: str - API base URL (default: OpenAI)
+        - model: str - Model to use (default: gpt-4o-mini)
+        - min_confidence: float (default: 0.3) - Use LLM if pattern confidence below this
+        - max_patterns: int (default: 5) - Max patterns to include in LLM context
+        - mode: str (default: "enhance") - Mode: "enhance", "fallback", or "replace"
+    """
+
+    name = "LLM Enricher"
+
+    # Mode descriptions
+    MODE_ENHANCE = "enhance"  # Enhance existing patterns with LLM
+    MODE_FALLBACK = "fallback"  # Only use LLM if no good patterns
+    MODE_REPLACE = "replace"  # Use LLM for entire response
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        super().__init__(config)
+        self.api_key = self.config.get("api_key") or os.getenv("OPENAI_API_KEY")
+        self.base_url = self.config.get("base_url") or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        self.model = self.config.get("model", "gpt-4o-mini")
+        self.min_confidence = self.config.get("min_confidence", 0.3)
+        self.max_patterns = self.config.get("max_patterns", 5)
+        self.mode = self.config.get("mode", "enhance")
+
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext
+    ) -> Dict[str, Any]:
+        """Enrich response using LLM."""
+        patterns = response_data.get("patterns", [])
+        confidence = response_data.get("confidence", 0.0)
+
+        # Decide whether to use LLM based on mode and confidence
+        use_llm = self._should_use_llm(patterns, confidence)
+
+        if not use_llm:
+            # Skip LLM enrichment
+            return response_data
+
+        # Generate LLM enhancement
+        llm_response = await self._generate_llm_response(
+            response_data,
+            context,
+            patterns
+        )
+
+        # Merge based on mode
+        if self.mode == self.MODE_REPLACE:
+            # Replace entire response with LLM output
+            response_data["llm_response"] = llm_response
+            response_data["llm_used"] = True
+        elif self.mode == self.MODE_FALLBACK:
+            # LLM as fallback when patterns are weak
+            if confidence < self.min_confidence or not patterns:
+                response_data["llm_fallback"] = llm_response
+                response_data["llm_used"] = True
+        else:  # enhance
+            # Add LLM enhancement to existing response
+            response_data["llm_enhancement"] = llm_response
+            response_data["llm_used"] = True
+
+        return response_data
+
+    def _should_use_llm(self, patterns: List, confidence: float) -> bool:
+        """Decide whether to use LLM based on mode and confidence."""
+        if self.mode == self.MODE_REPLACE:
+            return True  # Always use LLM
+        elif self.mode == self.MODE_FALLBACK:
+            # Check if any patterns are CERTIFIED with high confidence
+            # If we have certified patterns, trust them and don't use LLM
+            for pattern in patterns:
+                if pattern.get("status") == "certified":
+                    # Found a certified pattern - trust it, don't use LLM
+                    print(f"  LLM Enricher: Skipping LLM, found certified pattern: {pattern.get('name')}")
+                    return False
+
+            # Only use LLM if patterns are weak or non-certified
+            return confidence < self.min_confidence or not patterns
+        else:  # enhance
+            # Use LLM to enhance, but still use patterns
+            return True
+
+    async def _generate_llm_response(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext,
+        patterns: List
+    ) -> str:
+        """Generate LLM response based on query and patterns."""
+        query = response_data.get("query", "")
+        specialist_id = response_data.get("specialist_id", "")
+
+        # Build prompt based on mode and available patterns
+        if patterns and self.mode != self.MODE_REPLACE:
+            prompt = self._build_enhancement_prompt(query, patterns, specialist_id, context)
+        else:
+            prompt = self._build_direct_prompt(query, context)
+
+        # Call LLM API
+        try:
+            response = await self._call_llm(prompt)
+            return response
+        except Exception as e:
+            # Return error message if LLM fails
+            return f"[LLM Error: {str(e)}]"
+
+    def _build_enhancement_prompt(
+        self,
+        query: str,
+        patterns: List,
+        specialist_id: str,
+        context: EnrichmentContext
+    ) -> str:
+        """Build prompt for LLM enhancement with pattern context."""
+        domain_id = context.domain_id
+
+        # Format patterns for prompt
+        pattern_text = ""
+        for i, pattern in enumerate(patterns[:self.max_patterns], 1):
+            name = pattern.get("name", "Unknown")
+            solution = pattern.get("solution", "")
+            description = pattern.get("description", "")
+            problem = pattern.get("problem", "")
+
+            pattern_text += f"""
+Pattern {i}: {name}
+- Problem: {problem}
+- Description: {description}
+- Solution: {solution}
+"""
+
+        prompt = f"""You are a helpful AI assistant for the {domain_id} domain.
+
+A user asked: "{query}"
+
+We found {len(patterns)} relevant pattern(s) from our knowledge base:
+
+{pattern_text}
+
+Your task:
+1. Synthesize a clear, helpful answer using these patterns
+2. Be conversational and natural
+3. If patterns don't fully answer the question, you can add general knowledge
+4. Keep it concise but complete
+5. Use markdown formatting for readability
+
+Provide your response:"""
+
+        return prompt
+
+    def _build_direct_prompt(self, query: str, context: EnrichmentContext) -> str:
+        """Build prompt for direct LLM response without pattern context."""
+        domain_id = context.domain_id
+
+        prompt = f"""You are a helpful AI assistant with expertise in {domain_id}.
+
+A user asked: "{query}"
+
+Please provide a helpful, accurate response. Use markdown formatting.
+
+Note: We don't have specific pattern matches for this query, so use your general knowledge while being careful not to hallucinate specific facts.
+
+Your response:"""
+
+        return prompt
+
+    async def _call_llm(self, prompt: str) -> str:
+        """Call LLM API."""
+        if not self.api_key:
+            return "[LLM not configured: No API key]"
+
+        # Use httpx for async HTTP requests
+        import httpx
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        # Determine if this is OpenAI or Anthropic-compatible API
+        is_anthropic = "anthropic" in self.base_url.lower()
+
+        if is_anthropic:
+            # Anthropic/GLM API format (uses user role only)
+            # For GLM models (glm-4.7, etc.), use model as-is
+            model_name = self.model if self.model.startswith("glm-") else self.model.replace("gpt-", "claude-")
+            payload = {
+                "model": model_name,
+                "max_tokens": 1024,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ]
+            }
+        else:
+            # OpenAI API format
+            payload = {
+                "model": self.model,
+                "max_tokens": 1024,
+                "messages": [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt}
+                ]
+            }
+
+        timeout = httpx.Timeout(30.0)
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            try:
+                # Use correct endpoint based on API type
+                if is_anthropic:
+                    # Anthropic-compatible API uses /v1/messages endpoint
+                    endpoint = f"{self.base_url.rstrip('/')}/v1/messages"
+                else:
+                    # OpenAI-compatible API uses /chat/completions endpoint
+                    endpoint = f"{self.base_url.rstrip('/')}/chat/completions"
+
+                response = await client.post(
+                    endpoint,
+                    headers=headers,
+                    json=payload
+                )
+                response.raise_for_status()
+                data = response.json()
+
+                # Debug: log raw response for troubleshooting
+                print(f"  DEBUG: LLM API response keys: {list(data.keys())}")
+                print(f"  DEBUG: LLM API response: {str(data)[:500]}")
+
+                # Parse response based on API format
+                # Try OpenAI format first (most common for proxy APIs)
+                try:
+                    # Handle Chinese API wrapper format (code, msg, success)
+                    if "code" in data and "success" in data:
+                        if data.get("success") or data.get("code") == 200 or data.get("code") == 0:
+                            # Try to find actual content in nested data
+                            if "data" in data:
+                                inner_data = data["data"]
+                                if isinstance(inner_data, dict):
+                                    if "choices" in inner_data:
+                                        return inner_data["choices"][0]["message"]["content"]
+                                    elif "content" in inner_data:
+                                        if isinstance(inner_data["content"], list):
+                                            return inner_data["content"][0].get("text", inner_data["content"][0])
+                                        return inner_data["content"]
+                                    # Direct string in data field
+                                    elif isinstance(inner_data, str):
+                                        return inner_data
+                                return str(inner_data)
+                            elif "msg" in data and isinstance(data["msg"], str) and len(data["msg"]) > 20:
+                                # Sometimes msg contains the actual response
+                                return data["msg"]
+                        return f"[LLM Error: API returned error - code: {data.get('code')}, msg: {data.get('msg')}]"
+
+                    if "choices" in data:
+                        return data["choices"][0]["message"]["content"]
+                    elif "content" in data and isinstance(data["content"], list):
+                        # Anthropic format or similar
+                        return data["content"][0]["text"]
+                    elif "content" in data and isinstance(data["content"], str):
+                        # Direct content field
+                        return data["content"]
+                    else:
+                        return f"[LLM Error: Unknown response format: {list(data.keys())}]"
+                except (KeyError, IndexError, TypeError) as e:
+                    return f"[LLM Error: Could not parse response - {str(e)}. Response keys: {list(data.keys())}]"
+            except httpx.HTTPStatusError as e:
+                # Try to get error details from response
+                try:
+                    error_data = e.response.json()
+                    error_msg = error_data.get('error', {}).get('message', str(error_data))
+                except:
+                    error_msg = e.response.text[:200] if e.response.text else "Unknown error"
+                return f"[LLM HTTP Error: {e.response.status_code} - {error_msg}]"
+            except httpx.RequestError as e:
+                return f"[LLM Request Error: {str(e)}]"
+            except Exception as e:
+                return f"[LLM Error: {str(e)}]"
+
+    def get_supported_formats(self) -> List[str]:
+        """Works with all formats - generates markdown text."""
+        return []
+
+
+class LLMFallbackEnricher(LLMEnricher):
+    """
+    LLM Enricher that only activates as a fallback.
+
+    Only uses LLM when pattern confidence is below threshold.
+    Useful for keeping fast pattern-based responses while having LLM safety net.
+    """
+
+    name = "LLM Fallback Enricher"
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        config = config or {}
+        config["mode"] = "fallback"
+        super().__init__(config)
+
+
+class LLMSummarizerEnricher(LLMEnricher):
+    """
+    LLM Enricher that summarizes multiple patterns.
+
+    When there are many patterns, uses LLM to create a coherent summary.
+    """
+
+    name = "LLM Summarizer Enricher"
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        config = config or {}
+        config["mode"] = "enhance"
+        super().__init__(config)
+        self.min_patterns_for_summary = self.config.get("min_patterns_for_summary", 3)
+
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext
+    ) -> Dict[str, Any]:
+        """Only summarize if there are multiple patterns."""
+        patterns = response_data.get("patterns", [])
+
+        if len(patterns) < self.min_patterns_for_summary:
+            # Not enough patterns to need summarization
+            return response_data
+
+        # Generate summary
+        summary = await self._generate_summary(
+            response_data.get("query", ""),
+            patterns,
+            context
+        )
+
+        response_data["llm_summary"] = summary
+        response_data["llm_used"] = True
+
+        return response_data
+
+    async def _generate_summary(
+        self,
+        query: str,
+        patterns: List,
+        context: EnrichmentContext
+    ) -> str:
+        """Generate LLM summary of patterns."""
+        domain_id = context.domain_id
+
+        # Build patterns summary
+        patterns_text = "\n\n".join([
+            f"- {p.get('name', 'Unknown')}: {p.get('solution', p.get('description', ''))[:100]}"
+            for p in patterns[:self.max_patterns]
+        ])
+
+        prompt = f"""Summarize these {len(patterns)} patterns for the query: "{query}"
+
+Patterns:
+{patterns_text}
+
+Provide a concise 2-3 sentence summary that synthesizes the key insights."""
+
+        try:
+            return await self._call_llm(prompt)
+        except Exception as e:
+            return f"[Summary failed: {str(e)}]"
+
+
+class LLMExplanationEnricher(LLMEnricher):
+    """
+    LLM Enricher that adds explanations to technical patterns.
+
+    Great for code patterns, algorithms, and technical concepts.
+    """
+
+    name = "LLM Explanation Enricher"
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        super().__init__(config)
+        self.add_examples = self.config.get("add_examples", True)
+        self.simplify_language = self.config.get("simplify_language", True)
+
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext
+    ) -> Dict[str, Any]:
+        """Add LLM explanations to patterns."""
+        patterns = response_data.get("patterns", [])
+
+        if not patterns:
+            return response_data
+
+        # Add explanation to top pattern
+        top_pattern = patterns[0]
+        explanation = await self._generate_explanation(
+            top_pattern,
+            context
+        )
+
+        response_data["llm_explanation"] = explanation
+        response_data["llm_used"] = True
+
+        return response_data
+
+    async def _generate_explanation(
+        self,
+        pattern: Dict,
+        context: EnrichmentContext
+    ) -> str:
+        """Generate LLM explanation for a pattern."""
+        name = pattern.get("name", "")
+        solution = pattern.get("solution", "")
+        problem = pattern.get("problem", "")
+
+        instruction = "Explain this in simple terms for a beginner." if self.simplify_language else "Explain how this works."
+
+        if self.add_examples:
+            instruction += " Include a practical example."
+
+        prompt = f"""{instruction}
+
+Pattern: {name}
+Problem: {problem}
+Solution: {solution}
+
+Your explanation:"""
+
+        try:
+            return await self._call_llm(prompt)
+        except Exception as e:
+            return f"[Explanation failed: {str(e)}]"

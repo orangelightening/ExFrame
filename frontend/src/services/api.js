@@ -326,6 +326,212 @@ export const graphAPI = {
   getStats: () => fetchAPI('/knowledge/graph/stats'),
 };
 
+/**
+ * Universe API
+ */
+export const universeAPI = {
+  /**
+   * List all universes
+   */
+  listUniverses: () => fetchAPI('/universes'),
+
+  /**
+   * Get universe info
+   */
+  getUniverse: (universeId) => fetchAPI(`/universes/${universeId}`),
+
+  /**
+   * Load a universe on-demand
+   */
+  loadUniverse: (universeId) =>
+    fetchAPI(`/universes/${universeId}/load`, { method: 'POST' }),
+
+  /**
+   * Create a new universe
+   */
+  createUniverse: (universeId, name, description = '', baseOn = null) =>
+    fetchAPI('/universes', {
+      method: 'POST',
+      body: JSON.stringify({
+        universe_id: universeId,
+        name,
+        description,
+        base_on: baseOn,
+      }),
+    }),
+
+  /**
+   * List domains in a universe
+   */
+  listDomains: (universeId) => fetchAPI(`/universes/${universeId}/domains`),
+
+  /**
+   * Query within a universe
+   */
+  query: (universeId, domainId, query, includeTrace = false) =>
+    fetchAPI(`/universes/${universeId}/domains/${domainId}/query`, {
+      method: 'POST',
+      body: JSON.stringify({
+        query,
+        domain: domainId,
+        include_trace: includeTrace,
+      }),
+    }),
+
+  /**
+   * Merge universes
+   */
+  mergeUniverses: (source, target, strategy = 'merge_patterns') =>
+    fetchAPI('/admin/universes/merge', {
+      method: 'POST',
+      body: JSON.stringify({
+        source,
+        target,
+        strategy,
+      }),
+    }),
+};
+
+/**
+ * Domains API
+ */
+export const domainsAPI = {
+  /**
+   * List all domains
+   */
+  listDomains: () => fetchAPI('/domains'),
+
+  /**
+   * Get domain info
+   */
+  getDomain: (domainId) => fetchAPI(`/domains/${domainId}`),
+
+  /**
+   * Get domain specialists
+   */
+  getSpecialists: (domainId) => fetchAPI(`/domains/${domainId}/specialists`),
+
+  /**
+   * Get domain patterns
+   */
+  getPatterns: (domainId, category = null) => {
+    const params = category ? `?category=${category}` : '';
+    return fetchAPI(`/domains/${domainId}/patterns${params}`);
+  },
+
+  /**
+   * Get pattern details
+   */
+  getPattern: (domainId, patternId) =>
+    fetchAPI(`/domains/${domainId}/patterns/${patternId}`),
+
+  /**
+   * Get domain health
+   */
+  getHealth: (domainId) => fetchAPI(`/domains/${domainId}/health`),
+
+  /**
+   * Query domain
+   */
+  query: (domainId, query, includeTrace = false) =>
+    fetchAPI(`/query`, {
+      method: 'POST',
+      body: JSON.stringify({
+        query,
+        domain: domainId,
+        include_trace: includeTrace,
+      }),
+    }),
+};
+
+/**
+ * Admin API
+ */
+export const adminAPI = {
+  /**
+   * List all domains (admin view)
+   */
+  listAllDomains: () => fetchAPI('/admin/domains'),
+
+  /**
+   * Get domain config
+   */
+  getDomainConfig: (domainId) => fetchAPI(`/admin/domains/${domainId}`),
+
+  /**
+   * Create domain
+   */
+  createDomain: (domain) =>
+    fetchAPI('/admin/domains', {
+      method: 'POST',
+      body: JSON.stringify(domain),
+    }),
+
+  /**
+   * Update domain
+   */
+  updateDomain: (domainId, updates) =>
+    fetchAPI(`/admin/domains/${domainId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    }),
+
+  /**
+   * Delete domain
+   */
+  deleteDomain: (domainId) =>
+    fetchAPI(`/admin/domains/${domainId}`, { method: 'DELETE' }),
+
+  /**
+   * List all candidates
+   */
+  listCandidates: (domain = null, status = null, limit = 100) => {
+    const params = new URLSearchParams({ limit });
+    if (domain) params.append('domain', domain);
+    if (status) params.append('status', status);
+    return fetchAPI(`/admin/candidates?${params}`);
+  },
+
+  /**
+   * Get candidate details
+   */
+  getCandidate: (domainId, patternId) =>
+    fetchAPI(`/admin/candidates/${domainId}/${patternId}`),
+
+  /**
+   * Promote candidate
+   */
+  promoteCandidate: (domainId, patternId, reviewedBy = 'admin', reviewNotes = null) =>
+    fetchAPI(`/admin/candidates/${domainId}/${patternId}/promote`, {
+      method: 'POST',
+      body: JSON.stringify({
+        reviewed_by: reviewedBy,
+        review_notes: reviewNotes,
+      }),
+    }),
+
+  /**
+   * Reject candidate
+   */
+  rejectCandidate: (domainId, patternId) =>
+    fetchAPI(`/admin/candidates/${domainId}/${patternId}`, { method: 'DELETE' }),
+
+  /**
+   * Update pattern
+   */
+  updatePattern: (domainId, patternId, updates) =>
+    fetchAPI(`/admin/domains/${domainId}/patterns/${patternId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    }),
+
+  /**
+   * Delete pattern
+   */
+  deletePattern: (domainId, patternId) =>
+    fetchAPI(`/admin/domains/${domainId}/patterns/${patternId}`, { method: 'DELETE' }),
+};
+
 export default {
   system: systemAPI,
   assist: assistAPI,
@@ -336,4 +542,7 @@ export default {
   patterns: patternAPI,
   ingestion: ingestionAPI,
   graph: graphAPI,
+  universes: universeAPI,
+  domains: domainsAPI,
+  admin: adminAPI,
 };

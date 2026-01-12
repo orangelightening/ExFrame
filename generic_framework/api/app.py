@@ -2,7 +2,7 @@
 Generic Framework API - FastAPI backend for web interface.
 """
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -13,7 +13,7 @@ import sys
 import json
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 # Add parent directory to path for imports
@@ -22,7 +22,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.factory import DomainFactory
 from core.domain import DomainConfig
 from core.generic_domain import GenericDomain  # NEW: Use GenericDomain
+from core.universe import UniverseManager, UniverseMergeStrategy
 from assist.engine import GenericAssistantEngine
+from diagnostics.search_metrics import SearchMetrics, SearchTrace, SearchOutcome
+from diagnostics.pattern_analyzer import PatternAnalyzer
+from diagnostics.health_checker import HealthChecker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -75,6 +79,11 @@ class QueryResponse(BaseModel):
     domain: str
     processing_time_ms: Optional[int] = None
     trace: Optional[Dict[str, Any]] = None
+    llm_used: Optional[bool] = None
+    llm_fallback: Optional[str] = None
+    llm_enhancement: Optional[str] = None
+    llm_response: Optional[str] = None
+    ai_generated: Optional[bool] = None
 
 
 class DomainInfo(BaseModel):
@@ -103,11 +112,13 @@ app.add_middleware(
 
 # Mount static files from built React app
 frontend_dist_path = Path(__file__).parent.parent / "frontend" / "dist"
-if frontend_dist_path.exists():
-    app.mount("/assets", StaticFiles(directory=str(frontend_dist_path / "assets")), name="assets")
+frontend_assets_path = frontend_dist_path / "assets"
+if frontend_assets_path.exists():
+    app.mount("/assets", StaticFiles(directory=str(frontend_assets_path)), name="assets")
 
 # Global state
-engines: Dict[str, GenericAssistantEngine] = {}
+engines: Dict[str, GenericAssistantEngine] = {}  # Legacy: for backward compatibility
+universe_manager: Optional[UniverseManager] = None  # New: Universe-based architecture
 
 
 def get_storage_path(domain_id: str) -> str:
@@ -137,11 +148,70 @@ def get_domain_registry_path() -> Path:
 @app.on_event("startup")
 async def startup_event():
     """
-    Auto-discover and load all domains dynamically.
+    Initialize the ExFrame runtime with UniverseManager.
 
-    NO MORE MANUAL DOMAIN REGISTRATION!
-    Domains are discovered automatically from the filesystem.
+    Loads the default universe on startup, maintaining backward compatibility
+    by populating the legacy engines dictionary.
     """
+    global universe_manager, engines
+
+    # Get the universes base path
+    if os.getenv("APP_HOME"):
+        universes_base = Path("/app/universes")
+    else:
+        universes_base = Path(os.getenv("UNIVERSES_BASE",
+                                        "/home/peter/development/eeframe/universes"))
+
+    logger.info(f"=" * 60)
+    logger.info(f"ExFrame Runtime Starting")
+    logger.info(f"Universes base: {universes_base}")
+    logger.info(f"=" * 60)
+
+    # Initialize UniverseManager
+    universe_manager = UniverseManager(
+        universes_base_path=universes_base,
+        default_universe_id="default"
+    )
+
+    # Load default universe
+    try:
+        default_universe = await universe_manager.load_default()
+        await default_universe.activate()
+
+        # Populate legacy engines dict for backward compatibility
+        for domain_id, engine in default_universe.engines.items():
+            engines[domain_id] = engine
+
+        logger.info(f"✓ Default universe loaded: {default_universe.universe_id}")
+        logger.info(f"  Domains: {', '.join(default_universe.list_domains())}")
+
+        # Get pattern counts
+        for domain_id in default_universe.list_domains():
+            domain = default_universe.get_domain(domain_id)
+            if domain and hasattr(domain, 'knowledge_base') and domain.knowledge_base:
+                pattern_count = len(domain.knowledge_base._patterns)
+                logger.info(f"    - {domain_id}: {pattern_count} patterns")
+
+    except Exception as e:
+        logger.error(f"✗ Failed to load default universe: {e}")
+        logger.info(f"  Falling back to legacy domain discovery...")
+
+        # Fallback to legacy loading
+        await _legacy_domain_discovery()
+
+    logger.info(f"=" * 60)
+    logger.info(f"ExFrame Runtime Ready")
+    logger.info(f"=" * 60)
+
+
+async def _legacy_domain_discovery() -> None:
+    """
+    Fallback: Legacy domain discovery for backward compatibility.
+
+    This is only used if the universe system fails to initialize.
+    """
+    global engines
+
     # Get the patterns directory directly
     if os.getenv("APP_HOME"):
         patterns_dir = Path("/app/data/patterns")
@@ -149,11 +219,10 @@ async def startup_event():
         patterns_dir = Path(os.getenv("PATTERN_STORAGE_BASE",
                                         "/home/peter/development/eeframe/data/patterns"))
 
-    logger.info(f"Auto-discovering domains from: {patterns_dir}")
+    logger.info(f"Legacy domain discovery from: {patterns_dir}")
 
     # Track what we loaded
     loaded_domains = []
-    failed_domains = []
 
     # Iterate through domain directories
     for domain_dir in patterns_dir.iterdir():
@@ -182,7 +251,7 @@ async def startup_event():
                 tags=[]
             )
 
-            # Create GenericDomain (no custom class needed!)
+            # Create GenericDomain
             domain = GenericDomain(config)
             await domain.initialize()
 
@@ -200,32 +269,14 @@ async def startup_event():
                 "specialists": len(domain.list_specialists())
             })
 
-            logger.info(f"✓ Loaded domain: {domain_id} ({domain.domain_name})")
+            logger.info(f"  ✓ Loaded domain: {domain_id}")
 
         except Exception as e:
-            failed_domains.append({"domain_id": domain_id, "error": str(e)})
-            logger.error(f"✗ Failed to load domain {domain_id}: {e}")
+            logger.error(f"  ✗ Failed to load domain {domain_id}: {e}")
 
     # Log summary
-    logger.info(f"=" * 60)
-    logger.info(f"Domain Loading Complete:")
-    logger.info(f"  Loaded: {len(loaded_domains)} domains")
-    logger.info(f"  Failed: {len(failed_domains)} domains")
-
     if loaded_domains:
-        logger.info(f"\nActive Domains:")
-        for domain in loaded_domains:
-            logger.info(f"  - {domain['domain_id']}: {domain['patterns']} patterns, {domain['specialists']} specialists")
-
-    if failed_domains:
-        logger.warning(f"\nFailed Domains:")
-        for domain in failed_domains:
-            logger.warning(f"  - {domain['domain_id']}: {domain['error']}")
-
-    logger.info(f"=" * 60)
-
-    # Initialize domain registry
-    await _initialize_domain_registry(loaded_domains)
+        logger.info(f"  Loaded {len(loaded_domains)} domains via legacy discovery")
 
 
 async def _initialize_domain_registry(loaded_domains: List[Dict[str, Any]]) -> None:
@@ -257,8 +308,247 @@ async def _initialize_domain_registry(loaded_domains: List[Dict[str, Any]]) -> N
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown."""
+    # Cleanup universes
+    if universe_manager:
+        await universe_manager.unload_all()
+
+    # Legacy cleanup
     for engine in engines.values():
         await engine.domain.cleanup()
+
+
+# =============================================================================
+# UNIVERSE MANAGEMENT ENDPOINTS
+# =============================================================================
+
+class UniverseCreateRequest(BaseModel):
+    """Request to create a new universe."""
+    universe_id: str
+    name: str
+    description: str = ""
+    base_on: Optional[str] = None
+
+
+class UniverseMergeRequest(BaseModel):
+    """Request to merge universes."""
+    source: str
+    target: str
+    strategy: str = "merge_patterns"  # source_wins, target_wins, merge, fail
+
+
+@app.get("/api/universes")
+async def list_universes() -> Dict[str, Any]:
+    """List all available universes."""
+    if not universe_manager:
+        return {"universes": [], "loaded": [], "message": "UniverseManager not initialized"}
+
+    available = universe_manager.list_universes()
+    loaded = universe_manager.list_loaded_universes()
+
+    # Get metadata for loaded universes
+    universes_meta = []
+    for universe_id in loaded:
+        universe = await universe_manager.get_universe(universe_id)
+        if universe:
+            meta = universe.get_meta()
+            universes_meta.append({
+                "universe_id": meta.universe_id,
+                "name": meta.name,
+                "description": meta.description,
+                "state": meta.state.value,
+                "domain_count": meta.domain_count,
+                "total_patterns": meta.total_patterns,
+                "version": meta.version,
+                "loaded_at": meta.loaded_at,
+                "is_active": meta.state.value == "active"
+            })
+
+    return {
+        "available": available,
+        "loaded": loaded,
+        "universes": universes_meta
+    }
+
+
+@app.get("/api/universes/{universe_id}")
+async def get_universe_info(universe_id: str) -> Dict[str, Any]:
+    """Get information about a specific universe."""
+    if not universe_manager:
+        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
+
+    universe = await universe_manager.get_universe(universe_id)
+    if not universe:
+        # Check if universe exists but is not loaded
+        if universe_id in universe_manager.list_universes():
+            return {
+                "universe_id": universe_id,
+                "state": "unloaded",
+                "message": "Universe exists but is not loaded. Load it first."
+            }
+        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found")
+
+    meta = universe.get_meta()
+    return {
+        "universe_id": meta.universe_id,
+        "name": meta.name,
+        "description": meta.description,
+        "state": meta.state.value,
+        "domain_count": meta.domain_count,
+        "total_patterns": meta.total_patterns,
+        "version": meta.version,
+        "created_at": meta.created_at,
+        "loaded_at": meta.loaded_at,
+        "checksum": meta.checksum,
+        "domains": universe.list_domains()
+    }
+
+
+@app.post("/api/universes/{universe_id}/load")
+async def load_universe(universe_id: str) -> Dict[str, Any]:
+    """Load a universe on-demand."""
+    if not universe_manager:
+        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
+
+    try:
+        universe = await universe_manager.load_universe(universe_id)
+        await universe.activate()
+
+        meta = universe.get_meta()
+        return {
+            "universe_id": universe_id,
+            "status": "loaded",
+            "state": meta.state.value,
+            "domains": universe.list_domains(),
+            "message": f"Universe '{universe_id}' loaded successfully"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load universe: {e}")
+
+
+@app.post("/api/universes")
+async def create_universe(request: UniverseCreateRequest) -> Dict[str, Any]:
+    """Create a new universe."""
+    if not universe_manager:
+        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
+
+    try:
+        universe = await universe_manager.create_universe(
+            universe_id=request.universe_id,
+            name=request.name,
+            description=request.description,
+            base_on=request.base_on
+        )
+
+        meta = universe.get_meta()
+        return {
+            "universe_id": request.universe_id,
+            "status": "created",
+            "state": meta.state.value,
+            "domains": universe.list_domains(),
+            "message": f"Universe '{request.universe_id}' created successfully"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create universe: {e}")
+
+
+@app.post("/api/admin/universes/merge")
+async def merge_universes(request: UniverseMergeRequest) -> Dict[str, Any]:
+    """Merge source universe into target universe."""
+    if not universe_manager:
+        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
+
+    # Validate strategy
+    try:
+        strategy = UniverseMergeStrategy(request.strategy)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid strategy: {request.strategy}. Must be one of: source_wins, target_wins, merge_patterns, fail_on_conflict"
+        )
+
+    try:
+        result = await universe_manager.merge_universes(request.source, request.target, strategy)
+        return {
+            "status": "merged",
+            "result": result,
+            "message": f"Merged {result['merged_domains']} domains from {request.source} to {request.target}"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to merge universes: {e}")
+
+
+@app.get("/api/universes/{universe_id}/domains")
+async def list_universe_domains(universe_id: str) -> Dict[str, Any]:
+    """List domains in a specific universe."""
+    if not universe_manager:
+        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
+
+    universe = await universe_manager.get_universe(universe_id)
+    if not universe:
+        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found")
+
+    domains_info = []
+    for domain_id in universe.list_domains():
+        domain = universe.get_domain(domain_id)
+        if domain:
+            pattern_count = len(domain.knowledge_base._patterns) if hasattr(domain, 'knowledge_base') and domain.knowledge_base else 0
+            domains_info.append({
+                "domain_id": domain_id,
+                "domain_name": domain.config.domain_name,
+                "patterns": pattern_count,
+                "specialists": len(domain.list_specialists())
+            })
+
+    return {
+        "universe_id": universe_id,
+        "domains": domains_info
+    }
+
+
+@app.post("/api/universes/{universe_id}/domains/{domain_id}/query")
+async def query_universe_domain(
+    universe_id: str,
+    domain_id: str,
+    request: QueryRequest
+) -> Response:
+    """
+    Process a query in a specific universe.
+
+    This is the universe-aware version of the query endpoint.
+    """
+    if not universe_manager:
+        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
+
+    universe = await universe_manager.get_universe(universe_id)
+    if not universe:
+        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found")
+
+    engine = universe.get_engine(domain_id)
+    if not engine:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found in universe '{universe_id}'")
+
+    try:
+        result = await engine.process_query(
+            request.query,
+            request.context,
+            request.include_trace
+        )
+
+        return QueryResponse(**result)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# LEGACY ENDPOINTS (for backward compatibility)
+# =============================================================================
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -404,7 +694,12 @@ async def list_patterns(domain_id: str, category: Optional[str] = None) -> Dict[
                 "name": p.get("name"),
                 "type": p.get("type") or p.get("pattern_type"),
                 "description": p.get("description"),
-                "tags": p.get("tags", [])
+                "tags": p.get("tags", []),
+                "status": p.get("status", "certified"),  # Include status
+                "llm_generated": p.get("llm_generated", False),  # Include llm_generated flag
+                "confidence": p.get("confidence", p.get("confidence_score", 0.5)),  # Include confidence
+                "confidence_score": p.get("confidence_score", p.get("confidence", 0.5)),  # Include confidence_score
+                "times_accessed": p.get("times_accessed", 0)
             }
             for p in patterns[:50]  # Limit to 50 for performance
         ]
@@ -724,13 +1019,14 @@ async def get_domain_config(domain_id: str) -> Dict[str, Any]:
         for spec_id in engine.domain.list_specialists():
             spec = engine.domain.get_specialist(spec_id)
             if spec:
+                # Specialist plugins use config with keys: name, keywords, categories, threshold
                 live_specialists.append({
                     "specialist_id": spec.specialist_id,
                     "name": spec.name,
-                    "description": spec.config.description,
-                    "keywords": spec.config.expertise_keywords,
-                    "categories": spec.config.expertise_categories,
-                    "confidence_threshold": spec.config.confidence_threshold
+                    "description": spec.config.get("description", ""),
+                    "keywords": spec.config.get("keywords", []),
+                    "categories": spec.config.get("categories", []),
+                    "confidence_threshold": spec.config.get("threshold", 0.5)
                 })
         domain_config["specialists"] = live_specialists
 
@@ -869,6 +1165,48 @@ async def delete_domain(domain_id: str) -> Dict[str, Any]:
     }
 
 
+@app.post("/api/admin/domains/rebuild-registry")
+async def rebuild_domain_registry() -> Dict[str, Any]:
+    """
+    Rebuild the domain registry from actual domain.json files.
+
+    This updates the cached domains.json with current data from all domain configs.
+    """
+    from pathlib import Path
+
+    registry = {"domains": {}, "next_id": 1}
+    patterns_base = Path(__file__).parent.parent / "data" / "patterns"
+
+    # Scan all domain directories
+    for domain_dir in patterns_base.iterdir():
+        if not domain_dir.is_dir():
+            continue
+
+        domain_file = domain_dir / "domain.json"
+        if not domain_file.exists():
+            continue
+
+        try:
+            with open(domain_file, 'r') as f:
+                domain_config = json.load(f)
+                domain_id = domain_config.get("domain_id")
+
+                if domain_id:
+                    registry["domains"][domain_id] = domain_config
+                    print(f"  Added to registry: {domain_id}")
+        except Exception as e:
+            print(f"  Warning: Failed to load {domain_dir}: {e}")
+
+    # Save updated registry
+    _save_domain_registry(registry)
+
+    return {
+        "status": "rebuilt",
+        "domains_updated": len(registry["domains"]),
+        "message": f"Domain registry rebuilt with {len(registry['domains'])} domains"
+    }
+
+
 @app.post("/api/admin/domains/{domain_id}/reload")
 async def reload_domain(domain_id: str) -> Dict[str, Any]:
     """Reload a domain (apply configuration changes)."""
@@ -891,6 +1229,567 @@ async def reload_domain(domain_id: str) -> Dict[str, Any]:
         "status": "requires_restart",
         "message": "Domain configuration updated. Server restart required to load changes."
     }
+
+
+# =============================================================================
+# Candidate Pattern Management
+# =============================================================================
+
+@app.get("/api/admin/candidates")
+async def list_all_candidates(
+    domain: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 100
+) -> Dict[str, Any]:
+    """
+    List all candidate patterns across all domains or a specific domain.
+
+    Candidates are patterns auto-generated from LLM responses that await review.
+    """
+    all_candidates = []
+
+    if domain:
+        # List candidates for specific domain
+        if domain not in engines:
+            raise HTTPException(status_code=404, detail=f"Domain '{domain}' not found")
+
+        kb = engines[domain].knowledge_base
+        all_patterns = await kb.get_all_patterns()
+
+        for pattern in all_patterns:
+            if pattern.get("status") == "candidate":
+                all_candidates.append({
+                    "domain": domain,
+                    "pattern_id": pattern.get("id"),
+                    "name": pattern.get("name"),
+                    "problem": pattern.get("problem")[:100] + "..." if pattern.get("problem") and len(pattern.get("problem")) > 100 else pattern.get("problem"),
+                    "origin": pattern.get("origin"),
+                    "generated_at": pattern.get("generated_at"),
+                    "generated_by": pattern.get("generated_by"),
+                    "confidence_score": pattern.get("confidence_score"),
+                    "usage_count": pattern.get("usage_count", 0),
+                    "solution_preview": pattern.get("solution", "")[:200] + "..." if len(pattern.get("solution", "")) > 200 else pattern.get("solution", "")
+                })
+    else:
+        # List candidates across all domains
+        for domain_id, engine in engines.items():
+            kb = engine.knowledge_base
+            try:
+                all_patterns = await kb.get_all_patterns()
+
+                for pattern in all_patterns:
+                    if pattern.get("status") == "candidate":
+                        all_candidates.append({
+                            "domain": domain_id,
+                            "pattern_id": pattern.get("id"),
+                            "name": pattern.get("name"),
+                            "problem": pattern.get("problem")[:100] + "..." if pattern.get("problem") and len(pattern.get("problem")) > 100 else pattern.get("problem"),
+                            "origin": pattern.get("origin"),
+                            "generated_at": pattern.get("generated_at"),
+                            "generated_by": pattern.get("generated_by"),
+                            "confidence_score": pattern.get("confidence_score"),
+                            "usage_count": pattern.get("usage_count", 0),
+                            "solution_preview": pattern.get("solution", "")[:200] + "..." if len(pattern.get("solution", "")) > 200 else pattern.get("solution", "")
+                        })
+            except Exception as e:
+                # Skip domains that fail to load
+                continue
+
+    # Sort by generated_at (newest first)
+    all_candidates.sort(key=lambda x: x.get("generated_at", ""), reverse=True)
+
+    return {
+        "candidates": all_candidates[:limit],
+        "total": len(all_candidates),
+        "domain_filter": domain,
+        "status_filter": status
+    }
+
+
+@app.get("/api/admin/candidates/{domain_id}/{pattern_id}")
+async def get_candidate_details(domain_id: str, pattern_id: str) -> Dict[str, Any]:
+    """Get full details of a specific candidate pattern."""
+    if domain_id not in engines:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    kb = engines[domain_id].knowledge_base
+    pattern = await kb.get_by_id(pattern_id)
+
+    if not pattern:
+        raise HTTPException(status_code=404, detail=f"Pattern '{pattern_id}' not found")
+
+    if pattern.get("status") != "candidate":
+        raise HTTPException(status_code=400, detail=f"Pattern '{pattern_id}' is not a candidate")
+
+    return {
+        "domain": domain_id,
+        "pattern": pattern
+    }
+
+
+@app.post("/api/admin/candidates/{domain_id}/{pattern_id}/promote")
+async def promote_candidate(
+    domain_id: str,
+    pattern_id: str,
+    reviewed_by: Optional[str] = "admin",
+    review_notes: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Promote a candidate pattern to certified status.
+
+    This marks the pattern as trusted and removes the AI-generated badge.
+    """
+    if domain_id not in engines:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    kb = engines[domain_id].knowledge_base
+    pattern = await kb.get_by_id(pattern_id)
+
+    if not pattern:
+        raise HTTPException(status_code=404, detail=f"Pattern '{pattern_id}' not found")
+
+    if pattern.get("status") != "candidate":
+        raise HTTPException(status_code=400, detail=f"Pattern '{pattern_id}' is not a candidate")
+
+    # Update pattern to certified status
+    from datetime import datetime, timedelta
+    updates = {
+        "status": "certified",
+        "reviewed_by": reviewed_by,
+        "reviewed_at": datetime.utcnow().isoformat(),
+        "review_notes": review_notes,
+        "tags": list(set(pattern.get("tags", [])) - {"candidate", "llm_generated"}) + ["certified"]
+    }
+
+    await kb.update_pattern(pattern_id, updates)
+
+    # Remove from candidate tags if present
+    if "candidate" in pattern.get("tags", []):
+        pattern["tags"].remove("candidate")
+    if "llm_generated" in pattern.get("tags", []):
+        pattern["tags"].remove("llm_generated")
+
+    return {
+        "domain": domain_id,
+        "pattern_id": pattern_id,
+        "status": "certified",
+        "reviewed_by": reviewed_by,
+        "reviewed_at": updates["reviewed_at"],
+        "message": "Candidate pattern promoted to certified status"
+    }
+
+
+@app.delete("/api/admin/candidates/{domain_id}/{pattern_id}")
+async def reject_candidate(domain_id: str, pattern_id: str) -> Dict[str, Any]:
+    """
+    Reject and delete a candidate pattern.
+
+    Permanently removes the pattern from the knowledge base.
+    """
+    if domain_id not in engines:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    kb = engines[domain_id].knowledge_base
+    pattern = await kb.get_by_id(pattern_id)
+
+    if not pattern:
+        raise HTTPException(status_code=404, detail=f"Pattern '{pattern_id}' not found")
+
+    if pattern.get("status") != "candidate":
+        raise HTTPException(status_code=400, detail=f"Pattern '{pattern_id}' is not a candidate")
+
+    # Delete the pattern
+    await kb.delete_pattern(pattern_id)
+
+    return {
+        "domain": domain_id,
+        "pattern_id": pattern_id,
+        "status": "deleted",
+        "message": "Candidate pattern rejected and deleted"
+    }
+
+
+class PatternUpdate(BaseModel):
+    """Model for pattern update requests."""
+    status: Optional[str] = None
+    llm_generated: Optional[bool] = None
+    confidence_score: Optional[float] = None
+    tags: Optional[List[str]] = None
+
+
+@app.put("/api/admin/domains/{domain_id}/patterns/{pattern_id}")
+async def update_pattern(
+    domain_id: str,
+    pattern_id: str,
+    update_data: PatternUpdate
+) -> Dict[str, Any]:
+    """
+    Update pattern properties.
+
+    Allows editing:
+    - status: "candidate" or "certified"
+    - llm_generated: true/false flag for AI-generated badge
+    - confidence_score: 0.0 to 1.0, affects search ranking
+    - tags: array of tags for categorization
+    """
+    if domain_id not in engines:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    kb = engines[domain_id].knowledge_base
+    pattern = await kb.get_by_id(pattern_id)
+
+    if not pattern:
+        raise HTTPException(status_code=404, detail=f"Pattern '{pattern_id}' not found")
+
+    # Build updates dict with only provided fields
+    updates = {}
+
+    if update_data.status is not None:
+        if update_data.status not in ["candidate", "certified"]:
+            raise HTTPException(status_code=400, detail="status must be 'candidate' or 'certified'")
+        updates["status"] = update_data.status
+
+    if update_data.llm_generated is not None:
+        updates["llm_generated"] = update_data.llm_generated
+
+    if update_data.confidence_score is not None:
+        if not 0.0 <= update_data.confidence_score <= 1.0:
+            raise HTTPException(status_code=400, detail="confidence_score must be between 0.0 and 1.0")
+        updates["confidence_score"] = update_data.confidence_score
+
+    if update_data.tags is not None:
+        updates["tags"] = update_data.tags
+
+    # Apply updates
+    if updates:
+        await kb.update_pattern(pattern_id, updates)
+
+    # Auto-update tags when status changes
+    if update_data.status is not None:
+        # Get the updated pattern to check current tags
+        updated_pattern = await kb.get_by_id(pattern_id)
+        if updated_pattern:
+            current_tags = updated_pattern.get("tags", [])
+
+            # Update tags based on status
+            if update_data.status == "certified":
+                # Remove candidate/llm_generated tags, add certified tag
+                new_tags = [t for t in current_tags if t not in ["candidate", "llm_generated"]]
+                if "certified" not in new_tags:
+                    new_tags.append("certified")
+                await kb.update_pattern(pattern_id, {"tags": new_tags})
+            elif update_data.status == "candidate":
+                # Add candidate tag back if it was removed
+                if "candidate" not in current_tags:
+                    current_tags.append("candidate")
+                await kb.update_pattern(pattern_id, {"tags": current_tags})
+
+    # Sync confidence field with confidence_score if confidence_score was updated
+    if update_data.confidence_score is not None:
+        await kb.update_pattern(pattern_id, {"confidence": update_data.confidence_score})
+
+    # Get updated pattern
+    updated_pattern = await kb.get_by_id(pattern_id)
+
+    return {
+        "domain": domain_id,
+        "pattern_id": pattern_id,
+        "pattern": updated_pattern,
+        "updates_applied": list(updates.keys()),
+        "message": "Pattern updated successfully"
+    }
+
+
+@app.delete("/api/admin/domains/{domain_id}/patterns/{pattern_id}")
+async def delete_pattern_admin(domain_id: str, pattern_id: str) -> Dict[str, Any]:
+    """
+    Delete any pattern from the knowledge base.
+
+    Permanently removes the pattern.
+    """
+    if domain_id not in engines:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    kb = engines[domain_id].knowledge_base
+    pattern = await kb.get_by_id(pattern_id)
+
+    if not pattern:
+        raise HTTPException(status_code=404, detail=f"Pattern '{pattern_id}' not found")
+
+    # Delete the pattern
+    await kb.delete_pattern(pattern_id)
+
+    return {
+        "domain": domain_id,
+        "pattern_id": pattern_id,
+        "pattern_name": pattern.get("name", "Unknown"),
+        "status": "deleted",
+        "message": "Pattern deleted successfully"
+    }
+
+
+# =============================================================================
+# DIAGNOSTICS ENDPOINTS
+# =============================================================================
+
+# Global diagnostics instances
+_search_metrics_instance: Optional[SearchMetrics] = None
+_pattern_analyzer_instance: Optional[PatternAnalyzer] = None
+_health_checker_instance: Optional[HealthChecker] = None
+
+
+def get_search_metrics_instance() -> SearchMetrics:
+    """Get or create SearchMetrics instance."""
+    global _search_metrics_instance
+    if _search_metrics_instance is None:
+        log_dir = Path(__file__).parent.parent / "logs" / "search_metrics"
+        _search_metrics_instance = SearchMetrics(storage_path=log_dir)
+    return _search_metrics_instance
+
+
+def _get_universes_domains_path() -> Path:
+    """Get the path to the domains directory within the default universe."""
+    # Check if running in Docker (APP_HOME env var is set)
+    if os.getenv("APP_HOME"):
+        universes_base = Path("/app/universes")
+    else:
+        universes_base = Path(os.getenv("UNIVERSES_BASE",
+                                        "/home/peter/development/eeframe/universes"))
+    return universes_base / "default" / "domains"
+
+
+def get_pattern_analyzer_instance() -> PatternAnalyzer:
+    """Get or create PatternAnalyzer instance."""
+    global _pattern_analyzer_instance
+    if _pattern_analyzer_instance is None:
+        pattern_path = _get_universes_domains_path()
+        _pattern_analyzer_instance = PatternAnalyzer(pattern_path)
+    return _pattern_analyzer_instance
+
+
+def get_health_checker_instance() -> HealthChecker:
+    """Get or create HealthChecker instance."""
+    global _health_checker_instance
+    if _health_checker_instance is None:
+        pattern_path = _get_universes_domains_path()
+        _health_checker_instance = HealthChecker(
+            pattern_path,
+            get_search_metrics_instance()
+        )
+    return _health_checker_instance
+
+
+@app.get("/api/diagnostics/health")
+async def diagnostics_health(
+    domain_ids: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get overall system health status.
+
+    Query params:
+        domain_ids: Comma-separated domain IDs to check
+    """
+    checker = get_health_checker_instance()
+
+    domains = domain_ids.split(',') if domain_ids else None
+
+    report = checker.check_all(domain_ids=domains)
+    return report.to_dict()
+
+
+@app.get("/api/diagnostics/metrics")
+async def diagnostics_metrics(
+    hours: int = 24,
+    domain_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get search quality metrics.
+
+    Query params:
+        hours: Time window in hours (default: 24)
+        domain_id: Filter by domain
+    """
+    metrics = get_search_metrics_instance()
+
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(hours=hours)
+
+    quality_metrics = metrics.calculate_metrics(
+        start_time=start_time,
+        end_time=end_time,
+        domain_id=domain_id
+    )
+
+    return quality_metrics.to_dict()
+
+
+@app.get("/api/diagnostics/traces")
+async def diagnostics_traces(
+    limit: int = 100,
+    domain_id: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Get recent search traces.
+
+    Query params:
+        limit: Maximum traces to return (default: 100)
+        domain_id: Filter by domain
+    """
+    metrics = get_search_metrics_instance()
+
+    traces = metrics.get_recent_traces(limit=limit, domain_id=domain_id)
+
+    return [trace.to_dict() for trace in traces]
+
+
+@app.get("/api/diagnostics/traces/low-confidence")
+async def diagnostics_low_confidence(
+    threshold: float = 0.5,
+    limit: int = 50
+) -> List[Dict[str, Any]]:
+    """
+    Get searches with low confidence scores.
+
+    Query params:
+        threshold: Confidence threshold (default: 0.5)
+        limit: Maximum results (default: 50)
+    """
+    metrics = get_search_metrics_instance()
+
+    traces = metrics.identify_low_confidence_searches(
+        threshold=threshold,
+        limit=limit
+    )
+
+    return [trace.to_dict() for trace in traces]
+
+
+@app.get("/api/diagnostics/traces/no-results")
+async def diagnostics_no_results(
+    limit: int = 50
+) -> List[Dict[str, Any]]:
+    """
+    Get searches that returned no results.
+
+    Query params:
+        limit: Maximum results (default: 50)
+    """
+    metrics = get_search_metrics_instance()
+
+    traces = metrics.identify_no_results_searches(limit=limit)
+
+    return [trace.to_dict() for trace in traces]
+
+
+@app.get("/api/diagnostics/patterns/health")
+async def diagnostics_pattern_health(
+    domain_id: str
+) -> Dict[str, Any]:
+    """
+    Get pattern health report for a domain.
+
+    Query params:
+        domain_id: Domain ID to analyze
+    """
+    analyzer = get_pattern_analyzer_instance()
+
+    report = analyzer.analyze_domain(domain_id)
+    return report.to_dict()
+
+
+@app.get("/api/diagnostics/patterns/health/all")
+async def diagnostics_all_pattern_health(
+    domain_ids: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get pattern health for all domains.
+
+    Query params:
+        domain_ids: Comma-separated domain IDs (default: all)
+    """
+    analyzer = get_pattern_analyzer_instance()
+
+    if domain_ids:
+        domains = domain_ids.split(',')
+    else:
+        # Get all domains
+        pattern_path = Path(get_storage_path("dummy")).parent.parent
+        domains = [d.name for d in pattern_path.iterdir() if d.is_dir()]
+
+    reports = analyzer.analyze_universe(domains)
+
+    return {
+        domain_id: report.to_dict()
+        for domain_id, report in reports.items()
+    }
+
+
+@app.get("/api/diagnostics/patterns/usage")
+async def diagnostics_pattern_usage(
+    pattern_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get pattern usage statistics.
+
+    Query params:
+        pattern_id: Specific pattern ID (default: all)
+    """
+    metrics = get_search_metrics_instance()
+
+    stats = metrics.get_pattern_usage_stats(pattern_id=pattern_id)
+
+    return stats
+
+
+@app.get("/api/diagnostics/summary")
+async def diagnostics_summary() -> Dict[str, Any]:
+    """
+    Get a comprehensive diagnostics summary.
+
+    Combines health, metrics, and pattern analysis.
+    """
+    # Get system health
+    health = await diagnostics_health()
+
+    # Get search metrics (last 24 hours)
+    metrics_data = await diagnostics_metrics(hours=24)
+
+    # Get pattern health for all domains
+    pattern_health = await diagnostics_all_pattern_health()
+
+    return {
+        "health": health,
+        "search_metrics": metrics_data,
+        "pattern_health": pattern_health,
+        "generated_at": datetime.utcnow().isoformat(),
+    }
+
+
+@app.post("/api/diagnostics/self-test")
+async def run_self_test(
+    background_tasks: BackgroundTasks
+) -> Dict[str, Any]:
+    """
+    Run self-test suite and return results.
+
+    Runs automated tests to validate:
+    - Search quality
+    - Performance
+    - Regression detection
+    """
+    from diagnostics.self_test import SelfTestRunner
+
+    runner = SelfTestRunner(
+        api_base_url="http://localhost:3000",
+        search_metrics=get_search_metrics_instance()
+    )
+
+    # Run tests in background
+    import asyncio
+
+    result = await runner.run_self_tests(suite_name="default")
+
+    return result.to_dict()
 
 
 if __name__ == "__main__":

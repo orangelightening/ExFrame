@@ -2,56 +2,79 @@
 
 **Domain-Agnostic AI-Powered Knowledge Management System**
 
-Version 1.0.0 - Plugin Architecture Release
+Version 1.3.0 - Universe Architecture & Diagnostics Release
 
 ---
 
 ## Overview
 
-EEFrame is a unified, domain-agnostic framework for building AI-powered knowledge assistants with a **plugin-based architecture**. It provides:
+EEFrame is a unified, domain-agnostic framework for building AI-powered knowledge assistants with a **universe-based architecture** and **plugin-based pipeline**. It provides:
 
-- **Plugin Architecture**: Specialist and Knowledge Base plugins for extensibility
+- **Universe Architecture**: Complete isolation and portability of knowledge configurations
+- **Plugin Pipeline**: Router → Specialist → Enricher → Formatter - all swappable
 - **Domain-Agnostic**: Easy to add new knowledge domains without code changes
 - **Pattern-Based Knowledge**: Structured knowledge representation with relationships and metadata
-- **Dynamic Domain Loading**: Auto-discovery of domains from `data/patterns/*/`
+- **Dynamic Domain Loading**: Auto-discovery of domains within active universe
 - **Generic Domain System**: Universal domain class with plugin loading
-- **Multi-Domain Support**: 7 production domains included
+- **Multi-Universe Support**: Create, switch, merge, and export knowledge universes
+- **Diagnostics System**: Search metrics, pattern health analysis, self-testing
 - **Query Tracing**: Full visibility into AI decision-making process
 - **Docker Ready**: One-command deployment with monitoring stack
 - **Web Dashboard**: Single-page application with Alpine.js
 
 ### Core Philosophy
 
-> **Data and composition are configuration. All transformation logic is pluggable.**
+> **Universes are first-class entities. Patterns are data. All transformation logic is pluggable.**
 
-- ✅ **Patterns** are data (JSON files)
-- ✅ **Domains** are orchestrators (configuration)
+- ✅ **Universes** are complete, portable knowledge environments
+- ✅ **Patterns** are data (JSON files in universe directories)
+- ✅ **Domains** are orchestrators (configuration within universes)
+- ✅ **Routers** determine query handling strategies
 - ✅ **Specialists** are plugins (transformation logic)
-- ✅ **Knowledge Bases** are plugins (storage backends)
+- ✅ **Enrichers** enhance responses (LLM, related patterns, code generation)
+- ✅ **Formatters** control output format (Markdown, JSON, HTML, Slack)
 
 ### Key Features
 
-- **Plugin Architecture**: Specialist and Knowledge Base plugins for extensibility
+- **Universe Management**: Create, load, switch, merge, and export knowledge universes
+- **Plugin Architecture**: Router, Specialist, Enricher, and Formatter plugins for extensibility
 - **Domain Management**: Create and manage knowledge domains through the web UI
 - **Pattern Browser**: View and search patterns with full detail modals
 - **Query Assistant**: AI-powered assistance with confidence scoring
 - **Trace Inspector**: Debug and understand AI behavior
 - **Pattern Ingestion**: Extract knowledge from URLs and documents
-- **Health Monitoring**: Built-in Prometheus metrics and dashboards
+- **Diagnostics Dashboard**: System health, search metrics, and pattern analysis
+- **Health Monitoring**: Built-in Prometheus metrics and Grafana dashboards
+- **Self-Testing**: Automated test suite with regression detection
 
 ---
 
 ## Plugin Architecture
 
-EEFrame v1.0.0 introduces a plugin-based architecture that separates **data** (patterns) from **transformation logic** (plugins).
+EEFrame v1.3.0 features a complete pluggable pipeline that separates **data** (patterns) from **transformation logic** (plugins).
+
+### Pipeline Overview
+
+```
+Query → Router → Specialist → Enrichers → Formatter → Response
+```
 
 ### Plugin Types
 
-#### 1. Specialist Plugins
+#### 1. Router Plugins
+
+Router plugins determine which specialist(s) should handle a query.
+
+**Available Routers:**
+- `ConfidenceBasedRouter` - Selects highest-scoring specialist
+- `MultiSpecialistRouter` - Routes to top-N specialists
+- `ParallelRouter` - All specialists in parallel
+
+#### 2. Specialist Plugins
 
 Specialist plugins answer questions in specific domain areas.
 
-**Interface** (3 methods):
+**Interface**:
 ```python
 from core.specialist_plugin import SpecialistPlugin
 
@@ -193,13 +216,16 @@ docker-compose ps
 3. **Traces**: View historical query traces and debugging information
 4. **Ingestion**: Extract patterns from URLs (beta)
 5. **Domains**: Manage domains, specialists, and configuration
+6. **Universes**: Manage knowledge universes - create, load, switch, and export
+7. **Diagnostics**: System health, search metrics, and pattern analysis
 
 ### Using the Assistant
 
 1. Select a domain from the dropdown (default: llm_consciousness)
-2. Type your question in the text area
-3. Click "Query" or press Enter
-4. View the AI response with:
+2. The current universe is displayed next to "Universe:"
+3. Type your question in the text area
+4. Click "Query" or press Enter
+5. View the AI response with:
    - Confidence score
    - Which specialist handled it
    - Patterns used
@@ -229,7 +255,37 @@ docker-compose ps
    - Load status
 3. Click **Create Domain** to add a new domain
 4. Click **Edit** (pencil icon) to modify a domain
-5. Click **Delete** (trash icon) to remove a domain
+
+### Managing Universes
+
+1. Go to the **Universes** tab
+2. View current universe with:
+   - Universe name and active status
+   - Total domains and patterns
+3. Browse available universes with:
+   - Domain and pattern counts
+   - Active status indicators
+   - Switch and Details buttons
+4. Create new universes with:
+   - Universe ID
+   - Optional description
+5. Switch between universes instantly
+
+### Using Diagnostics
+
+1. Go to the **Diagnostics** tab
+2. Click **Load Diagnostics** to refresh
+3. View system health:
+   - Pattern storage status
+   - Knowledge base health
+   - Search performance metrics
+   - Disk space usage
+   - Pattern health scores
+4. Review search metrics:
+   - Total searches and success rate
+   - Average confidence and latency
+   - P50/P95/P99 duration percentiles
+   - LLM fallback rate
 
 ---
 

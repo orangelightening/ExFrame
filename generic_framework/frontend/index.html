@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EEFrame - Expertise Framework</title>
+    <title>ExFrame - Expertise Framework</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -63,11 +63,15 @@
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-xl font-bold">EEFrame</h1>
+                            <h1 class="text-xl font-bold">ExFrame</h1>
                             <p class="text-sm text-gray-400">Expertise Framework</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-400">Universe:</span>
+                            <span class="text-sm text-teal-400 font-semibold" x-text="currentUniverse"></span>
+                        </div>
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-gray-400">Domain:</span>
                             <form @submit.prevent="" autocomplete="off" class="contents">
@@ -171,6 +175,9 @@
                                 </span>
                                 <span x-show="confidence" class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400">
                                     Confidence: <span x-text="(confidence * 100).toFixed(0) + '%'"></span>
+                                </span>
+                                <span x-show="llm_used || ai_generated" class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40">
+                                    ⚡ AI-Generated
                                 </span>
                             </div>
                         </div>
@@ -445,14 +452,35 @@
                     <input type="text" placeholder="Search patterns..." class="w-full px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-emerald-500 outline-none">
                 </div>
                 <div class="space-y-3">
-                    <template x-for="pattern in patterns" :key="pattern.id">
-                        <div class="p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-emerald-500 cursor-pointer transition-all"
-                             @click="viewPatternDetail(pattern)">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-emerald-400" x-text="pattern.name"></h3>
-                                <span class="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400" x-text="pattern.type"></span>
+                    <template x-for="pattern in patterns" :key="pattern.id || pattern.pattern_id">
+                        <div class="p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-emerald-500 transition-all">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1 cursor-pointer" @click="viewPatternDetail(pattern)">
+                                    <h3 class="font-semibold text-emerald-400" x-text="pattern.name"></h3>
+                                </div>
+                                <div class="flex items-center gap-2 ml-4">
+                                    <span class="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400" x-text="pattern.type"></span>
+                                    <span x-show="pattern.status === 'candidate'" class="text-xs px-2 py-1 rounded bg-amber-500/20 text-amber-400">Candidate</span>
+                                    <span x-show="pattern.llm_generated" class="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-400">AI</span>
+                                    <button @click="editPatternProperties(pattern)" class="text-gray-400 hover:text-emerald-400 transition-colors p-1" title="Edit">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <button @click="confirmDeletePattern(pattern)" class="text-gray-400 hover:text-red-400 transition-colors p-1" title="Delete">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            <p class="text-sm text-gray-400" x-text="pattern.description"></p>
+                            <div class="cursor-pointer" @click="viewPatternDetail(pattern)">
+                                <p class="text-sm text-gray-400" x-text="pattern.description"></p>
+                                <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                                    <span>Confidence: <span class="text-blue-400" x-text="((pattern.confidence_score || pattern.confidence || 0) * 100).toFixed(0) + '%'"></span></span>
+                                    <span x-show="pattern.times_accessed !== undefined">Accessed: <span class="text-gray-300" x-text="pattern.times_accessed"></span></span>
+                                </div>
+                            </div>
                             <div class="flex gap-2 mt-3">
                                 <template x-for="tag in (pattern.tags || []).slice(0, 3)">
                                     <span class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300" x-text="tag"></span>
@@ -868,6 +896,349 @@
                 </div>
             </div>
 
+            <!-- Pattern Edit Modal -->
+            <div x-show="editingPattern" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                <div class="glass rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="flex items-start justify-between mb-6">
+                        <h3 class="text-xl font-bold text-emerald-400">Edit Pattern Properties</h3>
+                        <button @click="cancelPatternEdit()" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="savePatternEdits()" class="space-y-4">
+                        <div class="p-4 rounded-lg bg-gray-800/50 border border-gray-700 mb-4">
+                            <h4 class="font-medium text-emerald-400 mb-2" x-text="patternEditForm.name"></h4>
+                            <p class="text-sm text-gray-400" x-text="patternEditForm.description"></p>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Status</label>
+                            <select x-model="patternEditForm.status"
+                                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                                <option value="candidate">Candidate (AI-generated, awaiting review)</option>
+                                <option value="certified">Certified (human-approved, trusted)</option>
+                            </select>
+                        </div>
+
+                        <!-- AI Generated Flag -->
+                        <div>
+                            <label class="flex items-center gap-3 text-sm text-gray-400 cursor-pointer">
+                                <input type="checkbox" x-model="patternEditForm.llm_generated"
+                                       class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-500">
+                                <span>Mark as AI-Generated (shows badge to users)</span>
+                            </label>
+                        </div>
+
+                        <!-- Confidence Score -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">
+                                Confidence Score: <span x-text="(patternEditForm.confidence_score * 100).toFixed(0) + '%'"></span>
+                            </label>
+                            <input type="range" x-model="patternEditForm.confidence_score" min="0" max="1" step="0.05"
+                                   class="w-full">
+                            <p class="text-xs text-gray-500 mt-1">Higher confidence = pattern appears more in search results</p>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-700">
+                            <button type="button" @click="cancelPatternEdit()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-sm font-medium">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delete Pattern Confirmation Modal -->
+            <div x-show="patternToDelete" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                <div class="glass rounded-xl p-6 max-w-md w-full">
+                    <h3 class="text-xl font-bold text-red-400 mb-4">Delete Pattern</h3>
+                    <div class="space-y-4">
+                        <p>Are you sure you want to delete <strong x-text="patternToDelete?.name"></strong>?</p>
+                        <p class="text-sm text-gray-400">This action cannot be undone.</p>
+                        <div class="p-3 rounded bg-red-900/20 border border-red-800">
+                            <p class="text-xs text-gray-400" x-text="'ID: ' + (patternToDelete?.id || '')"></p>
+                        </div>
+                        <div class="flex justify-end gap-3">
+                            <button @click="patternToDelete = null" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium">
+                                Cancel
+                            </button>
+                            <button @click="deletePattern()" class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-sm font-medium">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNIVERSES VIEW -->
+            <div x-show="currentView === 'universes'" x-transition>
+                <h2 class="text-2xl font-bold mb-6">Universe Management</h2>
+
+                <!-- Current Universe Info -->
+                <div class="glass rounded-xl p-6 mb-6 border border-teal-500/30">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                        </svg>
+                        Current Universe
+                    </h3>
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl font-bold text-teal-400" x-text="currentUniverse"></span>
+                        <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-sm font-medium">Active</span>
+                        <span class="text-gray-400">
+                            <span class="text-emerald-400 font-semibold" x-text="availableDomains.length"></span> domains,
+                            <span class="text-emerald-400 font-semibold" x-text="totalPatternCount"></span> total patterns
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Available Universes -->
+                <div class="glass rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Available Universes</h3>
+                        <button @click="loadUniverses()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors">
+                            Refresh
+                        </button>
+                    </div>
+
+                    <div class="space-y-3" id="universe-list">
+                        <template x-for="universe in availableUniverses" :key="universe.universe_id">
+                            <div class="p-4 rounded-lg border transition-all"
+                                 :class="universe.universe_id === currentUniverse
+                                    ? 'border-teal-500 bg-teal-500/10'
+                                    : 'border-gray-700 hover:border-gray-600 bg-gray-800/50'">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div>
+                                            <h4 class="font-semibold text-lg" :class="universe.universe_id === currentUniverse ? 'text-teal-400' : 'text-gray-300'" x-text="universe.universe_id"></h4>
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                <span x-text="universe.domain_count || 0"></span> domains ·
+                                                <span x-text="universe.total_patterns || 0"></span> patterns
+                                            </p>
+                                        </div>
+                                        <div x-show="universe.is_active" class="px-2 py-1 rounded bg-teal-500/20 text-teal-400 text-xs font-medium">
+                                            Active
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button x-show="universe.universe_id !== currentUniverse"
+                                                @click="switchUniverse(universe.universe_id)"
+                                                class="px-4 py-2 bg-teal-500 hover:bg-teal-600 rounded-lg text-sm font-medium transition-colors">
+                                            Switch
+                                        </button>
+                                        <button @click="viewUniverseDetails(universe.universe_id)"
+                                                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors">
+                                            Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <div x-show="availableUniverses.length === 0" class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                            <p>No universes found</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Universe Section -->
+                <div class="glass rounded-xl p-6 mt-6">
+                    <h3 class="text-lg font-semibold mb-4">Create New Universe</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Universe ID</label>
+                            <input type="text" x-model="newUniverseId" placeholder="my_universe"
+                                   class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 focus:ring-2 focus:ring-teal-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Description</label>
+                            <input type="text" x-model="newUniverseDescription" placeholder="Optional description"
+                                   class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 focus:ring-2 focus:ring-teal-500/20 outline-none">
+                        </div>
+                    </div>
+                    <div class="mt-4 flex gap-3">
+                        <button @click="createUniverse()"
+                                :disabled="!newUniverseId"
+                                class="px-6 py-2 bg-teal-500 hover:bg-teal-600 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-colors">
+                            Create Universe
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIAGNOSTICS VIEW -->
+            <div x-show="currentView === 'diagnostics'" x-transition>
+                <h2 class="text-2xl font-bold mb-6">System Diagnostics</h2>
+
+                <!-- System Health Overview -->
+                <div class="glass rounded-xl p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        System Health
+                    </h3>
+                    <div x-show="!diagnosticsData.health" class="text-center py-8">
+                        <button @click="loadDiagnostics()" class="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-medium">
+                            Load Diagnostics
+                        </button>
+                    </div>
+                    <div x-show="diagnosticsData.health">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-lg">Overall Status:</span>
+                            <span class="px-3 py-1 rounded-full text-sm font-medium"
+                                  :class="{
+                                      'bg-green-500/20 text-green-400': diagnosticsData.health.overall_status === 'healthy',
+                                      'bg-yellow-500/20 text-yellow-400': diagnosticsData.health.overall_status === 'warning',
+                                      'bg-red-500/20 text-red-400': diagnosticsData.health.overall_status === 'critical'
+                                  }"
+                                  x-text="diagnosticsData.health.overall_status.toUpperCase()"></span>
+                        </div>
+
+                        <!-- Health Checks -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <template x-for="check in diagnosticsData.health.checks" :key="check.name">
+                                <div class="p-3 rounded-lg border"
+                                     :class="{
+                                         'bg-green-900/20 border-green-700/50': check.status === 'healthy',
+                                         'bg-yellow-900/20 border-yellow-700/50': check.status === 'warning',
+                                         'bg-red-900/20 border-red-700/50': check.status === 'critical',
+                                         'bg-gray-800/50 border-gray-700': check.status === 'unknown'
+                                     }">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-gray-200" x-text="check.name.replace(/_/g, ' ')"></span>
+                                        <span class="w-2 h-2 rounded-full"
+                                              :class="{
+                                                  'bg-green-400': check.status === 'healthy',
+                                                  'bg-yellow-400': check.status === 'warning',
+                                                  'bg-red-400': check.status === 'critical',
+                                                  'bg-gray-400': check.status === 'unknown'
+                                              }"></span>
+                                    </div>
+                                    <p class="text-xs text-gray-400" x-text="check.message"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Metrics -->
+                <div class="glass rounded-xl p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Search Performance (24h)
+                    </h3>
+                    <div x-show="diagnosticsData.search_metrics">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-blue-400" x-text="diagnosticsData.search_metrics.total_searches || 0"></p>
+                                <p class="text-xs text-gray-400 mt-1">Total Searches</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold" :class="diagnosticsData.search_metrics.success_rate >= 90 ? 'text-green-400' : 'text-yellow-400'" x-text="(diagnosticsData.search_metrics.success_rate || 0).toFixed(0) + '%'"></p>
+                                <p class="text-xs text-gray-400 mt-1">Success Rate</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-purple-400" x-text="(diagnosticsData.search_metrics.avg_confidence * 100).toFixed(0) + '%'"></p>
+                                <p class="text-xs text-gray-400 mt-1">Avg Confidence</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-emerald-400" x-text="(diagnosticsData.search_metrics.p95_duration_ms || 0).toFixed(0) + 'ms'"></p>
+                                <p class="text-xs text-gray-400 mt-1">P95 Latency</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                            <div class="p-2 rounded bg-gray-800/50">
+                                <span class="text-gray-400">No Results:</span>
+                                <span class="text-yellow-400 ml-2" x-text="(diagnosticsData.search_metrics.no_results_rate || 0).toFixed(1) + '%'"></span>
+                            </div>
+                            <div class="p-2 rounded bg-gray-800/50">
+                                <span class="text-gray-400">Errors:</span>
+                                <span class="text-red-400 ml-2" x-text="(diagnosticsData.search_metrics.error_rate || 0).toFixed(1) + '%'"></span>
+                            </div>
+                            <div class="p-2 rounded bg-gray-800/50">
+                                <span class="text-gray-400">LLM Fallback:</span>
+                                <span class="text-purple-400 ml-2" x-text="(diagnosticsData.search_metrics.llm_fallback_rate || 0).toFixed(1) + '%'"></span>
+                            </div>
+                            <div class="p-2 rounded bg-gray-800/50">
+                                <span class="text-gray-400">Avg Duration:</span>
+                                <span class="text-blue-400 ml-2" x-text="(diagnosticsData.search_metrics.avg_duration_ms || 0).toFixed(0) + 'ms'"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div x-show="!diagnosticsData.search_metrics" class="text-center py-4 text-gray-500 text-sm">
+                        No search metrics available yet
+                    </div>
+                </div>
+
+                <!-- Pattern Health -->
+                <div class="glass rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Pattern Health by Domain
+                    </h3>
+                    <div x-show="diagnosticsData.pattern_health">
+                        <div class="space-y-3">
+                            <template x-for="[domainId, health] in Object.entries(diagnosticsData.pattern_health)" :key="domainId">
+                                <div class="p-4 rounded-lg bg-gray-800/50 border border-gray-700">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-emerald-400" x-text="domainId"></h4>
+                                            <p class="text-xs text-gray-500" x-text="health.total_patterns + ' patterns'"></p>
+                                        </div>
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-center">
+                                                <p class="text-xl font-bold" :class="health.health_score >= 90 ? 'text-green-400' : health.health_score >= 70 ? 'text-yellow-400' : 'text-red-400'" x-text="health.health_score + '%'"></p>
+                                                <p class="text-xs text-gray-500">Health</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <p class="text-xl font-bold text-blue-400" x-text="health.issues_found"></p>
+                                                <p class="text-xs text-gray-500">Issues</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div x-show="health.issues_found > 0" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                        <div x-show="health.orphaned_patterns > 0">
+                                            <span class="text-gray-400">Orphaned:</span>
+                                            <span class="text-yellow-400" x-text="health.orphaned_patterns"></span>
+                                        </div>
+                                        <div x-show="health.duplicate_patterns > 0">
+                                            <span class="text-gray-400">Duplicates:</span>
+                                            <span class="text-yellow-400" x-text="health.duplicate_patterns"></span>
+                                        </div>
+                                        <div x-show="health.missing_field_patterns > 0">
+                                            <span class="text-gray-400">Missing Fields:</span>
+                                            <span class="text-orange-400" x-text="health.missing_field_patterns"></span>
+                                        </div>
+                                        <div x-show="health.critical_issues > 0">
+                                            <span class="text-gray-400">Critical:</span>
+                                            <span class="text-red-400" x-text="health.critical_issues"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div x-show="!diagnosticsData.pattern_health" class="text-center py-4 text-gray-500 text-sm">
+                        No pattern health data available
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -878,11 +1249,18 @@
                 response: '',
                 specialist: '',
                 confidence: 0,
+                llm_used: false,
+                ai_generated: false,
                 loading: false,
                 lastQuery: '',
                 currentDomain: 'llm_consciousness',
+                currentUniverse: 'default',
+                availableUniverses: [],
+                newUniverseId: '',
+                newUniverseDescription: '',
                 availableDomains: ['cooking', 'llm_consciousness'],
                 patternCount: 0,
+                totalPatternCount: 0,
                 // Explicit display properties for example queries and placeholder
                 currentExampleQueriesDisplay: [],
                 currentPlaceholderDisplay: 'Type your cooking question here... (Press Enter to submit)',
@@ -916,12 +1294,31 @@
                 newCategory: '',
                 newTag: '',
                 domainToDelete: null,
+                // Pattern edit state
+                editingPattern: false,
+                patternEditForm: {
+                    id: '',
+                    name: '',
+                    description: '',
+                    status: 'certified',
+                    llm_generated: false,
+                    confidence_score: 0.5
+                },
+                patternToDelete: null,
+                diagnosticsData: {
+                    health: null,
+                    search_metrics: null,
+                    pattern_health: null,
+                    generated_at: null
+                },
                 navItems: [
                     { id: 'assistant', label: 'Assistant' },
                     { id: 'patterns', label: 'Patterns' },
                     { id: 'traces', label: 'Traces' },
                     { id: 'ingestion', label: 'Ingestion' },
                     { id: 'domains', label: 'Domains' },
+                    { id: 'universes', label: 'Universes' },
+                    { id: 'diagnostics', label: 'Diagnostics' },
                 ],
                 exampleQueries: {
                     'cooking': [
@@ -968,6 +1365,8 @@
                     console.log('=== INIT START ===');
                     console.log('Initial currentDomain:', this.currentDomain);
 
+                    await this.loadCurrentUniverse();
+                    await this.loadUniverses();
                     await this.loadAvailableDomains();
                     console.log('After loadAvailableDomains, currentDomain:', this.currentDomain);
 
@@ -987,6 +1386,107 @@
                     });
 
                     console.log('=== INIT END ===');
+                },
+
+                async loadCurrentUniverse() {
+                    try {
+                        const res = await fetch('/api/universes');
+                        const data = await res.json();
+                        // Get the active/default universe
+                        if (data.universes && data.universes.length > 0) {
+                            // Find the active universe or default to 'default'
+                            const activeUniverse = data.universes.find(u => u.is_active) || data.universes.find(u => u.universe_id === 'default') || data.universes[0];
+                            this.currentUniverse = activeUniverse.universe_id;
+                            console.log('Loaded current universe:', this.currentUniverse);
+                        }
+                    } catch (error) {
+                        console.error('Failed to load current universe:', error);
+                        this.currentUniverse = 'default';
+                    }
+                },
+
+                async loadUniverses() {
+                    try {
+                        const res = await fetch('/api/universes');
+                        const data = await res.json();
+                        this.availableUniverses = data.universes || [];
+
+                        // Update total pattern count from current universe data
+                        const currentUniv = this.availableUniverses.find(u => u.universe_id === this.currentUniverse);
+                        if (currentUniv && currentUniv.total_patterns !== undefined) {
+                            this.totalPatternCount = currentUniv.total_patterns;
+                        }
+
+                        console.log('Loaded universes:', this.availableUniverses);
+                    } catch (error) {
+                        console.error('Failed to load universes:', error);
+                    }
+                },
+
+                async switchUniverse(universeId) {
+                    try {
+                        const res = await fetch(`/api/universes/${universeId}/load`, {
+                            method: 'POST'
+                        });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            this.currentUniverse = universeId;
+                            await this.loadAvailableDomains();
+                            await this.loadDomainInfo();
+                            await this.loadUniverses();
+                            console.log('Switched to universe:', universeId);
+                        } else {
+                            alert('Failed to switch universe: ' + (data.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Failed to switch universe:', error);
+                        alert('Failed to switch universe: ' + error.message);
+                    }
+                },
+
+                async viewUniverseDetails(universeId) {
+                    try {
+                        const res = await fetch(`/api/universes/${universeId}`);
+                        const data = await res.json();
+                        console.log('Universe details:', data);
+                        // Could show a modal with more details here
+                        alert(`Universe: ${data.universe_id}\nDomains: ${(data.domains || []).join(', ')}\nDescription: ${data.description || 'No description'}`);
+                    } catch (error) {
+                        console.error('Failed to load universe details:', error);
+                    }
+                },
+
+                async createUniverse() {
+                    if (!this.newUniverseId) {
+                        alert('Please enter a universe ID');
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch('/api/universes', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                universe_id: this.newUniverseId,
+                                description: this.newUniverseDescription
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (data.success || res.ok) {
+                            alert(`Universe "${this.newUniverseId}" created successfully!`);
+                            this.newUniverseId = '';
+                            this.newUniverseDescription = '';
+                            await this.loadUniverses();
+                        } else {
+                            alert('Failed to create universe: ' + (data.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Failed to create universe:', error);
+                        alert('Failed to create universe: ' + error.message);
+                    }
                 },
 
                 async loadAvailableDomains() {
@@ -1044,13 +1544,16 @@
                     // Update example queries display
                     this.currentExampleQueriesDisplay = this.exampleQueries[this.currentDomain] || this.exampleQueries['cooking'];
 
-                    // Update placeholder display
-                    if (this.currentDomain === 'llm_consciousness') {
+                    // Update placeholder display - use dynamic if available, otherwise fallback
+                    const domainPlaceholder = this.exampleQueries[this.currentDomain + '_placeholder'];
+                    if (domainPlaceholder) {
+                        this.currentPlaceholderDisplay = domainPlaceholder + ' (Press Enter to submit)';
+                    } else if (this.currentDomain === 'llm_consciousness') {
                         this.currentPlaceholderDisplay = 'Type your question about LLM failure modes... (Press Enter to submit)';
                     } else if (this.currentDomain === 'binary_symmetry') {
                         this.currentPlaceholderDisplay = 'Ask about binary patterns, bitwise operations, or bit manipulation... (Press Enter to submit)';
                     } else {
-                        this.currentPlaceholderDisplay = 'Type your cooking question here... (Press Enter to submit)';
+                        this.currentPlaceholderDisplay = 'Type your question here... (Press Enter to submit)';
                     }
 
                     console.log('Updated display properties for domain:', this.currentDomain);
@@ -1079,11 +1582,12 @@
                         console.log('Before load - this.patterns:', this.patterns);
                         console.log('Before load - this.patterns.length:', this.patterns.length);
 
-                        // Load specialists and patterns in parallel
-                        const [specsRes, patternsRes, healthRes] = await Promise.all([
+                        // Load specialists, patterns, health, and domain config in parallel
+                        const [specsRes, patternsRes, healthRes, configRes] = await Promise.all([
                             fetch(`/api/domains/${this.currentDomain}/specialists`),
                             fetch(`/api/domains/${this.currentDomain}/patterns`),
-                            fetch(`/api/domains/${this.currentDomain}/health`)
+                            fetch(`/api/domains/${this.currentDomain}/health`),
+                            fetch(`/api/admin/domains/${this.currentDomain}`)
                         ]);
 
                         const specsData = await specsRes.json();
@@ -1107,6 +1611,19 @@
 
                         const healthData = await healthRes.json();
                         this.categories = healthData.categories || [];
+
+                        // Load domain config to get example_queries and placeholder
+                        const configData = await configRes.json();
+                        if (configData.ui_config) {
+                            if (configData.ui_config.example_queries) {
+                                this.exampleQueries[this.currentDomain] = configData.ui_config.example_queries;
+                                console.log('Loaded example queries for', this.currentDomain, ':', configData.ui_config.example_queries);
+                            }
+                            if (configData.ui_config.placeholder_text) {
+                                this.exampleQueries[this.currentDomain + '_placeholder'] = configData.ui_config.placeholder_text;
+                                console.log('Loaded placeholder for', this.currentDomain, ':', configData.ui_config.placeholder_text);
+                            }
+                        }
                     } catch (error) {
                         console.error('=== ERROR in loadDomainInfo ===');
                         console.error('Error:', error);
@@ -1126,10 +1643,36 @@
 
                 async loadPatterns() {
                     try {
-                        const res = await fetch(`/api/domains/${this.currentDomain}/patterns`);
-                        const data = await res.json();
-                        this.patterns = data.patterns || [];
-                        this.patternCount = data.count || 0;
+                        // Load both regular patterns and candidate patterns
+                        const [patternsRes, candidatesRes] = await Promise.all([
+                            fetch(`/api/domains/${this.currentDomain}/patterns`),
+                            fetch(`/api/admin/candidates?domain=${this.currentDomain}`)
+                        ]);
+
+                        const patternsData = await patternsRes.json();
+                        const candidatesData = await candidatesRes.json();
+
+                        // Normalize patterns to have consistent field names
+                        const normalizedPatterns = (patternsData.patterns || []).map(p => ({
+                            ...p,
+                            id: p.id,
+                            pattern_id: p.id  // Add pattern_id for consistency
+                        }));
+
+                        const normalizedCandidates = (candidatesData.candidates || []).map(c => ({
+                            ...c,
+                            id: c.pattern_id,  // Use pattern_id as id for consistency
+                            type: c.status === 'candidate' ? 'candidate' : (c.type || 'pattern')
+                        }));
+
+                        // Merge both lists
+                        const allPatterns = [
+                            ...normalizedPatterns,
+                            ...normalizedCandidates
+                        ];
+
+                        this.patterns = allPatterns;
+                        this.patternCount = allPatterns.length;
                     } catch (error) {
                         console.error('Failed to load patterns:', error);
                     }
@@ -1137,7 +1680,13 @@
 
                 async viewPatternDetail(pattern) {
                     try {
-                        const res = await fetch(`/api/domains/${this.currentDomain}/patterns/${pattern.id}`);
+                        // Candidate patterns use a different endpoint
+                        const isCandidate = pattern.status === 'candidate';
+                        const endpoint = isCandidate
+                            ? `/api/admin/candidates/${this.currentDomain}/${pattern.id}`
+                            : `/api/domains/${this.currentDomain}/patterns/${pattern.id}`;
+
+                        const res = await fetch(endpoint);
                         if (!res.ok) {
                             throw new Error('Failed to load pattern details');
                         }
@@ -1159,6 +1708,8 @@
                     this.response = '';
                     this.specialist = '';
                     this.confidence = 0;
+                    this.llm_used = false;
+                    this.ai_generated = false;
                     this.trace = null;
                     this.selectedTrace = null;
 
@@ -1183,6 +1734,8 @@
                         this.lastQuery = data.query;
                         this.processingTime = data.processing_time_ms || 0;
                         this.trace = data.trace || null;
+                        this.llm_used = data.llm_used || false;
+                        this.ai_generated = data.ai_generated || false;
                         this.queriesProcessed++;
 
                         // Reload historical traces
@@ -1444,6 +1997,142 @@
                             spec.name.trim() !== ''
                         )
                     );
+                },
+
+                // ==================== PATTERN MANAGEMENT FUNCTIONS ====================
+
+                async editPatternProperties(pattern) {
+                    try {
+                        // Candidate patterns use a different endpoint
+                        const isCandidate = pattern.status === 'candidate';
+                        const endpoint = isCandidate
+                            ? `/api/admin/candidates/${this.currentDomain}/${pattern.id}`
+                            : `/api/domains/${this.currentDomain}/patterns/${pattern.id}`;
+
+                        const res = await fetch(endpoint);
+                        if (!res.ok) throw new Error('Failed to load pattern');
+                        const fullPattern = await res.json();
+
+                        // Handle different response formats
+                        const patternData = fullPattern.pattern || fullPattern;
+
+                        this.editingPattern = true;
+                        this.patternEditForm = {
+                            id: patternData.id,
+                            name: patternData.name,
+                            description: patternData.description,
+                            status: patternData.status || 'certified',
+                            llm_generated: patternData.llm_generated || false,
+                            confidence_score: patternData.confidence_score || patternData.confidence || 0.5
+                        };
+                    } catch (error) {
+                        console.error('Failed to load pattern for editing:', error);
+                        alert('Failed to load pattern: ' + error.message);
+                    }
+                },
+
+                async savePatternEdits() {
+                    try {
+                        const payload = {
+                            status: this.patternEditForm.status,
+                            llm_generated: this.patternEditForm.llm_generated,
+                            confidence_score: parseFloat(this.patternEditForm.confidence_score)
+                        };
+
+                        const res = await fetch(`/api/admin/domains/${this.currentDomain}/patterns/${this.patternEditForm.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!res.ok) {
+                            const error = await res.json();
+                            // Handle different error formats
+                            let errorMsg = 'Failed to update pattern';
+                            if (typeof error.detail === 'string') {
+                                errorMsg = error.detail;
+                            } else if (Array.isArray(error.detail)) {
+                                errorMsg = error.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+                            } else if (error.detail) {
+                                errorMsg = JSON.stringify(error.detail);
+                            }
+                            throw new Error(errorMsg);
+                        }
+
+                        const data = await res.json();
+                        alert('Pattern updated successfully');
+                        await this.loadPatterns();
+                        this.cancelPatternEdit();
+                    } catch (error) {
+                        console.error('Failed to update pattern:', error);
+                        alert('Failed to update pattern: ' + error.message);
+                    }
+                },
+
+                cancelPatternEdit() {
+                    this.editingPattern = false;
+                    this.patternEditForm = {
+                        id: '',
+                        name: '',
+                        description: '',
+                        status: 'certified',
+                        llm_generated: false,
+                        confidence_score: 0.5
+                    };
+                },
+
+                confirmDeletePattern(pattern) {
+                    this.patternToDelete = pattern;
+                },
+
+                async deletePattern() {
+                    if (!this.patternToDelete) return;
+
+                    try {
+                        const res = await fetch(`/api/admin/domains/${this.currentDomain}/patterns/${this.patternToDelete.id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (!res.ok) {
+                            const error = await res.json().catch(() => ({ detail: 'Unknown error' }));
+                            let errorMsg = 'Failed to delete pattern';
+                            if (typeof error.detail === 'string') {
+                                errorMsg = error.detail;
+                            } else if (error.detail) {
+                                errorMsg = JSON.stringify(error.detail);
+                            }
+                            throw new Error(errorMsg);
+                        }
+
+                        const data = await res.json();
+                        alert('Pattern deleted successfully');
+                        this.patternToDelete = null;
+                        await this.loadPatterns();
+                    } catch (error) {
+                        console.error('Failed to delete pattern:', error);
+                        alert('Failed to delete pattern: ' + error.message);
+                    }
+                },
+
+                async loadDiagnostics() {
+                    try {
+                        const res = await fetch('/api/diagnostics/summary');
+
+                        if (!res.ok) {
+                            throw new Error('Failed to load diagnostics');
+                        }
+
+                        const data = await res.json();
+                        this.diagnosticsData = {
+                            health: data.health,
+                            search_metrics: data.search_metrics,
+                            pattern_health: data.pattern_health,
+                            generated_at: data.generated_at
+                        };
+                    } catch (error) {
+                        console.error('Failed to load diagnostics:', error);
+                        alert('Failed to load diagnostics: ' + error.message);
+                    }
                 }
             }
         }

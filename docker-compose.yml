@@ -29,6 +29,7 @@ services:
       # Path configuration (optional, defaults shown)
       - PATTERN_STORAGE_BASE=/app/data/patterns
       - DOMAIN_REGISTRY_PATH=/app/data
+      - UNIVERSES_BASE=/app/universes
 
       # Log level
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -38,6 +39,15 @@ services:
 
       # Mount host pattern directories (bind mount for live sync)
       - ./data/patterns:/app/data/patterns:rw
+
+      # Mount universes directory (bind mount for live sync)
+      - ./universes:/app/universes:rw
+
+      # Mount frontend for live updates during development
+      - ./generic_framework/frontend:/app/frontend:ro
+
+      # Mount built frontend (bind mount for live updates)
+      # - ./frontend/dist:/app/frontend/dist:ro  # TEMPORARILY DISABLED TO RESTORE NICE UI
 
       # Persist logs (optional - container logs also captured)
       - eeframe_logs:/app/logs
