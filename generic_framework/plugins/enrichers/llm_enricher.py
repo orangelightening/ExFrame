@@ -169,11 +169,11 @@ We found {len(patterns)} relevant pattern(s) from our knowledge base:
 
 {pattern_text}
 
-Your task:
-1. Synthesize a clear, helpful answer using these patterns
-2. Be conversational and natural
-3. If patterns don't fully answer the question, you can add general knowledge
-4. Keep it concise but complete
+Build upon these patterns to provide a clear, helpful answer:
+1. Synthesize the key insights from these patterns
+2. Keep it conversational and natural
+3. Add relevant context when patterns are incomplete
+4. Keep it concise while being thorough
 5. Use markdown formatting for readability
 
 Provide your response:"""
@@ -188,9 +188,8 @@ Provide your response:"""
 
 A user asked: "{query}"
 
-Please provide a helpful, accurate response. Use markdown formatting.
-
-Note: We don't have specific pattern matches for this query, so use your general knowledge while being careful not to hallucinate specific facts.
+Provide a clear, helpful response using markdown formatting.
+Draw on your knowledge while staying accurate and factual.
 
 Your response:"""
 
@@ -464,12 +463,11 @@ We found the following relevant information from our knowledge search:
 
 {research_context}
 
-Your task:
-1. Use the search results above to answer the question
-2. If the search results don't fully answer the question, you can supplement with general knowledge
-3. Be clear and cite which source you're using when relevant
+Use these search results to provide a clear, helpful answer:
+1. Draw on the search results above
+2. Add relevant context when needed
+3. Cite sources when appropriate
 4. Use markdown formatting for readability
-5. If the search results are incomplete or unclear, acknowledge this
 
 Provide your response:"""
 

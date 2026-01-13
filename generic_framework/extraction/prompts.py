@@ -23,14 +23,14 @@ class PromptTemplate(str, Enum):
 # ============================================================================
 
 GENERAL_EXTRACTION_PROMPT = """You are an expertise extraction assistant. Your task is to
-analyze text from the {domain} domain and extract problem-solving patterns.
+analyze text from the {domain} domain and extract practical patterns.
 
 For each pattern you identify, provide:
 1. **name**: A short descriptive title
 2. **pattern_type**: One of: troubleshooting, procedure, substitution, decision, diagnostic, preparation, optimization, principle
-3. **description**: One sentence explaining what this pattern does
-4. **problem**: What problem does this solve?
-5. **solution**: How is it solved?
+3. **description**: One sentence explaining the value this provides
+4. **problem**: What challenge does this help overcome?
+5. **solution**: What makes this approach work well?
 6. **steps**: Step-by-step procedure (if applicable)
 7. **conditions**: If/then branches (if applicable)
 8. **tags**: Relevant keywords
@@ -42,8 +42,8 @@ Output ONLY valid JSON. Use this exact structure:
     "name": "Pattern Name",
     "pattern_type": "troubleshooting",
     "description": "Brief description",
-    "problem": "What problem it solves",
-    "solution": "How to solve it",
+    "problem": "What challenge this helps overcome",
+    "solution": "What makes this approach work",
     "steps": ["step 1", "step 2", "..."],
     "conditions": {{"if": "condition", "then": "action"}},
     "tags": ["tag1", "tag2"]
@@ -60,13 +60,13 @@ Text to analyze:
 # ============================================================================
 
 QA_EXTRACTION_PROMPT = """You are analyzing a Q&A pair from {domain}. Extract the
-problem-solving pattern embedded in this exchange.
+practical pattern embedded in this exchange.
 
 Focus on:
-- The core problem being asked
-- The solution approach provided in answers
-- Any step-by-step troubleshooting
-- Related problems or solutions mentioned
+- The question being explored
+- The solution that worked
+- Key steps to follow
+- Related insights mentioned
 
 Output as JSON:
 
@@ -74,8 +74,8 @@ Output as JSON:
   "name": "Pattern name based on the question",
   "pattern_type": "troubleshooting",
   "description": "One sentence summary",
-  "problem": "The question/problem being asked",
-  "solution": "The solution from the answers",
+  "problem": "The question being explored",
+  "solution": "What worked to resolve it",
   "steps": ["key steps from the solution"],
   "tags": ["relevant", "tags"]
 }}
@@ -93,7 +93,7 @@ Output as JSON:
 # ============================================================================
 
 PROCEDURE_EXTRACTION_PROMPT = """You are analyzing a procedural guide from {domain}.
-Extract the expertise pattern from these steps.
+Extract the practical pattern from these steps.
 
 Identify:
 - What this procedure accomplishes
@@ -107,8 +107,8 @@ Output as JSON:
 {{
   "name": "Procedure name",
   "pattern_type": "procedure",
-  "description": "What this does",
-  "problem": "What problem or need this addresses",
+  "description": "What this accomplishes",
+  "problem": "What need this addresses",
   "solution": "Overview of the approach",
   "steps": ["condensed step 1", "condensed step 2", "..."],
   "prerequisites": ["thing needed 1", "thing needed 2"],
@@ -141,7 +141,7 @@ Output as JSON:
   "name": "Substitution: X → Y",
   "pattern_type": "substitution",
   "description": "Replace X with Y under these conditions",
-  "problem": "When you need X but only have Y",
+  "problem": "When you need X but Y is available",
   "solution": "Use Y instead with this conversion",
   "steps": ["how to do the substitution"],
   "conditions": {{"works_when": "condition", "caveat": "limitation"}},
@@ -161,20 +161,20 @@ TROUBLESHOOTING_PROMPT = """You are analyzing troubleshooting steps from {domain
 Extract the diagnostic and repair pattern.
 
 Identify:
-- Symptoms or problem indicators
+- Symptoms or indicators
 - Diagnostic steps (how to identify the cause)
 - Solutions for each potential cause
 - Progressive isolation approach
-- Escalation rules (try simple fixes first)
+- Start with simple checks first
 
 Output as JSON:
 
 {{
   "name": "Troubleshooting: Problem Description",
   "pattern_type": "troubleshooting",
-  "description": "How to diagnose and fix this issue",
-  "problem": "The symptoms or error",
-  "solution": "General approach to fixing",
+  "description": "How to diagnose and resolve this issue",
+  "problem": "The symptoms being addressed",
+  "solution": "General approach to resolution",
   "steps": [
     "Check simple thing first",
     "Then check this",

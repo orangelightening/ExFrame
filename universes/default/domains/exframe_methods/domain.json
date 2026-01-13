@@ -56,14 +56,13 @@
         "max_patterns": 5,
         "research_strategy": {
           "type": "document",
+          "use_chunking": false,
           "base_path": "/app/universes/default/docs",
           "documents": [
             {"type": "file", "path": "user-guide.md"},
             {"type": "file", "path": "context.md"},
             {"type": "file", "path": "README.md"}
-          ],
-          "chunk_size": 500,
-          "chunk_overlap": 100
+          ]
         }
       }
     }

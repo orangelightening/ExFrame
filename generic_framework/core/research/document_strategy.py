@@ -17,37 +17,49 @@ class DocumentResearchStrategy(ResearchStrategy):
     """
     Research strategy that searches through local documents.
 
-    Uses vector embeddings to find relevant content from documents
-    specified in the domain configuration.
+    Two modes of operation:
+    1. Full Context Mode (use_chunking: false): Load entire documents for LLM.
+       Best for small document sets where full context matters (architecture docs, APIs).
+    2. Chunked Mode (use_chunking: true): Split documents into chunks for search.
+       Best for large document sets where targeted retrieval is needed.
+
+    For EEFrame queries about features, architecture, and interfaces, use Full Context mode
+    to preserve cross-section relationships and complete understanding.
     """
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.documents = config.get('documents', [])
+        self.use_chunking = config.get('use_chunking', False)  # Default: full context
         self.chunk_size = config.get('chunk_size', 500)
         self.chunk_overlap = config.get('chunk_overlap', 100)
         self.base_path = config.get('base_path', os.getcwd())
 
-        # Vector storage (will be initialized)
+        # Storage (will be initialized)
         self._chunks: List[Dict[str, Any]] = []
+        self._full_documents: List[Dict[str, Any]] = []
         self._initialized = False
 
     async def initialize(self) -> None:
-        """Initialize document index by loading and chunking documents."""
+        """Initialize document index by loading documents."""
         if self._initialized:
             return
 
-        print(f"  [DocumentResearchStrategy] Initializing with {len(self.documents)} documents")
+        mode = "chunked" if self.use_chunking else "full context"
+        print(f"  [DocumentResearchStrategy] Initializing with {len(self.documents)} documents ({mode} mode)")
 
         # Load and process each document
         for doc_config in self.documents:
             await self._load_document(doc_config)
 
-        print(f"  [DocumentResearchStrategy] Loaded {len(self._chunks)} chunks from {len(self.documents)} documents")
+        if self.use_chunking:
+            print(f"  [DocumentResearchStrategy] Loaded {len(self._chunks)} chunks from {len(self.documents)} documents")
+        else:
+            print(f"  [DocumentResearchStrategy] Loaded {len(self._full_documents)} full documents")
         self._initialized = True
 
     async def _load_document(self, doc_config: Dict[str, Any]) -> None:
-        """Load a single document and chunk it."""
+        """Load a single document."""
         doc_type = doc_config.get('type', 'file')
         doc_path = doc_config.get('path', '')
 
@@ -63,7 +75,7 @@ class DocumentResearchStrategy(ResearchStrategy):
             print(f"  [DocumentResearchStrategy] Unknown document type: {doc_type}")
 
     async def _load_local_file(self, file_path: str) -> None:
-        """Load a local file and chunk it."""
+        """Load a local file (chunked or full based on mode)."""
         full_path = Path(self.base_path) / file_path
 
         if not full_path.exists():
@@ -74,10 +86,19 @@ class DocumentResearchStrategy(ResearchStrategy):
             with open(full_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            # Simple chunking strategy
-            chunks = self._chunk_text(content, str(full_path))
-            self._chunks.extend(chunks)
-            print(f"  [DocumentResearchStrategy] Loaded {len(chunks)} chunks from {file_path}")
+            if self.use_chunking:
+                # Chunking mode: split into chunks for search
+                chunks = self._chunk_text(content, str(full_path))
+                self._chunks.extend(chunks)
+                print(f"  [DocumentResearchStrategy] Loaded {len(chunks)} chunks from {file_path}")
+            else:
+                # Full context mode: store entire document
+                self._full_documents.append({
+                    'path': str(full_path),
+                    'filename': file_path,
+                    'content': content
+                })
+                print(f"  [DocumentResearchStrategy] Loaded full document: {file_path}")
 
         except Exception as e:
             print(f"  [DocumentResearchStrategy] Error loading {file_path}: {e}")
@@ -115,14 +136,14 @@ class DocumentResearchStrategy(ResearchStrategy):
 
     async def search(self, query: str, limit: int = 5) -> List[SearchResult]:
         """
-        Search for relevant document chunks using simple keyword matching.
+        Search for relevant content in documents.
 
-        Note: This is a simplified implementation. A production version would use
-        vector embeddings with a vector database like ChromaDB.
+        In Full Context Mode: Returns all complete documents for the LLM to process.
+        In Chunked Mode: Returns relevant chunks using keyword matching.
 
         Args:
             query: The search query
-            limit: Maximum number of results
+            limit: Maximum number of results (only applies to chunked mode)
 
         Returns:
             List of search results
@@ -130,47 +151,66 @@ class DocumentResearchStrategy(ResearchStrategy):
         if not self._initialized:
             await self.initialize()
 
-        query_lower = query.lower()
-        query_terms = query_lower.split()
+        if not self.use_chunking:
+            # Full Context Mode: Return all complete documents
+            results = []
+            for doc in self._full_documents:
+                results.append(SearchResult(
+                    content=doc['content'],
+                    source=doc['filename'],
+                    relevance_score=1.0,  # All docs are equally relevant in full context mode
+                    metadata={
+                        'path': doc['path'],
+                        'full_document': True
+                    }
+                ))
+            print(f"  [DocumentResearchStrategy] Returning {len(results)} full documents")
+            return results
+        else:
+            # Chunked Mode: Keyword search
+            query_lower = query.lower()
+            query_terms = query_lower.split()
 
-        # Score each chunk based on keyword overlap
-        scored_chunks = []
-        for chunk in self._chunks:
-            text_lower = chunk['text'].lower()
+            # Score each chunk based on keyword overlap
+            scored_chunks = []
+            for chunk in self._chunks:
+                text_lower = chunk['text'].lower()
 
-            # Simple scoring: count query term occurrences
-            score = sum(1 for term in query_terms if term in text_lower)
+                # Simple scoring: count query term occurrences
+                score = sum(1 for term in query_terms if term in text_lower)
 
-            if score > 0:
-                scored_chunks.append((chunk, score))
+                if score > 0:
+                    scored_chunks.append((chunk, score))
 
-        # Sort by score and take top results
-        scored_chunks.sort(key=lambda x: x[1], reverse=True)
-        top_chunks = scored_chunks[:limit]
+            # Sort by score and take top results
+            scored_chunks.sort(key=lambda x: x[1], reverse=True)
+            top_chunks = scored_chunks[:limit]
 
-        # Convert to SearchResult objects
-        results = []
-        for chunk, score in top_chunks:
-            # Normalize score to 0-1 range
-            max_possible_score = len(query_terms)
-            normalized_score = min(score / max_possible_score, 1.0)
+            # Convert to SearchResult objects
+            results = []
+            for chunk, score in top_chunks:
+                # Normalize score to 0-1 range
+                max_possible_score = len(query_terms)
+                normalized_score = min(score / max_possible_score, 1.0)
 
-            results.append(SearchResult(
-                content=chunk['text'],
-                source=chunk['source'],
-                relevance_score=normalized_score,
-                metadata={
-                    'chunk_id': chunk['chunk_id'],
-                    'chunk_text': chunk['text']
-                }
-            ))
+                results.append(SearchResult(
+                    content=chunk['text'],
+                    source=chunk['source'],
+                    relevance_score=normalized_score,
+                    metadata={
+                        'chunk_id': chunk['chunk_id'],
+                        'chunk_text': chunk['text'],
+                        'full_document': False
+                    }
+                ))
 
-        print(f"  [DocumentResearchStrategy] Found {len(results)} results for query: {query}")
-        return results
+            print(f"  [DocumentResearchStrategy] Found {len(results)} chunks for query: {query}")
+            return results
 
     async def cleanup(self) -> None:
         """Clean up resources."""
         self._chunks.clear()
+        self._full_documents.clear()
         self._initialized = False
 
 
