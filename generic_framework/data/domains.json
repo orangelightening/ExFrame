@@ -54,6 +54,89 @@
       "specialists": [],
       "created_at": "2026-01-08T05:45:48.298732",
       "updated_at": "2026-01-08T05:45:48.298738"
+    },
+    "exframe_methods": {
+      "domain_id": "exframe_methods",
+      "domain_name": "EEFrame Guide",
+      "description": "Learn how to use EEFrame - self-documenting patterns",
+      "version": "1.0.0",
+      "categories": [
+        "getting_started",
+        "features",
+        "how_to",
+        "concepts",
+        "troubleshooting"
+      ],
+      "tags": [
+        "help",
+        "tutorial",
+        "guide",
+        "documentation",
+        "learn",
+        "eeframe",
+        "pattern",
+        "domain",
+        "query",
+        "survey"
+      ],
+      "storage_path": "/home/peter/development/eeframe/data/patterns/exframe_methods",
+      "pattern_format": "json",
+      "specialists": [
+        {
+          "specialist_id": "generalist",
+          "name": "EEFrame Guide",
+          "description": "Expert in EEFrame usage and features",
+          "expertise_keywords": [
+            "how",
+            "what",
+            "where",
+            "when",
+            "why",
+            "use",
+            "create",
+            "find",
+            "search",
+            "pattern",
+            "domain",
+            "query",
+            "survey",
+            "universe",
+            "start",
+            "begin",
+            "help",
+            "eeframe",
+            "system",
+            "interface",
+            "navigate",
+            "understand",
+            "learn"
+          ],
+          "expertise_categories": [
+            "getting_started",
+            "features",
+            "how_to",
+            "concepts",
+            "troubleshooting"
+          ],
+          "confidence_threshold": 0.25,
+          "response_template": "structured"
+        }
+      ],
+      "ui_config": {
+        "placeholder_text": "How can I help you learn EEFrame? (Press Enter to submit)",
+        "example_queries": [
+          "How do I ask a question?",
+          "What is a pattern?",
+          "How do I create a domain?",
+          "What is the Surveyor?",
+          "How do I get started?"
+        ],
+        "icon": "📚",
+        "color": "#4CAF50",
+        "is_default": true
+      },
+      "created_at": "2026-01-12T00:00:00Z",
+      "updated_at": "2026-01-12T00:00:00Z"
     }
   },
   "next_id": 1

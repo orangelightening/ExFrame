@@ -288,12 +288,16 @@ class GenericAssistantEngine:
                 llm_response_text = enriched_data['llm_response']
 
             if llm_response_text:
+                # Check if research strategy was used (for auto-certification)
+                research_strategy_used = enriched_data.get('research_strategy_used', False)
+
                 await self._save_candidate_pattern(
                     query=query,
                     llm_response=llm_response_text,
                     specialist_id=specialist_id,
                     patterns_found=len(patterns),
-                    confidence=result['confidence']  # Use reduced confidence
+                    confidence=result['confidence'],  # Use reduced confidence
+                    research_strategy_used=research_strategy_used
                 )
 
         # Add trace if requested
@@ -467,12 +471,15 @@ class GenericAssistantEngine:
         llm_response: str,
         specialist_id: Optional[str],
         patterns_found: int,
-        confidence: float
+        confidence: float,
+        research_strategy_used: bool = False
     ) -> Optional[str]:
         """
-        Save LLM response as a candidate pattern for later review.
+        Save LLM response as a pattern.
 
-        This captures LLM-generated knowledge that can be promoted to certified patterns.
+        If research_strategy_used is True (from trusted documentation),
+        auto-certify at 80% confidence.
+        Otherwise, save as candidate pattern for later review.
         """
         try:
             # Check if a pattern with this exact query already exists
@@ -514,12 +521,29 @@ class GenericAssistantEngine:
 
             # Count existing patterns to generate ID
             existing_count = len(all_patterns)
-            pattern_id = f"{self.domain.domain_id}_candidate_{existing_count + 1:03d}"
+
+            # Auto-certify if from trusted documentation research
+            if research_strategy_used:
+                # Documentation patterns get auto-certified at 80%
+                pattern_id = f"{self.domain.domain_id}_{existing_count + 1:03d}"
+                pattern_status = "certified"
+                pattern_confidence = 0.80
+                pattern_type = "knowledge"
+                pattern_tags = ["auto_certified", "documentation_derived"]
+                log_prefix = "✓ Auto-certified pattern"
+            else:
+                # Regular LLM responses are candidates
+                pattern_id = f"{self.domain.domain_id}_candidate_{existing_count + 1:03d}"
+                pattern_status = "candidate"
+                pattern_confidence = 0.50
+                pattern_type = "candidate"
+                pattern_tags = ["candidate", "llm_generated"]
+                log_prefix = "✓ Saved candidate pattern"
 
             candidate_pattern = {
                 "id": pattern_id,
                 "name": name,
-                "pattern_type": "candidate",
+                "pattern_type": pattern_type,
                 "description": f"Auto-generated from query: {query}",
                 "problem": query,  # The query that triggered the LLM
                 "solution": llm_response,  # The LLM's response
@@ -528,9 +552,9 @@ class GenericAssistantEngine:
                 "related_patterns": [],
                 "prerequisites": [],
                 "alternatives": [],
-                "confidence": 0.5,  # Default confidence for candidates
+                "confidence": pattern_confidence,  # 0.80 for docs, 0.50 for candidates
                 "sources": [],
-                "tags": ["candidate", "llm_generated"],
+                "tags": pattern_tags,
                 "examples": [query],  # Sample question from the query
                 "domain": self.domain.domain_id,
                 "created_at": now.isoformat(),
@@ -538,16 +562,16 @@ class GenericAssistantEngine:
                 "times_accessed": 0,
                 "user_rating": None,
 
-                # Candidate-specific metadata
-                "status": "candidate",
-                "origin": "llm_fallback",
+                # Status metadata
+                "status": pattern_status,
+                "origin": "documentation_research" if research_strategy_used else "llm_fallback",
                 "origin_query": query,
                 "generated_at": now.isoformat(),
                 "generated_by": "glm-4.7",  # Could be made configurable
                 "confidence_score": confidence,
-                "reviewed_by": None,
-                "reviewed_at": None,
-                "review_notes": None,
+                "reviewed_by": None if not research_strategy_used else "system",
+                "reviewed_at": None if not research_strategy_used else now.isoformat(),
+                "review_notes": None if not research_strategy_used else "Auto-certified from trusted documentation",
                 "usage_count": 0,
                 "user_feedback": []
             }
@@ -555,7 +579,7 @@ class GenericAssistantEngine:
             # Save to knowledge base
             saved_id = await self.knowledge_base.add_pattern(candidate_pattern)
 
-            print(f"  ✓ Saved candidate pattern: {saved_id} from query: {query[:40]}...")
+            print(f"  {log_prefix}: {saved_id} from query: {query[:40]}...")
             return saved_id
 
         except Exception as e:

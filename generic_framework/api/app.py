@@ -59,6 +59,7 @@ class DomainCreate(BaseModel):
     tags: List[str]
     specialists: List[SpecialistConfig]
     storage_path: Optional[str] = None
+    enrichers: Optional[List[Dict[str, Any]]] = None
 
 
 class DomainUpdate(BaseModel):
@@ -67,6 +68,7 @@ class DomainUpdate(BaseModel):
     categories: Optional[List[str]] = None
     tags: Optional[List[str]] = None
     specialists: Optional[List[SpecialistConfig]] = None
+    enrichers: Optional[List[Dict[str, Any]]] = None
 
 
 class QueryResponse(BaseModel):
@@ -109,6 +111,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# =============================================================================
+# MOUNT AUTONOMOUS LEARNING API
+# =============================================================================
+# Mount the autonomous learning FastAPI app as a sub-application
+# This allows the Surveyor UI to interact with the learning system
+try:
+    # Add autonomous_learning to path
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "autonomous_learning"))
+    from api.app import app as learning_app
+    # Mount at /api/learning path
+    app.mount("/api/learning", learning_app)
+    logger.info("✓ Autonomous Learning API mounted at /api/learning")
+except ImportError as e:
+    logger.warning(f"✗ Could not mount Autonomous Learning API: {e}")
+    logger.info("  Surveyor UI will run in stub mode")
+except Exception as e:
+    logger.warning(f"✗ Error mounting Autonomous Learning API: {e}")
 
 # Mount static files from built React app
 frontend_dist_path = Path(__file__).parent.parent / "frontend" / "dist"
@@ -1122,15 +1142,66 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
             }
             for s in request.specialists
         ]
+    if request.enrichers is not None:
+        domain_config["enrichers"] = request.enrichers
 
     domain_config["updated_at"] = datetime.utcnow().isoformat()
 
     _save_domain_registry(registry)
 
+    # Also update the universe's domain.json file if it exists
+    try:
+        universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+        domain_file = Path(universes_base) / "default" / "domains" / domain_id / "domain.json"
+
+        if domain_file.exists():
+            # Load the domain.json file
+            with open(domain_file, 'r') as f:
+                universe_domain_config = json.load(f)
+
+            # Update enrichers in the universe domain config
+            if request.enrichers is not None:
+                universe_domain_config["enrichers"] = request.enrichers
+
+            # Update other fields
+            if request.domain_name is not None:
+                universe_domain_config["domain_name"] = request.domain_name
+            if request.description is not None:
+                universe_domain_config["description"] = request.description
+            if request.categories is not None:
+                universe_domain_config["categories"] = request.categories
+            if request.tags is not None:
+                universe_domain_config["tags"] = request.tags
+            if request.specialists is not None:
+                universe_domain_config["specialists"] = [
+                    {
+                        "specialist_id": s.specialist_id,
+                        "name": s.name,
+                        "description": s.description,
+                        "expertise_keywords": s.expertise_keywords,
+                        "expertise_categories": s.expertise_categories,
+                        "confidence_threshold": s.confidence_threshold
+                    }
+                    for s in request.specialists
+                ]
+
+            universe_domain_config["updated_at"] = datetime.utcnow().isoformat()
+
+            # Save back to the universe domain.json
+            with open(domain_file, 'w') as f:
+                json.dump(universe_domain_config, f, indent=2)
+
+            print(f"Updated universe domain file: {domain_file}")
+    except Exception as e:
+        print(f"Warning: Failed to update universe domain file: {e}")
+
     # Reload domain if it's currently loaded
     if domain_id in engines:
-        # In production, you'd want to reload the domain here
-        pass
+        # Trigger a reload of the domain
+        try:
+            await engines[domain_id].reload()
+        except Exception as e:
+            print(f"Warning: Failed to reload domain {domain_id}: {e}")
 
     return {
         "domain_id": domain_id,

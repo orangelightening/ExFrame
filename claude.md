@@ -2,9 +2,25 @@
 
 **Purpose**: Complete context for resuming work on the EEFrame project after refactoring.
 
-**Last Updated**: 2026-01-08  
-**Status**: Refactored - AI Communications removed, OMV integrated into Generic Framework  
-**Version**: 3.0.0
+**Last Updated**: 2026-01-12
+**Status**: Docker Compose distribution ready, security fixes applied
+**Version**: 3.1.0
+
+---
+
+## IMPORTANT - Current Session (2026-01-12)
+
+**Shell Issue**: CLI was broken after deleting `/tmp/ExFrame-test` directory. User needs to restart and resume.
+
+**When Resuming**: See `/home/peter/development/eeframe/context.md` for current state and next steps.
+
+**Key Tasks Completed This Session**:
+1. Fixed Domain Management page (now uses `/api/domains`)
+2. Updated README with clear Docker installation instructions
+3. Fixed security issue: removed `.env` from git tracking
+4. Pushed all changes to GitHub
+
+**Next Task**: Test fresh install from GitHub in new test directory (see context.md)
 
 ---
 

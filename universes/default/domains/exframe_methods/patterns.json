@@ -1,0 +1,509 @@
+[
+  {
+    "id": "exframe_001",
+    "name": "How to Ask a Question",
+    "pattern_type": "getting_started",
+    "description": "Learn how to query the EEFrame knowledge base",
+    "problem": "New users don't know how to ask questions or interact with EEFrame",
+    "solution": "Use the Query tab to ask natural language questions. Select your domain, type your question, and press Enter or click Submit.",
+    "steps": [
+      "Click the Query tab in the navigation",
+      "Select your domain from the dropdown",
+      "Type your question in natural language",
+      "Press Enter or click Submit Query",
+      "Review the response and confidence score"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_002",
+      "exframe_003"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.95,
+    "sources": [],
+    "tags": [
+      "getting_started",
+      "query",
+      "how_to"
+    ],
+    "examples": [
+      "How do I cook chicken?",
+      "What is a pattern?"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_002",
+    "name": "What is a Pattern?",
+    "pattern_type": "concepts",
+    "description": "Understanding the fundamental unit of knowledge in EEFrame",
+    "problem": "Users need to understand what patterns are and how they work",
+    "solution": "A Pattern is a reusable knowledge unit with a problem/solution structure. Each pattern contains: name, description, problem it solves, solution steps, tags, and confidence score.",
+    "steps": [
+      "Patterns are knowledge units",
+      "Each has a problem and solution",
+      "Patterns are organized into domains",
+      "Patterns can be certified for quality",
+      "Patterns are matched when you query"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_003",
+      "exframe_004"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.95,
+    "sources": [],
+    "tags": [
+      "concepts",
+      "pattern",
+      "knowledge"
+    ],
+    "examples": [
+      "Recipe pattern",
+      "Code pattern",
+      "Technique pattern"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 2,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_003",
+    "name": "What is a Domain?",
+    "pattern_type": "concepts",
+    "description": "Understanding how knowledge is organized in EEFrame",
+    "problem": "Users need to understand how EEFrame organizes knowledge",
+    "solution": "A Domain is an area of expertise containing related patterns. Examples: cooking, python, gardening. Domains help organize patterns and enable targeted queries.",
+    "steps": [
+      "Domains contain related patterns",
+      "Each domain has specialists",
+      "Domains have categories and tags",
+      "You select a domain before querying",
+      "New domains can be created"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_002",
+      "exframe_010"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.93,
+    "sources": [],
+    "tags": [
+      "concepts",
+      "domain",
+      "organization"
+    ],
+    "examples": [
+      "Cooking domain",
+      "Python domain"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 1,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_004",
+    "name": "How to Create a Domain",
+    "pattern_type": "how_to",
+    "description": "Step-by-step guide to creating a new domain",
+    "problem": "Users want to add their own area of expertise",
+    "solution": "Use the Domains tab to create a new domain. Fill in domain ID, name, description, categories, tags, and specialists configuration.",
+    "steps": [
+      "Click the Domains tab",
+      "Click Create Domain button",
+      "Fill in Domain ID (unique identifier)",
+      "Fill in Domain Name (display name)",
+      "Add description",
+      "Add categories (topic sub-groups)",
+      "Add tags (discovery keywords)",
+      "Configure specialists (AI agents)",
+      "Click Create Domain"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_003"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.9,
+    "sources": [],
+    "tags": [
+      "how_to",
+      "domain",
+      "create"
+    ],
+    "examples": [
+      "Creating a baking domain"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_005",
+    "name": "What is the Surveyor?",
+    "pattern_type": "concepts",
+    "description": "Understanding EEFrame's autonomous learning system",
+    "problem": "Users need to understand what the Surveyor does",
+    "solution": "The Surveyor is EEFrame's autonomous learning system. It can scrape web sources, extract knowledge patterns, certify them through a 5-judge AI panel, and store validated expertise.",
+    "steps": [
+      "Surveyor is for autonomous learning",
+      "It can scrape web sources",
+      "It extracts patterns automatically",
+      "5-judge panel certifies quality",
+      "Patterns are stored for querying"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_006",
+      "exframe_007"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.92,
+    "sources": [],
+    "tags": [
+      "concepts",
+      "surveyor",
+      "autonomous"
+    ],
+    "examples": [
+      "Surveying cooking recipes"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 2,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_006",
+    "name": "Survey Scopes: Domain vs Neighbourhood vs Universe",
+    "pattern_type": "concepts",
+    "description": "Understanding the three levels of survey scope",
+    "problem": "Users need to choose the right survey scope for their needs",
+    "solution": "Domain surveys one specific area. Neighbourhood surveys use a filter across multiple domains. Universe surveys everything. Choose based on your goals.",
+    "steps": [
+      "Domain Survey: One specific domain (e.g., cooking)",
+      "Neighbourhood Survey: Filter across domains (e.g., 'quick baking')",
+      "Universe Survey: Everything (comprehensive)",
+      "Choose Domain for focused learning",
+      "Choose Neighbourhood for cross-cutting topics"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_005",
+      "exframe_007"
+    ],
+    "prerequisites": [
+      "exframe_003"
+    ],
+    "alternatives": [],
+    "confidence": 0.91,
+    "sources": [],
+    "tags": [
+      "concepts",
+      "surveyor",
+      "survey",
+      "scope"
+    ],
+    "examples": [
+      "Surveying cooking domain",
+      "Surveying quick recipes across domains"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 1,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_007",
+    "name": "How to Create a Survey",
+    "pattern_type": "how_to",
+    "description": "Step-by-step guide to creating an autonomous learning survey",
+    "problem": "Users want to collect patterns automatically",
+    "solution": "Use the Surveyor tab to create a survey. Choose scope, configure scraping control (seed URL, additional URLs, collection instructions), set targets, and start the survey.",
+    "steps": [
+      "Click the Surveyor tab",
+      "Click + New Survey",
+      "Enter name and description",
+      "Choose scope (Domain/Neighbourhood/Universe)",
+      "For Neighbourhood: define your filter criteria",
+      "Add Seed URL (starting point)",
+      "Add Additional URLs (optional)",
+      "Add Collection Instructions (what to look for)",
+      "Set Target Patterns and Min Confidence",
+      "Click Create Survey",
+      "Click \u25b6 Start to begin"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_005",
+      "exframe_006"
+    ],
+    "prerequisites": [
+      "exframe_003"
+    ],
+    "alternatives": [],
+    "confidence": 0.89,
+    "sources": [],
+    "tags": [
+      "how_to",
+      "surveyor",
+      "survey",
+      "create"
+    ],
+    "examples": [
+      "Creating a baking recipes survey"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 1,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_008",
+    "name": "Understanding Confidence Scores",
+    "pattern_type": "concepts",
+    "description": "What confidence scores mean and how to interpret them",
+    "problem": "Users need to understand query result confidence",
+    "solution": "Confidence scores (0.0-1.0) indicate how certain the system is about its answer. Higher confidence = more reliable. 90%+ is excellent, 70-89% is good, below 70% should be verified.",
+    "steps": [
+      "Confidence ranges from 0.0 to 1.0",
+      "0.9-1.0: Excellent, deploy immediately",
+      "0.8-0.89: Good, monitor feedback",
+      "0.6-0.79: Acceptable, provisional",
+      "Below 0.6: Poor, verify or reject"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_001",
+      "exframe_002"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.88,
+    "sources": [],
+    "tags": [
+      "concepts",
+      "confidence",
+      "quality"
+    ],
+    "examples": [
+      "Query with 0.95 confidence"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 0,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_009",
+    "name": "Navigating the Interface",
+    "pattern_type": "getting_started",
+    "description": "Overview of EEFrame's user interface",
+    "problem": "New users need to understand the interface layout",
+    "solution": "EEFrame has a tab-based interface: Query (ask questions), Patterns (browse knowledge), Traces (view query history), Sources (search), Domains (manage), Surveyor (autonomous learning), Universes (environments), Diagnostics (health).",
+    "steps": [
+      "Query: Ask questions in natural language",
+      "Patterns: Browse all patterns by domain",
+      "Traces: View query history and debugging",
+      "Sources: Search across all patterns",
+      "Domains: Create and manage domains",
+      "Surveyor: Autonomous learning system",
+      "Universes: Manage knowledge environments",
+      "Diagnostics: System health monitoring"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_001"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.93,
+    "sources": [],
+    "tags": [
+      "getting_started",
+      "navigation",
+      "interface"
+    ],
+    "examples": [
+      "Finding the Surveyor tab"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 2,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_010",
+    "name": "EEFrame Hierarchy Explained",
+    "pattern_type": "concepts",
+    "description": "Understanding the knowledge organization hierarchy",
+    "problem": "Users need to understand how EEFrame organizes knowledge",
+    "solution": "EEFrame uses a hierarchy: Multiverse (all) \u2192 Universe (environment) \u2192 Neighbourhood (user-defined filter) \u2192 Domain (expertise area) \u2192 Patterns (knowledge units).",
+    "steps": [
+      "Multiverse: All universes in system",
+      "Universe: Complete knowledge environment",
+      "Neighbourhood: Filter across domains",
+      "Domain: Area of expertise",
+      "Pattern: Individual knowledge unit"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "exframe_002",
+      "exframe_003",
+      "exframe_006"
+    ],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.9,
+    "sources": [],
+    "tags": [
+      "concepts",
+      "hierarchy",
+      "organization"
+    ],
+    "examples": [
+      "Cooking domain in default universe"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-12T00:00:00Z",
+    "updated_at": "2026-01-12T00:00:00Z",
+    "times_accessed": 1,
+    "user_rating": null
+  },
+  {
+    "id": "exframe_methods_011",
+    "name": "What is ExFrame?\n",
+    "pattern_type": "knowledge",
+    "description": "Auto-generated from query: What is ExFrame?\n",
+    "problem": "What is ExFrame?\n",
+    "solution": "Based on the provided search results, there is no direct definition of \"ExFrame\" (e.g., as a software framework or specific product name) in the text. However, the results strongly imply that **ExFrame** is the name of the knowledge management system or platform you are currently using, which organizes information into **Domains** and **Patterns** to solve specific problems.\n\nHere is what can be inferred about ExFrame from the search results:\n\n### 1. Core Concept: Domains\nThe system organizes knowledge into distinct areas called \"Domains.\" The provided text lists examples such as:\n*   **Cooking Domain:** Contains patterns for recipes, food techniques, and troubleshooting (e.g., \"How do I cook chicken breast?\").\n*   **Python Domain:** Contains patterns for coding, LLM monitoring, and autonomous agents (e.g., \"How do I detect when an LLM is hallucinating?\").\n*   *Source 1 & 3 mention: \"Domains are areas of expe...\"*\n\n### 2. Knowledge Representation: Patterns\nInformation within ExFrame is structured into \"Patterns.\" According to **Source 2**, each pattern contains specific metadata fields:\n*   **Name:** A brief title.\n*   **Type:** The category of the pattern (e.g., recipe, technique, code).\n*   **Description:** What the pattern does.\n*   **Problem:** The specific issue the pattern addresses.\n*   **Solution:** The answer or implementation.\n*   **Status:** Indicates if the pattern is \"Certified\" (\u2713) or a \"Candidate\" (?).\n*   **Confidence:** A quality score ranging from 0.0 to 1.0.\n\n### 3. User Interface\nThe text describes a specific user interface for interacting with this knowledge base, including:\n*   **Patterns Tab:** Used to browse and filter patterns by domain or category.\n*   **Sources Tab:** Used to search across all domains and view usage statistics.\n\n### Summary\n**ExFrame** appears to be an expert system or knowledge framework that captures solutions as reusable \"Patterns\" categorized by \"Domains.\" It is designed to help users query specific problems (like \"My cake is too dense\") and retrieve certified solutions with associated confidence scores.",
+    "steps": [],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.8,
+    "sources": [],
+    "tags": [
+      "auto_certified",
+      "documentation_derived"
+    ],
+    "examples": [
+      "What is ExFrame?\n"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-13T18:57:19.309862",
+    "updated_at": "2026-01-13T18:57:19.309862",
+    "times_accessed": 2,
+    "user_rating": null,
+    "status": "certified",
+    "origin": "documentation_research",
+    "origin_query": "What is ExFrame?\n",
+    "generated_at": "2026-01-13T18:57:19.309823",
+    "generated_by": "glm-4.7",
+    "confidence_score": 0.0,
+    "reviewed_by": "system",
+    "reviewed_at": "2026-01-13T18:57:19.309823",
+    "review_notes": "Auto-certified from trusted documentation",
+    "usage_count": 0,
+    "user_feedback": []
+  },
+  {
+    "id": "exframe_methods_012",
+    "name": "How does the surveyor work?\n",
+    "pattern_type": "knowledge",
+    "description": "Auto-generated from query: How does the surveyor work?\n",
+    "problem": "How does the surveyor work?\n",
+    "solution": "Based on the provided search results, the documentation explains how to **configure and create** a survey, but does not fully detail the background mechanics of how the surveyor processes data after creation.\n\nHere is the information available regarding how the surveyor works:\n\n### Creating and Configuring a Survey\nTo start a survey, you must first define your parameters. According to **Source 1**, the process involves the following settings:\n\n*   **Targets**:\n    *   **Target Patterns**: You determine how many patterns the system should attempt to collect.\n    *   **Min Confidence**: You set a minimum quality threshold for the results (ranging from 0.0 to 1.0).\n*   **Neighbourhood Definition**: You can define a \"Neighbourhood,\" which acts as a user-defined filter to search across all available domains.\n*   **Action**: Once these settings are input, you click **Create Survey** to initiate the process.\n\n### Understanding Results\nWhile the documents do not explain the exact algorithm the surveyor uses to traverse the data, **Source 3** explains how to interpret the output of queries (which may be related to the survey results):\n*   **Confidence**: The system provides a confidence score (0-100%) indicating how reliable the answer is.\n*   **Specialist**: It indicates which AI specialist handled the query.\n*   **Patterns Used**: It lists which knowledge patterns were referenced to generate the response.\n\n**Note:** The specific mechanics of how the surveyor executes the search\u2014such as how it identifies \"Neighbourhoods\" or how it validates patterns against the Min Confidence threshold\u2014are not detailed in the provided text segments.",
+    "steps": [],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.8,
+    "sources": [],
+    "tags": [
+      "auto_certified",
+      "documentation_derived"
+    ],
+    "examples": [
+      "How does the surveyor work?\n"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-13T19:00:32.039550",
+    "updated_at": "2026-01-13T19:00:32.039550",
+    "times_accessed": 0,
+    "user_rating": null,
+    "status": "certified",
+    "origin": "documentation_research",
+    "origin_query": "How does the surveyor work?\n",
+    "generated_at": "2026-01-13T19:00:32.039504",
+    "generated_by": "glm-4.7",
+    "confidence_score": 0.7,
+    "reviewed_by": "system",
+    "reviewed_at": "2026-01-13T19:00:32.039504",
+    "review_notes": "Auto-certified from trusted documentation",
+    "usage_count": 0,
+    "user_feedback": []
+  },
+  {
+    "id": "exframe_methods_013",
+    "name": "What is a pattern?",
+    "pattern_type": "knowledge",
+    "description": "Auto-generated from query: What is a pattern?",
+    "problem": "What is a pattern?",
+    "solution": "Based on the documentation provided, a **pattern** in this context refers to a specific unit of knowledge or a solution within a specific domain.\n\nAccording to **Source 2** and **Source 3**, a pattern serves to address a specific problem and typically contains the following structured fields:\n\n| Field | Description |\n|-------|-------------|\n| **Name** | A brief title for the pattern |\n| **Type** | The category of the pattern (e.g., recipe, technique, code) |\n| **Description** | Explanation of what this pattern does |\n| **Problem** | The specific issue or challenge the pattern solves |\n| **Solution** | The solution or answer provided by the pattern |\n| **Tags** | Keywords used to help discover the pattern |\n| **Status** | Indicates if the pattern is Certified (\u2713) or a Candidate (?) |\n| **Confidence** | A quality score ranging from 0.0 to 1.0 |\n\nYou can view, filter, and search these patterns using the **Patterns** or **Sources** tabs in the interface (**Source 2**, **Source 3**).",
+    "steps": [],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.8,
+    "sources": [],
+    "tags": [
+      "auto_certified",
+      "documentation_derived"
+    ],
+    "examples": [
+      "What is a pattern?"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-13T19:30:31.909585",
+    "updated_at": "2026-01-13T19:30:31.909585",
+    "times_accessed": 0,
+    "user_rating": null,
+    "status": "certified",
+    "origin": "documentation_research",
+    "origin_query": "What is a pattern?",
+    "generated_at": "2026-01-13T19:30:31.909545",
+    "generated_by": "glm-4.7",
+    "confidence_score": 0.7,
+    "reviewed_by": "system",
+    "reviewed_at": "2026-01-13T19:30:31.909545",
+    "review_notes": "Auto-certified from trusted documentation",
+    "usage_count": 0,
+    "user_feedback": []
+  }
+]

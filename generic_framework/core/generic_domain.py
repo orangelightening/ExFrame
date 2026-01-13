@@ -368,9 +368,15 @@ class GenericDomain(Domain):
 
         # ALWAYS add LLM fallback as the last enricher if not already present
         # This ensures all domains have LLM fallback when patterns are weak or missing
-        if not has_llm_fallback:
+        # UNLESS the domain has explicitly disabled it by having a disabled LLM fallback in config
+        has_llm_fallback_in_config = any(
+            e.get('class') == 'LLMFallbackEnricher' for e in enrichers_config
+        )
+        if not has_llm_fallback and not has_llm_fallback_in_config:
             print(f"  No LLM fallback enricher found - adding default LLM fallback")
             self._add_default_llm_fallback()
+        elif has_llm_fallback_in_config and not has_llm_fallback:
+            print(f"  LLM fallback explicitly disabled in config - skipping default fallback")
 
     async def enrich(
         self,

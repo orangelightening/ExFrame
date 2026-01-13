@@ -15,6 +15,7 @@ import asyncio
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.enrichment_plugin import EnrichmentPlugin, EnrichmentContext
+from core.research import create_research_strategy, SearchResult
 
 
 class LLMEnricher(EnrichmentPlugin):
@@ -317,6 +318,28 @@ class LLMFallbackEnricher(LLMEnricher):
 
     Only uses LLM when pattern confidence is below threshold.
     Useful for keeping fast pattern-based responses while having LLM safety net.
+
+    Enhanced with Research Strategies:
+    - Can search documents or internet for context before calling LLM
+    - Configured via research_strategy in domain config
+
+    Configuration:
+        - mode: "fallback" (fixed)
+        - research_strategy: Optional dict with 'type' and strategy-specific config
+            Example:
+            {
+                'type': 'document',
+                'documents': [
+                    {'type': 'file', 'path': 'context.md'},
+                    {'type': 'file', 'path': 'user-guide.md'}
+                ],
+                'base_path': '/path/to/project'
+            }
+            OR
+            {
+                'type': 'internet',
+                'search_provider': 'auto'
+            }
     """
 
     name = "LLM Fallback Enricher"
@@ -325,6 +348,132 @@ class LLMFallbackEnricher(LLMEnricher):
         config = config or {}
         config["mode"] = "fallback"
         super().__init__(config)
+
+        # Initialize research strategy if configured
+        self.research_strategy = None
+        research_config = config.get("research_strategy")
+
+        if research_config:
+            try:
+                print(f"  [LLMFallbackEnricher] Initializing research strategy: {research_config.get('type')}")
+                self.research_strategy = create_research_strategy(research_config)
+            except Exception as e:
+                print(f"  [LLMFallbackEnricher] Failed to initialize research strategy: {e}")
+
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext
+    ) -> Dict[str, Any]:
+        """Enrich using LLM with optional research strategy."""
+        patterns = response_data.get("patterns", [])
+        confidence = response_data.get("confidence", 0.0)
+
+        # Decide whether to use LLM based on mode and confidence
+        use_llm = self._should_use_llm(patterns, confidence)
+
+        if not use_llm:
+            return response_data
+
+        # Initialize research strategy if needed
+        if self.research_strategy and not hasattr(self.research_strategy, '_initialized'):
+            try:
+                await self.research_strategy.initialize()
+            except Exception as e:
+                print(f"  [LLMFallbackEnricher] Failed to initialize research strategy: {e}")
+                self.research_strategy = None
+
+        # Use research-enhanced prompt if strategy is available
+        if self.research_strategy:
+            llm_response = await self._generate_research_enhanced_response(
+                response_data,
+                context,
+                patterns
+            )
+        else:
+            llm_response = await self._generate_llm_response(
+                response_data,
+                context,
+                patterns
+            )
+
+        # Add as fallback
+        if confidence < self.min_confidence or not patterns:
+            response_data["llm_fallback"] = llm_response
+            response_data["llm_used"] = True
+            response_data["research_strategy_used"] = self.research_strategy is not None
+
+        return response_data
+
+    async def _generate_research_enhanced_response(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext,
+        patterns: List
+    ) -> str:
+        """Generate LLM response with research context."""
+        query = response_data.get("query", "")
+
+        try:
+            # Search for relevant context
+            search_results = await self.research_strategy.search(query, limit=3)
+
+            if search_results:
+                # Build prompt with research context
+                prompt = self._build_research_enhanced_prompt(
+                    query,
+                    search_results,
+                    patterns,
+                    context
+                )
+            else:
+                # Fall back to standard prompt
+                prompt = self._build_direct_prompt(query, context)
+
+        except Exception as e:
+            print(f"  [LLMFallbackEnricher] Research failed: {e}, using fallback")
+            prompt = self._build_direct_prompt(query, context)
+
+        # Call LLM
+        return await self._call_llm(prompt)
+
+    def _build_research_enhanced_prompt(
+        self,
+        query: str,
+        search_results: List[SearchResult],
+        patterns: List,
+        context: EnrichmentContext
+    ) -> str:
+        """Build prompt with research context from documents or web search."""
+        domain_id = context.domain_id
+
+        # Format search results
+        research_context = ""
+        for i, result in enumerate(search_results, 1):
+            research_context += f"""
+Source {i} (relevance: {result.relevance_score:.2f}):
+From: {result.source}
+Content: {result.content[:500]}...
+"""
+
+        prompt = f"""You are a helpful AI assistant for the {domain_id} domain.
+
+A user asked: "{query}"
+
+We found the following relevant information from our knowledge search:
+
+{research_context}
+
+Your task:
+1. Use the search results above to answer the question
+2. If the search results don't fully answer the question, you can supplement with general knowledge
+3. Be clear and cite which source you're using when relevant
+4. Use markdown formatting for readability
+5. If the search results are incomplete or unclear, acknowledge this
+
+Provide your response:"""
+
+        return prompt
 
 
 class LLMSummarizerEnricher(LLMEnricher):

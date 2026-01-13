@@ -158,6 +158,24 @@
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Knowledge Constellation (ExFrame_Methods Welcome) -->
+                        <div class="glass rounded-xl overflow-hidden relative" x-show="currentDomain === 'exframe_methods' && !response">
+                            <canvas id="constellation-canvas" class="w-full" style="height: 350px; background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);"></canvas>
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="text-center space-y-2">
+                                    <h2 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                                        Welcome to EEFrame
+                                    </h2>
+                                    <p class="text-gray-400 text-lg">Ask me anything about EEFrame to get started</p>
+                                    <div class="flex items-center justify-center gap-4 text-sm text-gray-500 mt-4">
+                                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Patterns</span>
+                                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse" style="animation-delay: 0.5s"></span> Domains</span>
+                                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse" style="animation-delay: 1s"></span> Knowledge</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Response -->
@@ -520,26 +538,642 @@
                 </div>
             </div>
 
-            <!-- INGESTION VIEW -->
-            <div x-show="currentView === 'ingestion'" x-transition class="glass rounded-xl p-6">
-                <h2 class="text-2xl font-bold mb-6">Pattern Ingestion</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="p-4 rounded-lg bg-gray-800/50 border border-gray-700">
-                        <h3 class="font-semibold text-emerald-400 mb-3">Single URL Ingestion</h3>
-                        <p class="text-sm text-gray-400 mb-4">Extract patterns from a single URL</p>
-                        <input type="text" placeholder="Enter URL..." class="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 mb-2 text-sm">
-                        <button class="w-full px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded text-sm font-medium">Ingest</button>
+            <!-- SURVEYOR VIEW -->
+            <div x-show="currentView === 'surveyor'" x-transition class="h-full">
+                <div class="grid grid-cols-12 gap-4 h-full">
+                    <!-- Survey List (Left Sidebar) -->
+                    <div class="col-span-3">
+                        <div class="glass rounded-xl p-4 h-full flex flex-col">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-lg font-bold">Surveys</h2>
+                                <button @click="showNewSurveyModal = true" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 rounded text-sm font-medium">+ New</button>
+                            </div>
+                            <div class="flex-1 overflow-y-auto space-y-2">
+                                <template x-for="survey in surveys" :key="survey.id">
+                                    <div
+                                        @click="selectSurvey(survey.id)"
+                                        :class="selectedSurvey?.id === survey.id ? 'bg-emerald-500/20 border-emerald-500' : 'bg-gray-800/50 border-gray-700 hover:border-gray-600'"
+                                        class="p-3 rounded-lg border cursor-pointer transition-all"
+                                    >
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-lg" x-text="survey.status === 'running' ? '▶' : survey.status === 'paused' ? '⏸' : survey.status === 'completed' ? '✓' : '○'"></span>
+                                            <span class="font-medium text-sm" x-text="survey.name"></span>
+                                            <span class="px-1.5 py-0.5 rounded text-xs font-medium"
+                                                  :class="{
+                                                      'bg-purple-500/20 text-purple-400': survey.level === 'neighbourhood',
+                                                      'bg-blue-500/20 text-blue-400': survey.level === 'domain',
+                                                      'bg-teal-500/20 text-teal-400': survey.level === 'universe'
+                                                  }" x-text="survey.level.charAt(0).toUpperCase() + survey.level.slice(1)"></span>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mb-2" x-text="survey.description"></p>
+                                        <div class="text-xs text-gray-500">
+                                            <span>P: <span x-text="survey.patterns_certified"></span>/<span x-text="survey.patterns_created || survey.target_patterns"></span></span>
+                                            <span class="ml-2" x-show="survey.level === 'neighbourhood' && survey.neighbourhood" x-text="'🔍 ' + survey.neighbourhood.slice(0, 25) + (survey.neighbourhood.length > 25 ? '...' : '')"></span>
+                                            <span class="ml-2" x-show="survey.level === 'domain' && survey.domain" x-text="'📁 ' + survey.domain"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-4 rounded-lg bg-gray-800/50 border border-gray-700">
-                        <h3 class="font-semibold text-blue-400 mb-3">Batch Ingestion</h3>
-                        <p class="text-sm text-gray-400 mb-4">Process multiple URLs from a file</p>
-                        <textarea placeholder="Enter URLs (one per line)..." class="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 mb-2 text-sm h-24 resize-none"></textarea>
-                        <button class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded text-sm font-medium">Batch Process</button>
+
+                    <!-- Survey Detail (Center Panel) -->
+                    <div class="col-span-6">
+                        <div class="glass rounded-xl p-6 h-full flex flex-col" x-show="selectedSurvey">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h2 class="text-2xl font-bold" x-text="selectedSurvey?.name"></h2>
+                                    <p class="text-sm text-gray-400" x-text="selectedSurvey?.description"></p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        x-show="selectedSurvey?.status === 'idle' || selectedSurvey?.status === 'paused'"
+                                        @click="startSurvey()"
+                                        class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded text-sm font-medium"
+                                    >▶ Start</button>
+                                    <button
+                                        x-show="selectedSurvey?.status === 'running'"
+                                        @click="pauseSurvey()"
+                                        class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded text-sm font-medium"
+                                    >⏸ Pause</button>
+                                    <button
+                                        x-show="selectedSurvey?.status === 'running' || selectedSurvey?.status === 'paused'"
+                                        @click="stopSurvey()"
+                                        class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded text-sm font-medium"
+                                    >■ Stop</button>
+                                    <button @click="openEditSurvey()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded text-sm font-medium">✏️ Edit</button>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="mb-6">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-400">Progress</span>
+                                    <span class="text-emerald-400" x-text="Math.round((selectedSurvey?.progress || 0) * 100) + '%'"></span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all" :style="'width: ' + ((selectedSurvey?.progress || 0) * 100) + '%'"></div>
+                                </div>
+                            </div>
+
+                            <!-- Survey Requirements -->
+                            <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700 mb-4">
+                                <h3 class="font-semibold text-gray-300 mb-3">Scope</h3>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-gray-500">Level:</span>
+                                        <span class="px-2 py-0.5 rounded ml-2 text-xs font-medium"
+                                              :class="{
+                                                  'bg-purple-500/20 text-purple-400': selectedSurvey?.level === 'neighbourhood',
+                                                  'bg-blue-500/20 text-blue-400': selectedSurvey?.level === 'domain',
+                                                  'bg-teal-500/20 text-teal-400': selectedSurvey?.level === 'universe'
+                                              }" x-text="selectedSurvey?.level"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Universe:</span>
+                                        <span class="text-gray-300 ml-2" x-text="selectedSurvey?.universe"></span>
+                                    </div>
+                                    <div x-show="selectedSurvey?.neighbourhood" class="col-span-2">
+                                        <span class="text-gray-500 block mb-1">Neighbourhood Definition:</span>
+                                        <span class="text-gray-300 block" x-text="selectedSurvey?.neighbourhood"></span>
+                                    </div>
+                                    <div x-show="selectedSurvey?.domain">
+                                        <span class="text-gray-500">Domain:</span>
+                                        <span class="text-gray-300 ml-2" x-text="selectedSurvey?.domain"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Target Patterns:</span>
+                                        <span class="text-gray-300 ml-2" x-text="selectedSurvey?.target_patterns || 100"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Min Confidence:</span>
+                                        <span class="text-gray-300 ml-2" x-text="(selectedSurvey?.min_confidence || 0.8)"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Activity Log -->
+                            <div class="flex-1 overflow-y-auto p-4 bg-gray-800/30 rounded-lg border border-gray-700">
+                                <h3 class="font-semibold text-gray-300 mb-3">Activity Log</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-start gap-2 text-gray-400">
+                                        <span class="text-gray-600 shrink-0" x-text="formatTime(new Date())"></span>
+                                        <span>Survey loaded</span>
+                                    </div>
+                                    <div class="flex items-start gap-2 text-emerald-400">
+                                        <span class="text-gray-600 shrink-0">10:30</span>
+                                        <span>Started scraping: allrecipes.com</span>
+                                    </div>
+                                    <div class="flex items-start gap-2 text-blue-400">
+                                        <span class="text-gray-600 shrink-0">10:32</span>
+                                        <span>Certified pattern: Chocolate Chip Cookies</span>
+                                    </div>
+                                    <div class="flex items-start gap-2 text-yellow-400">
+                                        <span class="text-gray-600 shrink-0">10:33</span>
+                                        <span>Flagged for review: Cake Temperature Guide</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="glass rounded-xl p-12 text-center" x-show="!selectedSurvey">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-8m-6 8h8m-8 0v-8"></path>
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-400 mb-2">No Survey Selected</h3>
+                            <p class="text-gray-500 text-sm">Select a survey from the list or create a new one</p>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Metrics (Right Panel) -->
+                    <div class="col-span-3">
+                        <div class="glass rounded-xl p-4 h-full">
+                            <h3 class="text-lg font-bold mb-4">Live Metrics</h3>
+
+                            <!-- Pulse -->
+                            <div class="mb-6">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-400">Pulse</span>
+                                    <span class="text-emerald-400" x-text="metrics.pulse"></span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <template x-for="i in 5">
+                                        <div class="h-2 flex-1 rounded" :class="(i <= (selectedSurvey?.status === 'running' ? 4 : 0)) ? 'bg-emerald-400' : 'bg-gray-700'"></div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Certification Stats -->
+                            <div class="p-3 bg-gray-800/50 rounded-lg border border-gray-700 mb-4">
+                                <h4 class="text-sm font-medium text-gray-300 mb-3">Certification</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">✓ Certified</span>
+                                        <span class="text-emerald-400" x-text="selectedSurvey?.patterns_certified || 0"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">⚠ Flagged</span>
+                                        <span class="text-yellow-400" x-text="selectedSurvey?.patterns_flagged || 0"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">✗ Rejected</span>
+                                        <span class="text-red-400" x-text="selectedSurvey?.patterns_rejected || 0"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">⏳ Pending</span>
+                                        <span class="text-blue-400" x-text="selectedSurvey?.patterns_pending || 0"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Judge Activity -->
+                            <div class="p-3 bg-gray-800/50 rounded-lg border border-gray-700 mb-4">
+                                <h4 class="text-sm font-medium text-gray-300 mb-3">Judges</h4>
+                                <div class="space-y-2 text-sm">
+                                    <template x-for="i in 4">
+                                        <div>
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-gray-400" x-text="'J' + (i + 1)"></span>
+                                                <span class="text-gray-500" x-text="judgeActivity['J' + (i + 1)] + '%'"></span>
+                                            </div>
+                                            <div class="w-full bg-gray-700 rounded-full h-1">
+                                                <div class="bg-blue-500 h-1 rounded-full" :style="'width: ' + judgeActivity['J' + (i + 1)] + '%'"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                                <h4 class="text-sm font-medium text-gray-300 mb-2">Status</h4>
+                                <div class="text-xs space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Errors</span>
+                                        <span class="text-red-400" x-text="metrics.errors"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Focus</span>
+                                        <span class="text-emerald-400" x-text="(metrics.focus * 100).toFixed(0) + '%'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-6 p-4 rounded-lg bg-gray-800/50 border border-gray-700">
-                    <h3 class="font-semibold text-yellow-400 mb-3">Recent Ingestions</h3>
-                    <p class="text-sm text-gray-500">No recent ingestions</p>
+            </div>
+
+            <!-- NEW SURVEY MODAL -->
+            <div x-show="showNewSurveyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70" x-cloak>
+                <div class="glass rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold">Create New Survey</h2>
+                        <button @click="showNewSurveyModal = false" class="text-gray-400 hover:text-gray-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="createSurvey()" class="space-y-5">
+                        <!-- Basic Info -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Survey Name</label>
+                            <input type="text" x-model="newSurveyForm.name" required
+                                   class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none"
+                                   placeholder="e.g., Baking Recipes Collection">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Description</label>
+                            <textarea x-model="newSurveyForm.description" required rows="2"
+                                      class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none resize-none"
+                                      placeholder="What this survey will collect..."></textarea>
+                        </div>
+
+                        <!-- Survey Scope -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">What do you want to survey?</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="flex flex-col p-4 rounded-lg border cursor-pointer transition-all"
+                                       :class="newSurveyForm.level === 'domain' ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 hover:border-gray-600'">
+                                    <input type="radio" x-model="newSurveyForm.level" value="domain" class="sr-only">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-2xl">📁</span>
+                                        <div class="font-semibold text-sm text-blue-400">Domain</div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 leading-relaxed">
+                                        One specific domain<br>
+                                        <span class="text-gray-500">e.g., just "cooking" or "python"</span>
+                                    </div>
+                                </label>
+                                <label class="flex flex-col p-4 rounded-lg border cursor-pointer transition-all"
+                                       :class="newSurveyForm.level === 'neighbourhood' ? 'border-purple-500 bg-purple-500/10' : 'border-gray-700 hover:border-gray-600'">
+                                    <input type="radio" x-model="newSurveyForm.level" value="neighbourhood" class="sr-only">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-2xl">🔍</span>
+                                        <div class="font-semibold text-sm text-purple-400">Neighbourhood</div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 leading-relaxed">
+                                        Filter across domains<br>
+                                        <span class="text-gray-500">e.g., "baking under 30 min"</span>
+                                    </div>
+                                </label>
+                                <label class="flex flex-col p-4 rounded-lg border cursor-pointer transition-all"
+                                       :class="newSurveyForm.level === 'universe' ? 'border-teal-500 bg-teal-500/10' : 'border-gray-700 hover:border-gray-600'">
+                                    <input type="radio" x-model="newSurveyForm.level" value="universe" class="sr-only">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-2xl">🌌</span>
+                                        <div class="font-semibold text-sm text-teal-400">Universe</div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 leading-relaxed">
+                                        Everything<br>
+                                        <span class="text-gray-500">All domains, all patterns</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Scope Explanation (changes based on selection) -->
+                        <div class="p-3 rounded-lg border text-sm"
+                             :class="{
+                                 'bg-blue-900/20 border-blue-700/50': newSurveyForm.level === 'domain',
+                                 'bg-purple-900/20 border-purple-700/50': newSurveyForm.level === 'neighbourhood',
+                                 'bg-teal-900/20 border-teal-700/50': newSurveyForm.level === 'universe'
+                             }">
+                            <div x-show="newSurveyForm.level === 'domain'" class="flex items-start gap-3">
+                                <span class="text-blue-400 text-lg">📁</span>
+                                <div>
+                                    <div class="font-medium text-blue-400">Domain Survey</div>
+                                    <div class="text-gray-400 text-xs mt-1">Surveys all patterns within a single, existing domain. Choose this when you want comprehensive coverage of one topic area.</div>
+                                </div>
+                            </div>
+                            <div x-show="newSurveyForm.level === 'neighbourhood'" class="flex items-start gap-3">
+                                <span class="text-purple-400 text-lg">🔍</span>
+                                <div>
+                                    <div class="font-medium text-purple-400">Neighbourhood Survey</div>
+                                    <div class="text-gray-400 text-xs mt-1">Defines a filter that spans multiple domains. The system searches across all domains to find patterns matching your criteria. <strong class="text-purple-300">Perfect for cross-cutting topics like "quick recipes" or "data science patterns."</strong></div>
+                                </div>
+                            </div>
+                            <div x-show="newSurveyForm.level === 'universe'" class="flex items-start gap-3">
+                                <span class="text-teal-400 text-lg">🌌</span>
+                                <div>
+                                    <div class="font-medium text-teal-400">Universe Survey</div>
+                                    <div class="text-gray-400 text-xs mt-1">Surveys all patterns across all domains in the universe. Use sparingly - this is comprehensive and resource-intensive.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Universe -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Universe</label>
+                            <select x-model="newSurveyForm.universe" required
+                                    class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                                <template x-for="universe in availableUniverses" :key="universe.universe_id">
+                                    <option :value="universe.universe_id" x-text="universe.universe_id"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Neighbourhood Definition (only shown for neighbourhood level) -->
+                        <div x-show="newSurveyForm.level === 'neighbourhood'" x-transition class="p-4 rounded-lg border-2 border-purple-500/50 bg-purple-900/10">
+                            <label class="block text-sm font-semibold text-purple-400 mb-2">
+                                🔍 Define Your Neighbourhood
+                            </label>
+                            <input type="text" x-model="newSurveyForm.neighbourhood"
+                                   class="w-full px-4 py-3 rounded-lg bg-gray-900/50 border-2 border-purple-500/30 focus:border-purple-500 outline-none text-white placeholder-gray-500"
+                                   placeholder="e.g., baking recipes under 30 minutes, Python data science patterns">
+                            <div class="mt-3 space-y-2">
+                                <p class="text-xs text-gray-300">
+                                    <span class="text-purple-400 font-medium">What this does:</span> Your definition becomes a search query that scans across ALL domains to find matching patterns.
+                                </p>
+                                <p class="text-xs text-gray-400">
+                                    <span class="text-purple-400 font-medium">Examples:</span><br>
+                                    • "quick desserts under 20 minutes" → finds matching patterns from cooking, baking, dessert domains<br>
+                                    • "machine learning model evaluation" → finds patterns from python, data_science, ML domains<br>
+                                    • "authentication and security best practices" → spans webdev, security, backend domains
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Domain (only shown for domain level) -->
+                        <div x-show="newSurveyForm.level === 'domain'">
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Domain</label>
+                            <select x-model="newSurveyForm.domain" required
+                                    class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                                <template x-for="domain in availableDomains" :key="domain">
+                                    <option :value="domain" x-text="domain"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Source Type Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-400 mb-3">
+                                📚 Source Type
+                                <span class="text-xs text-gray-500 ml-2">— where to collect patterns from</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex flex-col p-4 rounded-lg border cursor-pointer transition-all"
+                                       :class="newSurveyForm.source_type === 'web' ? 'border-amber-500 bg-amber-500/10' : 'border-gray-700 hover:border-gray-600'">
+                                    <input type="radio" x-model="newSurveyForm.source_type" value="web" class="sr-only">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-2xl">🌐</span>
+                                        <span class="font-semibold text-amber-400">Web Scraping</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Scrape websites and follow links</p>
+                                </label>
+
+                                <label class="flex flex-col p-4 rounded-lg border cursor-pointer transition-all"
+                                       :class="newSurveyForm.source_type === 'documents' ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 hover:border-gray-600'">
+                                    <input type="radio" x-model="newSurveyForm.source_type" value="documents" class="sr-only">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-2xl">📄</span>
+                                        <span class="font-semibold text-blue-400">Local Documents</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Ingest documentation files</p>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Scraping Control Panel (Web) -->
+                        <div x-show="newSurveyForm.source_type === 'web'" class="p-4 rounded-lg border-2 border-amber-500/30 bg-amber-900/10">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-amber-400">⚙️</span>
+                                <h3 class="font-semibold text-amber-400">Web Scraping Control</h3>
+                            </div>
+
+                            <!-- Seed URL -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    🔗 Seed URL
+                                    <span class="text-xs text-gray-500 ml-2">— where to start scraping</span>
+                                </label>
+                                <input type="url" x-model="newSurveyForm.seed_url"
+                                       class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500"
+                                       placeholder="https://www.allrecipes.com/recipes/17215/best-chocolate-chip-cookies">
+                                <p class="text-xs text-gray-400 mt-1">The starting point. The scraper will begin here and follow relevant links.</p>
+                            </div>
+
+                            <!-- Additional URLs -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    📎 Additional URLs
+                                    <span class="text-xs text-gray-500 ml-2">— optional, one per line</span>
+                                </label>
+                                <textarea x-model="newSurveyForm.additional_urls" rows="3"
+                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500 resize-none"
+                                          placeholder="https://www.foodnetwork.com/recipes/chocolate-cookies&#10;https://www.tasty.co/recipe/baking-101"></textarea>
+                                <p class="text-xs text-gray-400 mt-1">Extra sources to include. Add one URL per line.</p>
+                            </div>
+
+                            <!-- Scraping Prompt -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    🤖 Collection Instructions
+                                    <span class="text-xs text-gray-500 ml-2">— tell the AI what to collect</span>
+                                </label>
+                                <textarea x-model="newSurveyForm.scraping_prompt" rows="4"
+                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500 resize-none"
+                                          placeholder="Focus on cookie baking techniques. Look for patterns about:&#10;- Temperature settings and their effects&#10;- Ingredient ratios and substitutions&#10;- Baking times and pan types&#10;- Common mistakes and troubleshooting"></textarea>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    <span class="text-amber-400">Tip:</span> Be specific about what patterns to extract. This guides the AI on what to look for and how to traverse links.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Document Control Panel (Documents) -->
+                        <div x-show="newSurveyForm.source_type === 'documents'" class="p-4 rounded-lg border-2 border-blue-500/30 bg-blue-900/10">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-blue-400">📁</span>
+                                <h3 class="font-semibold text-blue-400">Document Ingestion Control</h3>
+                            </div>
+
+                            <!-- Docs Base Path -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    📂 Documents Path (in container)
+                                    <span class="text-xs text-gray-500 ml-2">— absolute path to docs directory</span>
+                                </label>
+                                <input type="text" x-model="newSurveyForm.docs_base_path"
+                                       class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none text-white placeholder-gray-500"
+                                       placeholder="/app/universes/default/docs">
+                                <p class="text-xs text-gray-400 mt-1">Path inside Docker container where documents are stored</p>
+                            </div>
+
+                            <!-- Documents List -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    📄 Documents
+                                    <span class="text-xs text-gray-500 ml-2">— one per line</span>
+                                </label>
+                                <textarea x-model="newSurveyForm.docs_list" rows="5"
+                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none text-white placeholder-gray-500 resize-none font-mono text-sm"
+                                          placeholder="user-guide.md&#10;context.md&#10;README.md&#10;docs/architecture.md"></textarea>
+                                <p class="text-xs text-gray-400 mt-1">Files to ingest for pattern extraction. One per line, relative to documents path.</p>
+                            </div>
+
+                            <!-- Chunk Settings -->
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                                        🔹 Chunk Size
+                                        <span class="text-xs text-gray-500 ml-2">— chars per chunk</span>
+                                    </label>
+                                    <input type="number" x-model="newSurveyForm.docs_chunk_size" min="100" max="2000" step="100"
+                                           class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                                        🔹 Chunk Overlap
+                                        <span class="text-xs text-gray-500 ml-2">— chars overlap</span>
+                                    </label>
+                                    <input type="number" x-model="newSurveyForm.docs_chunk_overlap" min="0" max="500" step="50"
+                                           class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none">
+                                </div>
+                            </div>
+
+                            <!-- Extraction Instructions -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    🤖 Extraction Instructions
+                                    <span class="text-xs text-gray-500 ml-2">— what patterns to extract</span>
+                                </label>
+                                <textarea x-model="newSurveyForm.scraping_prompt" rows="4"
+                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none text-white placeholder-gray-500 resize-none"
+                                          placeholder="Extract patterns about:&#10;- Core concepts and terminology&#10;- Step-by-step procedures&#10;- Configuration options&#10;- Troubleshooting guides"></textarea>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    <span class="text-blue-400">Tip:</span> Describe what kind of patterns to extract from the documentation.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Targets -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Target Patterns</label>
+                                <input type="number" x-model="newSurveyForm.target_patterns" required min="1"
+                                       class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Min Confidence</label>
+                                <input type="number" x-model="newSurveyForm.min_confidence" required min="0" max="1" step="0.05"
+                                       class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-3 pt-4 border-t border-gray-700">
+                            <button type="button" @click="showNewSurveyModal = false"
+                                    class="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-medium transition-colors">
+                                Create Survey
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- EDIT SURVEY MODAL -->
+            <div x-show="showEditSurveyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70" x-cloak>
+                <div class="glass rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold">Edit Survey</h2>
+                        <button @click="showEditSurveyModal = false" class="text-gray-400 hover:text-gray-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="saveSurveyEdit()" class="space-y-5">
+                        <!-- Basic Info -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Survey Name</label>
+                            <input type="text" x-model="editSurveyForm.name" required
+                                   class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Description</label>
+                            <textarea x-model="editSurveyForm.description" required rows="2"
+                                      class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none resize-none"></textarea>
+                        </div>
+
+                        <!-- Survey Scope (read-only indicator) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Scope</label>
+                            <div class="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                                <span class="px-2 py-1 rounded text-sm font-medium"
+                                      :class="{
+                                          'bg-purple-500/20 text-purple-400': editSurveyForm.level === 'neighbourhood',
+                                          'bg-blue-500/20 text-blue-400': editSurveyForm.level === 'domain',
+                                          'bg-teal-500/20 text-teal-400': editSurveyForm.level === 'universe'
+                                      }" x-text="editSurveyForm.level.charAt(0).toUpperCase() + editSurveyForm.level.slice(1)"></span>
+                                <span class="text-gray-400 text-sm ml-2" x-show="editSurveyForm.neighbourhood" x-text="'• ' + editSurveyForm.neighbourhood"></span>
+                                <span class="text-gray-400 text-sm ml-2" x-show="editSurveyForm.domain" x-text="'• ' + editSurveyForm.domain"></span>
+                            </div>
+                        </div>
+
+                        <!-- Scraping Control Panel -->
+                        <div class="p-4 rounded-lg border-2 border-amber-500/30 bg-amber-900/10">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-amber-400">⚙️</span>
+                                <h3 class="font-semibold text-amber-400">Scraping Control</h3>
+                            </div>
+
+                            <!-- Seed URL -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">🔗 Seed URL</label>
+                                <input type="url" x-model="editSurveyForm.seed_url"
+                                       class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500">
+                            </div>
+
+                            <!-- Additional URLs -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">📎 Additional URLs</label>
+                                <textarea x-model="editSurveyForm.additional_urls" rows="2"
+                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500 resize-none"></textarea>
+                            </div>
+
+                            <!-- Scraping Prompt -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">🤖 Collection Instructions</label>
+                                <textarea x-model="editSurveyForm.scraping_prompt" rows="3"
+                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500 resize-none"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Targets -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Target Patterns</label>
+                                <input type="number" x-model="editSurveyForm.target_patterns" required min="1"
+                                       class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Min Confidence</label>
+                                <input type="number" x-model="editSurveyForm.min_confidence" required min="0" max="1" step="0.05"
+                                       class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-3 pt-4 border-t border-gray-700">
+                            <button type="button" @click="showEditSurveyModal = false"
+                                    class="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-medium transition-colors">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -746,6 +1380,87 @@
                                 </template>
                                 <div x-show="domainForm.specialists.length === 0" class="text-center py-6 text-gray-500 text-sm">
                                     No specialists defined. Add at least one specialist.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Research Strategy (LLM Fallback) -->
+                        <div class="p-4 rounded-lg bg-amber-900/10 border border-amber-500/30">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-amber-400">🔬</span>
+                                <h3 class="font-semibold text-amber-400">Research Strategy (LLM Fallback)</h3>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-4">Configure how the LLM searches for information when patterns aren't found.</p>
+
+                            <!-- Strategy Type -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-400 mb-2">Fallback Strategy</label>
+                                <select x-model="domainForm.research_strategy_type"
+                                        class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none">
+                                    <option value="none">No LLM Fallback (fail if no patterns)</option>
+                                    <option value="llm_only">LLM Only (hallucinates without context)</option>
+                                    <option value="document">Document Search (search local docs first)</option>
+                                    <option value="internet">Internet Search (search web - not yet implemented)</option>
+                                </select>
+                            </div>
+
+                            <!-- Document Search Settings -->
+                            <div x-show="domainForm.research_strategy_type === 'document'" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Documents Path (in container)</label>
+                                    <input type="text" x-model="domainForm.research_base_path"
+                                           class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none"
+                                           placeholder="/app/universes/default/docs">
+                                    <p class="text-xs text-gray-500 mt-1">Absolute path inside Docker container</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Documents (one per line)</label>
+                                    <textarea x-model="domainForm.research_documents" rows="4"
+                                              class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none resize-none font-mono"
+                                              placeholder="user-guide.md&#10;context.md&#10;README.md"></textarea>
+                                    <p class="text-xs text-gray-500 mt-1">Files relative to documents path</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-400 mb-2">Chunk Size</label>
+                                        <input type="number" x-model="domainForm.research_chunk_size" min="100" max="2000" step="100"
+                                               class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-400 mb-2">Chunk Overlap</label>
+                                        <input type="number" x-model="domainForm.research_chunk_overlap" min="0" max="500" step="50"
+                                               class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none">
+                                    </div>
+                                </div>
+
+                                <!-- Auto-Certification -->
+                                <div class="p-3 rounded bg-gray-800/50 border border-gray-700">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" x-model="domainForm.auto_certify_docs"
+                                               class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-500">
+                                        <span class="text-sm text-gray-300">Auto-certify documentation patterns at 80%</span>
+                                    </label>
+                                    <p class="text-xs text-gray-500 mt-1 ml-6">Patterns from document search become certified (not candidates)</p>
+                                </div>
+                            </div>
+
+                            <!-- LLM Model Settings -->
+                            <div x-show="domainForm.research_strategy_type !== 'none'" class="mt-4 space-y-3">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">LLM Model</label>
+                                    <input type="text" x-model="domainForm.llm_model"
+                                           class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none"
+                                           placeholder="glm-4.7">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Min Confidence for Fallback</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="range" x-model="domainForm.llm_min_confidence" min="0" max="1" step="0.1"
+                                               class="flex-1">
+                                        <span class="text-sm text-gray-400 w-16" x-text="(domainForm.llm_min_confidence * 100).toFixed(0) + '%'"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1253,12 +1968,12 @@
                 ai_generated: false,
                 loading: false,
                 lastQuery: '',
-                currentDomain: 'llm_consciousness',
+                currentDomain: 'exframe_methods',
                 currentUniverse: 'default',
                 availableUniverses: [],
                 newUniverseId: '',
                 newUniverseDescription: '',
-                availableDomains: ['cooking', 'llm_consciousness'],
+                availableDomains: ['cooking', 'llm_consciousness', 'exframe_methods'],
                 patternCount: 0,
                 totalPatternCount: 0,
                 // Explicit display properties for example queries and placeholder
@@ -1276,6 +1991,17 @@
                 showRawTrace: false,
                 historicalTraces: [],
                 currentView: 'assistant',
+
+                // Constellation animation state
+                constellation: {
+                    nodes: [],
+                    edges: [],
+                    animationId: null,
+                    canvas: null,
+                    ctx: null,
+                    mouse: { x: 0, y: 0 }
+                },
+
                 // Pattern detail state
                 selectedPattern: null,
                 showPatternDetail: false,
@@ -1289,7 +2015,16 @@
                     description: '',
                     categories: [],
                     tags: [],
-                    specialists: []
+                    specialists: [],
+                    // Research Strategy (LLM Fallback) fields
+                    research_strategy_type: 'none', // 'none', 'llm_only', 'document', 'internet'
+                    research_base_path: '/app/universes/default/docs',
+                    research_documents: '',
+                    research_chunk_size: 500,
+                    research_chunk_overlap: 100,
+                    auto_certify_docs: true,
+                    llm_model: 'glm-4.7',
+                    llm_min_confidence: 0.3
                 },
                 newCategory: '',
                 newTag: '',
@@ -1311,12 +2046,72 @@
                     pattern_health: null,
                     generated_at: null
                 },
+                // ==================== SURVEYOR STATE ====================
+                surveys: [],
+                selectedSurvey: null,
+                metrics: {
+                    pulse: '● ● ● ● ●',
+                    errors: 0,
+                    focus: 0.95
+                },
+                judgeActivity: {
+                    'J1': 85,
+                    'J2': 62,
+                    'J3': 94,
+                    'J4': 71
+                },
+                showNewSurveyModal: false,
+                showEditSurveyModal: false,
+                newSurveyForm: {
+                    name: '',
+                    description: '',
+                    level: 'domain', // 'neighbourhood', 'domain', 'universe'
+                    universe: '',
+                    neighbourhood: '',
+                    domain: '',
+                    target_patterns: 100,
+                    min_confidence: 0.8,
+                    // Source selection
+                    source_type: 'web', // 'web' or 'documents'
+                    // Scraping control (web)
+                    seed_url: '',
+                    additional_urls: '',
+                    scraping_prompt: '',
+                    // Document control (documents)
+                    docs_base_path: '/app/universes/default/docs',
+                    docs_list: '',
+                    docs_chunk_size: 500,
+                    docs_chunk_overlap: 100
+                },
+                editSurveyForm: {
+                    id: '',
+                    name: '',
+                    description: '',
+                    level: 'domain',
+                    universe: '',
+                    neighbourhood: '',
+                    domain: '',
+                    target_patterns: 100,
+                    min_confidence: 0.8,
+                    // Source selection
+                    source_type: 'web', // 'web' or 'documents'
+                    // Scraping control (web)
+                    seed_url: '',
+                    additional_urls: '',
+                    scraping_prompt: '',
+                    // Document control (documents)
+                    docs_base_path: '/app/universes/default/docs',
+                    docs_list: '',
+                    docs_chunk_size: 500,
+                    docs_chunk_overlap: 100
+                },
                 navItems: [
-                    { id: 'assistant', label: 'Assistant' },
+                    { id: 'assistant', label: 'Query' },
                     { id: 'patterns', label: 'Patterns' },
                     { id: 'traces', label: 'Traces' },
-                    { id: 'ingestion', label: 'Ingestion' },
+                    { id: 'sources', label: 'Sources' },
                     { id: 'domains', label: 'Domains' },
+                    { id: 'surveyor', label: 'Surveyor' },
                     { id: 'universes', label: 'Universes' },
                     { id: 'diagnostics', label: 'Diagnostics' },
                 ],
@@ -1370,10 +2165,12 @@
                     await this.loadAvailableDomains();
                     console.log('After loadAvailableDomains, currentDomain:', this.currentDomain);
 
-                    // Initialize display properties for current domain
+                    // Load domain info BEFORE updating display properties
+                    await this.loadDomainInfo();
+
+                    // Now update display properties with loaded example queries
                     this.updateDisplayProperties();
 
-                    await this.loadDomainInfo();
                     await this.loadHistoricalTraces();
 
                     // Force the dropdown to match currentDomain after Alpine initializes
@@ -1382,6 +2179,28 @@
                         if (select && select.value !== this.currentDomain) {
                             console.log('Forcing dropdown value from', select.value, 'to', this.currentDomain);
                             select.value = this.currentDomain;
+                        }
+
+                        // Initialize constellation animation
+                        this.initConstellation();
+                    });
+
+                    // Watch for domain/response changes to control constellation
+                    this.$watch('currentDomain', (val) => {
+                        this.$nextTick(() => {
+                            if (val === 'exframe_methods' && !this.response) {
+                                this.initConstellation();
+                            } else {
+                                if (this.constellation.animationId) {
+                                    cancelAnimationFrame(this.constellation.animationId);
+                                }
+                            }
+                        });
+                    });
+
+                    this.$watch('response', (val) => {
+                        if (val && this.constellation.animationId) {
+                            cancelAnimationFrame(this.constellation.animationId);
                         }
                     });
 
@@ -1504,9 +2323,13 @@
 
                         this.availableDomains = data.domains;
 
-                        // Set currentDomain to API's default
-                        const apiDefault = data.default || data.domains[0];
-                        console.log('Setting currentDomain to API default:', apiDefault);
+                        // Set currentDomain to API's default, but prioritize exframe_methods if available
+                        let apiDefault = data.default || data.domains[0];
+                        if (data.domains.includes('exframe_methods')) {
+                            apiDefault = 'exframe_methods';
+                            console.log('Overriding to exframe_methods as default');
+                        }
+                        console.log('Setting currentDomain to:', apiDefault);
                         this.currentDomain = apiDefault;
 
                         // Wait for Alpine to process
@@ -1572,6 +2395,8 @@
                         this.loadIngestionStatus();
                     } else if (viewId === 'domains') {
                         this.loadAllDomains();
+                    } else if (viewId === 'surveyor') {
+                        this.loadSurveys();
                     }
                 },
 
@@ -1840,6 +2665,31 @@
                         if (!res.ok) throw new Error('Failed to load domain');
                         const data = await res.json();
 
+                        // Extract research strategy config from enrichers
+                        let research_strategy_type = 'none';
+                        let research_base_path = '/app/universes/default/docs';
+                        let research_documents = '';
+                        let research_chunk_size = 500;
+                        let research_chunk_overlap = 100;
+                        let llm_model = 'glm-4.7';
+                        let llm_min_confidence = 0.3;
+
+                        if (data.enrichers && data.enrichers.length > 0) {
+                            const llm_enricher = data.enrichers.find(e => e.class === 'LLMFallbackEnricher');
+                            if (llm_enricher && llm_enricher.enabled) {
+                                const rs_config = llm_enricher.config?.research_strategy;
+                                if (rs_config) {
+                                    research_strategy_type = rs_config.type || 'document';
+                                    research_base_path = rs_config.base_path || '/app/universes/default/docs';
+                                    research_documents = (rs_config.documents || []).map(d => d.path || d).join('\n');
+                                    research_chunk_size = rs_config.chunk_size || 500;
+                                    research_chunk_overlap = rs_config.chunk_overlap || 100;
+                                }
+                                llm_model = llm_enricher.config?.model || 'glm-4.7';
+                                llm_min_confidence = llm_enricher.config?.min_confidence || 0.3;
+                            }
+                        }
+
                         this.editingDomain = true;
                         this.creatingDomain = false;
                         this.domainForm = {
@@ -1855,7 +2705,16 @@
                                 keywords_input: (spec.keywords || []).join(', '),
                                 expertise_categories: spec.categories || [],
                                 confidence_threshold: spec.confidence_threshold || 0.6
-                            }))
+                            })),
+                            // Research Strategy fields
+                            research_strategy_type,
+                            research_base_path,
+                            research_documents,
+                            research_chunk_size,
+                            research_chunk_overlap,
+                            auto_certify_docs: true, // Default to true
+                            llm_model,
+                            llm_min_confidence
                         };
                         this.newCategory = '';
                         this.newTag = '';
@@ -1872,6 +2731,42 @@
                     }
 
                     try {
+                        // Build enrichers config based on research strategy type
+                        const enrichers = [];
+
+                        if (this.domainForm.research_strategy_type !== 'none') {
+                            const enricher_config = {
+                                mode: 'fallback',
+                                model: this.domainForm.llm_model,
+                                min_confidence: this.domainForm.llm_min_confidence,
+                                max_patterns: 5
+                            };
+
+                            // Add research strategy config if document or internet
+                            if (this.domainForm.research_strategy_type === 'document' || this.domainForm.research_strategy_type === 'internet') {
+                                const documents = this.domainForm.research_documents
+                                    .split('\n')
+                                    .map(line => line.trim())
+                                    .filter(line => line)
+                                    .map(path => ({ type: 'file', path }));
+
+                                enricher_config.research_strategy = {
+                                    type: this.domainForm.research_strategy_type,
+                                    base_path: this.domainForm.research_base_path,
+                                    documents: documents,
+                                    chunk_size: parseInt(this.domainForm.research_chunk_size),
+                                    chunk_overlap: parseInt(this.domainForm.research_chunk_overlap)
+                                };
+                            }
+
+                            enrichers.push({
+                                module: 'plugins.enrichers.llm_enricher',
+                                class: 'LLMFallbackEnricher',
+                                enabled: true,
+                                config: enricher_config
+                            });
+                        }
+
                         const payload = {
                             domain_id: this.domainForm.domain_id,
                             domain_name: this.domainForm.domain_name,
@@ -1885,7 +2780,8 @@
                                 expertise_keywords: spec.keywords_input.split(',').map(k => k.trim()).filter(k => k),
                                 expertise_categories: spec.expertise_categories,
                                 confidence_threshold: parseFloat(spec.confidence_threshold)
-                            }))
+                            })),
+                            enrichers: enrichers
                         };
 
                         const url = this.creatingDomain ? '/api/admin/domains' : `/api/admin/domains/${this.domainForm.domain_id}`;
@@ -1921,7 +2817,16 @@
                         description: '',
                         categories: [],
                         tags: [],
-                        specialists: []
+                        specialists: [],
+                        // Research Strategy fields
+                        research_strategy_type: 'none',
+                        research_base_path: '/app/universes/default/docs',
+                        research_documents: '',
+                        research_chunk_size: 500,
+                        research_chunk_overlap: 100,
+                        auto_certify_docs: true,
+                        llm_model: 'glm-4.7',
+                        llm_min_confidence: 0.3
                     };
                     this.newCategory = '';
                     this.newTag = '';
@@ -2143,6 +3048,512 @@
                         console.error('Failed to load diagnostics:', error);
                         alert('Failed to load diagnostics: ' + error.message);
                     }
+                },
+
+                // ==================== SURVEYOR FUNCTIONS ====================
+
+                async loadSurveys() {
+                    try {
+                        const res = await fetch('/api/learning/api/surveys');
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.surveys = data.surveys || [];
+                        } else {
+                            // Fall back to stub data if API not available
+                            console.warn('Learning API not available, using stub data');
+                            this.surveys = this._getStubSurveys();
+                        }
+                    } catch (error) {
+                        console.error('Failed to load surveys:', error);
+                        // Fall back to stub data
+                        this.surveys = this._getStubSurveys();
+                    }
+                },
+
+                _getStubSurveys() {
+                    // Stub data for when API is not available
+                    return [
+                        {
+                            id: 'survey_001',
+                            name: 'Quick Baking Recipes',
+                            description: 'Survey baking recipes that take under 30 minutes',
+                            level: 'neighbourhood',
+                            universe: 'default',
+                            neighbourhood: 'baking recipes under 30 minutes',
+                            domain: null,
+                            status: 'running',
+                            progress: 0.34,
+                            target_patterns: 100,
+                            patterns_created: 47,
+                            patterns_certified: 38,
+                            patterns_flagged: 3,
+                            patterns_rejected: 2,
+                            patterns_pending: 4,
+                            domains_created: 0,
+                            created_at: '2025-01-10T10:00:00Z'
+                        },
+                        {
+                            id: 'survey_002',
+                            name: 'Python Data Science',
+                            description: 'Survey Python patterns related to data science and ML',
+                            level: 'neighbourhood',
+                            universe: 'default',
+                            neighbourhood: 'Python data science and machine learning patterns',
+                            domain: null,
+                            status: 'idle',
+                            progress: 0.0,
+                            target_patterns: 150,
+                            patterns_created: 0,
+                            patterns_certified: 0,
+                            patterns_flagged: 0,
+                            patterns_rejected: 0,
+                            patterns_pending: 0,
+                            domains_created: 0,
+                            created_at: '2025-01-11T14:30:00Z'
+                        },
+                        {
+                            id: 'survey_003',
+                            name: 'Cooking Domain',
+                            description: 'Full survey of the cooking domain',
+                            level: 'domain',
+                            universe: 'default',
+                            neighbourhood: null,
+                            domain: 'cooking',
+                            status: 'paused',
+                            progress: 0.67,
+                            target_patterns: 200,
+                            patterns_created: 134,
+                            patterns_certified: 118,
+                            patterns_flagged: 8,
+                            patterns_rejected: 5,
+                            patterns_pending: 3,
+                            domains_created: 0,
+                            created_at: '2025-01-09T09:15:00Z'
+                        }
+                    ];
+                },
+
+                async selectSurvey(surveyId) {
+                    try {
+                        // For stub, find in existing array
+                        this.selectedSurvey = this.surveys.find(s => s.id === surveyId) || null;
+                        if (this.selectedSurvey) {
+                            await this.loadSurveyorMetrics(surveyId);
+                        }
+                    } catch (error) {
+                        console.error('Failed to select survey:', error);
+                    }
+                },
+
+                async loadSurveyorMetrics(surveyId) {
+                    try {
+                        // For stub, use mock data with some variation
+                        this.metrics = {
+                            pulse: surveyId === 'survey_001' ? '● ● ● ● ○' : '○ ○ ○ ○ ○',
+                            errors: Math.floor(Math.random() * 3),
+                            focus: 0.85 + Math.random() * 0.15
+                        };
+                        this.judgeActivity = {
+                            'J1': Math.floor(60 + Math.random() * 40),
+                            'J2': Math.floor(50 + Math.random() * 50),
+                            'J3': Math.floor(70 + Math.random() * 30),
+                            'J4': Math.floor(55 + Math.random() * 45)
+                        };
+                    } catch (error) {
+                        console.error('Failed to load metrics:', error);
+                    }
+                },
+
+                async startSurvey() {
+                    if (!this.selectedSurvey) return;
+                    try {
+                        // For stub, just update local state
+                        this.selectedSurvey.status = 'running';
+                        this.metrics.pulse = '● ● ● ● ●';
+                    } catch (error) {
+                        console.error('Failed to start survey:', error);
+                        alert('Failed to start survey: ' + error.message);
+                    }
+                },
+
+                async pauseSurvey() {
+                    if (!this.selectedSurvey) return;
+                    try {
+                        // For stub, just update local state
+                        this.selectedSurvey.status = 'paused';
+                        this.metrics.pulse = '● ● ● ○ ○';
+                    } catch (error) {
+                        console.error('Failed to pause survey:', error);
+                        alert('Failed to pause survey: ' + error.message);
+                    }
+                },
+
+                async stopSurvey() {
+                    if (!this.selectedSurvey) return;
+                    if (!confirm('Are you sure you want to stop this survey?')) return;
+                    try {
+                        // For stub, just update local state
+                        this.selectedSurvey.status = 'idle';
+                        this.metrics.pulse = '○ ○ ○ ○ ○';
+                    } catch (error) {
+                        console.error('Failed to stop survey:', error);
+                        alert('Failed to stop survey: ' + error.message);
+                    }
+                },
+
+                formatTime(date) {
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                },
+
+                async createSurvey() {
+                    try {
+                        const requestBody = {
+                            name: this.newSurveyForm.name,
+                            description: this.newSurveyForm.description,
+                            level: this.newSurveyForm.level,
+                            universe: this.newSurveyForm.universe,
+                            neighbourhood: this.newSurveyForm.level === 'neighbourhood' ? this.newSurveyForm.neighbourhood : null,
+                            domain: this.newSurveyForm.level === 'domain' ? this.newSurveyForm.domain : null,
+                            target_patterns: parseInt(this.newSurveyForm.target_patterns),
+                            min_confidence: parseFloat(this.newSurveyForm.min_confidence),
+                            // Source type
+                            source_type: this.newSurveyForm.source_type
+                        };
+
+                        // Add source-specific configuration
+                        if (this.newSurveyForm.source_type === 'web') {
+                            // Parse additional URLs (one per line)
+                            const additionalUrls = this.newSurveyForm.additional_urls
+                                .split('\n')
+                                .map(url => url.trim())
+                                .filter(url => url.length > 0);
+
+                            requestBody.seed_url = this.newSurveyForm.seed_url || null;
+                            requestBody.additional_urls = additionalUrls.length > 0 ? additionalUrls : null;
+                            requestBody.scraping_prompt = this.newSurveyForm.scraping_prompt || null;
+                        } else if (this.newSurveyForm.source_type === 'documents') {
+                            // Parse documents list (one per line)
+                            const docsList = this.newSurveyForm.docs_list
+                                .split('\n')
+                                .map(doc => doc.trim())
+                                .filter(doc => doc.length > 0);
+
+                            requestBody.docs_base_path = this.newSurveyForm.docs_base_path;
+                            requestBody.docs_list = docsList;
+                            requestBody.docs_chunk_size = parseInt(this.newSurveyForm.docs_chunk_size);
+                            requestBody.docs_chunk_overlap = parseInt(this.newSurveyForm.docs_chunk_overlap);
+                            requestBody.scraping_prompt = this.newSurveyForm.scraping_prompt || null;
+                        }
+
+                        const res = await fetch('/api/learning/api/surveys', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody)
+                        });
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            // Reload surveys to get the updated list
+                            await this.loadSurveys();
+                            this.showNewSurveyModal = false;
+                            // Auto-select the new survey
+                            await this.selectSurvey(data.survey_id);
+                        } else {
+                            // Fall back to stub behavior
+                            console.warn('API call failed, using stub behavior');
+                            this._createStubSurvey(requestBody);
+                        }
+                    } catch (error) {
+                        console.error('Failed to create survey:', error);
+                        // Fall back to stub behavior
+                        this._createStubSurvey({
+                            id: 'survey_' + Date.now().toString().slice(-6),
+                            name: this.newSurveyForm.name,
+                            description: this.newSurveyForm.description,
+                            level: this.newSurveyForm.level,
+                            universe: this.newSurveyForm.universe,
+                            neighbourhood: this.newSurveyForm.level === 'neighbourhood' ? this.newSurveyForm.neighbourhood : null,
+                            domain: this.newSurveyForm.level === 'domain' ? this.newSurveyForm.domain : null,
+                            target_patterns: parseInt(this.newSurveyForm.target_patterns),
+                            min_confidence: parseFloat(this.newSurveyForm.min_confidence),
+                            source_type: this.newSurveyForm.source_type,
+                            // Include source-specific fields for stub
+                            ...(this.newSurveyForm.source_type === 'web' ? {
+                                seed_url: this.newSurveyForm.seed_url,
+                                additional_urls: this.newSurveyForm.additional_urls.split('\n').map(u => u.trim()).filter(u => u)
+                            } : {}),
+                            ...(this.newSurveyForm.source_type === 'documents' ? {
+                                docs_base_path: this.newSurveyForm.docs_base_path,
+                                docs_list: this.newSurveyForm.docs_list.split('\n').map(d => d.trim()).filter(d => d),
+                                docs_chunk_size: parseInt(this.newSurveyForm.docs_chunk_size),
+                                docs_chunk_overlap: parseInt(this.newSurveyForm.docs_chunk_overlap)
+                            } : {}),
+                            scraping_prompt: this.newSurveyForm.scraping_prompt
+                        });
+                    }
+                },
+
+                _createStubSurvey(requestBody) {
+                    // Stub behavior when API is not available
+                    const newSurvey = {
+                        id: requestBody.id || 'survey_' + Date.now().toString().slice(-6),
+                        name: requestBody.name,
+                        description: requestBody.description,
+                        level: requestBody.level,
+                        universe: requestBody.universe,
+                        neighbourhood: requestBody.neighbourhood,
+                        domain: requestBody.domain,
+                        status: 'idle',
+                        progress: 0.0,
+                        target_patterns: requestBody.target_patterns,
+                        min_confidence: requestBody.min_confidence,
+                        patterns_created: 0,
+                        patterns_certified: 0,
+                        patterns_flagged: 0,
+                        patterns_rejected: 0,
+                        patterns_pending: 0,
+                        domains_created: 0,
+                        created_at: new Date().toISOString(),
+                        // Scraping config (stored for display)
+                        seed_url: requestBody.seed_url,
+                        additional_urls: requestBody.additional_urls,
+                        scraping_prompt: requestBody.scraping_prompt
+                    };
+
+                    this.surveys.push(newSurvey);
+                    this.showNewSurveyModal = false;
+
+                    // Reset form
+                    this.newSurveyForm = {
+                        name: '',
+                        description: '',
+                        level: 'domain',
+                        universe: '',
+                        neighbourhood: '',
+                        domain: '',
+                        target_patterns: 100,
+                        min_confidence: 0.8,
+                        // Source selection
+                        source_type: 'web',
+                        // Scraping control (web)
+                        seed_url: '',
+                        additional_urls: '',
+                        scraping_prompt: '',
+                        // Document control (documents)
+                        docs_base_path: '/app/universes/default/docs',
+                        docs_list: '',
+                        docs_chunk_size: 500,
+                        docs_chunk_overlap: 100
+                    };
+
+                    // Auto-select the new survey
+                    this.selectSurvey(newSurvey.id);
+                },
+
+                async saveSurveyEdit() {
+                    try {
+                        const survey = this.selectedSurvey;
+                        const additionalUrls = this.editSurveyForm.additional_urls
+                            .split('\n')
+                            .map(url => url.trim())
+                            .filter(url => url.length > 0);
+
+                        const requestBody = {
+                            name: this.editSurveyForm.name,
+                            description: this.editSurveyForm.description,
+                            target_patterns: parseInt(this.editSurveyForm.target_patterns),
+                            min_confidence: parseFloat(this.editSurveyForm.min_confidence),
+                            seed_url: this.editSurveyForm.seed_url || null,
+                            additional_urls: additionalUrls.length > 0 ? additionalUrls : null,
+                            scraping_prompt: this.editSurveyForm.scraping_prompt || null
+                        };
+
+                        const res = await fetch(`/api/learning/api/surveys/${survey.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody)
+                        });
+
+                        if (res.ok) {
+                            // Update local survey object
+                            survey.name = this.editSurveyForm.name;
+                            survey.description = this.editSurveyForm.description;
+                            survey.target_patterns = parseInt(this.editSurveyForm.target_patterns);
+                            survey.min_confidence = parseFloat(this.editSurveyForm.min_confidence);
+                            survey.seed_url = this.editSurveyForm.seed_url;
+                            survey.additional_urls = additionalUrls;
+                            survey.scraping_prompt = this.editSurveyForm.scraping_prompt;
+
+                            this.showEditSurveyModal = false;
+                        } else {
+                            // Fall back to stub behavior
+                            console.warn('API call failed, using stub behavior');
+                            this._saveSurveyEditStub(survey, requestBody);
+                        }
+                    } catch (error) {
+                        console.error('Failed to save survey edit:', error);
+                        // Fall back to stub behavior
+                        this._saveSurveyEditStub(this.selectedSurvey, {
+                            name: this.editSurveyForm.name,
+                            description: this.editSurveyForm.description,
+                            target_patterns: parseInt(this.editSurveyForm.target_patterns),
+                            min_confidence: parseFloat(this.editSurveyForm.min_confidence),
+                            seed_url: this.editSurveyForm.seed_url,
+                            additional_urls: this.editSurveyForm.additional_urls.split('\n').map(u => u.trim()).filter(u => u),
+                            scraping_prompt: this.editSurveyForm.scraping_prompt
+                        });
+                    }
+                },
+
+                _saveSurveyEditStub(survey, updates) {
+                    // Stub behavior when API is not available
+                    survey.name = updates.name;
+                    survey.description = updates.description;
+                    survey.target_patterns = updates.target_patterns;
+                    survey.min_confidence = updates.min_confidence;
+                    survey.seed_url = updates.seed_url;
+                    survey.additional_urls = updates.additional_urls;
+                    survey.scraping_prompt = updates.scraping_prompt;
+                    this.showEditSurveyModal = false;
+                },
+
+                // ==================== CONSTELLATION ANIMATION ====================
+
+                initConstellation() {
+                    console.log('initConstellation called, currentDomain:', this.currentDomain, 'response:', this.response);
+                    const canvas = document.getElementById('constellation-canvas');
+                    if (!canvas) {
+                        console.log('Canvas element not found');
+                        return;
+                    }
+                    console.log('Canvas found:', canvas);
+
+                    this.constellation.canvas = canvas;
+                    this.constellation.ctx = canvas.getContext('2d');
+
+                    // Set canvas size - use explicit width if canvas is hidden
+                    const rect = canvas.getBoundingClientRect();
+                    const width = rect.width > 0 ? rect.width : canvas.parentElement.offsetWidth;
+                    const height = 350; // explicit height from CSS
+                    canvas.width = width;
+                    canvas.height = height;
+                    console.log('Canvas size set to:', width, 'x', height);
+
+                    // Create nodes with labels
+                    const labels = ['Pattern', 'Domain', 'Query', 'Expertise', 'Knowledge', 'Learn', 'Search', 'Discover'];
+                    const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#14B8A6', '#F97316'];
+
+                    this.constellation.nodes = labels.map((label, i) => ({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 0.3,
+                        vy: (Math.random() - 0.5) * 0.3,
+                        radius: 4 + Math.random() * 3,
+                        label: label,
+                        color: colors[i],
+                        pulse: Math.random() * Math.PI * 2
+                    }));
+
+                    // Create random connections
+                    for (let i = 0; i < this.constellation.nodes.length; i++) {
+                        for (let j = i + 1; j < this.constellation.nodes.length; j++) {
+                            if (Math.random() > 0.5) {
+                                this.constellation.edges.push([i, j]);
+                            }
+                        }
+                    }
+
+                    // Mouse tracking
+                    canvas.addEventListener('mousemove', (e) => {
+                        const rect = canvas.getBoundingClientRect();
+                        this.constellation.mouse.x = e.clientX - rect.left;
+                        this.constellation.mouse.y = e.clientY - rect.top;
+                    });
+
+                    // Start animation
+                    this.animateConstellation();
+                },
+
+                animateConstellation() {
+                    const ctx = this.constellation.ctx;
+                    const canvas = this.constellation.canvas;
+                    const nodes = this.constellation.nodes;
+                    const edges = this.constellation.edges;
+
+                    // Clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Update and draw edges
+                    edges.forEach(([i, j]) => {
+                        const nodeA = nodes[i];
+                        const nodeB = nodes[j];
+
+                        const dist = Math.hypot(nodeA.x - nodeB.x, nodeA.y - nodeB.y);
+                        const maxDist = 200;
+
+                        if (dist < maxDist) {
+                            const alpha = (1 - dist / maxDist) * 0.3;
+                            ctx.beginPath();
+                            ctx.moveTo(nodeA.x, nodeA.y);
+                            ctx.lineTo(nodeB.x, nodeB.y);
+                            ctx.strokeStyle = `rgba(16, 185, 129, ${alpha})`;
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                        }
+                    });
+
+                    // Update and draw nodes
+                    nodes.forEach(node => {
+                        // Update position
+                        node.x += node.vx;
+                        node.y += node.vy;
+
+                        // Bounce off walls
+                        if (node.x < node.radius || node.x > canvas.width - node.radius) node.vx *= -1;
+                        if (node.y < node.radius || node.y > canvas.height - node.radius) node.vy *= -1;
+
+                        // Pulse effect
+                        node.pulse += 0.02;
+                        const pulseRadius = node.radius + Math.sin(node.pulse) * 2;
+
+                        // Mouse interaction
+                        const mouseDist = Math.hypot(
+                            node.x - this.constellation.mouse.x,
+                            node.y - this.constellation.mouse.y
+                        );
+                        const isNearMouse = mouseDist < 100;
+
+                        // Draw glow
+                        const gradient = ctx.createRadialGradient(
+                            node.x, node.y, 0,
+                            node.x, node.y, pulseRadius * (isNearMouse ? 2 : 1.5)
+                        );
+                        gradient.addColorStop(0, node.color + '80');
+                        gradient.addColorStop(0.5, node.color + '20');
+                        gradient.addColorStop(1, 'transparent');
+
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, pulseRadius * (isNearMouse ? 2 : 1.5), 0, Math.PI * 2);
+                        ctx.fillStyle = gradient;
+                        ctx.fill();
+
+                        // Draw node
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = node.color;
+                        ctx.fill();
+
+                        // Draw label
+                        ctx.font = '11px system-ui, sans-serif';
+                        ctx.fillStyle = isNearMouse ? '#ffffff' : '#9CA3AF';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(node.label, node.x, node.y + node.radius + 14);
+                    });
+
+                    // Continue animation
+                    this.constellation.animationId = requestAnimationFrame(() => this.animateConstellation());
                 }
             }
         }
