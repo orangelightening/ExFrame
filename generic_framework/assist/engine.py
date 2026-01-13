@@ -513,6 +513,28 @@ class GenericAssistantEngine:
                             pass
                         return existing_pattern["id"]
 
+            # Check if LLM response indicates query is out of scope
+            # Don't create patterns for out-of-scope queries
+            out_of_scope_indicators = [
+                "falls outside the scope",
+                "outside the scope",
+                "not covered",
+                "does not contain relevant information",
+                "beyond the scope",
+                "not within the scope",
+                "this domain does not cover",
+                "this question is outside",
+                "unable to answer",
+                "cannot provide information"
+            ]
+
+            llm_response_lower = llm_response.lower()
+            is_out_of_scope = any(indicator in llm_response_lower for indicator in out_of_scope_indicators)
+
+            if is_out_of_scope:
+                print(f"  ✗ Skipping pattern creation - query is out of scope: {query[:40]}...")
+                return None
+
             # Generate pattern from LLM response
             now = datetime.utcnow()
 
