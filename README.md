@@ -204,9 +204,23 @@ sudo usermod -aG docker $USER
 git clone https://github.com/orangelightening/ExFrame.git
 cd ExFrame
 
-# 2. Configure environment (optional)
+# 2. Configure environment (REQUIRED for LLM features)
 cp .env.example .env
-# Edit .env with your API keys if using LLM features
+
+# Edit .env with your API credentials
+# For OpenAI:
+#   - Set OPENAI_API_KEY=your-openai-api-key
+#   - Leave OPENAI_BASE_URL as is (or remove to use default)
+#
+# For GLM (z.ai):
+#   - Set OPENAI_API_KEY=your-glm-api-key
+#   - Set OPENAI_BASE_URL=https://api.z.ai/api/anthropic
+#
+# For Anthropic Claude:
+#   - Set OPENAI_API_KEY=your-anthropic-api-key
+#   - Set OPENAI_BASE_URL=https://api.anthropic.com/v1
+#
+nano .env  # or use your preferred editor
 
 # 3. Start the application
 # NOTE: Use "docker compose" (space), NOT "docker-compose" (hyphen)
