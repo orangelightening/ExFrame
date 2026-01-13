@@ -17,12 +17,12 @@
       "config": {
         "name": "EEFrame",
         "keywords": [
-          "how", "what", "where", "when", "why", "use", "create", "find", "search",
-          "pattern", "domain", "query", "survey", "universe", "start", "begin", "help",
-          "eeframe", "system", "interface", "navigate", "understand", "learn"
+          "pattern", "domain", "query", "survey", "universe",
+          "eeframe", "exframe", "interface", "specialist", "enricher",
+          "knowledge", "trace", "diagnostics", "autopilot"
         ],
         "categories": ["getting_started", "features", "how_to", "concepts"],
-        "threshold": 0.25
+        "threshold": 0.40
       }
     }
   ],
@@ -33,13 +33,13 @@
       "name": "EEFrame Guide",
       "description": "Expert in EEFrame usage and features",
       "expertise_keywords": [
-        "how", "what", "where", "when", "why", "use", "create", "find", "search",
-        "pattern", "domain", "query", "survey", "universe", "start", "begin", "help",
-        "eeframe", "system", "interface", "navigate", "understand", "learn",
-        "question", "problem", "solve", "answer", "ask"
+        "pattern", "domain", "query", "survey", "universe",
+        "eeframe", "exframe", "interface", "specialist", "enricher",
+        "knowledge", "trace", "diagnostics", "autopilot",
+        "plugin", "router", "formatter", "certification"
       ],
       "expertise_categories": ["getting_started", "features", "how_to", "concepts", "troubleshooting"],
-      "confidence_threshold": 0.25,
+      "confidence_threshold": 0.40,
       "response_template": "structured"
     }
   ],
@@ -51,7 +51,7 @@
       "enabled": true,
       "config": {
         "mode": "fallback",
-        "min_confidence": 0.30,
+        "min_confidence": 0.50,
         "model": "glm-4.7",
         "max_patterns": 5,
         "research_strategy": {
@@ -74,11 +74,11 @@
   "ui_config": {
     "placeholder_text": "How can I help you learn EEFrame? (Press Enter to submit)",
     "example_queries": [
-      "How do I ask a question?",
-      "What is a pattern?",
-      "How do I create a domain?",
-      "What is the Surveyor?",
-      "How do I get started?"
+      "EEFrame domains and patterns",
+      "Surveyor and autonomous learning",
+      "Query interface and traces",
+      "Creating specialists and plugins",
+      "Diagnostics and health checks"
     ],
     "icon": "📚",
     "color": "#4CAF50",
@@ -88,6 +88,6 @@
   "links": {
     "related_domains": [],
     "imports_patterns_from": [],
-    "suggest_on_confidence_below": 0.25
+    "suggest_on_confidence_below": 0.40
   }
 }
