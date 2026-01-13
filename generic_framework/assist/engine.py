@@ -127,8 +127,9 @@ class GenericAssistantEngine:
             })
 
         # Step 2: Search knowledge base for relevant patterns
+        # Only search if a specialist was selected - otherwise we'll use LLM fallback
         step2_time = datetime.utcnow()
-        patterns = await self.knowledge_base.search(query, limit=5)
+        patterns = await self.knowledge_base.search(query, limit=5) if specialist else []
 
         if trace:
             trace['steps'].append({
