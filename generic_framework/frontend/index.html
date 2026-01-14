@@ -2563,6 +2563,11 @@
                         this.ai_generated = data.ai_generated || false;
                         this.queriesProcessed++;
 
+                        // Reload patterns if a new one was created (LLM used or AI generated)
+                        if (this.llm_used || this.ai_generated) {
+                            await this.loadDomainInfo();
+                        }
+
                         // Reload historical traces
                         if (this.enableTrace) {
                             await this.loadHistoricalTraces();

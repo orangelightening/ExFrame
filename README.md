@@ -2,7 +2,7 @@
 
 **Domain-Agnostic AI-Powered Knowledge Management System**
 
-Version 1.3.0 - Universe Architecture & Diagnostics Release
+Version 1.4.0 - Pattern Caching & ID Generation Fixes
 
 ---
 
@@ -172,7 +172,210 @@ See [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md) for:
 
 ---
 
-## Quick Start
+## Installation on New Linux Machine
+
+**Complete step-by-step guide for deploying EEFrame from GitHub to a fresh Linux system.**
+
+### What Must Be Running on Host
+
+**Required:**
+- **Docker Engine** (official, NOT snap) - Container runtime
+- **Docker Compose v2** - Multi-container orchestration
+- **Git** - For cloning the repository
+- **Internet Connection** - For Docker image pulls and API access
+
+**Optional (for LLM features):**
+- **OpenAI API Key** or compatible LLM service (GLM, Anthropic Claude, etc.)
+
+### Verify Host Prerequisites
+
+```bash
+# 1. Check if Docker is installed (must be official, NOT snap)
+docker --version
+# Expected output: Docker version 24.0.0 or higher
+
+# IMPORTANT: If you see snap Docker, remove it first:
+snap list docker  # If this shows docker, you have snap version
+sudo snap remove docker
+
+# 2. Check Docker Compose version
+docker compose version
+# Expected output: Docker Compose version v2.x.x
+# Note: Use "docker compose" (space), NOT "docker-compose" (hyphen)
+
+# 3. Check if git is installed
+git --version
+# If not installed: sudo apt-get install git -y
+```
+
+### Install Docker (if not already installed)
+
+```bash
+# Install official Docker Engine (NOT snap)
+curl -fsSL https://get.docker.com | sh
+
+# Add your user to docker group (required for running without sudo)
+sudo usermod -aG docker $USER
+
+# IMPORTANT: Log out and log back in for group change to take effect
+# Or use: newgrp docker
+```
+
+### Clone and Deploy EEFrame
+
+```bash
+# Step 1: Clone the repository
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+
+# Step 2: Configure environment variables
+cp .env.example .env
+nano .env  # Edit with your API key (see below)
+
+# Step 3: Start the application
+docker compose up -d
+
+# Step 4: Verify containers are running
+docker compose ps
+# You should see: eeframe-app (Up), plus monitoring containers
+
+# Step 5: Check application logs
+docker compose logs eeframe-app | tail -20
+# Look for: "ExFrame Runtime Ready" and "Uvicorn running"
+```
+
+### Configure API Key (.env file)
+
+Edit `.env` with your preferred LLM provider:
+
+**For OpenAI:**
+```bash
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+**For GLM (z.ai):**
+```bash
+OPENAI_API_KEY=your-glm-api-key-here
+OPENAI_BASE_URL=https://api.z.ai/api/anthropic
+```
+
+**For Anthropic Claude:**
+```bash
+OPENAI_API_KEY=sk-ant-your-anthropic-api-key-here
+OPENAI_BASE_URL=https://api.anthropic.com/v1
+```
+
+**For local LLM (Ollama):**
+```bash
+OPENAI_API_KEY=not-needed  # Ollama doesn't require a key
+OPENAI_BASE_URL=http://host.docker.internal:11434/v1
+```
+
+### Access the Application
+
+Once containers are running, access EEFrame at:
+
+- **Main Application**: `http://localhost:3000` or `http://<your-server-ip>:3000`
+- **API Documentation**: `http://localhost:3000/docs`
+- **Health Check**: `http://localhost:3000/health`
+
+**Monitoring Stack (optional):**
+- **Grafana Dashboards**: `http://localhost:3001` (admin/admin)
+- **Prometheus Metrics**: `http://localhost:9090`
+- **Loki Logs**: `http://localhost:3100`
+
+### Verify Installation
+
+```bash
+# 1. Check health endpoint
+curl http://localhost:3000/health
+# Expected: {"status":"healthy"}
+
+# 2. List domains
+curl http://localhost:3000/api/domains
+# Expected: JSON array with domain IDs
+
+# 3. View container status
+docker compose ps
+# All containers should show "Up" status
+
+# 4. Check logs for errors
+docker compose logs eeframe-app | grep -i error
+# Should return nothing (no errors)
+```
+
+### Troubleshooting Fresh Install
+
+**Problem**: `docker compose: command not found`
+
+**Solution**: You have Docker Compose v1. Install v2:
+```bash
+sudo apt-get update
+sudo apt-get install docker-compose-plugin
+```
+
+**Problem**: `permission denied while trying to connect to the Docker daemon`
+
+**Solution**: Your user isn't in docker group or hasn't reloaded:
+```bash
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Option 1: Log out and log back in
+# Option 2: Use newgrp to reload group for current session
+newgrp docker
+```
+
+**Problem**: Port 3000 already in use
+
+**Solution**:
+```bash
+# Find what's using port 3000
+sudo lsof -ti:3000
+
+# Kill the process (replace PID with actual process ID)
+sudo kill -9 <PID>
+
+# Restart EEFrame
+docker compose up -d
+```
+
+**Problem**: Containers start but application doesn't respond
+
+**Solution**: Check logs and rebuild:
+```bash
+# View logs
+docker compose logs eeframe-app
+
+# Rebuild from scratch (fixes most issues)
+docker compose down
+docker compose build --no-cache eeframe-app
+docker compose up -d
+```
+
+### Quick Start Commands (Reference)
+
+```bash
+# Clone and start (one-liner after prerequisites)
+git clone https://github.com/orangelightening/ExFrame.git && cd ExFrame && cp .env.example .env && docker compose up -d
+
+# Stop application
+docker compose down
+
+# Restart application
+docker compose restart
+
+# View logs
+docker compose logs -f eeframe-app
+
+# Rebuild after code changes
+docker compose build --no-cache eeframe-app && docker compose up -d
+```
+
+---
+
+## Quick Start (Additional Information)
 
 ### Prerequisites
 

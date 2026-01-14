@@ -563,13 +563,25 @@ class GenericAssistantEngine:
             # Extract a name from the query (first ~50 chars)
             name = query[:50] + ("..." if len(query) > 50 else "")
 
-            # Count existing patterns to generate ID
-            existing_count = len(all_patterns)
+            # Find the maximum existing pattern ID to generate a unique new ID
+            # This is more robust than using len(all_patterns) which can cause duplicates
+            max_id = 0
+            for p in all_patterns:
+                pid = p.get('id', '')
+                # Extract the numeric part from IDs like "exframe_methods_018" or "exframe_methods_candidate_005"
+                parts = pid.split('_')
+                if len(parts) >= 2:
+                    try:
+                        num = int(parts[-1])
+                        max_id = max(max_id, num)
+                    except ValueError:
+                        pass  # Skip if the last part isn't a number
+            next_id = max_id + 1
 
             # Determine pattern status based on scope
             if is_out_of_scope:
                 # Out-of-scope queries get flagged for review
-                pattern_id = f"{self.domain.domain_id}_flagged_{existing_count + 1:03d}"
+                pattern_id = f"{self.domain.domain_id}_flagged_{next_id:03d}"
                 pattern_status = "flagged_for_review"
                 pattern_confidence = 0.10  # Low confidence
                 pattern_type = "flagged"
@@ -577,7 +589,7 @@ class GenericAssistantEngine:
                 log_prefix = "⚠ Flagged pattern (out of scope)"
             elif research_strategy_used:
                 # Documentation patterns get auto-certified at 80%
-                pattern_id = f"{self.domain.domain_id}_{existing_count + 1:03d}"
+                pattern_id = f"{self.domain.domain_id}_{next_id:03d}"
                 pattern_status = "certified"
                 pattern_confidence = 0.80
                 pattern_type = "knowledge"
@@ -585,7 +597,7 @@ class GenericAssistantEngine:
                 log_prefix = "✓ Auto-certified pattern"
             else:
                 # Regular LLM responses are candidates
-                pattern_id = f"{self.domain.domain_id}_candidate_{existing_count + 1:03d}"
+                pattern_id = f"{self.domain.domain_id}_candidate_{next_id:03d}"
                 pattern_status = "candidate"
                 pattern_confidence = 0.50
                 pattern_type = "candidate"
