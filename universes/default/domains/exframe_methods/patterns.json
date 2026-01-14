@@ -34,7 +34,7 @@
     "domain": "exframe_methods",
     "created_at": "2026-01-12T00:00:00Z",
     "updated_at": "2026-01-12T00:00:00Z",
-    "times_accessed": 7,
+    "times_accessed": 8,
     "user_rating": null
   },
   {
@@ -492,7 +492,7 @@
     "domain": "exframe_methods",
     "created_at": "2026-01-13T19:30:31.909585",
     "updated_at": "2026-01-13T19:30:31.909585",
-    "times_accessed": 7,
+    "times_accessed": 8,
     "user_rating": null,
     "status": "certified",
     "origin": "documentation_research",
@@ -768,6 +768,44 @@
     "confidence_score": 0.0,
     "reviewed_by": "system",
     "reviewed_at": "2026-01-14T03:02:15.494798",
+    "review_notes": "Auto-certified from trusted documentation",
+    "usage_count": 0,
+    "user_feedback": []
+  },
+  {
+    "id": "exframe_methods_022",
+    "name": "What is the Surveyor?",
+    "pattern_type": "knowledge",
+    "description": "Auto-generated from query: What is the Surveyor?",
+    "problem": "What is the Surveyor?",
+    "solution": "Based on the provided documentation, the **Surveyor** is an **Autonomous Learning** system within EEFrame.\n\nHere are the key details about its function and context:\n\n*   **Purpose:** It is part of EEFrame's broader strategy to build a robust system that can autonomously scrape web sources, extract knowledge patterns, and certify those patterns using a 5-judge AI panel to store validated expertise [[2](https://context.md)]. It is also designed to include hooks for a future Research Generator [[2](https://context.md)].\n*   **Architecture:** The Surveyor operates within EEFrame's \"universe-based architecture,\" which ensures complete isolation and portability of knowledge configurations [[3](https://README.md)]. It utilizes a \"plugin-based pipeline\" that follows a flow of Router \u2192 Specialist \u2192 Enricher \u2192 Formatter [[3](https://README.md)].\n\nYou can find more details in the **User Guide** under the section titled \"Surveyor: Autonomous Learning\" [[1](https://user-guide.md)].",
+    "steps": [],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.8,
+    "sources": [],
+    "tags": [
+      "auto_certified",
+      "documentation_derived"
+    ],
+    "examples": [
+      "What is the Surveyor?"
+    ],
+    "domain": "exframe_methods",
+    "created_at": "2026-01-14T03:33:20.457106",
+    "updated_at": "2026-01-14T03:33:20.457106",
+    "times_accessed": 0,
+    "user_rating": null,
+    "status": "certified",
+    "origin": "documentation_research",
+    "origin_query": "What is the Surveyor?",
+    "generated_at": "2026-01-14T03:33:20.456986",
+    "generated_by": "glm-4.7",
+    "confidence_score": 0.0,
+    "reviewed_by": "system",
+    "reviewed_at": "2026-01-14T03:33:20.456986",
     "review_notes": "Auto-certified from trusted documentation",
     "usage_count": 0,
     "user_feedback": []

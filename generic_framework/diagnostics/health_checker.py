@@ -181,32 +181,61 @@ class HealthChecker:
             )
 
     def _check_knowledge_base(self, domain_ids: List[str]) -> HealthCheckResult:
-        """Check knowledge base (SQLite) integrity."""
+        """Check knowledge base integrity (JSON or SQLite)."""
         issues = []
+        has_kb_count = 0
 
         for domain_id in domain_ids:
-            kb_path = self.pattern_storage_path / domain_id / "knowledge_base.db"
+            domain_path = self.pattern_storage_path / domain_id
 
-            if kb_path.exists():
-                # Check file size
-                size_kb = kb_path.stat().st_size / 1024
+            # Check for JSON knowledge base (patterns.json)
+            json_kb = domain_path / "patterns.json"
+            # Check for SQLite knowledge base
+            sqlite_kb = domain_path / "knowledge_base.db"
+
+            if json_kb.exists():
+                # Validate JSON KB
+                try:
+                    with open(json_kb, 'r') as f:
+                        data = json.load(f)
+                        # Accept both list format and dict with 'patterns' key
+                        if isinstance(data, list) and len(data) > 0:
+                            has_kb_count += 1
+                        elif isinstance(data, dict) and 'patterns' in data and len(data['patterns']) > 0:
+                            has_kb_count += 1
+                        else:
+                            issues.append(f'{domain_id}: JSON KB is empty')
+                except Exception as e:
+                    issues.append(f'{domain_id}: JSON KB error - {str(e)}')
+            elif sqlite_kb.exists():
+                # Validate SQLite KB
+                size_kb = sqlite_kb.stat().st_size / 1024
                 if size_kb < 1:
-                    issues.append(f'{domain_id}: KB file too small ({size_kb:.1f} KB)')
+                    issues.append(f'{domain_id}: SQLite KB file too small ({size_kb:.1f} KB)')
+                else:
+                    has_kb_count += 1
             else:
-                issues.append(f'{domain_id}: No KB file found')
+                issues.append(f'{domain_id}: No knowledge base file found (patterns.json or knowledge_base.db)')
 
         if not issues:
             return HealthCheckResult(
                 name='knowledge_base',
                 status='healthy',
-                message='Knowledge base files present for all domains',
+                message=f'Knowledge base present for all {len(domain_ids)} domains',
                 details={'domains_checked': len(domain_ids)},
+            )
+        elif has_kb_count > 0:
+            return HealthCheckResult(
+                name='knowledge_base',
+                status='warning',
+                message=f'{len(issues)} domains have KB issues, {has_kb_count} OK',
+                details={'issues': issues, 'domains_ok': has_kb_count},
             )
         else:
             return HealthCheckResult(
                 name='knowledge_base',
-                status='warning',
-                message=f'Knowledge base issues: {len(issues)}',
+                status='critical',
+                message='No valid knowledge base files found',
                 details={'issues': issues},
             )
 

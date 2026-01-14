@@ -95,15 +95,17 @@ class PatternAnalyzer:
     """
 
     # Required fields for a valid pattern
-    # Note: Patterns don't have a single 'content' field - they have structured
-    # fields like 'description', 'problem', 'solution', 'steps', etc.
+    # Note: EEFrame patterns have structured fields like 'description', 'problem', 'solution'
     REQUIRED_FIELDS = {'id', 'name', 'pattern_type'}
 
-    # Pattern types
+    # Valid pattern types for EEFrame
     PATTERN_TYPES = {
+        # Standard types
         'troubleshooting', 'procedure', 'substitution', 'decision',
         'diagnostic', 'preparation', 'optimization', 'principle',
-        'solution', 'failure_mode', 'technique', 'concept'  # Added common types
+        'solution', 'failure_mode', 'technique', 'concept',
+        # EEFrame-specific types
+        'getting_started', 'knowledge', 'how_to', 'concepts', 'features'
     }
 
     def __init__(self, pattern_storage_path: Path):
@@ -153,7 +155,7 @@ class PatternAnalyzer:
 
         report.total_patterns = len(patterns)
 
-        # Track pattern IDs
+        # Track pattern IDs and content for duplicate detection
         pattern_ids: Set[str] = set()
         pattern_contents: Dict[str, str] = {}
 
@@ -163,7 +165,13 @@ class PatternAnalyzer:
                 continue
 
             pattern_ids.add(pid)
-            pattern_contents[pid] = pattern.get('content', '')
+
+            # For EEFrame: combine description + problem + solution for duplicate detection
+            description = pattern.get('description', '').strip()
+            problem = pattern.get('problem', '').strip()
+            solution = pattern.get('solution', '').strip()
+            combined_content = f"{description} {problem} {solution}".strip()
+            pattern_contents[pid] = combined_content
 
             # Check for missing required fields
             missing = self.REQUIRED_FIELDS - set(pattern.keys())
@@ -190,16 +198,20 @@ class PatternAnalyzer:
                     details={'pattern_type': pattern_type},
                 ))
 
-            # Check for empty content
-            content = pattern.get('content', '').strip()
-            if not content or len(content) < 50:
+            # Check for meaningful content in EEFrame fields
+            # EEFrame patterns have structured fields: description, problem, solution
+            if len(combined_content) < 50:
                 report.warning_issues += 1
                 report.issues.append(PatternIssue(
                     pattern_id=pid,
                     issue_type='empty_content',
                     severity='warning',
-                    description='Pattern content is empty or too short',
-                    details={'content_length': len(content)},
+                    description='Pattern has insufficient content in description/problem/solution',
+                    details={
+                        'description_length': len(description),
+                        'problem_length': len(problem),
+                        'solution_length': len(solution)
+                    },
                 ))
 
         # Check for duplicates
@@ -215,24 +227,17 @@ class PatternAnalyzer:
                 details={'duplicates': duplicate_pids},
             ))
 
-        # Check for orphaned patterns (referenced in patterns.json but file doesn't exist)
-        for pid in pattern_ids:
-            pattern_file = domain_path / "patterns" / f"{pid}.md"
-            if not pattern_file.exists():
-                # This might be OK if patterns are only in JSON
-                # But let's note it as info
-                report.info_issues += 1
-                report.issues.append(PatternIssue(
-                    pattern_id=pid,
-                    issue_type='no_markdown_file',
-                    severity='info',
-                    description='Pattern has no corresponding .md file',
-                    details={'expected_file': str(pattern_file)},
-                ))
+        # Skip orphaned pattern check - EEFrame stores all patterns in JSON only
+        # No individual .md files expected
 
-        # Calculate healthy patterns
+        # Calculate healthy patterns (avoid negative values)
         report.issues_found = len(report.issues)
-        report.healthy_patterns = report.total_patterns - report.critical_issues - report.warning_issues
+        # Count unique patterns with at least one critical or warning issue
+        problematic_patterns = set()
+        for issue in report.issues:
+            if issue.severity in ('critical', 'warning'):
+                problematic_patterns.add(issue.pattern_id)
+        report.healthy_patterns = max(0, report.total_patterns - len(problematic_patterns))
 
         return report
 
@@ -347,10 +352,13 @@ class PatternAnalyzer:
         if pattern_type and pattern_type not in self.PATTERN_TYPES:
             issues.append(f"Invalid pattern_type: {pattern_type}")
 
-        # Validate content
-        content = pattern.get('content', '')
-        if not content or len(content.strip()) < 50:
-            issues.append("Content is empty or too short (min 50 chars)")
+        # Validate content (EEFrame uses description/problem/solution fields)
+        description = pattern.get('description', '').strip()
+        problem = pattern.get('problem', '').strip()
+        solution = pattern.get('solution', '').strip()
+        combined_content = f"{description} {problem} {solution}".strip()
+        if len(combined_content) < 50:
+            issues.append("Combined content (description + problem + solution) is too short (min 50 chars)")
 
         # Validate ID format
         pid = pattern.get('id', '')
