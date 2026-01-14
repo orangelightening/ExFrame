@@ -515,7 +515,7 @@ class GenericAssistantEngine:
                         return existing_pattern["id"]
 
             # Check if LLM response indicates query is out of scope
-            # Don't create patterns for out-of-scope queries
+            # Flag these patterns for human review instead of blocking creation
             out_of_scope_indicators = [
                 "falls outside the scope",
                 "outside the scope",
@@ -526,15 +526,31 @@ class GenericAssistantEngine:
                 "this domain does not cover",
                 "this question is outside",
                 "unable to answer",
-                "cannot provide information"
+                "cannot provide information",
+                "not documented",
+                # Added: Common LLM refusal patterns
+                "i am unable to provide",
+                "unable to provide",
+                "cannot provide",
+                "can only assist",
+                "i can only assist",
+                "unable to help with",
+                "i'm unable to",
+                "im unable to",
+                "not able to provide",
+                "only assist with",
+                "is not within my expertise",
+                "not something i can help with",
+                "outside of my expertise",
+                "beyond my expertise",
+                "outside my expertise",
+                "not designed to",
+                "cannot assist with",
+                "i cannot assist"
             ]
 
             llm_response_lower = llm_response.lower()
             is_out_of_scope = any(indicator in llm_response_lower for indicator in out_of_scope_indicators)
-
-            if is_out_of_scope:
-                print(f"  ✗ Skipping pattern creation - query is out of scope: {query[:40]}...")
-                return None
 
             # Generate pattern from LLM response
             now = datetime.utcnow()
@@ -545,8 +561,16 @@ class GenericAssistantEngine:
             # Count existing patterns to generate ID
             existing_count = len(all_patterns)
 
-            # Auto-certify if from trusted documentation research
-            if research_strategy_used:
+            # Determine pattern status based on scope
+            if is_out_of_scope:
+                # Out-of-scope queries get flagged for review
+                pattern_id = f"{self.domain.domain_id}_flagged_{existing_count + 1:03d}"
+                pattern_status = "flagged_for_review"
+                pattern_confidence = 0.10  # Low confidence
+                pattern_type = "flagged"
+                pattern_tags = ["flagged_for_review", "out_of_scope", "llm_generated"]
+                log_prefix = "⚠ Flagged pattern (out of scope)"
+            elif research_strategy_used:
                 # Documentation patterns get auto-certified at 80%
                 pattern_id = f"{self.domain.domain_id}_{existing_count + 1:03d}"
                 pattern_status = "certified"

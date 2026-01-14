@@ -3494,12 +3494,12 @@
                         const maxDist = 200;
 
                         if (dist < maxDist) {
-                            const alpha = (1 - dist / maxDist) * 0.3;
+                            const alpha = (1 - dist / maxDist) * 0.5;
                             ctx.beginPath();
                             ctx.moveTo(nodeA.x, nodeA.y);
                             ctx.lineTo(nodeB.x, nodeB.y);
                             ctx.strokeStyle = `rgba(16, 185, 129, ${alpha})`;
-                            ctx.lineWidth = 1;
+                            ctx.lineWidth = 1.5;
                             ctx.stroke();
                         }
                     });
