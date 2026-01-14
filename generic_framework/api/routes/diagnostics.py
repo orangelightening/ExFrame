@@ -38,9 +38,10 @@ def get_pattern_analyzer() -> PatternAnalyzer:
     """Get or create PatternAnalyzer instance."""
     global _pattern_analyzer
     if _pattern_analyzer is None:
-        from api.app import get_storage_path
-        pattern_path = Path(get_storage_path("dummy")).parent.parent
-        _pattern_analyzer = PatternAnalyzer(pattern_path)
+        import os
+        # Use universe-based path structure
+        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/default/domains'))
+        _pattern_analyzer = PatternAnalyzer(universe_path)
     return _pattern_analyzer
 
 
@@ -48,9 +49,10 @@ def get_health_checker() -> HealthChecker:
     """Get or create HealthChecker instance."""
     global _health_checker
     if _health_checker is None:
-        from api.app import get_storage_path
-        pattern_path = Path(get_storage_path("dummy")).parent.parent
-        _health_checker = HealthChecker(pattern_path, get_search_metrics())
+        import os
+        # Use universe-based path structure
+        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/default/domains'))
+        _health_checker = HealthChecker(universe_path, get_search_metrics())
     return _health_checker
 
 
@@ -162,6 +164,40 @@ async def get_slow_searches(
     return [trace.to_dict() for trace in traces]
 
 
+@router.get("/patterns/health/all")
+async def get_all_pattern_health(
+    domain_ids: Optional[str] = Query(None, description="Comma-separated domain IDs")
+) -> Dict[str, Any]:
+    """Get pattern health for all domains."""
+    import os
+    import logging
+    logger = logging.getLogger(__name__)
+    analyzer = get_pattern_analyzer()
+
+    logger.info(f"Pattern analyzer path: {analyzer.pattern_storage_path}")
+
+    domains = domain_ids.split(',') if domain_ids else None
+
+    if domains:
+        logger.info(f"Using provided domains: {domains}")
+        reports = analyzer.analyze_universe(domains)
+    else:
+        # Get all domains from universe path
+        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/default/domains'))
+        domains = [d.name for d in universe_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
+        logger.info(f"Auto-discovered domains: {domains}")
+        reports = analyzer.analyze_universe(domains)
+
+    logger.info(f"Generated reports for {len(reports)} domains: {list(reports.keys())}")
+
+    result = {
+        domain_id: report.to_dict()
+        for domain_id, report in reports.items()
+    }
+    logger.info(f"Returning result with keys: {list(result.keys())}")
+    return result
+
+
 @router.get("/patterns/health")
 async def get_pattern_health(
     domain_id: str = Query(..., description="Domain ID to analyze")
@@ -179,30 +215,6 @@ async def get_pattern_health(
 
     report = analyzer.analyze_domain(domain_id)
     return report
-
-
-@router.get("/patterns/health/all")
-async def get_all_pattern_health(
-    domain_ids: Optional[str] = Query(None, description="Comma-separated domain IDs")
-) -> Dict[str, Any]:
-    """Get pattern health for all domains."""
-    analyzer = get_pattern_analyzer()
-
-    domains = domain_ids.split(',') if domain_ids else None
-
-    if domains:
-        reports = analyzer.analyze_universe(domains)
-    else:
-        # Get all domains
-        from api.app import get_storage_path
-        pattern_path = Path(get_storage_path("dummy")).parent.parent
-        domains = [d.name for d in pattern_path.iterdir() if d.is_dir()]
-        reports = analyzer.analyze_universe(domains)
-
-    return {
-        domain_id: report.to_dict()
-        for domain_id, report in reports.items()
-    }
 
 
 @router.get("/patterns/usage")

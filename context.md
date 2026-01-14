@@ -1210,9 +1210,46 @@ pandas>=2.0.0           # Data analysis
 
 ---
 
-**Last Updated**: 2026-01-12
-**Status**: Ready to begin Phase 1 implementation
-**Next Action**: Create autonomous_learning directory structure
+---
+
+## RECOVERY POINT: 2026-01-14
+
+**Status**: Pattern Health Diagnostics Implementation
+
+### Completed Work
+
+1. **Pattern Content Threshold Lowered** - Changed from 50 to 30 characters in `pattern_analyzer.py:208`
+2. **Added `problematic_patterns` List** - PatternHealthReport now includes list of problematic pattern names for UI display
+3. **Health Indicators on Patterns Page** - Added visual badges and colored borders (green/yellow/red) based on health status
+4. **Diagnostics Page Enhancement** - Added problematic patterns list display in Diagnostics view
+5. **Docker Container Rebuilt** - Changes deployed
+
+### Files Modified
+
+- `generic_framework/diagnostics/pattern_analyzer.py` - Threshold lowered to 30, added problematic_patterns tracking
+- `generic_framework/frontend/index.html` - Health indicators on pattern cards, diagnostics page list display
+- `generic_framework/diagnostics/health_checker.py` - JSON KB validation support
+
+### Known Bug (RESOLVED)
+
+**Health Indicator State Bug** (FIXED 2026-01-14): Health indicators now appear correctly on all domain changes.
+
+**Previous Symptoms**:
+- Health indicators showed "healthy" for all patterns (incorrect)
+- When changing domains directly, health flags didn't appear at all
+- Health data only loaded properly after going through Query flow first
+
+**Root Cause**: `switchDomain()` called `loadDomainInfo()` which didn't fetch health data. `loadPatterns()` was the only function that fetched health data from `/api/diagnostics/patterns/health`.
+
+**Fix Applied**: Modified `switchDomain()` in `index.html:2368-2374` to check if current view is 'patterns' and call `loadPatterns()` instead of `loadDomainInfo()` when on the Patterns tab.
+
+**Location**: `generic_framework/frontend/index.html` line 2368-2374
+
+---
+
+**Last Updated**: 2026-01-14
+**Status**: Health indicator bug fixed and deployed
+**Next Action**: Monitor for any additional state-related issues
 
 **Decisions Made**:
 - Hierarchy: Multiverse → Universe → Neighbourhood → Domain → Patterns

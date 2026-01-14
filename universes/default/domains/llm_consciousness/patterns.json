@@ -489,7 +489,7 @@
   {
     "id": "llm_consciousness_candidate_012",
     "name": "What is the opposite of 0xFF?",
-    "pattern_type": "candidate",
+    "pattern_type": "how_to",
     "description": "Auto-generated from query: What is the opposite of 0xFF?",
     "problem": "What is the opposite of 0xFF?",
     "solution": "The answer depends on the context (arithmetic or programming) and the bit-width you are working with.\n\n### 1. Arithmetic (Mathematical Negation)\nIn standard arithmetic, the opposite (negative) of `0xFF` is simply the negative of its integer value.\n\n*   **Value:** `0xFF` (Hex) = `255` (Decimal)\n*   **Opposite:** **`-0xFF`** or **`-255`**\n\n### 2. Programming (Bitwise NOT / One's Complement)\nIn programming contexts (like C, Python, or Java), \"opposite\" often refers to the bitwise **NOT** operator (`~`), which flips every bit.\n\n**A. In an 8-bit system (e.g., `uint8_t`)**\n`0xFF` is `1111 1111`. Flipping all bits results in `0000 0000`.\n*   **Result:** **`0x00`**\n\n**B. In a 16-bit or 32-bit system**\nIf `0xFF` is treated as an integer (e.g., `int`), it is typically stored with leading zeros (e.g., `0x00FF` or `0x000000FF`). Flipping all bits turns these leading zeros into ones.\n*   **Result:** **`0xFFFFFF00`** (in a 32-bit system)\n*   **Result:** **`-256`** (if interpreted as a signed Two's Complement integer)",

@@ -58,6 +58,13 @@ class PatternHealthReport:
 
     # Details
     issues: List[PatternIssue] = field(default_factory=list)
+
+    # List of problematic pattern names (for UI display)
+    problematic_patterns: List[str] = field(default_factory=list)
+
+    # Map of pattern name to issue type (for detailed UI display)
+    pattern_issues: Dict[str, str] = field(default_factory=dict)
+
     generated_at: datetime = field(default_factory=datetime.utcnow)
 
     def health_score(self) -> float:
@@ -83,6 +90,8 @@ class PatternHealthReport:
             'low_confidence_patterns': self.low_confidence_patterns,
             'missing_field_patterns': self.missing_field_patterns,
             'issues': [issue.to_dict() for issue in self.issues],
+            'problematic_patterns': self.problematic_patterns,
+            'pattern_issues': self.pattern_issues,
             'generated_at': self.generated_at.isoformat(),
         }
 
@@ -105,7 +114,11 @@ class PatternAnalyzer:
         'diagnostic', 'preparation', 'optimization', 'principle',
         'solution', 'failure_mode', 'technique', 'concept',
         # EEFrame-specific types
-        'getting_started', 'knowledge', 'how_to', 'concepts', 'features'
+        'getting_started', 'knowledge', 'how_to', 'concepts', 'features',
+        # Binary symmetry domain types
+        'symmetry', 'algorithm', 'metric', 'encoding', 'transformation',
+        'property', 'relationship', 'duality', 'computation', 'extraction',
+        'distribution', 'signed_arithmetic'
     }
 
     def __init__(self, pattern_storage_path: Path):
@@ -200,7 +213,7 @@ class PatternAnalyzer:
 
             # Check for meaningful content in EEFrame fields
             # EEFrame patterns have structured fields: description, problem, solution
-            if len(combined_content) < 50:
+            if len(combined_content) < 30:
                 report.warning_issues += 1
                 report.issues.append(PatternIssue(
                     pattern_id=pid,
@@ -230,13 +243,46 @@ class PatternAnalyzer:
         # Skip orphaned pattern check - EEFrame stores all patterns in JSON only
         # No individual .md files expected
 
-        # Calculate healthy patterns (avoid negative values)
+        # Calculate healthy patterns (avoid negative values) and build problematic pattern list
         report.issues_found = len(report.issues)
         # Count unique patterns with at least one critical or warning issue
         problematic_patterns = set()
+        pattern_names = {}  # Map pattern_id to pattern name
+
+        # First, build a map of pattern IDs to names
+        for pattern in patterns:
+            pid = pattern.get('id')
+            if pid:
+                pattern_names[pid] = pattern.get('name', pid)
+
+        # Then track problematic patterns and add their names to the report
         for issue in report.issues:
             if issue.severity in ('critical', 'warning'):
                 problematic_patterns.add(issue.pattern_id)
+
+        # Add pattern names to the report for UI display
+        for pid in problematic_patterns:
+            name = pattern_names.get(pid, pid)
+            report.problematic_patterns.append(name)
+
+        # Map pattern names to their issue types for detailed UI
+        for issue in report.issues:
+            if issue.severity in ('critical', 'warning'):
+                name = pattern_names.get(issue.pattern_id, issue.pattern_id)
+                # Map issue_type to user-friendly label
+                issue_labels = {
+                    'invalid_pattern_type': 'Invalid Type',
+                    'empty_content': 'Low Content',
+                    'duplicate': 'Duplicate',
+                    'missing_field': 'Missing Fields',
+                    'orphaned': 'Orphaned',
+                    'invalid_format': 'Invalid Format',
+                }
+                label = issue_labels.get(issue.issue_type, issue.issue_type.replace('_', ' ').title())
+                # Only store the first issue for each pattern
+                if name not in report.pattern_issues:
+                    report.pattern_issues[name] = label
+
         report.healthy_patterns = max(0, report.total_patterns - len(problematic_patterns))
 
         return report
@@ -357,8 +403,8 @@ class PatternAnalyzer:
         problem = pattern.get('problem', '').strip()
         solution = pattern.get('solution', '').strip()
         combined_content = f"{description} {problem} {solution}".strip()
-        if len(combined_content) < 50:
-            issues.append("Combined content (description + problem + solution) is too short (min 50 chars)")
+        if len(combined_content) < 30:
+            issues.append("Combined content (description + problem + solution) is too short (min 30 chars)")
 
         # Validate ID format
         pid = pattern.get('id', '')

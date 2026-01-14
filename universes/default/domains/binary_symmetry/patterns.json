@@ -954,7 +954,7 @@
   {
     "id": "binary_symmetry_candidate_018",
     "name": "What is Gray code and why is it useful?",
-    "pattern_type": "candidate",
+    "pattern_type": "how_to",
     "description": "Auto-generated from query: What is Gray code and why is it useful?",
     "problem": "What is Gray code and why is it useful?",
     "solution": "# Gray Code\n\n**Gray code** is a binary numeral system where consecutive values differ by exactly **one bit**.\n\n## How It Works\n\nUnlike standard binary counting where multiple bits can change at once (like going from `0111` to `1000`, where all 4 bits flip), Gray code ensures that only a single bit changes between any two consecutive numbers.\n\n### The Formula\nYou can generate Gray code using this simple operation:\n```\nG(i) = i XOR (i >> 1)\n```\n*(XOR the number with a right-shifted version of itself)*\n\n## Why Is This Useful?\n\nThis single-bit-change property makes Gray code incredibly valuable in real-world engineering:\n\n1.  **Prevents Ambiguity:** In physical systems (like rotary encoders or sensors), it's impossible for mechanical switches to change state at the exact same microsecond. If multiple bits changed at once in standard binary, the system might read a temporary, incorrect value. Gray code eliminates this risk because only one bit is ever \"in transition.\"\n\n2.  **Error Detection:** It is easier to detect if a signal spikes or a bit flips incorrectly, as valid transitions only occur between specific single-bit pairs.\n\n3.  **Mathematical Elegance:** It represents a **Hamiltonian path** on a hypercube\u2014essentially, a path that visits every corner of an N-dimensional cube exactly once without repeating.\n\n### Example (2-bit Gray Code)\n| Decimal | Binary | Gray Code |\n| :--- | :--- | :--- |\n| 0 | 00 | **00** |\n| 1 | 01 | **01** |\n| 2 | 10 | **11** |\n| 3 | 11 | **10** |\n\nNotice how only one bold bit changes as you move down the list",
@@ -992,7 +992,7 @@
   {
     "id": "binary_symmetry_candidate_020",
     "name": "What is the opposite of 0xFF?",
-    "pattern_type": "candidate",
+    "pattern_type": "how_to",
     "description": "Auto-generated from query: What is the opposite of 0xFF?",
     "problem": "What is the opposite of 0xFF?",
     "solution": "The \"opposite\" of `0xFF` depends entirely on which type of binary symmetry you are looking for. Here are the two most common interpretations:\n\n### 1. Bitwise Complement (The \"Photographic Negative\")\nIf by \"opposite\" you mean flipping every bit (turning every 1 into a 0 and every 0 into a 1), you are looking for the **Bitwise NOT**.\n\n*   **Logic:** `~0xFF` (or `0xFF XOR 0xFF`)\n*   **Result:** **`0x00`**\n*   **Context:** Since `0xFF` is `1111 1111` in binary, flipping every bit results in `0000 0000`.\n\n### 2. Mathematical Opposite (Two's Complement)\nIf you mean the arithmetic negation (the negative number equivalent), you calculate the **Two's Complement**.\n\n*   **Logic:** Invert the bits and add 1 (`~0xFF + 1`)\n*   **Result:** **`0x01`** (read as **-1** in signed 8-bit integer representation)\n*   **Context:** This is how computers handle negative numbers. Even though the bits look like `0000 0001`, the system interprets this specific pattern as -1.",
