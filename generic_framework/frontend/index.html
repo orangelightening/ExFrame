@@ -2386,7 +2386,8 @@
                     // Update placeholder display - use dynamic if available, otherwise fallback
                     const domainPlaceholder = this.exampleQueries[this.currentDomain + '_placeholder'];
                     if (domainPlaceholder) {
-                        this.currentPlaceholderDisplay = domainPlaceholder + ' (Press Enter to submit)';
+                        // Domain config already includes "(Press Enter to submit)" in the placeholder
+                        this.currentPlaceholderDisplay = domainPlaceholder;
                     } else if (this.currentDomain === 'llm_consciousness') {
                         this.currentPlaceholderDisplay = 'Type your question about LLM failure modes... (Press Enter to submit)';
                     } else if (this.currentDomain === 'binary_symmetry') {
