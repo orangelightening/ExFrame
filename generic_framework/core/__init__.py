@@ -9,8 +9,11 @@ from .collector import Collector, CollectorConfig
 from .specialist import Specialist, SpecialistConfig
 from .knowledge_base import KnowledgeBase, KnowledgeBaseConfig
 from .factory import DomainFactory
-from .generic_domain import GenericDomain
 from .specialist_plugin import SpecialistPlugin
+
+# Note: GenericDomain is not exported here to avoid circular import
+# with knowledge.json_kb. Import it directly when needed:
+# from core.generic_domain import GenericDomain
 
 __all__ = [
     'Domain',
@@ -23,6 +26,5 @@ __all__ = [
     'KnowledgeBase',
     'KnowledgeBaseConfig',
     'DomainFactory',
-    'GenericDomain',
     'SpecialistPlugin',
 ]
