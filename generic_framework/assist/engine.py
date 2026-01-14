@@ -127,9 +127,14 @@ class GenericAssistantEngine:
             })
 
         # Step 2: Search knowledge base for relevant patterns
-        # Only search if a specialist was selected - otherwise we'll use LLM fallback
+        # When no specialist selected, only search for exact query matches (pattern caching)
+        # When specialist selected, do full search for relevant patterns
         step2_time = datetime.utcnow()
-        patterns = await self.knowledge_base.search(query, limit=5) if specialist else []
+        if specialist:
+            patterns = await self.knowledge_base.search(query, limit=5, exact_only=False)
+        else:
+            # Only find exact query matches in examples field (for cached responses)
+            patterns = await self.knowledge_base.search(query, limit=5, exact_only=True)
 
         if trace:
             trace['steps'].append({

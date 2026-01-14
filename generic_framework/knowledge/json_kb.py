@@ -84,6 +84,7 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         query: str,
         category: Optional[str] = None,
         limit: int = 10,
+        exact_only: bool = False,
         **filters
     ) -> List[Dict[str, Any]]:
         """
@@ -93,6 +94,7 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
             query: Search query
             category: Optional category filter
             limit: Max results
+            exact_only: If True, only return patterns with exact query match in examples
             **filters: Additional backend-specific filters (ignored for JSON)
 
         Returns:
@@ -114,7 +116,20 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
                 if category != pattern_cats and category not in pattern_tags:
                     continue
 
+            # Check for exact query match in examples field
+            examples = pattern.get('examples', [])
+            has_exact_match = examples and query_lower in [str(ex).lower() for ex in examples]
+
+            # If exact_only mode, skip patterns without exact match
+            if exact_only and not has_exact_match:
+                continue
+
             score = self._calculate_relevance(pattern, query_lower, query_terms)
+
+            # Bonus for exact query match in examples field (for pattern caching)
+            if has_exact_match:
+                score += 10.0  # Large bonus for exact query match
+
             if score > 0:
                 scored_patterns.append((pattern, score))
 
@@ -381,9 +396,8 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
             if term in tags:
                 score += 1.5
 
-        # Apply pattern confidence boost
-        confidence = pattern.get('confidence', 0.5)
-        score *= confidence
+        # Note: Don't multiply by confidence here - we want all patterns to be findable
+        # regardless of confidence. Confidence affects ranking, not visibility.
 
         return score
 
