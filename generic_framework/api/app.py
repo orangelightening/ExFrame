@@ -605,7 +605,7 @@ async def health_check():
     """Health check endpoint for Docker and load balancers."""
     return {
         "status": "healthy",
-        "service": "EEFrame - Expertise Framework",
+        "service": "ExFrame - Expertise Framework",
         "version": "1.0.0",
         "domains_loaded": len(engines),
         "domains": list(engines.keys())
@@ -1424,13 +1424,28 @@ async def promote_candidate(
 
     # Update pattern to certified status
     from datetime import datetime, timedelta
-    updates = {
-        "status": "certified",
-        "reviewed_by": reviewed_by,
-        "reviewed_at": datetime.utcnow().isoformat(),
-        "review_notes": review_notes,
-        "tags": list(set(pattern.get("tags", [])) - {"candidate", "llm_generated"}) + ["certified"]
-    }
+
+    # Fix invalid pattern_type when certifying
+    current_type = pattern.get("pattern_type", "")
+    invalid_types = {"candidate", "", None}
+    if current_type in invalid_types:
+        # Set to a valid default type
+        updates = {
+            "status": "certified",
+            "pattern_type": "how_to",  # Fix invalid type
+            "reviewed_by": reviewed_by,
+            "reviewed_at": datetime.utcnow().isoformat(),
+            "review_notes": review_notes,
+            "tags": list(set(pattern.get("tags", [])) - {"candidate", "llm_generated"}) + ["certified"]
+        }
+    else:
+        updates = {
+            "status": "certified",
+            "reviewed_by": reviewed_by,
+            "reviewed_at": datetime.utcnow().isoformat(),
+            "review_notes": review_notes,
+            "tags": list(set(pattern.get("tags", [])) - {"candidate", "llm_generated"}) + ["certified"]
+        }
 
     await kb.update_pattern(pattern_id, updates)
 

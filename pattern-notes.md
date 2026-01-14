@@ -12,7 +12,7 @@ Patterns are evaluated against the following criteria:
 - `name` - Pattern display name
 - `pattern_type` - Must be one of:
   - Standard types: `troubleshooting`, `procedure`, `substitution`, `decision`, `diagnostic`, `preparation`, `optimization`, `principle`, `solution`, `failure_mode`, `technique`, `concept`
-  - EEFrame types: `getting_started`, `knowledge`, `how_to`, `concepts`, `features`
+  - ExFrame types: `getting_started`, `knowledge`, `how_to`, `concepts`, `features`
   - Binary symmetry types: `symmetry`, `algorithm`, `metric`, `encoding`, `transformation`, `property`, `relationship`, `duality`, `computation`, `extraction`, `distribution`, `signed_arithmetic`
 
 ### Content Quality

@@ -612,5 +612,43 @@
     "times_accessed": 0,
     "user_rating": null,
     "rating": 4.6
+  },
+  {
+    "id": "cooking_candidate_027",
+    "name": "What is the name of the french flat fruit pie ad w...",
+    "pattern_type": "candidate",
+    "description": "Auto-generated from query: What is the name of the french flat fruit pie ad what is a good recipe?",
+    "problem": "What is the name of the french flat fruit pie ad what is a good recipe?",
+    "solution": "The name of the French flat fruit pie is a **Galette**.\n\nWhile the term *galette* can refer to various flat cakes or buckwheat crepes (like Galette des Rois), in the context of fruit pies, it refers specifically to a **free-form, rustic tart**.\n\nUnlike a traditional pie or tart that uses a pie pan or tart tin, a galette is baked flat on a baking sheet. The dough is rolled out into a rough circle, the filling is placed in the center (leaving a border), and the edges are folded up and over the fruit to create a pleated \"crust.\"\n\nHere is an excellent, reliable recipe for a Classic French Fruit Galette.\n\n***\n\n### Classic French Fruit Galette\n\nThis recipe uses a combination of all-purpose flour and almond flour for a dough that is incredibly flavorful and tender, yet sturdy enough to handle the fruit juices.\n\n#### **Ingredients**\n\n**For the Crust:**\n*   **1 cup (125g)** All-purpose flour\n*   **\u00bc cup (30g)** Almond flour (or ground almonds)\n*   **1 tbsp** Sugar\n*   **\u00bc tsp** Salt\n*   **\u00bd cup (1 stick / 113g)** Unsalted butter, **very cold** and cubed\n*   **3\u20135 tbsp** Ice water\n*   **1 tsp** Apple cider vinegar (helps keep the crust tender)\n\n**For the Filling:**\n*   **3\u20134 cups** Fresh fruit (Stone fruits like peaches, plums, or cherries work best, as do apples, pears, or berries)\n*   **\u00bc cup (50g)** Granulated sugar (adjust based on fruit sweetness)\n*   **1 tbsp** Cornstarch or tapioca starch (helps thicken the juices)\n*   **1 tsp** Lemon juice\n*   **1 tsp** Vanilla extract\n*   **1** Egg yolk mixed with 1 tbsp water (egg wash)\n*   **Coarse sugar** (Turbinado) for sprinkling on top\n\n---\n\n#### **Instructions**\n\n**1. Prepare the Dough**\n*   In a large bowl (or food processor), whisk together the flour, almond flour, sugar, and salt.\n*   Add the cold, cubed butter. Use a pastry cutter or pulse the food processor until the mixture looks like coarse crumbs with some pea-sized chunks of butter remaining.\n*   Sprinkle the vinegar and 3 tablespoons of ice water over the mixture. Mix gently with a spatula. If the dough is too dry to hold together when pinched, add more water, 1 tablespoon at a time.\n*   Gather the dough into a ball, flatten it into a disk, wrap in plastic wrap, and refrigerate for at least **1 hour**.\n\n**2. Prepare the Filling**\n*   Wash, pit (if necessary), and slice your fruit.\n*   In a bowl, toss the fruit gently with the sugar, cornstarch, lemon juice, and vanilla extract. Set aside.\n\n**3. Assemble the Galette**\n*   Preheat your oven to **400\u00b0F (200\u00b0C)**. Line a large baking sheet with parchment paper.\n*   On a lightly floured surface, roll the chilled dough out into a rough 12-inch circle (it doesn't have to be perfect).\n*   Transfer the dough to the parchment-lined baking sheet.\n*   Arrange the fruit in the center of the dough, leaving a **2 to 3-inch border** around the edges. Pour any remaining juices from the bowl over the fruit.\n*   Fold the edges of the dough up and over the fruit, pleating the dough as you go to create a rustic rim.\n\n**4. Bake**\n*   Brush the folded crust with the egg wash and sprinkle with coarse sugar.\n*   Bake for **30 to 40 minutes**, or until the crust is golden brown and the fruit filling is bubbling and thick.\n*   **Important:** If the crust is browning too quickly, cover the edges loosely with foil for the last 10 minutes of baking.\n\n**5. Cool and Serve**\n*   Let the galette cool on the baking sheet for at least 20\u201330 minutes before slicing. This allows the fruit filling to set so it doesn't run when you cut it.\n\n***\n\n### **Tips for Success**\n*   **Keep it Cold:** The most important rule for a flaky crust is cold butter. If the butter melts before it hits the oven, you lose the flakiness. Work quickly and chill the dough if it feels soft.\n*   **Almond Flour:** While optional, the almond flour adds a nice \"shortbread\" texture and nutty flavor that pairs beautifully with stone fruits.\n*   **Serving:** Serve warm with a scoop of vanilla ice cream or a dollop of cr\u00e8me fra\u00eeche.",
+    "steps": [],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.8,
+    "sources": [],
+    "tags": [
+      "certified"
+    ],
+    "examples": [
+      "What is the name of the french flat fruit pie ad what is a good recipe?"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-01-14T21:39:23.907670",
+    "updated_at": "2026-01-14T21:41:26.728991",
+    "times_accessed": 1,
+    "user_rating": null,
+    "status": "certified",
+    "origin": "llm_fallback",
+    "origin_query": "What is the name of the french flat fruit pie ad what is a good recipe?",
+    "generated_at": "2026-01-14T21:39:23.907599",
+    "generated_by": "glm-4.7",
+    "confidence_score": 0.8,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": null,
+    "usage_count": 0,
+    "user_feedback": [],
+    "llm_generated": false
   }
 ]

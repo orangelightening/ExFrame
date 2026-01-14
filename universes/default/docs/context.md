@@ -1,4 +1,4 @@
-# EEFrame Project Context
+# ExFrame Project Context
 
 **Date**: 2026-01-12
 **Working Directory**: `/home/peter/development/eeframe`
@@ -9,7 +9,7 @@
 
 ### Primary Goal
 
-Build a **robust autonomous learning and certification system** for EEFrame that can:
+Build a **robust autonomous learning and certification system** for ExFrame that can:
 1. Scrape web sources autonomously
 2. Extract knowledge patterns
 3. Certify patterns through **5-judge AI panel**
@@ -28,7 +28,7 @@ Build a **robust autonomous learning and certification system** for EEFrame that
 
 ---
 
-## EEFrame Hierarchy (Spatial Confirmation)
+## ExFrame Hierarchy (Spatial Confirmation)
 
 ```
 MULTIVERSE
@@ -95,7 +95,7 @@ MULTIVERSE
 ### Example Hierarchy
 
 ```
-Multiverse: EEFrame Installation
+Multiverse: ExFrame Installation
 │
 └── Universe: production
     │
@@ -191,7 +191,7 @@ Surveyor can operate at different hierarchy levels:
               └───────────────────────┼───────────────────────┘
                                       ▼
                         ┌─────────────────────────────────┐
-                        │     EEFrame Knowledge Base      │
+                        │     ExFrame Knowledge Base      │
                         │     (Certified Patterns)         │
                         └─────────────────────────────────┘
                                       │
@@ -450,7 +450,7 @@ Survey operations:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  EEFrame - Generic Framework                │
+│  ExFrame - Generic Framework                │
 ├──────────┬──────────────────────────────────────────────────────┤
 │          │                                                       │
 │ Query    │  SURVEYOR - Autonomous Learning Manager              │

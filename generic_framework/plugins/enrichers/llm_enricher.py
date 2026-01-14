@@ -31,10 +31,15 @@ class LLMEnricher(EnrichmentPlugin):
     Configuration:
         - api_key: str - OpenAI/Anthropic API key (or env var OPENAI_API_KEY)
         - base_url: str - API base URL (default: OpenAI)
-        - model: str - Model to use (default: gpt-4o-mini)
+        - model: str - Model to use (overrides LLM_MODEL env var)
         - min_confidence: float (default: 0.3) - Use LLM if pattern confidence below this
         - max_patterns: int (default: 5) - Max patterns to include in LLM context
         - mode: str (default: "enhance") - Mode: "enhance", "fallback", or "replace"
+
+    Model Priority (first found wins):
+        1. LLM_MODEL environment variable (global default for all domains)
+        2. Domain config "model" field (per-domain override)
+        3. Hardcoded default: glm-4.7
     """
 
     name = "LLM Enricher"
@@ -48,7 +53,12 @@ class LLMEnricher(EnrichmentPlugin):
         super().__init__(config)
         self.api_key = self.config.get("api_key") or os.getenv("OPENAI_API_KEY")
         self.base_url = self.config.get("base_url") or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-        self.model = self.config.get("model", "gpt-4o-mini")
+        # Model priority: env var > domain config > hardcoded default
+        self.model = (
+            os.getenv("LLM_MODEL") or
+            self.config.get("model") or
+            "glm-4.7"
+        )
         self.min_confidence = self.config.get("min_confidence", 0.3)
         self.max_patterns = self.config.get("max_patterns", 5)
         self.mode = self.config.get("mode", "enhance")

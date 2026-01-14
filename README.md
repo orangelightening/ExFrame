@@ -1,4 +1,4 @@
-# EEFrame - Expertise Framework
+# ExFrame - Expertise Framework
 
 **Domain-Agnostic AI-Powered Knowledge Management System**
 
@@ -8,7 +8,7 @@ Version 1.4.0 - Pattern Caching & ID Generation Fixes
 
 ## Overview
 
-EEFrame is a unified, domain-agnostic framework for building AI-powered knowledge assistants with a **universe-based architecture** and **plugin-based pipeline**. It provides:
+ExFrame is a unified, domain-agnostic framework for building AI-powered knowledge assistants with a **universe-based architecture** and **plugin-based pipeline**. It provides:
 
 - **Universe Architecture**: Complete isolation and portability of knowledge configurations
 - **Plugin Pipeline**: Router → Specialist → Enricher → Formatter - all swappable
@@ -51,7 +51,7 @@ EEFrame is a unified, domain-agnostic framework for building AI-powered knowledg
 
 ## Plugin Architecture
 
-EEFrame v1.3.0 features a complete pluggable pipeline that separates **data** (patterns) from **transformation logic** (plugins).
+ExFrame v1.3.0 features a complete pluggable pipeline that separates **data** (patterns) from **transformation logic** (plugins).
 
 ### Pipeline Overview
 
@@ -174,7 +174,7 @@ See [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md) for:
 
 ## Installation on New Linux Machine
 
-**Complete step-by-step guide for deploying EEFrame from GitHub to a fresh Linux system.**
+**Complete step-by-step guide for deploying ExFrame from GitHub to a fresh Linux system.**
 
 ### What Must Be Running on Host
 
@@ -221,7 +221,7 @@ sudo usermod -aG docker $USER
 # Or use: newgrp docker
 ```
 
-### Clone and Deploy EEFrame
+### Clone and Deploy ExFrame
 
 ```bash
 # Step 1: Clone the repository
@@ -244,37 +244,73 @@ docker compose logs eeframe-app | tail -20
 # Look for: "ExFrame Runtime Ready" and "Uvicorn running"
 ```
 
-### Configure API Key (.env file)
+### Configure LLM (.env file)
 
-Edit `.env` with your preferred LLM provider:
+The `.env` file configures your LLM provider. **All domains use this global configuration by default.**
 
-**For OpenAI:**
+#### Quick Setup - Common Providers
+
+**For GLM (z.ai) - RECOMMENDED for ExFrame:**
 ```bash
+LLM_MODEL=glm-4.7
+OPENAI_API_KEY=your-glm-key-here
+OPENAI_BASE_URL=https://api.z.ai/api/anthropic
+```
+
+**For OpenAI GPT:**
+```bash
+LLM_MODEL=gpt-4o-mini
 OPENAI_API_KEY=sk-your-openai-api-key-here
 OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
-**For GLM (z.ai):**
-```bash
-OPENAI_API_KEY=your-glm-api-key-here
-OPENAI_BASE_URL=https://api.z.ai/api/anthropic
-```
-
 **For Anthropic Claude:**
 ```bash
+LLM_MODEL=claude-3-5-sonnet-20241022
 OPENAI_API_KEY=sk-ant-your-anthropic-api-key-here
 OPENAI_BASE_URL=https://api.anthropic.com/v1
 ```
 
 **For local LLM (Ollama):**
 ```bash
-OPENAI_API_KEY=not-needed  # Ollama doesn't require a key
+LLM_MODEL=llama3
+OPENAI_API_KEY=not-needed
 OPENAI_BASE_URL=http://host.docker.internal:11434/v1
 ```
 
+#### Configuration Explained
+
+| Variable | Purpose | Required | Default |
+|----------|---------|----------|---------|
+| `LLM_MODEL` | Model name for all domains | No | `glm-4.7` |
+| `OPENAI_API_KEY` | Your API key | Yes* | - |
+| `OPENAI_BASE_URL` | API endpoint URL | No | OpenAI |
+
+*Required for LLM features. System works without it for pattern-only queries.
+
+#### Advanced: Per-Domain Model Override
+
+If you want different models for different domains (e.g., use a cheaper model for simple domains):
+
+**Option 1: Web UI**
+1. Go to **Domains** → Select domain → **Edit**
+2. Find **Enrichers** → **LLM Enricher** → **model**
+3. Set to your preferred model
+
+**Option 2: Edit domain config**
+```bash
+nano universes/default/domains/{domain}/domain_config.json
+# Find "enrichers" section and add "model": "your-model"
+```
+
+**Model Priority:**
+1. `LLM_MODEL` in `.env` (global default)
+2. Domain config `model` field (per-domain override)
+3. Hardcoded default: `glm-4.7`
+
 ### Access the Application
 
-Once containers are running, access EEFrame at:
+Once containers are running, access ExFrame at:
 
 - **Main Application**: `http://localhost:3000` or `http://<your-server-ip>:3000`
 - **API Documentation**: `http://localhost:3000/docs`
@@ -337,7 +373,7 @@ sudo lsof -ti:3000
 # Kill the process (replace PID with actual process ID)
 sudo kill -9 <PID>
 
-# Restart EEFrame
+# Restart ExFrame
 docker compose up -d
 ```
 
@@ -398,7 +434,8 @@ sudo usermod -aG docker $USER
 ```
 
 **Additional Requirements:**
-- OpenAI API key (or compatible LLM like GLM) - optional, for LLM enrichment features
+- LLM API key and model (GLM, OpenAI, Anthropic, etc.) - **optional**, for LLM enrichment features
+- System works for pattern-based queries without LLM configuration
 
 ### Installation
 
@@ -407,21 +444,24 @@ sudo usermod -aG docker $USER
 git clone https://github.com/orangelightening/ExFrame.git
 cd ExFrame
 
-# 2. Configure environment (REQUIRED for LLM features)
+# 2. Configure environment (OPTIONAL - for LLM features)
 cp .env.example .env
 
-# Edit .env with your API credentials
-# For OpenAI:
-#   - Set OPENAI_API_KEY=your-openai-api-key
-#   - Leave OPENAI_BASE_URL as is (or remove to use default)
+# Edit .env with your LLM credentials
+# The system works without LLM config for pattern-based queries
 #
-# For GLM (z.ai):
+# For GLM (z.ai) - RECOMMENDED:
+#   - Set LLM_MODEL=glm-4.7
 #   - Set OPENAI_API_KEY=your-glm-api-key
 #   - Set OPENAI_BASE_URL=https://api.z.ai/api/anthropic
 #
+# For OpenAI:
+#   - Set LLM_MODEL=gpt-4o-mini
+#   - Set OPENAI_API_KEY=your-openai-api-key
+#
 # For Anthropic Claude:
+#   - Set LLM_MODEL=claude-3-5-sonnet-20241022
 #   - Set OPENAI_API_KEY=your-anthropic-api-key
-#   - Set OPENAI_BASE_URL=https://api.anthropic.com/v1
 #
 nano .env  # or use your preferred editor
 
@@ -437,7 +477,7 @@ docker compose logs -f eeframe-app
 ```
 
 **Access URLs**:
-- **EEFrame UI**: `http://localhost:3000` (main application)
+- **ExFrame UI**: `http://localhost:3000` (main application)
 - **API Docs**: `http://localhost:3000/docs` (Swagger UI)
 - **Health Check**: `http://localhost:3000/health`
 - **Prometheus**: `http://localhost:9090` (metrics)
@@ -604,16 +644,20 @@ eeframe/
 Create a `.env` file in the project root:
 
 ```bash
-# LLM Configuration
+# LLM Configuration (all domains use this by default)
+LLM_MODEL=glm-4.7              # Global default model
 OPENAI_API_KEY=your_api_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
 
 # For local LLMs (Ollama, etc.)
+# LLM_MODEL=llama3
 # OPENAI_BASE_URL=http://host.docker.internal:11434/v1
 
 # Application Settings
 LOG_LEVEL=INFO
 ```
+
+**See "Configure LLM" section above for provider-specific examples.**
 
 ### Domain Configuration
 
@@ -909,7 +953,7 @@ pytest tests/ -v
 
 ## Current Domains
 
-EEFrame includes 7 production domains demonstrating the plugin architecture:
+ExFrame includes 7 production domains demonstrating the plugin architecture:
 
 ### Binary Symmetry
 - **Specialists**: 3 (BitwiseMaster, PatternAnalyst, AlgorithmExplorer)

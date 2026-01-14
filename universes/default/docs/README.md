@@ -1,4 +1,4 @@
-# EEFrame - Expertise Framework
+# ExFrame - Expertise Framework
 
 **Domain-Agnostic AI-Powered Knowledge Management System**
 
@@ -8,7 +8,7 @@ Version 1.3.0 - Universe Architecture & Diagnostics Release
 
 ## Overview
 
-EEFrame is a unified, domain-agnostic framework for building AI-powered knowledge assistants with a **universe-based architecture** and **plugin-based pipeline**. It provides:
+ExFrame is a unified, domain-agnostic framework for building AI-powered knowledge assistants with a **universe-based architecture** and **plugin-based pipeline**. It provides:
 
 - **Universe Architecture**: Complete isolation and portability of knowledge configurations
 - **Plugin Pipeline**: Router → Specialist → Enricher → Formatter - all swappable
@@ -51,7 +51,7 @@ EEFrame is a unified, domain-agnostic framework for building AI-powered knowledg
 
 ## Plugin Architecture
 
-EEFrame v1.3.0 features a complete pluggable pipeline that separates **data** (patterns) from **transformation logic** (plugins).
+ExFrame v1.3.0 features a complete pluggable pipeline that separates **data** (patterns) from **transformation logic** (plugins).
 
 ### Pipeline Overview
 
@@ -234,7 +234,7 @@ docker compose logs -f eeframe-app
 ```
 
 **Access URLs**:
-- **EEFrame UI**: `http://localhost:3000` (main application)
+- **ExFrame UI**: `http://localhost:3000` (main application)
 - **API Docs**: `http://localhost:3000/docs` (Swagger UI)
 - **Health Check**: `http://localhost:3000/health`
 - **Prometheus**: `http://localhost:9090` (metrics)
@@ -706,7 +706,7 @@ pytest tests/ -v
 
 ## Current Domains
 
-EEFrame includes 7 production domains demonstrating the plugin architecture:
+ExFrame includes 7 production domains demonstrating the plugin architecture:
 
 ### Binary Symmetry
 - **Specialists**: 3 (BitwiseMaster, PatternAnalyst, AlgorithmExplorer)

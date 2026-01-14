@@ -144,7 +144,7 @@
                                     </label>
                                     <div class="text-sm text-gray-400">
                                         <span x-show="loading">Processing...</span>
-                                        <span x-show="!loading && lastQuery">Last: <span class="text-emerald-400" x-text="lastQuery"></span></span>
+                                        <span x-show="!loading && lastQuery">Last: <span class="text-emerald-400" x-text="truncate(lastQuery, 40)"></span></span>
                                         <span x-show="processingTime && !loading" class="ml-2 text-gray-500">(<span x-text="processingTime"></span>ms)</span>
                                     </div>
                                 </div>
@@ -165,9 +165,9 @@
                             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <div class="text-center space-y-2">
                                     <h2 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                                        Welcome to EEFrame
+                                        Welcome to ExFrame
                                     </h2>
-                                    <p class="text-gray-400 text-lg">Ask me anything about EEFrame to get started</p>
+                                    <p class="text-gray-400 text-lg">Ask me anything about ExFrame to get started</p>
                                     <div class="flex items-center justify-center gap-4 text-sm text-gray-500 mt-4">
                                         <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Patterns</span>
                                         <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse" style="animation-delay: 0.5s"></span> Domains</span>
@@ -414,7 +414,7 @@
                                 <div class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-purple-500 transition-all cursor-pointer"
                                      @click="selectedTrace = historyItem;">
                                     <div class="flex items-center justify-between mb-1">
-                                        <span class="text-sm text-gray-200 truncate" x-text="historyItem.query"></span>
+                                        <span class="text-sm text-gray-200 truncate" x-text="truncate(historyItem.query, 40)"></span>
                                         <span class="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-400" x-text="(historyItem.confidence * 100).toFixed(0) + '%'"></span>
                                     </div>
                                     <div class="flex items-center gap-2 text-xs text-gray-500">
@@ -524,7 +524,7 @@
                         <div class="p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-purple-500 cursor-pointer transition-all"
                              @click="selectedTrace = trace; currentView = 'assistant';">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-gray-200 font-medium" x-text="trace.query"></span>
+                                <span class="text-gray-200 font-medium" x-text="truncate(trace.query, 40)"></span>
                                 <span class="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-400" x-text="(trace.confidence * 100).toFixed(0) + '%'"></span>
                             </div>
                             <div class="flex items-center gap-4 text-xs text-gray-500">
@@ -1823,26 +1823,81 @@
                         </div>
 
                         <!-- Health Checks -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div class="space-y-3">
                             <template x-for="check in diagnosticsData.health.checks" :key="check.name">
-                                <div class="p-3 rounded-lg border"
+                                <!-- Health Check Card (Click to expand) -->
+                                <div class="rounded-lg border cursor-pointer transition-all hover:shadow-lg"
                                      :class="{
-                                         'bg-green-900/20 border-green-700/50': check.status === 'healthy',
-                                         'bg-yellow-900/20 border-yellow-700/50': check.status === 'warning',
-                                         'bg-red-900/20 border-red-700/50': check.status === 'critical',
+                                         'bg-green-900/20 border-green-700/50 hover:border-green-600': check.status === 'healthy',
+                                         'bg-yellow-900/20 border-yellow-700/50 hover:border-yellow-600': check.status === 'warning',
+                                         'bg-red-900/20 border-red-700/50 hover:border-red-600': check.status === 'critical',
                                          'bg-gray-800/50 border-gray-700': check.status === 'unknown'
-                                     }">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-sm font-medium text-gray-200" x-text="check.name.replace(/_/g, ' ')"></span>
-                                        <span class="w-2 h-2 rounded-full"
-                                              :class="{
-                                                  'bg-green-400': check.status === 'healthy',
-                                                  'bg-yellow-400': check.status === 'warning',
-                                                  'bg-red-400': check.status === 'critical',
-                                                  'bg-gray-400': check.status === 'unknown'
-                                              }"></span>
+                                     }"
+                                     @click="selectedHealthCheck = selectedHealthCheck === check.name ? null : check.name">
+                                    <div class="p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3 flex-1">
+                                                <span class="w-3 h-3 rounded-full"
+                                                      :class="{
+                                                          'bg-green-400 shadow-lg shadow-green-400/50': check.status === 'healthy',
+                                                          'bg-yellow-400 shadow-lg shadow-yellow-400/50': check.status === 'warning',
+                                                          'bg-red-400 shadow-lg shadow-red-400/50': check.status === 'critical',
+                                                          'bg-gray-400': check.status === 'unknown'
+                                                      }"></span>
+                                                <div>
+                                                    <span class="text-sm font-semibold text-gray-200" x-text="check.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())"></span>
+                                                    <p class="text-xs text-gray-400 mt-0.5" x-text="check.message"></p>
+                                                </div>
+                                            </div>
+                                            <svg class="w-4 h-4 text-gray-400 transition-transform"
+                                                 :class="{'rotate-180': selectedHealthCheck === check.name}"
+                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <p class="text-xs text-gray-400" x-text="check.message"></p>
+
+                                    <!-- Expanded Details -->
+                                    <div x-show="selectedHealthCheck === check.name"
+                                         x-transition:enter="transition ease-out duration-200"
+                                         x-transition:enter-start="opacity-0 -mt-2"
+                                         x-transition:enter-end="opacity-100 mt-0"
+                                         x-transition:leave="transition ease-in duration-150"
+                                         x-transition:leave-start="opacity-100 mt-0"
+                                         x-transition:leave-end="opacity-0 -mt-2"
+                                         class="border-t border-gray-700/50 mt-2 pt-3">
+                                        <!-- Details Grid -->
+                                        <div class="grid grid-cols-2 gap-3 text-xs">
+                                            <template x-for="(value, key) in check.details" :key="key">
+                                                <div class="p-2 rounded bg-gray-900/50">
+                                                    <span class="text-gray-500" x-text="key.replace(/_/g, ' ')"></span>
+                                                    <span class="ml-2 font-medium"
+                                                          :class="{
+                                                              'text-green-400': typeof value === 'number' && value > 90,
+                                                              'text-yellow-400': typeof value === 'number' && value > 70 && value <= 90,
+                                                              'text-red-400': typeof value === 'number' && value <= 70,
+                                                              'text-gray-300': typeof value !== 'number'
+                                                          }"
+                                                          x-text="typeof value === 'number' ? (value % 1 === 0 ? value : value.toFixed(2)) : value"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Issues List (if any) -->
+                                        <div x-show="check.details.issues && check.details.issues.length > 0" class="mt-3">
+                                            <p class="text-xs text-gray-400 mb-2">Issues:</p>
+                                            <div class="space-y-1">
+                                                <template x-for="issue in check.details.issues" :key="issue">
+                                                    <div class="p-2 rounded bg-red-900/20 border border-red-700/30 text-red-300 text-xs" x-text="issue"></div>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timestamp -->
+                                        <div class="mt-3 text-xs text-gray-500" x-show="check.timestamp">
+                                            Last checked: <span x-text="new Date(check.timestamp).toLocaleString()"></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
                         </div>
@@ -2057,6 +2112,7 @@
                     pattern_health: null,
                     generated_at: null
                 },
+                selectedHealthCheck: null,  // For drill-down details
                 // ==================== SURVEYOR STATE ====================
                 surveys: [],
                 selectedSurvey: null,
@@ -2637,6 +2693,12 @@
                     if (score >= 0.8) return 'text-emerald-400';
                     if (score >= 0.5) return 'text-yellow-400';
                     return 'text-red-400';
+                },
+
+                truncate(text, maxLength = 40) {
+                    if (!text) return '';
+                    if (text.length <= maxLength) return text;
+                    return text.substring(0, maxLength) + '...';
                 },
 
                 getStateChanges(trace) {

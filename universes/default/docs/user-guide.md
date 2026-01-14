@@ -1,4 +1,4 @@
-# EEFrame User Guide
+# ExFrame User Guide
 
 **Version**: 1.3.0
 **Last Updated**: 2026-01-12
@@ -22,7 +22,7 @@
 
 ## Introduction
 
-EEFrame is a domain-agnostic expertise assistant framework. It stores knowledge as **patterns** in **domains** within **universes**, and lets you query that knowledge through natural language.
+ExFrame is a domain-agnostic expertise assistant framework. It stores knowledge as **patterns** in **domains** within **universes**, and lets you query that knowledge through natural language.
 
 ### Key Concepts
 
@@ -211,7 +211,7 @@ Domains are areas of expertise that contain related patterns.
 
 ## Surveyor: Autonomous Learning
 
-The **Surveyor** is EEFrame's autonomous learning system. It can scrape web sources, extract knowledge patterns, and certify them through a 5-judge AI panel.
+The **Surveyor** is ExFrame's autonomous learning system. It can scrape web sources, extract knowledge patterns, and certify them through a 5-judge AI panel.
 
 ### Survey Levels
 
@@ -531,4 +531,4 @@ Control how patterns are matched:
 
 **Document Version**: 1.0
 **Last Updated**: 2026-01-12
-**Maintained By**: EEFrame Development Team
+**Maintained By**: ExFrame Development Team
