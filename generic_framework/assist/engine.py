@@ -7,6 +7,7 @@ from datetime import datetime
 import sys
 import json
 import logging
+import os
 from pathlib import Path
 
 # Add parent directory to path for imports
@@ -127,14 +128,9 @@ class GenericAssistantEngine:
             })
 
         # Step 2: Search knowledge base for relevant patterns
-        # When no specialist selected, only search for exact query matches (pattern caching)
-        # When specialist selected, do full search for relevant patterns
+        # Always do a full search - exact_only is too restrictive
         step2_time = datetime.utcnow()
-        if specialist:
-            patterns = await self.knowledge_base.search(query, limit=5, exact_only=False)
-        else:
-            # Only find exact query matches in examples field (for cached responses)
-            patterns = await self.knowledge_base.search(query, limit=5, exact_only=True)
+        patterns = await self.knowledge_base.search(query, limit=5)
 
         if trace:
             trace['steps'].append({
@@ -471,6 +467,128 @@ class GenericAssistantEngine:
                 except Exception:
                     pass  # Don't fail if recording fails
 
+    async def _polish_pattern(
+        self,
+        query: str,
+        llm_response: str,
+        domain_id: str
+    ) -> Dict[str, Any]:
+        """
+        Polish a pattern using LLM to generate meaningful title and fill fields.
+
+        Returns a dict with polished pattern fields:
+        - name: Short, meaningful title (5-10 words)
+        - problem: Clear problem statement
+        - solution: Enhanced solution with details
+        - description: Friendly, informative description
+        - examples: Relevant examples
+        - tags: Appropriate tags
+        """
+        import httpx
+
+        api_key = os.getenv("OPENAI_API_KEY")
+        base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        model = os.getenv("LLM_MODEL", "glm-4.7")
+
+        if not api_key:
+            # No API key - return basic polish
+            return {
+                "name": query[:50] + ("..." if len(query) > 50 else ""),
+                "problem": query,
+                "solution": llm_response,
+                "description": f"Response to: {query}",
+                "examples": [query],
+                "tags": ["llm_generated"]
+            }
+
+        # Build polishing prompt - only for metadata, NOT rewriting the solution
+        prompt = f"""Hey! You're helping organize knowledge for ExFrame (an awesome expertise framework)!
+
+DOMAIN: {domain_id}
+
+ORIGINAL QUERY: {query}
+
+Great news - the AI has already provided a fantastic full answer! Your job is the fun part - creating a catchy title and helpful metadata so people can easily find this gem.
+
+Return ONLY valid JSON:
+{{
+  "name": "A memorable, engaging title (5-10 words) that makes someone curious to learn more!",
+  "problem": "What challenge does this solve? Describe it in a friendly, relatable way (1-2 sentences)",
+  "description": "Get people excited about this! What's the context? Why is it useful? Be enthusiastic (2-3 sentences)",
+  "examples": ["Give a concrete example of when someone would use this", "Add another practical scenario"],
+  "tags": ["Pick 5 relevant tags that will help people discover this"]
+}}
+
+Style: Enthusiastic, friendly, like a knowledgeable friend sharing something cool. You love helping people learn!
+
+Keep it concise but fun - the full detailed answer is stored separately.
+
+Return ONLY the JSON, no other text:"""
+
+        try:
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+
+            is_anthropic = "anthropic" in base_url.lower()
+
+            if is_anthropic:
+                model_name = model if model.startswith("glm-") else model.replace("gpt-", "claude-")
+                payload = {
+                    "model": model_name,
+                    "max_tokens": 512,  # Only metadata, not full solution
+                    "messages": [{"role": "user", "content": prompt}]
+                }
+            else:
+                payload = {
+                    "model": model,
+                    "max_tokens": 512,  # Only metadata, not full solution
+                    "messages": [
+                        {"role": "system", "content": "You are a helpful assistant that returns only valid JSON."},
+                        {"role": "user", "content": prompt}
+                    ]
+                }
+
+            timeout = httpx.Timeout(30.0)  # Normal timeout for metadata generation
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                endpoint = f"{base_url.rstrip('/')}/v1/messages" if is_anthropic else f"{base_url.rstrip('/')}/chat/completions"
+
+                response = await client.post(endpoint, headers=headers, json=payload)
+                response.raise_for_status()
+                data = response.json()
+
+                # Parse response
+                content = ""
+                if "choices" in data:
+                    content = data["choices"][0]["message"]["content"]
+                elif "content" in data and isinstance(data["content"], list):
+                    content = data["content"][0].get("text", "")
+                elif "content" in data and isinstance(data["content"], str):
+                    content = data["content"]
+
+                # Try to parse JSON from LLM response
+                import re
+                json_match = re.search(r'\{[^{}]*\{.*\}[^{}]*\}|\{[^{}]+\}', content, re.DOTALL)
+                if json_match:
+                    polished = json.loads(json_match.group(0))
+                    print(f"  ✓ Pattern polished: {polished.get('name', 'Unknown')}")
+                    return polished
+                else:
+                    print(f"  ⚠ Could not parse JSON from LLM polish, using basic")
+                    raise ValueError("No JSON found")
+
+        except Exception as e:
+            print(f"  ⚠ LLM polishing failed: {e}, using basic fields")
+            return {
+                "name": query[:50] + ("..." if len(query) > 50 else ""),
+                "problem": query,
+                "solution": llm_response,
+                "description": f"Response to: {query}",
+                "examples": [query],
+                "tags": ["llm_generated"]
+            }
+
     async def _save_candidate_pattern(
         self,
         query: str,
@@ -560,9 +678,6 @@ class GenericAssistantEngine:
             # Generate pattern from LLM response
             now = datetime.utcnow()
 
-            # Extract a name from the query (first ~50 chars)
-            name = query[:50] + ("..." if len(query) > 50 else "")
-
             # Find the maximum existing pattern ID to generate a unique new ID
             # This is more robust than using len(all_patterns) which can cause duplicates
             max_id = 0
@@ -584,7 +699,7 @@ class GenericAssistantEngine:
                 pattern_id = f"{self.domain.domain_id}_flagged_{next_id:03d}"
                 pattern_status = "flagged_for_review"
                 pattern_confidence = 0.10  # Low confidence
-                pattern_type = "flagged"
+                pattern_type = "how_to"  # Valid type even for flagged patterns
                 pattern_tags = ["flagged_for_review", "out_of_scope", "llm_generated"]
                 log_prefix = "⚠ Flagged pattern (out of scope)"
             elif research_strategy_used:
@@ -600,17 +715,21 @@ class GenericAssistantEngine:
                 pattern_id = f"{self.domain.domain_id}_candidate_{next_id:03d}"
                 pattern_status = "candidate"
                 pattern_confidence = 0.50
-                pattern_type = "candidate"
+                pattern_type = "how_to"  # Valid pattern type for candidates
                 pattern_tags = ["candidate", "llm_generated"]
                 log_prefix = "✓ Saved candidate pattern"
 
+            # Polish the pattern to generate meaningful title and fill fields (but keep full AI response)
+            print(f"  → Polishing pattern for: {query[:40]}...")
+            polished = await self._polish_pattern(query, llm_response, self.domain.domain_id)
+
             candidate_pattern = {
                 "id": pattern_id,
-                "name": name,
+                "name": polished.get("name", query[:50] + ("..." if len(query) > 50 else "")),
                 "pattern_type": pattern_type,
-                "description": f"Auto-generated from query: {query}",
-                "problem": query,  # The query that triggered the LLM
-                "solution": llm_response,  # The LLM's response
+                "description": polished.get("description", f"Auto-generated from query: {query}"),
+                "problem": polished.get("problem", query),  # Polished problem statement
+                "solution": llm_response,  # FULL original AI response - NOT the polished summary
                 "steps": [],  # Could be parsed from response in future
                 "conditions": {},
                 "related_patterns": [],
@@ -618,8 +737,8 @@ class GenericAssistantEngine:
                 "alternatives": [],
                 "confidence": pattern_confidence,  # 0.80 for docs, 0.50 for candidates
                 "sources": [],
-                "tags": pattern_tags,
-                "examples": [query],  # Sample question from the query
+                "tags": list(set(pattern_tags + polished.get("tags", []))),  # Merge tags
+                "examples": polished.get("examples", [query]),  # Polished examples
                 "domain": self.domain.domain_id,
                 "created_at": now.isoformat(),
                 "updated_at": now.isoformat(),
@@ -629,9 +748,9 @@ class GenericAssistantEngine:
                 # Status metadata
                 "status": pattern_status,
                 "origin": "documentation_research" if research_strategy_used else "llm_fallback",
-                "origin_query": query,
+                "origin_query": query,  # Keep original query for matching
                 "generated_at": now.isoformat(),
-                "generated_by": "glm-4.7",  # Could be made configurable
+                "generated_by": os.getenv("LLM_MODEL", "glm-4.7"),
                 "confidence_score": confidence,
                 "reviewed_by": None if not research_strategy_used else "system",
                 "reviewed_at": None if not research_strategy_used else now.isoformat(),

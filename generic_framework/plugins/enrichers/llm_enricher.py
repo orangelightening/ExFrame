@@ -179,14 +179,14 @@ We found {len(patterns)} relevant pattern(s) from our knowledge base:
 
 {pattern_text}
 
-Build upon these patterns to provide a clear, helpful answer:
+Build upon these patterns to provide a comprehensive, helpful answer:
 1. Synthesize the key insights from these patterns
 2. Keep it conversational and natural
-3. Add relevant context when patterns are incomplete
-4. Keep it concise while being thorough
+3. Add relevant context and details when patterns are incomplete
+4. Be thorough - don't cut short, provide complete information
 5. Use markdown formatting for readability
 
-Provide your response:"""
+Provide your detailed response:"""
 
         return prompt
 
@@ -198,8 +198,11 @@ Provide your response:"""
 
 A user asked: "{query}"
 
-Provide a clear, helpful response using markdown formatting.
-Draw on your knowledge while staying accurate and factual.
+Provide a comprehensive, detailed response using markdown formatting:
+- Be thorough and complete
+- Include practical details and examples
+- Draw on your knowledge while staying accurate
+- Don't cut short - give a full, helpful answer
 
 Your response:"""
 
@@ -227,7 +230,7 @@ Your response:"""
             model_name = self.model if self.model.startswith("glm-") else self.model.replace("gpt-", "claude-")
             payload = {
                 "model": model_name,
-                "max_tokens": 1024,
+                "max_tokens": 8192,  # Book chapter length responses
                 "messages": [
                     {"role": "user", "content": prompt}
                 ]
@@ -236,14 +239,14 @@ Your response:"""
             # OpenAI API format
             payload = {
                 "model": self.model,
-                "max_tokens": 1024,
+                "max_tokens": 8192,  # Book chapter length responses
                 "messages": [
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ]
             }
 
-        timeout = httpx.Timeout(30.0)
+        timeout = httpx.Timeout(60.0)  # Increased timeout for longer responses
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 # Use correct endpoint based on API type

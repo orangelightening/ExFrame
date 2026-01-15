@@ -88,25 +88,20 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         **filters
     ) -> List[Dict[str, Any]]:
         """
-        Search patterns by query text using keyword matching.
+        Search patterns by simple substring matching.
 
-        Args:
-            query: Search query
-            category: Optional category filter
-            limit: Max results
-            exact_only: If True, only return patterns with exact query match in examples
-            **filters: Additional backend-specific filters (ignored for JSON)
-
-        Returns:
-            List of matching patterns sorted by relevance.
+        Simple and reliable - just checks if query appears in pattern fields.
         """
         if not self._loaded:
             await self.load_patterns()
 
         query_lower = query.lower()
-        query_terms = self._extract_terms(query_lower)
 
-        # Score each pattern
+        # DEBUG: Log search start
+        print(f"  [SEARCH] Query: '{query[:50]}...' (lowercased: '{query_lower[:50]}...')")
+        print(f"  [SEARCH] Total patterns to check: {len(self._patterns)}")
+
+        # Score each pattern by counting matching fields
         scored_patterns = []
         for pattern in self._patterns:
             # Filter by category if specified
@@ -116,24 +111,37 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
                 if category != pattern_cats and category not in pattern_tags:
                     continue
 
-            # Check for exact query match in examples field
-            examples = pattern.get('examples', [])
-            has_exact_match = examples and query_lower in [str(ex).lower() for ex in examples]
+            # Check for exact match first
+            has_exact_match = False
+            origin_query = pattern.get('origin_query', '').lower()
+            if origin_query == query_lower:
+                has_exact_match = True
+
+            if not has_exact_match:
+                examples = pattern.get('examples', [])
+                if examples and query_lower in [str(ex).lower() for ex in examples]:
+                    has_exact_match = True
 
             # If exact_only mode, skip patterns without exact match
             if exact_only and not has_exact_match:
                 continue
 
-            score = self._calculate_relevance(pattern, query_lower, query_terms)
+            # Count how many fields contain the query (simple relevance)
+            match_count = self._count_matching_fields(pattern, query_lower)
 
-            # Bonus for exact query match in examples field (for pattern caching)
+            # Exact matches get highest priority
             if has_exact_match:
-                score += 10.0  # Large bonus for exact query match
+                match_count += 100  # Bonus for exact match
 
-            if score > 0:
-                scored_patterns.append((pattern, score))
+            if match_count > 0:
+                scored_patterns.append((pattern, match_count))
+                # DEBUG: Log each match
+                print(f"  [SEARCH] ✓ Match: '{pattern.get('name', '?')[:40]}...' (score: {match_count}, exact: {has_exact_match})")
 
-        # Sort by score descending
+        # DEBUG: Log results
+        print(f"  [SEARCH] Found {len(scored_patterns)} matches")
+
+        # Sort by match count descending
         scored_patterns.sort(key=lambda x: x[1], reverse=True)
 
         # Return top patterns
@@ -348,71 +356,35 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
 
         return None
 
-    def _extract_terms(self, query: str) -> List[str]:
-        """Extract significant terms from query."""
-        # Remove common stop words
-        stop_words = {
-            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to',
-            'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are',
-            'how', 'what', 'when', 'where', 'why', 'who', 'do', 'does',
-            'can', 'could', 'would', 'should', 'i', 'you', 'we', 'they'
-        }
+    def _count_matching_fields(self, pattern: Dict[str, Any], query_lower: str) -> int:
+        """
+        Count how many fields contain the query string.
 
-        # Extract words
-        words = re.findall(r'\b\w+\b', query.lower())
-        return [w for w in words if w not in stop_words and len(w) > 2]
+        Simple and predictable - just counts matches.
+        Returns 0-6 (number of fields that matched).
+        """
+        count = 0
 
-    def _calculate_relevance(
-        self,
-        pattern: Dict[str, Any],
-        query_lower: str,
-        query_terms: List[str]
-    ) -> float:
-        """Calculate relevance score for a pattern."""
-        score = 0.0
+        # Check all searchable fields
+        fields_to_check = [
+            pattern.get('name', ''),
+            pattern.get('description', ''),
+            pattern.get('problem', ''),
+            pattern.get('solution', ''),
+            pattern.get('origin_query', ''),
+            ' '.join(pattern.get('tags', [])),
+            ' '.join(str(ex) for ex in pattern.get('examples', []))
+        ]
 
-        # Check name match (highest weight)
-        name = pattern.get('name', '').lower()
-        for term in query_terms:
-            if term in name:
-                score += 2.0
+        for field_value in fields_to_check:
+            if query_lower in field_value.lower():
+                count += 1
 
-        # Check description
-        description = pattern.get('description', '').lower()
-        for term in query_terms:
-            if term in description:
-                score += 1.0
-
-        # Check problem/solution
-        problem = pattern.get('problem', '').lower()
-        solution = pattern.get('solution', '').lower()
-        for term in query_terms:
-            if term in problem or term in solution:
-                score += 0.5
-
-        # Check tags
-        tags = [t.lower() for t in pattern.get('tags', [])]
-        for term in query_terms:
-            if term in tags:
-                score += 1.5
-
-        # Note: Don't multiply by confidence here - we want all patterns to be findable
-        # regardless of confidence. Confidence affects ranking, not visibility.
-
-        return score
+        return count
 
     def _calculate_similarity(self, query: str, pattern: Dict[str, Any]) -> float:
-        """Calculate similarity score (0-1)."""
+        """Calculate similarity score (0-1) - simplified version."""
         query_lower = query.lower()
-        query_terms = self._extract_terms(query_lower)
-
-        # Get max possible score for this query
-        max_score = len(query_terms) * 2.0
-
-        if max_score == 0:
-            return 0.0
-
-        actual_score = self._calculate_relevance(pattern, query_lower, query_terms)
-
-        # Normalize to 0-1
-        return min(actual_score / max_score, 1.0)
+        match_count = self._count_matching_fields(pattern, query_lower)
+        # Normalize: 6 fields max, so return match_count / 6
+        return min(match_count / 6.0, 1.0)
