@@ -108,16 +108,10 @@ class LLMEnricher(EnrichmentPlugin):
         if self.mode == self.MODE_REPLACE:
             return True  # Always use LLM
         elif self.mode == self.MODE_FALLBACK:
-            # Check if any patterns are CERTIFIED with high confidence
-            # If we have certified patterns, trust them and don't use LLM
-            for pattern in patterns:
-                if pattern.get("status") == "certified":
-                    # Found a certified pattern - trust it, don't use LLM
-                    print(f"  LLM Enricher: Skipping LLM, found certified pattern: {pattern.get('name')}")
-                    return False
-
-            # Only use LLM if patterns are weak or non-certified
-            return confidence < self.min_confidence or not patterns
+            # Only use LLM if no patterns found (auto-fallback)
+            # If patterns exist, confirmation will be handled in enrich() method
+            result = not patterns
+            return result
         else:  # enhance
             # Use LLM to enhance, but still use patterns
             return True
@@ -146,6 +140,21 @@ class LLMEnricher(EnrichmentPlugin):
             # Return error message if LLM fails
             return f"[LLM Error: {str(e)}]"
 
+    def _clean_pattern_text(self, text: str) -> str:
+        """Remove Source X references and other LLM artifacts from pattern text."""
+        import re
+        # Remove "Source X", "Source X:" references
+        text = re.sub(r'\*\*Source \d+:\*\*', '', text)
+        text = re.sub(r'\*\*Source \d+\*\*', '', text)
+        text = re.sub(r'Source \d+:', '', text)
+        text = re.sub(r'\(Source \d+\)', '', text)
+        # Remove "According to Source X" phrases
+        text = re.sub(r'According to \*\*Source \d+\*\*', 'According to', text)
+        text = re.sub(r'According to Source \d+', 'According to', text)
+        # Clean up extra whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+
     def _build_enhancement_prompt(
         self,
         query: str,
@@ -156,13 +165,21 @@ class LLMEnricher(EnrichmentPlugin):
         """Build prompt for LLM enhancement with pattern context."""
         domain_id = context.domain_id
 
-        # Format patterns for prompt
+        # Format patterns for prompt - clean up Source X references
         pattern_text = ""
         for i, pattern in enumerate(patterns[:self.max_patterns], 1):
             name = pattern.get("name", "Unknown")
             solution = pattern.get("solution", "")
             description = pattern.get("description", "")
             problem = pattern.get("problem", "")
+
+            # Clean up Source X references from the content
+            solution = self._clean_pattern_text(solution)
+            description = self._clean_pattern_text(description)
+
+            # Truncate solution if too long to avoid token limits
+            if len(solution) > 1000:
+                solution = solution[:1000] + "..."
 
             pattern_text += f"""
 Pattern {i}: {name}
@@ -185,6 +202,8 @@ Build upon these patterns to provide a comprehensive, helpful answer:
 3. Add relevant context and details when patterns are incomplete
 4. Be thorough - don't cut short, provide complete information
 5. Use markdown formatting for readability
+6. **CRITICAL**: When citing information, ALWAYS use the actual pattern name. For example: "According to **EEFrame Pattern Structure**..." or "As described in **Asking Questions in EEFrame**..."
+7. NEVER use references like "Source 1", "Source 2", or numbered sources - these are meaningless to users
 
 Provide your detailed response:"""
 
@@ -361,6 +380,9 @@ class LLMFallbackEnricher(LLMEnricher):
         config["mode"] = "fallback"
         super().__init__(config)
 
+        # Require user confirmation before using LLM fallback (default: true)
+        self.require_confirmation = config.get("require_confirmation", True)
+
         # Initialize research strategy if configured
         self.research_strategy = None
         research_config = config.get("research_strategy")
@@ -381,36 +403,82 @@ class LLMFallbackEnricher(LLMEnricher):
         patterns = response_data.get("patterns", [])
         confidence = response_data.get("confidence", 0.0)
 
+        # If user already confirmed LLM usage, execute directly
+        if context.llm_confirmed:
+            print(f"  [LLMFallbackEnricher] User confirmed LLM - executing directly")
+            # Initialize research strategy if needed
+            if self.research_strategy and not hasattr(self.research_strategy, '_initialized'):
+                try:
+                    await self.research_strategy.initialize()
+                except Exception as e:
+                    print(f"  [LLMFallbackEnricher] Failed to initialize research strategy: {e}")
+                    self.research_strategy = None
+
+            # Use research-enhanced prompt if strategy is available
+            if self.research_strategy:
+                llm_response = await self._generate_research_enhanced_response(
+                    response_data,
+                    context,
+                    patterns
+                )
+            else:
+                llm_response = await self._generate_llm_response(
+                    response_data,
+                    context,
+                    patterns
+                )
+
+            response_data["llm_fallback"] = llm_response
+            response_data["llm_used"] = True
+            response_data["research_strategy_used"] = self.research_strategy is not None
+            return response_data
+
         # Decide whether to use LLM based on mode and confidence
         use_llm = self._should_use_llm(patterns, confidence)
 
-        if not use_llm:
+        # If patterns exist and confirmation is enabled, always offer choice
+        # User sees results first, then decides whether to extend with LLM
+        if self.require_confirmation and not context.llm_confirmed and patterns:
+            # Return confirmation request with partial results
+            print(f"  [LLMFallbackEnricher] Offering LLM extension choice (patterns: {len(patterns)})")
+            response_data["requires_confirmation"] = True
+            response_data["confirmation_message"] = "Would you like to extend your search beyond this local data?"
+            response_data["partial_response"] = {
+                "query": response_data.get("query"),
+                "response": response_data.get("response") or response_data.get("raw_answer", "No detailed answer available."),
+                "specialist": response_data.get("specialist_id"),
+                "confidence": confidence,
+                "patterns_used": patterns,
+                "llm_used": False,
+                "ai_generated": False
+            }
             return response_data
 
-        # Initialize research strategy if needed
-        if self.research_strategy and not hasattr(self.research_strategy, '_initialized'):
-            try:
-                await self.research_strategy.initialize()
-            except Exception as e:
-                print(f"  [LLMFallbackEnricher] Failed to initialize research strategy: {e}")
-                self.research_strategy = None
+        # No patterns found or confirmation disabled - auto-use LLM
+        if not patterns:
+            print(f"  [LLMFallbackEnricher] No patterns found - using LLM automatically")
+            # Initialize research strategy if needed
+            if self.research_strategy and not hasattr(self.research_strategy, '_initialized'):
+                try:
+                    await self.research_strategy.initialize()
+                except Exception as e:
+                    print(f"  [LLMFallbackEnricher] Failed to initialize research strategy: {e}")
+                    self.research_strategy = None
 
-        # Use research-enhanced prompt if strategy is available
-        if self.research_strategy:
-            llm_response = await self._generate_research_enhanced_response(
-                response_data,
-                context,
-                patterns
-            )
-        else:
-            llm_response = await self._generate_llm_response(
-                response_data,
-                context,
-                patterns
-            )
+            # Use research-enhanced prompt if strategy is available
+            if self.research_strategy:
+                llm_response = await self._generate_research_enhanced_response(
+                    response_data,
+                    context,
+                    patterns
+                )
+            else:
+                llm_response = await self._generate_llm_response(
+                    response_data,
+                    context,
+                    patterns
+                )
 
-        # Add as fallback
-        if confidence < self.min_confidence or not patterns:
             response_data["llm_fallback"] = llm_response
             response_data["llm_used"] = True
             response_data["research_strategy_used"] = self.research_strategy is not None
@@ -459,28 +527,39 @@ class LLMFallbackEnricher(LLMEnricher):
         """Build prompt with research context from documents or web search."""
         domain_id = context.domain_id
 
-        # Format search results
+        # Format search results with meaningful source names
         research_context = ""
         for i, result in enumerate(search_results, 1):
+            # Extract a meaningful source name from the file path
+            source_name = result.source
+            if '/' in source_name:
+                source_name = source_name.split('/')[-1]  # Get filename
+            # Remove file extension
+            if '.' in source_name:
+                source_name = source_name.rsplit('.', 1)[0]
+
+            # Clean up the content to remove any Source X references
+            content = self._clean_pattern_text(result.content[:500])
+
             research_context += f"""
-Source {i} (relevance: {result.relevance_score:.2f}):
-From: {result.source}
-Content: {result.content[:500]}...
+From **{source_name}** (relevance: {result.relevance_score:.2f}):
+{content}...
 """
 
         prompt = f"""You are a helpful AI assistant for the {domain_id} domain.
 
 A user asked: "{query}"
 
-We found the following relevant information from our knowledge search:
+We found the following relevant information from our documentation:
 
 {research_context}
 
 Use these search results to provide a clear, helpful answer:
-1. Draw on the search results above
+1. Draw on the documentation results above
 2. Add relevant context when needed
-3. Cite sources when appropriate
-4. Use markdown formatting for readability
+3. Cite documents using their actual names (e.g., "According to **README**..." or "As described in **user-guide**...")
+4. NEVER use numbered references like "Source 1", "Source 2" - always use the document name
+5. Use markdown formatting for readability
 
 Provide your response:"""
 

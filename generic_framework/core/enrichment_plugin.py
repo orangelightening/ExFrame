@@ -29,6 +29,7 @@ class EnrichmentContext:
     query: str
     knowledge_base: Optional['KnowledgeBase'] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+    llm_confirmed: bool = False  # User has confirmed LLM fallback usage
 
 
 class EnrichmentPlugin(ABC):

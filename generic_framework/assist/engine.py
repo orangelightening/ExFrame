@@ -82,19 +82,24 @@ class GenericAssistantEngine:
         self,
         query: str,
         context: Optional[Dict[str, Any]] = None,
-        include_trace: bool = False
+        include_trace: bool = False,
+        llm_confirmed: bool = False
     ) -> Dict[str, Any]:
         """
         Process a user query.
 
         Args:
             query: User's question or request
-            context: Optional additional context
+            context: Optional additional context (may include llm_confirmed)
             include_trace: Whether to include detailed processing trace
+            llm_confirmed: Whether user has confirmed LLM fallback usage
 
         Returns:
             Response dictionary with answer, sources, and metadata
         """
+        # Extract llm_confirmed from context if provided there
+        if context and isinstance(context, dict):
+            llm_confirmed = context.get('llm_confirmed', llm_confirmed)
         start_time = datetime.utcnow()
         trace = {
             'query': query,
@@ -178,12 +183,16 @@ class GenericAssistantEngine:
 
         # Step 3.5: Apply enrichers (LLM fallback, quality scores, etc.)
         enrich_time = datetime.utcnow()
+
+        # Calculate confidence BEFORE enrichers (needed for partial responses)
+        confidence = self._calculate_confidence(patterns, specialist, query)
+
         # Prepare response data for enrichers
         enricher_input = {
             'query': query,
             'patterns': patterns,
             'response': response,
-            'confidence': 0.0,  # Will be calculated later
+            'confidence': confidence,  # Include calculated confidence
             'specialist_id': specialist_id,
             'processing_method': processing_method
         }
@@ -191,35 +200,38 @@ class GenericAssistantEngine:
         # Initialize enriched_data to avoid undefined variable
         enriched_data = {}
 
-        # Call domain enrichers
+        # Call domain enrichers with EnrichmentContext
         try:
-            enriched_data = await self.domain.enrich(enricher_input)
-
-            print(f"  DEBUG: After enrichment - llm_used: {enriched_data.get('llm_used')}, keys: {list(enriched_data.keys())}")
+            # Import and create EnrichmentContext with llm_confirmed flag
+            from core.enrichment_plugin import EnrichmentContext
+            enrichment_context = EnrichmentContext(
+                domain_id=self.domain.domain_id,
+                specialist_id=specialist_id,
+                query=query,
+                knowledge_base=self.knowledge_base,
+                llm_confirmed=llm_confirmed
+            )
+            enriched_data = await self.domain.enrich(enricher_input, enrichment_context)
 
             # Update response and result with enriched data
             if enriched_data.get('llm_used'):
-                print(f"  DEBUG: LLM was used, checking response key...")
                 # LLM was used as fallback or enhancement
                 if 'llm_fallback' in enriched_data:
                     # LLM fallback response
-                    print(f"  DEBUG: Using llm_fallback as response")
                     response = enriched_data['llm_fallback']
                     result_key = 'llm_fallback'
                 elif 'llm_enhancement' in enriched_data:
                     # LLM enhancement to existing response
-                    print(f"  DEBUG: Using llm_enhancement")
                     response = enriched_data.get('response', response)
                     if enriched_data.get('llm_enhancement'):
                         response += f"\n\n---\n\n{enriched_data['llm_enhancement']}"
                     result_key = 'llm_enhancement'
                 elif 'llm_response' in enriched_data:
                     # LLM replaced response
-                    print(f"  DEBUG: Using llm_response as response")
                     response = enriched_data['llm_response']
                     result_key = 'llm_response'
                 else:
-                    print(f"  DEBUG: llm_used=True but no response key found!")
+                    pass  # llm_used=True but no response key found
 
                 # Add LLM metadata to result
                 enricher_input['llm_used'] = True
@@ -240,7 +252,7 @@ class GenericAssistantEngine:
         await self._record_query(query, response, specialist_id, patterns)
 
         end_time = datetime.utcnow()
-        confidence = self._calculate_confidence(patterns, specialist, query)
+        # Confidence was already calculated above (before enrichers)
 
         result = {
             'query': query,
@@ -261,26 +273,19 @@ class GenericAssistantEngine:
                 if key in enriched_data:
                     result[key] = enriched_data[key]
 
-            # Reduce confidence when LLM is used - AI-generated content is less reliable
-            # Set to max 0.7 (70%) to indicate uncertainty and risk
+        # Add confirmation data to result if user confirmation is required
+        if enriched_data.get('requires_confirmation'):
+            result['requires_confirmation'] = enriched_data['requires_confirmation']
+            result['confirmation_message'] = enriched_data.get('confirmation_message')
+            result['partial_response'] = enriched_data.get('partial_response')
+
+            # Reduce confidence when confirmation is pending (user hasn't seen LLM yet)
             result['confidence'] = min(confidence * 0.7, 0.7)
-            print(f"  DEBUG: Reduced confidence from {confidence:.2f} to {result['confidence']:.2f} due to LLM usage")
 
-            # Log LLM usage for risk tracking
-            llm_log_entry = {
-                'timestamp': end_time.isoformat(),
-                'domain': self.domain.domain_id,
-                'query': query,
-                'specialist': specialist_id,
-                'patterns_found': len(patterns),
-                'confidence': confidence,
-                'llm_used': True,
-                'llm_response_type': [k for k in ['llm_fallback', 'llm_enhancement', 'llm_response'] if k in enriched_data],
-                'processing_time_ms': result['processing_time_ms']
-            }
-            llm_logger.info(json.dumps(llm_log_entry))
-
-            # Save LLM response as candidate pattern for future learning
+        # Save LLM response as candidate pattern for future learning
+        # This happens regardless of confirmation - whenever LLM is used, we create a pattern
+        if enriched_data.get('llm_used'):
+            # Extract LLM response text
             llm_response_text = None
             if 'llm_fallback' in enriched_data:
                 llm_response_text = enriched_data['llm_fallback']
@@ -293,6 +298,21 @@ class GenericAssistantEngine:
                 # Check if research strategy was used (for auto-certification)
                 research_strategy_used = enriched_data.get('research_strategy_used', False)
 
+                # Log LLM usage for risk tracking
+                llm_log_entry = {
+                    'timestamp': end_time.isoformat(),
+                    'domain': self.domain.domain_id,
+                    'query': query,
+                    'specialist': specialist_id,
+                    'patterns_found': len(patterns),
+                    'confidence': confidence,
+                    'llm_used': True,
+                    'llm_response_type': [k for k in ['llm_fallback', 'llm_enhancement', 'llm_response'] if k in enriched_data],
+                    'processing_time_ms': result['processing_time_ms']
+                }
+                llm_logger.info(json.dumps(llm_log_entry))
+
+                # Save as candidate pattern
                 await self._save_candidate_pattern(
                     query=query,
                     llm_response=llm_response_text,
@@ -694,6 +714,7 @@ Return ONLY the JSON, no other text:"""
             next_id = max_id + 1
 
             # Determine pattern status based on scope
+            # ALL LLM-generated patterns are candidates requiring human verification
             if is_out_of_scope:
                 # Out-of-scope queries get flagged for review
                 pattern_id = f"{self.domain.domain_id}_flagged_{next_id:03d}"
@@ -702,22 +723,19 @@ Return ONLY the JSON, no other text:"""
                 pattern_type = "how_to"  # Valid type even for flagged patterns
                 pattern_tags = ["flagged_for_review", "out_of_scope", "llm_generated"]
                 log_prefix = "⚠ Flagged pattern (out of scope)"
-            elif research_strategy_used:
-                # Documentation patterns get auto-certified at 80%
-                pattern_id = f"{self.domain.domain_id}_{next_id:03d}"
-                pattern_status = "certified"
-                pattern_confidence = 0.80
-                pattern_type = "knowledge"
-                pattern_tags = ["auto_certified", "documentation_derived"]
-                log_prefix = "✓ Auto-certified pattern"
             else:
-                # Regular LLM responses are candidates
+                # ALL LLM-generated patterns (including from docs) are candidates
+                # They require human verification before becoming certified
                 pattern_id = f"{self.domain.domain_id}_candidate_{next_id:03d}"
                 pattern_status = "candidate"
-                pattern_confidence = 0.50
-                pattern_type = "how_to"  # Valid pattern type for candidates
-                pattern_tags = ["candidate", "llm_generated"]
-                log_prefix = "✓ Saved candidate pattern"
+                pattern_confidence = 0.50  # Candidate confidence
+                pattern_type = "knowledge"
+                # If research strategy was used, note it in tags for reference
+                if research_strategy_used:
+                    pattern_tags = ["candidate", "llm_generated", "documentation_derived"]
+                else:
+                    pattern_tags = ["candidate", "llm_generated"]
+                log_prefix = "✓ Saved candidate pattern (requires human verification)"
 
             # Polish the pattern to generate meaningful title and fill fields (but keep full AI response)
             print(f"  → Polishing pattern for: {query[:40]}...")
@@ -735,7 +753,7 @@ Return ONLY the JSON, no other text:"""
                 "related_patterns": [],
                 "prerequisites": [],
                 "alternatives": [],
-                "confidence": pattern_confidence,  # 0.80 for docs, 0.50 for candidates
+                "confidence": pattern_confidence,  # 0.50 for all candidates
                 "sources": [],
                 "tags": list(set(pattern_tags + polished.get("tags", []))),  # Merge tags
                 "examples": polished.get("examples", [query]),  # Polished examples
@@ -745,16 +763,16 @@ Return ONLY the JSON, no other text:"""
                 "times_accessed": 0,
                 "user_rating": None,
 
-                # Status metadata
+                # Status metadata - ALL candidates require human verification
                 "status": pattern_status,
                 "origin": "documentation_research" if research_strategy_used else "llm_fallback",
                 "origin_query": query,  # Keep original query for matching
                 "generated_at": now.isoformat(),
                 "generated_by": os.getenv("LLM_MODEL", "glm-4.7"),
                 "confidence_score": confidence,
-                "reviewed_by": None if not research_strategy_used else "system",
-                "reviewed_at": None if not research_strategy_used else now.isoformat(),
-                "review_notes": None if not research_strategy_used else "Auto-certified from trusted documentation",
+                "reviewed_by": None,  # Candidate patterns are not reviewed
+                "reviewed_at": None,  # Candidate patterns are not reviewed
+                "review_notes": "Requires human verification before becoming certified",  # All candidates need verification
                 "usage_count": 0,
                 "user_feedback": []
             }

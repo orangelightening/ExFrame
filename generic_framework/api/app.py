@@ -42,6 +42,13 @@ class QueryRequest(BaseModel):
     format: Optional[str] = None  # Output format: json, markdown, compact, table, etc.
 
 
+class ConfirmLLMRequest(BaseModel):
+    query: str
+    domain: Optional[str] = "llm_consciousness"
+    include_trace: Optional[bool] = False
+    format: Optional[str] = None
+
+
 class SpecialistConfig(BaseModel):
     specialist_id: str
     name: str
@@ -86,6 +93,10 @@ class QueryResponse(BaseModel):
     llm_enhancement: Optional[str] = None
     llm_response: Optional[str] = None
     ai_generated: Optional[bool] = None
+    # LLM confirmation fields
+    requires_confirmation: Optional[bool] = None
+    confirmation_message: Optional[str] = None
+    partial_response: Optional[Dict[str, Any]] = None
 
 
 class DomainInfo(BaseModel):
@@ -814,6 +825,28 @@ async def process_query_get(
     )
 
 
+@app.post("/api/query/confirm-llm")
+async def confirm_llm_fallback(request: ConfirmLLMRequest) -> Response:
+    """
+    Process query with user-confirmed LLM fallback.
+
+    Called when user confirms they want to extend search beyond local data.
+    This bypasses the confirmation prompt and directly uses LLM fallback.
+
+    Example:
+        curl -X POST http://localhost:3000/api/query/confirm-llm \\
+          -H "Content-Type: application/json" \\
+          -d '{"query": "What is gastronomy?", "domain": "cooking"}'
+    """
+    return await _process_query_impl(
+        query=request.query,
+        domain_id=request.domain,
+        context={"llm_confirmed": True},  # Pass llm_confirmed flag
+        include_trace=request.include_trace,
+        format_type=request.format
+    )
+
+
 async def _process_query_impl(
     query: str,
     domain_id: Optional[str],
@@ -834,11 +867,17 @@ async def _process_query_impl(
     engine = engines[domain_id]
 
     try:
+        # Extract llm_confirmed from context if present
+        llm_confirmed = False
+        if context and isinstance(context, dict):
+            llm_confirmed = context.get('llm_confirmed', False)
+
         # Process the query
         result = await engine.process_query(
             query,
             context,
-            include_trace=include_trace
+            include_trace=include_trace,
+            llm_confirmed=llm_confirmed
         )
 
         # If format is specified, use formatter and return formatted response

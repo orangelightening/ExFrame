@@ -1247,16 +1247,111 @@ pandas>=2.0.0           # Data analysis
 
 ---
 
-**Last Updated**: 2026-01-14
-**Status**: Health indicator bug fixed and deployed
-**Next Action**: Monitor for any additional state-related issues
+## RECOVERY POINT: 2026-01-15
 
-**Decisions Made**:
-- Hierarchy: Multiverse → Universe → Neighbourhood → Domain → Patterns
-- Pilot Domain: Cooking
-- Pilot Neighbourhood: Parksville, BC (geographic)
-- Surveyor UI: Plain HTML/JS + Alpine.js in Generic Framework (replace Ingestion tab)
-- Agent Wrapper: Deferred to Phase 10 (black box with status monitoring for v1)
-- Embeddings: SKIPPED (use simple text-based similarity, no ML dependencies)
-- Judges: 5-judge panel (4 AI + 1 human last resort)
-- All APIs: GLM-4 (existing config, no additional costs)
+**Status**: Query System Rewrite - Knowledge Dashboard Design
+
+### Current Focus: Query System Redesign
+
+**Philosophy**: The query position is a **Knowledge Dashboard** where Responsible Agents (human domain experts) directly accept AI-generated knowledge into curated domains.
+
+**Key Principle**: User acceptance IS the certification. When a Responsible Agent clicks "Accept as Pattern," that decision IS the validation. No separate "candidate → certified" workflow exists.
+
+### Simplified Workflow
+
+```
+OLD (Overcomplicated):
+Query → Extend → LLM → Create CANDIDATE → Later CERTIFY → Finally Use
+
+NEW (Current Vision):
+Query → Extend → LLM → User Accepts → Pattern Created & IMMEDIATELY USED
+```
+
+### Design Specification
+
+**Document**: `query-rewrite.md` (Complete, version 1.0)
+
+**Key Changes from Previous Model**:
+1. **No "candidate" status** - Patterns are either created or not created
+2. **User acceptance IS validation** - No separate certification step
+3. **Immediate use** - Patterns are searchable immediately after creation
+4. **Status is informational** - Not a gate for inclusion in search
+
+### Implementation Plan (8 Weeks)
+
+**Phase 1: Foundation (Week 1-2)**
+- Fresh state landing page
+- Submit Query button requirement (user confirmed ✅)
+- Separate local results from LLM results
+- Remove auto-LLM from initial query flow
+- Add "Extend Search" button
+
+**Phase 2: External Search (Week 3-4)**
+- Domain-specific data source configuration
+- LLM integration with local_docs and web_search
+- Source attribution in responses
+- Fallback strategies
+
+**Phase 3: Acceptance UI (Week 5-6)**
+- "Accept as New Pattern" button
+- Optional editing before creation
+- Immediate pattern creation
+- Direct inclusion in search index
+
+**Phase 4: Polish & Testing (Week 7-8)**
+- End-to-end testing
+- Performance optimization
+- Error handling
+- Documentation
+
+### Open Questions
+
+**Q6 (Scale)**: Multiple users, pattern count growth, search performance, duplicate detection - **To be discussed separately**
+
+### Files Modified (Recent Session)
+
+1. **LLM Fallback Confirmation Feature** (`generic_framework/plugins/enrichers/llm_enricher.py`)
+   - Added confirmation flow with partial responses
+   - Confidence calculation moved before enrichers
+   - User acceptance workflow
+
+2. **Query Response Handling** (`generic_framework/assist/engine.py`)
+   - Added `llm_confirmed` parameter to `process_query()`
+   - Confirmation data passed through pipeline
+   - Pattern creation on LLM usage
+
+3. **Frontend Query Interface** (`generic_framework/frontend/index.html`)
+   - Added `canExtendWithAI` state variable
+   - Modified response handling for confirmation
+   - Added "Extend with AI" button inline (not modal)
+
+4. **Pattern Schema Updates**
+   - Added `origin` field (local | llm_external_search | human_created)
+   - Added `validated_by` field (user who accepted)
+   - Added `validation_method` field (query_portal_acceptance, bulk_import, etc.)
+   - `status` is informational only (not a gate)
+
+### Known Issues (Not To Be Fixed in Current Session)
+
+1. **Source X References** - Partially addressed with text cleaning, but legacy patterns still contain "Source 2", "Source 3" references in their content
+
+2. **LLM Prompt Enhancement** - Added explicit instructions to use pattern names instead of "Source X", but legacy pattern content still contains old references
+
+### Next Steps
+
+1. **Review query-rewrite.md** - User review in progress
+2. **Discuss scale considerations** (Q6)
+3. **Make decisions on Q1-Q5**
+4. **Approve Phase 1** for implementation
+5. **Begin coding** once approved
+
+### Future Consideration (User Note)
+
+User mentioned interest in **multiple AI personas and consensus-based approach** (using different AI personas and then using consensus of the data) - **Deferred for now, noted for future discussion**
+
+---
+
+**Last Updated**: 2026-01-15
+**Status**: Query rewrite design complete, awaiting user review
+**Next Action**: User reviewing query-rewrite.md, then discuss scale (Q6)
+**Commit Pending**: Update docs and commit current state
