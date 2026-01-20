@@ -71,7 +71,10 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
     async def save_pattern(self, pattern: Dict[str, Any]) -> None:
         """Save a pattern to the JSON file."""
         self._patterns.append(pattern)
-        self._pattern_index[pattern.get('id', pattern.get('name', ''))] = pattern
+        # Use same key priority as load_patterns: pattern_id -> id -> name
+        key = pattern.get('pattern_id') or pattern.get('id') or pattern.get('name', '')
+        if key:
+            self._pattern_index[key] = pattern
         await self._persist()
 
     async def _persist(self) -> None:
@@ -113,11 +116,17 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
 
             # Check for exact match first
             has_exact_match = False
+            has_substring_match = False
             origin_query = pattern.get('origin_query', '').lower()
+
+            # Full exact match (highest priority)
             if origin_query == query_lower:
                 has_exact_match = True
+            # Substring match in origin_query (e.g., "gallette" matches "What is a recipe for a gallette")
+            elif query_lower in origin_query and len(query_lower) > 3:
+                has_substring_match = True
 
-            if not has_exact_match:
+            if not has_exact_match and not has_substring_match:
                 examples = pattern.get('examples', [])
                 if examples and query_lower in [str(ex).lower() for ex in examples]:
                     has_exact_match = True
@@ -132,6 +141,8 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
             # Exact matches get highest priority
             if has_exact_match:
                 match_count += 100  # Bonus for exact match
+            elif has_substring_match:
+                match_count += 50  # Bonus for substring match in origin_query
 
             if match_count > 0:
                 scored_patterns.append((pattern, match_count))
@@ -358,12 +369,16 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
 
     def _count_matching_fields(self, pattern: Dict[str, Any], query_lower: str) -> int:
         """
-        Count how many fields contain the query string.
+        Count how many query words match in pattern fields.
 
-        Simple and predictable - just counts matches.
-        Returns 0-6 (number of fields that matched).
+        Splits query into words and counts matches - works for long queries.
         """
         count = 0
+
+        # Split query into words (simple tokenization)
+        query_words = query_lower.split()
+        if not query_words:
+            return 0
 
         # Check all searchable fields
         fields_to_check = [
@@ -376,9 +391,13 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
             ' '.join(str(ex) for ex in pattern.get('examples', []))
         ]
 
+        # For each field, check if ANY query word matches
         for field_value in fields_to_check:
-            if query_lower in field_value.lower():
-                count += 1
+            field_lower = field_value.lower()
+            for word in query_words:
+                if word in field_lower:
+                    count += 1
+                    break  # Count each field once, even if multiple words match
 
         return count
 

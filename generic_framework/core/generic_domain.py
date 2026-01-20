@@ -62,6 +62,10 @@ class GenericDomain(Domain):
         This replaces all the custom initialization code
         that used to be in every domain class.
         """
+        # Prevent duplicate initialization
+        if self._initialized:
+            return
+
         # Load domain configuration
         await self._load_domain_config()
 
@@ -324,9 +328,6 @@ class GenericDomain(Domain):
         """
         enrichers_config = self._domain_config.get("enrichers", [])
 
-        # DEBUG: Print what we found
-        print(f"  DEBUG: Domain {self.domain_id} - enrichers in config: {len(enrichers_config)}")
-
         if not enrichers_config:
             # No enrichers configured - add default LLM fallback
             print(f"  No enrichers configured - adding default LLM fallback")
@@ -336,10 +337,7 @@ class GenericDomain(Domain):
         # Load configured enrichers
         has_llm_fallback = False
         for idx, enricher_config in enumerate(enrichers_config):
-            print(f"  DEBUG: Processing enricher {idx}: enabled={enricher_config.get('enabled', True)}, class={enricher_config.get('class')}")
-
             if not enricher_config.get("enabled", True):
-                print(f"  DEBUG: Skipping disabled enricher {idx}")
                 continue
 
             try:
@@ -347,7 +345,6 @@ class GenericDomain(Domain):
                 module_path = enricher_config["module"]
                 class_name = enricher_config["class"]
 
-                print(f"  DEBUG: Importing {module_path}.{class_name}")
                 module = importlib.import_module(module_path)
                 enricher_class = getattr(module, class_name)
 
@@ -396,11 +393,8 @@ class GenericDomain(Domain):
         Returns:
             Enriched response data
         """
-        print(f"  DEBUG: enrich() called for {self.domain_id}, enrichers: {len(self._enrichers)}")
-
         if not self._enrichers:
             # No enrichers configured
-            print(f"  DEBUG: No enrichers, returning original data")
             return response_data
 
         # Create enrichment context if not provided
@@ -416,14 +410,11 @@ class GenericDomain(Domain):
         # Apply each enricher in sequence
         for idx, enricher in enumerate(self._enrichers):
             try:
-                print(f"  DEBUG: Calling enricher {idx}: {enricher.name}")
                 response_data = await enricher.enrich(response_data, context)
-                print(f"  DEBUG: Enricher {idx} completed, llm_used: {response_data.get('llm_used', False)}")
             except Exception as e:
                 print(f"  Warning: Enricher {enricher.name} failed: {e}")
                 # Continue with other enrichers even if one fails
 
-        print(f"  DEBUG: enrich() finished, returning data")
         return response_data
 
     async def health_check(self) -> Dict[str, Any]:

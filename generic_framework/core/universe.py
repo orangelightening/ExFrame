@@ -610,8 +610,22 @@ class UniverseManager:
 
         # Write config
         config_file = universe_path / "universe.yaml"
+        # Convert config to dict, handling enums properly
+        config_dict = {}
+        for key, value in config.__dict__.items():
+            if isinstance(value, UniverseMergeStrategy):
+                config_dict[key] = value.value
+            elif isinstance(value, dict):
+                # Handle nested dicts (like domains)
+                config_dict[key] = {
+                    k: v.value if isinstance(v, UniverseMergeStrategy) else v
+                    for k, v in value.items()
+                }
+            else:
+                config_dict[key] = value
+
         with open(config_file, 'w') as f:
-            yaml.dump({'universe': config.__dict__}, f, default_flow_style=False)
+            yaml.dump({'universe': config_dict}, f, default_flow_style=False)
 
         logger.info(f"Created universe: {universe_id} at {universe_path}")
 

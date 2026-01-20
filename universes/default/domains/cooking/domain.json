@@ -29,8 +29,9 @@
   "specialists": [
     {
       "specialist_id": "generalist",
-      "name": "Cooking Generalist",
+      "name": "Cooking Expert",
       "description": "General expert in cooking and recipes",
+      "persona_plugin": "cooking_expert",
       "expertise_keywords": [
         "cook", "recipe", "bake", "chicken", "oven", "temperature", "how", "what", "make",
         "ingredients", "preparation", "technique", "method", "prepare", "time", "long"
@@ -50,7 +51,8 @@
         "mode": "fallback",
         "min_confidence": 0.30,
         "model": "glm-4.7",
-        "max_patterns": 3
+        "max_patterns": 3,
+        "require_confirmation": true
       }
     }
   ],

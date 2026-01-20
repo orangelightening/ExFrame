@@ -2,7 +2,7 @@
 Generic Framework API - FastAPI backend for web interface.
 """
 
-from fastapi import FastAPI, HTTPException, Response, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Response, BackgroundTasks, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -140,6 +140,20 @@ except ImportError as e:
     logger.info("  Surveyor UI will run in stub mode")
 except Exception as e:
     logger.warning(f"✗ Error mounting Autonomous Learning API: {e}")
+
+# =============================================================================
+# MOUNT PERSONAS API
+# =============================================================================
+# Mount the personas API router for persona plugin management
+try:
+    # Inside container: /app = generic_framework, so use relative import
+    from api.personas import router as personas_router
+    app.include_router(personas_router)
+    logger.info("✓ Personas API router mounted at /api/personas")
+except ImportError as e:
+    logger.warning(f"✗ Could not mount Personas API: {e}")
+except Exception as e:
+    logger.warning(f"✗ Error mounting Personas API: {e}")
 
 # Mount static files from built React app
 frontend_dist_path = Path(__file__).parent.parent / "frontend" / "dist"
@@ -756,6 +770,96 @@ async def get_pattern_detail(domain_id: str, pattern_id: str) -> Dict[str, Any]:
         raise HTTPException(status_code=404, detail=f"Pattern '{pattern_id}' not found")
 
     return pattern
+
+
+@app.post("/api/patterns")
+async def create_pattern(request: Request) -> Dict[str, Any]:
+    """
+    Create a new pattern from LLM-generated content.
+
+    This endpoint allows users to accept AI-generated knowledge as a new pattern
+    in the knowledge base through the query portal.
+
+    Expected JSON body:
+    {
+        "domain": "exframe_methods",
+        "name": "Pattern Name",
+        "problem": "What question does this answer?",
+        "solution": "The answer/content",
+        "description": "Brief description",
+        "pattern_type": "knowledge",
+        "origin": "llm_external_search",
+        "origin_query": "original query",
+        "llm_generated": true,
+        "confidence": 0.8,
+        "validated_by": "user_id",
+        "validated_at": "2026-01-15T10:00:00Z",
+        "validation_method": "query_portal_acceptance",
+        "status": "validated",
+        "tags": ["external_search", "llm_generated"]
+    }
+    """
+    import time
+    from datetime import datetime
+
+    data = await request.json()
+    domain_id = data.get("domain")
+
+    if not domain_id:
+        raise HTTPException(status_code=400, detail="domain is required")
+
+    if domain_id not in engines:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    engine = engines[domain_id]
+    kb = engine.knowledge_base
+
+    # Generate pattern ID if not provided
+    import uuid
+    pattern_id = data.get("id") or f"{domain_id}_{uuid.uuid4().hex[:8]}"
+
+    # Build the pattern object
+    pattern = {
+        "id": pattern_id,
+        "pattern_id": pattern_id,
+        "name": data.get("name", "Untitled Pattern"),
+        "domain": domain_id,
+        "problem": data.get("problem", ""),
+        "solution": data.get("solution", ""),
+        "description": data.get("description", ""),
+        "pattern_type": data.get("pattern_type", "knowledge"),
+        "confidence": data.get("confidence", 0.5),
+        "status": data.get("status", "validated"),
+        "origin": data.get("origin", "llm_external_search"),
+        "origin_query": data.get("origin_query", ""),
+        "llm_generated": data.get("llm_generated", True),
+        "validated_by": data.get("validated_by", "current_user"),
+        "validated_at": data.get("validated_at", datetime.utcnow().isoformat() + "Z"),
+        "validation_method": data.get("validation_method", "query_portal_acceptance"),
+        "tags": data.get("tags", ["llm_generated"]),
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "times_accessed": 0
+    }
+
+    # Add the pattern to the knowledge base
+    try:
+        # Use add_pattern method if available
+        if hasattr(kb, 'add_pattern'):
+            await kb.add_pattern(pattern)
+        elif hasattr(kb, 'save_pattern'):
+            await kb.save_pattern(pattern)
+        else:
+            raise HTTPException(status_code=500, detail="Knowledge base does not support adding patterns")
+
+        return {
+            "success": True,
+            "pattern_id": pattern_id,
+            "message": f"Pattern '{pattern['name']}' created successfully",
+            "pattern": pattern
+        }
+    except Exception as e:
+        logger.error(f"Failed to create pattern: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create pattern: {str(e)}")
 
 
 @app.post("/api/query")

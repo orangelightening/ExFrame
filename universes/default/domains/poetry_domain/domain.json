@@ -1,0 +1,77 @@
+{
+  "domain_id": "poetry_domain",
+  "domain_name": "Poetry & Literary Arts",
+  "description": "Knowledge about poetry forms, techniques, and literary analysis",
+  "version": "1.0.0",
+  "created_at": "2026-01-19T00:00:00Z",
+  "updated_at": "2026-01-19T00:00:00Z",
+
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "Poetry Generalist",
+      "description": "General expert in poetry and literary arts",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "Poetry",
+        "keywords": [
+          "poem", "poetry", "verse", "stanza", "rhyme", "meter", "rhythm",
+          "metaphor", "simile", "alliteration", "imagery", "sonnet", "haiku",
+          "limerick", "ballad", "ode", "elegy", "free verse", "form", "structure"
+        ],
+        "categories": ["poetic_form", "technique", "analysis", "literary_device"],
+        "threshold": 0.30
+      }
+    }
+  ],
+
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "Poetry Generalist",
+      "description": "General expert in poetry and literary arts",
+      "expertise_keywords": [
+        "poem", "poetry", "verse", "stanza", "rhyme", "meter", "rhythm",
+        "metaphor", "simile", "alliteration", "imagery", "sonnet", "haiku",
+        "limerick", "ballad", "ode", "elegy", "free verse", "form", "structure",
+        "write", "create", "analyze", "interpret", "meaning", "theme"
+      ],
+      "expertise_categories": ["poetic_form", "technique", "analysis", "literary_device"],
+      "confidence_threshold": 0.30,
+      "response_template": "structured"
+    }
+  ],
+
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMFallbackEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "fallback",
+        "min_confidence": 0.3,
+        "temperature": 0.8,
+        "max_tokens": 4096
+      }
+    }
+  ],
+
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true
+  },
+
+  "pattern_schema": {
+    "required_fields": ["id", "name", "pattern_type", "problem", "solution"],
+    "optional_fields": [
+      "description", "steps", "conditions", "related_patterns",
+      "prerequisites", "alternatives", "confidence", "sources", "tags",
+      "examples", "domain", "created_at", "updated_at", "times_accessed",
+      "user_rating", "origin", "origin_query", "llm_generated", "status"
+    ]
+  }
+}

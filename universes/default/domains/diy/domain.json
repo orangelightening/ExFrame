@@ -24,8 +24,9 @@
   "specialists": [
     {
       "specialist_id": "generalist",
-      "name": "General Specialist",
+      "name": "DIY Expert",
       "description": "General expert for diy",
+      "persona_plugin": "diy_expert",
       "expertise_keywords": [],
       "expertise_categories": [],
       "confidence_threshold": 0.6,
