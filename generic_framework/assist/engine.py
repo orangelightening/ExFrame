@@ -30,6 +30,10 @@ llm_logger = logging.getLogger('llm_usage')
 llm_logger.addHandler(llm_handler)
 llm_logger.setLevel(logging.INFO)
 
+# Setup general logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 from core.domain import Domain
 from core.knowledge_base import KnowledgeBaseConfig
 from knowledge.json_kb import JSONKnowledgeBase
@@ -100,12 +104,29 @@ class GenericAssistantEngine:
         # Extract llm_confirmed from context if provided there
         if context and isinstance(context, dict):
             llm_confirmed = context.get('llm_confirmed', llm_confirmed)
+
+        # Check for direct prompt bypass (// prefix)
+        # Trim whitespace first to handle " // query" cases
+        direct_prompt = False
+        actual_query = query
+        trimmed_query = query.strip()
+        if trimmed_query.startswith('//'):
+            direct_prompt = True
+            # Strip the // prefix and any following space from trimmed version
+            actual_query = trimmed_query[2:].lstrip()
+            logger.info(f"Direct prompt detected: '{actual_query}' (bypassing pattern search and specialist)")
+
         start_time = datetime.utcnow()
         trace = {
-            'query': query,
+            'query': actual_query,
+            'original_query': query,  # Keep original for reference
             'start_time': start_time.isoformat(),
             'steps': []
         } if self.enable_tracing else None
+
+        # Handle direct prompt - skip to LLM directly
+        if direct_prompt:
+            return await self._process_direct_prompt(actual_query, query, start_time, trace)
 
         # Step 1: Select appropriate specialist
         step1_time = datetime.utcnow()
@@ -312,15 +333,10 @@ class GenericAssistantEngine:
                 }
                 llm_logger.info(json.dumps(llm_log_entry))
 
-                # Save as candidate pattern
-                await self._save_candidate_pattern(
-                    query=query,
-                    llm_response=llm_response_text,
-                    specialist_id=specialist_id,
-                    patterns_found=len(patterns),
-                    confidence=result['confidence'],  # Use reduced confidence
-                    research_strategy_used=research_strategy_used
-                )
+                # NOTE: Auto-saving candidate patterns removed
+                # Users now explicitly choose to accept patterns via "Accept as New Pattern" button
+                # This puts human validation at the center of knowledge creation
+                # Pattern creation happens through /api/patterns endpoint when user clicks accept
 
         # Add trace if requested
         if include_trace and trace:
@@ -363,6 +379,22 @@ class GenericAssistantEngine:
             'patterns_found': len(patterns)
         }
 
+    @staticmethod
+    def _clean_source_references(text: str) -> str:
+        """Remove 'Source X' references from pattern text."""
+        import re
+        # Remove various Source X formats
+        text = re.sub(r'\*\*Source \d+:\*\*', '', text)
+        text = re.sub(r'\*\*Source \d+\*\*', '', text)
+        text = re.sub(r'Source \d+:', '', text)
+        text = re.sub(r'\(Source \d+\)', '', text)
+        text = re.sub(r'According to \*\*Source \d+\*\*', 'According to', text)
+        text = re.sub(r'According to Source \d+', 'According to', text)
+        # Clean up extra whitespace and blank lines
+        text = re.sub(r'\n\s*\n\s*\n', '\n\n', text)
+        text = re.sub(r' +', ' ', text)
+        return text.strip()
+
     def _synthesize_answer(self, query: str, patterns: List[Dict[str, Any]]) -> str:
         """Synthesize answer from multiple patterns."""
         if not patterns:
@@ -373,13 +405,21 @@ class GenericAssistantEngine:
         top_pattern = patterns[0]
 
         if top_pattern.get('solution'):
-            answer = f"**{top_pattern['name']}**\n\n{top_pattern['solution']}"
+            # Clean source references from the solution
+            clean_solution = self._clean_source_references(top_pattern['solution'])
+            answer = f"**{top_pattern['name']}**\n\n{clean_solution}"
 
             # Add steps if available
             if top_pattern.get('steps'):
                 answer += "\n\n**Steps:**\n"
                 for i, step in enumerate(top_pattern['steps'][:5], 1):
                     answer += f"{i}. {step}\n"
+
+            # List all patterns used at the end
+            if len(patterns) > 1:
+                answer += f"\n\n---\n**Patterns referenced:**\n"
+                for i, pattern in enumerate(patterns, 1):
+                    answer += f"{i}. {pattern.get('name', 'Unknown')}\n"
 
             return answer
 
@@ -486,6 +526,195 @@ class GenericAssistantEngine:
                     )
                 except Exception:
                     pass  # Don't fail if recording fails
+
+    async def _process_direct_prompt(
+        self,
+        actual_query: str,
+        original_query: str,
+        start_time: datetime,
+        trace: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Process a direct prompt (// prefix) - bypass pattern search and specialist.
+
+        Sends query directly to LLM without domain specialist persona wrapping.
+        Uses the same API configuration as the LLM enricher.
+        """
+        import httpx
+        import os
+
+        api_key = os.getenv("OPENAI_API_KEY")
+        base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        # Use same model priority as LLM enricher: LLM_MODEL env var > OPENAI_MODEL > default to glm-4.7
+        model = os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL") or "glm-4.7"
+
+        if not api_key:
+            return {
+                'query': actual_query,
+                'original_query': original_query,
+                'response': "[LLM not configured: No API key]",
+                'specialist': None,
+                'patterns_used': [],
+                'confidence': 0.0,
+                'timestamp': datetime.utcnow().isoformat(),
+                'engine': 'GenericAssistantEngine',
+                'domain': self.domain.domain_id,
+                'processing_time_ms': 0,
+                'direct_prompt': True,
+                'llm_used': False,
+                'error': True
+            }
+
+        # Record trace step for direct prompt
+        if trace:
+            trace['steps'].append({
+                'step': 1,
+                'action': 'direct_prompt_detected',
+                'timestamp': datetime.utcnow().isoformat(),
+                'bypassed': ['specialist_selection', 'pattern_search', 'domain_enrichment']
+            })
+
+        # Determine if this is OpenAI or Anthropic-compatible API
+        is_anthropic = "anthropic" in base_url.lower()
+
+        if is_anthropic:
+            # Anthropic/GLM API format (uses user role only)
+            model_name = model if model.startswith("glm-") else model.replace("gpt-", "claude-")
+            payload = {
+                "model": model_name,
+                "max_tokens": 8192,
+                "messages": [
+                    {"role": "user", "content": actual_query}
+                ]
+            }
+        else:
+            # OpenAI API format
+            payload = {
+                "model": model,
+                "max_tokens": 8192,
+                "messages": [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": actual_query}
+                ]
+            }
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        # Use correct endpoint based on API type
+        if is_anthropic:
+            endpoint = f"{base_url.rstrip('/')}/v1/messages"
+        else:
+            endpoint = f"{base_url.rstrip('/')}/chat/completions"
+
+        try:
+            timeout = httpx.Timeout(60.0)
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                response = await client.post(endpoint, headers=headers, json=payload)
+
+                if response.status_code != 200:
+                    error_text = response.text
+                    logger.error(f"Direct prompt LLM error: {error_text}")
+                    return {
+                        'query': actual_query,
+                        'original_query': original_query,
+                        'response': f"[LLM Error: {response.status_code} - {error_text}]",
+                        'specialist': None,
+                        'patterns_used': [],
+                        'confidence': 0.0,
+                        'timestamp': datetime.utcnow().isoformat(),
+                        'engine': 'GenericAssistantEngine',
+                        'domain': self.domain.domain_id,
+                        'processing_time_ms': 0,
+                        'direct_prompt': True,
+                        'llm_used': True,
+                        'error': True
+                    }
+
+                data = response.json()
+                llm_response = data['content'][0]['text'] if is_anthropic else data['choices'][0]['message']['content']
+
+                if trace:
+                    trace['steps'].append({
+                        'step': 2,
+                        'action': 'llm_direct_call',
+                        'timestamp': datetime.utcnow().isoformat(),
+                        'model': model_name if is_anthropic else model,
+                        'tokens_used': data.get('usage', {}).get('total_tokens', 0) if not is_anthropic else data.get('usage', {}).get('input_tokens', 0) + data.get('usage', {}).get('output_tokens', 0)
+                    })
+
+                end_time = datetime.utcnow()
+
+                result = {
+                    'query': actual_query,
+                    'original_query': original_query,
+                    'response': llm_response,
+                    'specialist': None,
+                    'patterns_used': [],
+                    'confidence': 1.0,
+                    'timestamp': end_time.isoformat(),
+                    'engine': 'GenericAssistantEngine',
+                    'domain': self.domain.domain_id,
+                    'processing_time_ms': int((end_time - start_time).total_seconds() * 1000),
+                    'direct_prompt': True,
+                    'llm_used': True,
+                    'llm_model': model_name if is_anthropic else model,
+                    'processing_method': 'direct_prompt'
+                }
+
+                if trace:
+                    result['trace'] = trace
+
+                self.query_history.append({
+                    'query': actual_query,
+                    'original_query': original_query,
+                    'response': llm_response,
+                    'specialist': None,
+                    'patterns': [],
+                    'direct_prompt': True,
+                    'timestamp': end_time.isoformat()
+                })
+
+                return result
+
+        except httpx.RequestError as e:
+            logger.error(f"Direct prompt request error: {e}")
+            return {
+                'query': actual_query,
+                'original_query': original_query,
+                'response': f"[Network Error: Unable to reach LLM - {str(e)}]",
+                'specialist': None,
+                'patterns_used': [],
+                'confidence': 0.0,
+                'timestamp': datetime.utcnow().isoformat(),
+                'engine': 'GenericAssistantEngine',
+                'domain': self.domain.domain_id,
+                'processing_time_ms': 0,
+                'direct_prompt': True,
+                'llm_used': False,
+                'error': True
+            }
+        except Exception as e:
+            logger.error(f"Direct prompt unexpected error: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                'query': actual_query,
+                'original_query': original_query,
+                'response': f"[Error: {str(e)}]",
+                'specialist': None,
+                'patterns_used': [],
+                'confidence': 0.0,
+                'timestamp': datetime.utcnow().isoformat(),
+                'engine': 'GenericAssistantEngine',
+                'domain': self.domain.domain_id,
+                'processing_time_ms': 0,
+                'direct_prompt': True,
+                'llm_used': False,
+                'error': True
+            }
 
     async def _polish_pattern(
         self,
@@ -799,6 +1028,34 @@ Return ONLY the JSON, no other text:"""
             'categories': self.knowledge_base.get_all_categories() if self.knowledge_base else [],
             'queries_processed': len(self.query_history),
         }
+
+    async def reload(self) -> None:
+        """Reload the domain configuration and knowledge base from disk.
+
+        Called when domain.json is updated externally (e.g., via admin UI).
+        Reloads:
+        - Domain configuration from domain.json
+        - Knowledge base patterns from patterns.json
+        - Specialist definitions
+        """
+        logger.info(f"Reloading domain: {self.domain.domain_id}")
+
+        # Reload domain configuration
+        try:
+            await self.domain.reload()
+        except Exception as e:
+            logger.warning(f"Failed to reload domain config: {e}")
+
+        # Reload knowledge base patterns
+        if self.knowledge_base:
+            try:
+                await self.knowledge_base.load_patterns()
+                pattern_count = len(self.knowledge_base._patterns) if hasattr(self.knowledge_base, '_patterns') else 0
+                logger.info(f"  Reloaded {pattern_count} patterns")
+            except Exception as e:
+                logger.warning(f"Failed to reload knowledge base: {e}")
+
+        logger.info(f"Domain reload complete: {self.domain.domain_id}")
 
     def get_history(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Get recent query history."""

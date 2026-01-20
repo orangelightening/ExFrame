@@ -9,6 +9,9 @@ from pathlib import Path
 import json
 from datetime import datetime
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -36,6 +39,7 @@ class GenericDomain(Domain):
         super().__init__(config)
         self._domain_config: Optional[Dict[str, Any]] = None
         self._knowledge_base: Optional[KnowledgeBase] = None
+        self._config_path: Optional[Path] = None
         self._specialists: Dict[str, 'GenericSpecialist'] = {}
         self._router: Optional[RouterPlugin] = None
         self._formatter: Optional[FormatterPlugin] = None
@@ -89,6 +93,9 @@ class GenericDomain(Domain):
     async def _load_domain_config(self) -> None:
         """Load domain.json configuration file."""
         config_file = Path(self.config.pattern_storage_path) / "domain.json"
+
+        # Store config path for later reload
+        self._config_path = config_file
 
         if config_file.exists():
             try:
@@ -679,6 +686,61 @@ class GenericDomain(Domain):
         self._domain_config["specialists"].append(specialist_config)
         await self._save_domain_config()
         self._initialize_specialists()
+
+    async def reload(self) -> None:
+        """
+        Reload domain configuration from the JSON file.
+
+        Called when domain.json is updated externally.
+        Reloads configuration and re-initializes specialists.
+        """
+        if not self._config_path or not self._config_path.exists():
+            logger.warning(f"Cannot reload domain: config path not set or missing")
+            return
+
+        logger.info(f"Reloading domain config from: {self._config_path}")
+
+        # Load the updated configuration
+        try:
+            with open(self._config_path, 'r') as f:
+                self._domain_config = json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load domain config: {e}")
+            return
+
+        # Re-initialize specialists with new configuration
+        old_specialists = self._specialists.copy()
+        self._specialists.clear()
+
+        # Load from plugins (same logic as _initialize_specialists)
+        plugins_config = self._domain_config.get("plugins", [])
+        if plugins_config:
+            import importlib
+            for plugin_config in plugins_config:
+                if not plugin_config.get("enabled", True):
+                    continue
+
+                try:
+                    # Dynamically import the plugin module
+                    module_path = plugin_config["module"]
+                    class_name = plugin_config["class"]
+
+                    module = importlib.import_module(module_path)
+                    plugin_class = getattr(module, class_name)
+
+                    # Instantiate plugin with knowledge base and config
+                    plugin = plugin_class(self._knowledge_base, plugin_config.get("config", {}))
+
+                    # Store using plugin_id as specialist_id
+                    self._specialists[plugin_config["plugin_id"]] = plugin
+                    logger.debug(f"  Reloaded specialist: {plugin_config['plugin_id']}")
+
+                except (ImportError, AttributeError) as e:
+                    logger.warning(f"  Failed to reload plugin {plugin_config.get('plugin_id')}: {e}")
+        else:
+            logger.warning(f"  No plugins configured in domain {self.domain_id}")
+
+        logger.info(f"Domain reload complete: {self.domain_id}")
 
     async def cleanup(self) -> None:
         """Clean up domain resources."""

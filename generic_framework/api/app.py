@@ -1328,6 +1328,28 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
                     for s in request.specialists
                 ]
 
+                # Also update the corresponding plugin config if it exists
+                # This ensures the plugin (which reads from plugins[].config) gets the updated data
+                if "plugins" in universe_domain_config:
+                    for specialist in request.specialists:
+                        specialist_id = specialist.specialist_id
+                        # Find the plugin with matching plugin_id
+                        for plugin in universe_domain_config["plugins"]:
+                            if plugin.get("plugin_id") == specialist_id:
+                                # Update plugin config with specialist data
+                                if "config" not in plugin:
+                                    plugin["config"] = {}
+                                if specialist.name is not None:
+                                    plugin["config"]["name"] = specialist.name
+                                if specialist.description is not None:
+                                    plugin["config"]["description"] = specialist.description
+                                if specialist.expertise_keywords:
+                                    plugin["config"]["keywords"] = specialist.expertise_keywords
+                                if specialist.expertise_categories:
+                                    plugin["config"]["categories"] = specialist.expertise_categories
+                                if specialist.confidence_threshold is not None:
+                                    plugin["config"]["threshold"] = specialist.confidence_threshold
+
             universe_domain_config["updated_at"] = datetime.utcnow().isoformat()
 
             # Save back to the universe domain.json
