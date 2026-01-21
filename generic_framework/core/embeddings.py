@@ -1,0 +1,302 @@
+"""
+Semantic Embedding Service
+
+Provides text embedding generation and similarity computation
+using SentenceTransformers for semantic search.
+"""
+
+import json
+import numpy as np
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Tuple
+import asyncio
+from functools import lru_cache
+
+# Optional import - will fail gracefully if not installed
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+
+
+class EmbeddingConfig:
+    """Configuration for embedding service."""
+
+    def __init__(
+        self,
+        model_name: str = "all-MiniLM-L6-v2",
+        embedding_dim: int = 384
+    ):
+        self.model_name = model_name
+        self.embedding_dim = embedding_dim
+
+
+class EmbeddingService:
+    """
+    Service for generating text embeddings and computing similarity.
+
+    Uses SentenceTransformers for fast, local semantic embeddings.
+    """
+
+    def __init__(self, config: Optional[EmbeddingConfig] = None):
+        self.config = config or EmbeddingConfig()
+        self._model = None
+        self._loaded = False
+
+    @property
+    def is_available(self) -> bool:
+        """Check if sentence-transformers is available."""
+        return SENTENCE_TRANSFORMERS_AVAILABLE
+
+    @property
+    def is_loaded(self) -> bool:
+        """Check if model is loaded."""
+        return self._loaded and self._model is not None
+
+    def load_model(self) -> None:
+        """Load the sentence transformer model."""
+        if not SENTENCE_TRANSFORMERS_AVAILABLE:
+            raise ImportError(
+                "sentence-transformers is not installed. "
+                "Install it with: pip install sentence-transformers"
+            )
+
+        if self._loaded:
+            return
+
+        print(f"[EMBED] Loading model: {self.config.model_name}")
+        self._model = SentenceTransformer(self.config.model_name)
+        self._loaded = True
+        print(f"[EMBED] Model loaded. Embedding dim: {self._model.get_sentence_embedding_dimension()}")
+
+    def ensure_loaded(self) -> None:
+        """Ensure model is loaded, loading if necessary."""
+        if not self.is_loaded:
+            self.load_model()
+
+    def encode(self, text: str) -> np.ndarray:
+        """
+        Encode a single text string to an embedding vector.
+
+        Args:
+            text: Input text to encode
+
+        Returns:
+            Embedding vector as numpy array
+        """
+        self.ensure_loaded()
+        return self._model.encode(text, convert_to_numpy=True)
+
+    def encode_batch(self, texts: List[str]) -> np.ndarray:
+        """
+        Encode multiple texts to embedding vectors.
+
+        Args:
+            texts: List of input texts
+
+        Returns:
+            Matrix of embedding vectors (n_texts, embedding_dim)
+        """
+        self.ensure_loaded()
+        return self._model.encode(texts, convert_to_numpy=True)
+
+    def encode_pattern(self, pattern: Dict[str, Any]) -> np.ndarray:
+        """
+        Encode a pattern dictionary to an embedding vector.
+
+        Combines multiple fields for better semantic representation.
+
+        Args:
+            pattern: Pattern dictionary
+
+        Returns:
+            Embedding vector
+        """
+        # Build combined text from relevant fields
+        parts = []
+
+        name = pattern.get('name', '')
+        if name:
+            parts.append(f"Name: {name}")
+
+        description = pattern.get('description', '')
+        if description:
+            parts.append(f"Description: {description}")
+
+        problem = pattern.get('problem', '')
+        if problem:
+            parts.append(f"Problem: {problem}")
+
+        solution = pattern.get('solution', '')
+        if solution:
+            parts.append(f"Solution: {solution}")
+
+        tags = pattern.get('tags', [])
+        if tags:
+            parts.append(f"Tags: {', '.join(tags)}")
+
+        origin_query = pattern.get('origin_query', '')
+        if origin_query:
+            parts.append(f"Query: {origin_query}")
+
+        # Join with newlines for better context
+        combined_text = "\n".join(parts)
+
+        return self.encode(combined_text)
+
+    @staticmethod
+    def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+        """
+        Compute cosine similarity between two vectors.
+
+        Args:
+            a: First vector
+            b: Second vector
+
+        Returns:
+            Similarity score between -1 and 1 (1 = identical)
+        """
+        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+    def compute_similarities(
+        self,
+        query_embedding: np.ndarray,
+        pattern_embeddings: Dict[str, np.ndarray]
+    ) -> Dict[str, float]:
+        """
+        Compute cosine similarity between query and all patterns.
+
+        Args:
+            query_embedding: Query vector
+            pattern_embeddings: Dict of pattern_id -> embedding
+
+        Returns:
+            Dict of pattern_id -> similarity score
+        """
+        similarities = {}
+        for pattern_id, pattern_emb in pattern_embeddings.items():
+            similarities[pattern_id] = self.cosine_similarity(query_embedding, pattern_emb)
+        return similarities
+
+    def find_most_similar(
+        self,
+        query: str,
+        pattern_embeddings: Dict[str, np.ndarray],
+        pattern_data: Dict[str, Dict],
+        top_k: int = 10,
+        threshold: float = 0.0
+    ) -> List[Tuple[Dict, float]]:
+        """
+        Find most similar patterns to a query.
+
+        Args:
+            query: Search query text
+            pattern_embeddings: Dict of pattern_id -> embedding
+            pattern_data: Dict of pattern_id -> pattern dict
+            top_k: Number of results to return
+            threshold: Minimum similarity score (0-1)
+
+        Returns:
+            List of (pattern, similarity_score) tuples, sorted by similarity
+        """
+        # Encode query
+        query_emb = self.encode(query)
+
+        # Compute similarities
+        similarities = self.compute_similarities(query_emb, pattern_embeddings)
+
+        # Filter by threshold and sort
+        results = []
+        for pattern_id, score in similarities.items():
+            if score >= threshold and pattern_id in pattern_data:
+                results.append((pattern_data[pattern_id], score))
+
+        # Sort by similarity (descending)
+        results.sort(key=lambda x: x[1], reverse=True)
+
+        return results[:top_k]
+
+
+class VectorStore:
+    """
+    Simple vector store for pattern embeddings.
+
+    Stores embeddings in memory with persistence to JSON.
+    """
+
+    def __init__(self, storage_path: Path):
+        self.storage_path = storage_path
+        self.embeddings_file = storage_path / "embeddings.json"
+        self._embeddings: Dict[str, List[float]] = {}
+        self._numpy_embeddings: Dict[str, np.ndarray] = {}
+
+    def load(self) -> None:
+        """Load embeddings from disk."""
+        if not self.embeddings_file.exists():
+            print(f"[VECTOR] No existing embeddings file at {self.embeddings_file}")
+            return
+
+        with open(self.embeddings_file, 'r') as f:
+            self._embeddings = json.load(f)
+
+        # Convert to numpy for computation
+        self._numpy_embeddings = {
+            k: np.array(v) for k, v in self._embeddings.items()
+        }
+
+        print(f"[VECTOR] Loaded {len(self._embeddings)} embeddings")
+
+    def save(self) -> None:
+        """Save embeddings to disk."""
+        self.embeddings_file.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(self.embeddings_file, 'w') as f:
+            json.dump(self._embeddings, f)
+
+        print(f"[VECTOR] Saved {len(self._embeddings)} embeddings to {self.embeddings_file}")
+
+    def set(self, pattern_id: str, embedding: np.ndarray) -> None:
+        """Store an embedding for a pattern."""
+        self._embeddings[pattern_id] = embedding.tolist()
+        self._numpy_embeddings[pattern_id] = embedding
+
+    def get(self, pattern_id: str) -> Optional[np.ndarray]:
+        """Get an embedding for a pattern."""
+        return self._numpy_embeddings.get(pattern_id)
+
+    def get_all(self) -> Dict[str, np.ndarray]:
+        """Get all embeddings as numpy arrays."""
+        return self._numpy_embeddings.copy()
+
+    def has(self, pattern_id: str) -> bool:
+        """Check if an embedding exists for a pattern."""
+        return pattern_id in self._numpy_embeddings
+
+    def remove(self, pattern_id: str) -> None:
+        """Remove an embedding."""
+        self._embeddings.pop(pattern_id, None)
+        self._numpy_embeddings.pop(pattern_id, None)
+
+    def clear(self) -> None:
+        """Clear all embeddings."""
+        self._embeddings.clear()
+        self._numpy_embeddings.clear()
+
+    def __len__(self) -> int:
+        return len(self._embeddings)
+
+
+# Singleton instance
+_embedding_service: Optional[EmbeddingService] = None
+
+
+def get_embedding_service() -> Optional[EmbeddingService]:
+    """Get or create the singleton embedding service."""
+    global _embedding_service
+    if _embedding_service is None:
+        if SENTENCE_TRANSFORMERS_AVAILABLE:
+            _embedding_service = EmbeddingService()
+        else:
+            print("[EMBED] sentence-transformers not available, semantic search disabled")
+    return _embedding_service

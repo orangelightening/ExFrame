@@ -33,7 +33,7 @@ class LLMEnricher(EnrichmentPlugin):
         - base_url: str - API base URL (default: OpenAI)
         - model: str - Model to use (overrides LLM_MODEL env var)
         - min_confidence: float (default: 0.3) - Use LLM if pattern confidence below this
-        - max_patterns: int (default: 5) - Max patterns to include in LLM context
+        - max_patterns: int (default: 10) - Max patterns to include in LLM context
         - mode: str (default: "enhance") - Mode: "enhance", "fallback", or "replace"
 
     Model Priority (first found wins):
@@ -60,7 +60,7 @@ class LLMEnricher(EnrichmentPlugin):
             "glm-4.7"
         )
         self.min_confidence = self.config.get("min_confidence", 0.3)
-        self.max_patterns = self.config.get("max_patterns", 5)
+        self.max_patterns = self.config.get("max_patterns", 10)
         self.mode = self.config.get("mode", "enhance")
 
     async def enrich(
@@ -334,7 +334,12 @@ Your response:"""
                     error_msg = e.response.text[:200] if e.response.text else "Unknown error"
                 return f"[LLM HTTP Error: {e.response.status_code} - {error_msg}]"
             except httpx.RequestError as e:
-                return f"[LLM Request Error: {str(e)}]"
+                # Provide more detailed error information
+                error_type = type(e).__name__
+                error_details = str(e)
+                if not error_details or error_details == str(type(e)):
+                    error_details = "Connection failed - check API endpoint and network"
+                return f"[LLM Request Error ({error_type}): {error_details}. API: {self.base_url}, Model: {self.model}]"
             except Exception as e:
                 return f"[LLM Error: {str(e)}]"
 

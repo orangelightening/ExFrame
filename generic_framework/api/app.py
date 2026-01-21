@@ -1227,20 +1227,62 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
         "tags": request.tags,
         "storage_path": storage_path,
         "pattern_format": "json",
+        "plugins": [
+            {
+                "plugin_id": s.specialist_id,
+                "name": s.name,
+                "description": s.description,
+                "module": "plugins.generalist",
+                "class": "GeneralistPlugin",
+                "enabled": True,
+                "config": {
+                    "name": s.name,
+                    "description": s.description,
+                    "keywords": s.expertise_keywords,
+                    "categories": s.expertise_categories,
+                    "threshold": s.confidence_threshold
+                }
+            }
+            for s in request.specialists
+        ],
         "specialists": [
             {
                 "specialist_id": s.specialist_id,
                 "name": s.name,
                 "description": s.description,
-                "keywords": s.expertise_keywords,
-                "categories": s.expertise_categories,
+                "expertise_keywords": s.expertise_keywords,
+                "expertise_categories": s.expertise_categories,
                 "confidence_threshold": s.confidence_threshold
             }
             for s in request.specialists
         ],
+        "knowledge_base": {
+            "type": "json",
+            "storage_path": "patterns.json",
+            "pattern_format": "embedded",
+            "auto_save": True
+        },
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat()
     }
+
+    # Create domain.json file in the universe structure
+    try:
+        universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+        domain_file = Path(universes_base) / "default" / "domains" / request.domain_id / "domain.json"
+        domain_file.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(domain_file, 'w') as f:
+            json.dump(domain_config, f, indent=2)
+
+        # Create empty patterns.json file
+        patterns_file = domain_file.parent / "patterns.json"
+        with open(patterns_file, 'w') as f:
+            json.dump([], f)
+
+        print(f"Created domain files: {domain_file}")
+    except Exception as e:
+        print(f"Warning: Failed to create domain files: {e}")
 
     # Save to registry
     registry["domains"][request.domain_id] = domain_config
@@ -2041,6 +2083,136 @@ async def run_self_test(
     result = await runner.run_self_tests(suite_name="default")
 
     return result.to_dict()
+
+
+# =============================================================================
+# SEMANTIC SEARCH / EMBEDDING MANAGEMENT API
+# =============================================================================
+
+class HybridWeightsRequest(BaseModel):
+    """Request to adjust hybrid search weights."""
+    semantic: float = 0.5
+    keyword: float = 0.5
+
+
+@app.get("/api/embeddings/status")
+async def get_embeddings_status(domain: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Get embedding status for a domain or all domains.
+
+    Returns:
+        - total_patterns: Number of patterns
+        - has_embeddings: Number with embeddings
+        - needs_embeddings: Number needing embeddings
+        - coverage_percent: Percentage covered
+        - semantic_available: Whether sentence-transformers is installed
+        - hybrid_enabled: Whether hybrid search is active
+    """
+    if domain:
+        if domain not in engines:
+            raise HTTPException(status_code=404, detail=f"Domain '{domain}' not found")
+
+        kb = engines[domain].knowledge_base
+        if hasattr(kb, 'get_embedding_status'):
+            return kb.get_embedding_status()
+        else:
+            return {"error": "Embedding support not available for this knowledge base type"}
+    else:
+        # Return status for all domains
+        results = {}
+        for domain_id, engine in engines.items():
+            kb = engine.knowledge_base
+            if hasattr(kb, 'get_embedding_status'):
+                results[domain_id] = kb.get_embedding_status()
+        return {"domains": results}
+
+
+@app.post("/api/embeddings/generate")
+async def generate_embeddings(
+    domain: str,
+    background_tasks: BackgroundTasks
+) -> Dict[str, Any]:
+    """
+    Generate embeddings for all patterns in a domain.
+
+    This is a long-running operation. Patterns without embeddings
+    will have them generated and saved to disk.
+
+    Returns:
+        - generated: Number of new embeddings created
+        - skipped: Number already with embeddings
+        - failed: Number that failed
+        - total: Total patterns processed
+    """
+    if domain not in engines:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain}' not found")
+
+    kb = engines[domain].knowledge_base
+    if not hasattr(kb, 'generate_embeddings'):
+        return {"error": "Embedding generation not supported for this knowledge base type"}
+
+    # Run synchronously for now (could be made async)
+    result = await kb.generate_embeddings()
+    return result
+
+
+@app.post("/api/embeddings/weights")
+async def set_hybrid_weights(
+    request: HybridWeightsRequest,
+    domain: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Adjust hybrid search weights for semantic vs keyword matching.
+
+    Args:
+        semantic: Weight for semantic similarity (0-1)
+        keyword: Weight for keyword matching (0-1)
+        domain: Optional domain to apply weights to (default: all domains)
+
+    Returns:
+        Updated weights
+    """
+    if domain:
+        if domain not in engines:
+            raise HTTPException(status_code=404, detail=f"Domain '{domain}' not found")
+
+        kb = engines[domain].knowledge_base
+        if hasattr(kb, 'set_hybrid_weights'):
+            kb.set_hybrid_weights(request.semantic, request.keyword)
+        return {"domain": domain, "semantic": request.semantic, "keyword": request.keyword}
+    else:
+        # Apply to all domains
+        results = {}
+        for domain_id, engine in engines.items():
+            kb = engine.knowledge_base
+            if hasattr(kb, 'set_hybrid_weights'):
+                kb.set_hybrid_weights(request.semantic, request.keyword)
+                results[domain_id] = {"semantic": request.semantic, "keyword": request.keyword}
+        return {"domains": results}
+
+
+@app.get("/api/embeddings/model")
+async def get_embedding_model_info() -> Dict[str, Any]:
+    """
+    Get information about the embedding model.
+
+    Returns:
+        - available: Whether sentence-transformers is installed
+        - model_name: Name of the model
+        - loaded: Whether model is loaded
+        - embedding_dim: Dimension of embeddings
+    """
+    from core.embeddings import SENTENCE_TRANSFORMERS_AVAILABLE, get_embedding_service
+
+    service = get_embedding_service()
+
+    return {
+        "available": SENTENCE_TRANSFORMERS_AVAILABLE,
+        "model_name": "all-MiniLM-L6-v2" if service else None,
+        "loaded": service.is_loaded if service else False,
+        "embedding_dim": 384 if service else None,
+        "description": "SentenceTransformers model for semantic search"
+    }
 
 
 if __name__ == "__main__":

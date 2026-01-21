@@ -2,10 +2,12 @@
 JSON Knowledge Base - JSON file-based pattern storage.
 
 Implements the KnowledgeBasePlugin interface for JSON file storage.
+Supports hybrid search combining keyword matching and semantic similarity.
 """
 
 import json
 import re
+import random
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
@@ -16,6 +18,73 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.knowledge_base_plugin import KnowledgeBasePlugin
 from core.knowledge_base import KnowledgeBaseConfig
+from core.embeddings import EmbeddingService, VectorStore, get_embedding_service
+from core.hybrid_search import HybridSearcher, HybridSearchConfig
+
+
+def weighted_random_select(scored_patterns: List[Tuple[Dict, int]], count: int = 10) -> List[Dict]:
+    """
+    Select patterns using weighted random selection based on relevance score.
+
+    Weighting scale:
+    - < 50: irrelevant (very low weight)
+    - 60: relevant (low weight)
+    - 80: truth (good weight)
+    - 100: fact (highest weight)
+
+    Args:
+        scored_patterns: List of (pattern, score) tuples
+        count: Number of patterns to select
+
+    Returns:
+        List of selected patterns
+    """
+    if not scored_patterns:
+        return []
+
+    # If we have fewer patterns than requested, return all
+    if len(scored_patterns) <= count:
+        return [p for p, _ in scored_patterns]
+
+    # Calculate weights based on relevance score
+    weights = []
+    for _, score in scored_patterns:
+        # Weighting scale from user:
+        # < 50: irrelevant (very low)
+        # 60: relevant (low)
+        # 80: truth (good)
+        # 100: fact (highest)
+        if score < 50:
+            weight = 1  # Very low weight for irrelevant
+        elif score < 70:
+            weight = 3  # Low weight for relevant
+        elif score < 85:
+            weight = 8  # Good weight for truth
+        else:
+            weight = 15  # Highest weight for fact
+
+        weights.append(weight)
+
+    # Weighted random selection
+    selected_indices = random.choices(
+        range(len(scored_patterns)),
+        weights=weights,
+        k=min(count, len(scored_patterns))
+    )
+
+    # Get unique selections (in case same index is picked multiple times)
+    unique_indices = list(set(selected_indices))
+
+    # If we didn't get enough unique patterns, fill the rest randomly
+    while len(unique_indices) < min(count, len(scored_patterns)):
+        remaining = [i for i in range(len(scored_patterns)) if i not in unique_indices]
+        if remaining:
+            unique_indices.append(random.choice(remaining))
+        else:
+            break
+
+    # Return selected patterns
+    return [scored_patterns[i][0] for i in unique_indices]
 
 
 class JSONKnowledgeBase(KnowledgeBasePlugin):
@@ -36,6 +105,140 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         self._patterns = []
         self._pattern_index = {}
         self._loaded = False
+
+        # Hybrid search components
+        storage_path = Path(config.storage_path)
+        self.vector_store = VectorStore(storage_path)
+        self.vector_store.load()
+
+        # Initialize embedding service (may be None if not available)
+        self.embedding_service = get_embedding_service()
+
+        # Hybrid search configuration
+        self.hybrid_config = HybridSearchConfig(
+            semantic_weight=0.5,
+            keyword_weight=0.5,
+            min_semantic_score=0.0,  # Allow any semantic match to be considered
+            min_keyword_score=0
+        )
+
+        # Hybrid searcher (created on first search if embeddings available)
+        self._hybrid_searcher: Optional[HybridSearcher] = None
+
+        # Feature flag: enable hybrid search
+        self.use_hybrid_search = True
+
+    def _get_hybrid_searcher(self) -> Optional[HybridSearcher]:
+        """Get or create the hybrid searcher."""
+        if not self.use_hybrid_search:
+            return None
+
+        if self._hybrid_searcher is None and self.embedding_service:
+            # Auto-load model if embeddings exist and model isn't loaded yet
+            if not self.embedding_service.is_loaded and len(self.vector_store) > 0:
+                print("[KB] Loading embedding model (auto-loading due to existing embeddings)")
+                try:
+                    self.embedding_service.load_model()
+                except Exception as e:
+                    print(f"[KB] Failed to load embedding model: {e}")
+                    return None
+
+            if self.embedding_service.is_loaded:
+                self._hybrid_searcher = HybridSearcher(
+                    embedding_service=self.embedding_service,
+                    vector_store=self.vector_store,
+                    config=self.hybrid_config
+                )
+                print("[KB] Hybrid search enabled")
+            else:
+                print("[KB] Embedding service not loaded, using keyword-only search")
+
+        return self._hybrid_searcher
+
+    def set_hybrid_weights(self, semantic: float, keyword: float) -> None:
+        """Adjust hybrid search weights dynamically."""
+        self.hybrid_config.update_weights(semantic, keyword)
+        if self._hybrid_searcher:
+            self._hybrid_searcher.set_config(self.hybrid_config)
+        print(f"[KB] Updated weights: semantic={self.hybrid_config.semantic_weight:.2f}, keyword={self.hybrid_config.keyword_weight:.2f}")
+
+    async def generate_embeddings(self) -> Dict[str, str]:
+        """
+        Generate embeddings for all patterns that don't have them.
+
+        Returns:
+            Dict with status: {'generated': int, 'skipped': int, 'failed': int}
+        """
+        if not self.embedding_service or not self.embedding_service.is_available:
+            return {'error': 'Embedding service not available'}
+
+        # Ensure model is loaded
+        self.embedding_service.load_model()
+
+        if not self._loaded:
+            await self.load_patterns()
+
+        generated = 0
+        skipped = 0
+        failed = 0
+
+        print(f"[KB] Generating embeddings for {len(self._patterns)} patterns...")
+
+        for pattern in self._patterns:
+            pattern_id = pattern.get('pattern_id') or pattern.get('id') or pattern.get('name', '')
+
+            if not pattern_id:
+                failed += 1
+                continue
+
+            # Skip if already has embedding
+            if self.vector_store.has(pattern_id):
+                skipped += 1
+                continue
+
+            try:
+                embedding = self.embedding_service.encode_pattern(pattern)
+                self.vector_store.set(pattern_id, embedding)
+                generated += 1
+            except Exception as e:
+                print(f"[KB] Failed to generate embedding for {pattern_id}: {e}")
+                failed += 1
+
+        # Save to disk
+        self.vector_store.save()
+
+        result = {
+            'generated': generated,
+            'skipped': skipped,
+            'failed': failed,
+            'total': len(self._patterns)
+        }
+
+        print(f"[KB] Embedding generation complete: {result}")
+
+        # Initialize hybrid searcher now that we have embeddings
+        if generated > 0 or len(self.vector_store) > 0:
+            self._get_hybrid_searcher()
+
+        return result
+
+    def get_embedding_status(self) -> Dict[str, Any]:
+        """Get status of embeddings for patterns."""
+        if not self._loaded:
+            return {'error': 'Patterns not loaded'}
+
+        total = len(self._patterns)
+        embedded = len(self.vector_store)
+        needs_embedding = total - embedded
+
+        return {
+            'total_patterns': total,
+            'has_embeddings': embedded,
+            'needs_embeddings': needs_embedding,
+            'coverage_percent': round(embedded / total * 100, 1) if total > 0 else 0,
+            'semantic_available': self.embedding_service is not None and self.embedding_service.is_available,
+            'hybrid_enabled': self._hybrid_searcher is not None
+        }
 
     def _ensure_storage_exists(self) -> None:
         """Ensure storage directory and file exist."""
@@ -91,21 +294,37 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         **filters
     ) -> List[Dict[str, Any]]:
         """
-        Search patterns by simple substring matching.
+        Search patterns using hybrid semantic + keyword search.
 
-        Simple and reliable - just checks if query appears in pattern fields.
+        Falls back to keyword-only search if embeddings not available.
         """
         if not self._loaded:
             await self.load_patterns()
 
         query_lower = query.lower()
 
-        # DEBUG: Log search start
-        print(f"  [SEARCH] Query: '{query[:50]}...' (lowercased: '{query_lower[:50]}...')")
+        # Extract content words from query (for better matching)
+        # Strip punctuation from words
+        import string
+        content_words = [
+            w.strip(string.punctuation)
+            for w in query_lower.split()
+            if w.strip(string.punctuation) not in self.STOP_WORDS
+            and len(w.strip(string.punctuation)) > 2
+        ]
+
+        print(f"  [SEARCH] Query: '{query[:60]}...'")
+        print(f"  [SEARCH] Content words: {content_words}")
         print(f"  [SEARCH] Total patterns to check: {len(self._patterns)}")
 
-        # Score each pattern by counting matching fields
-        scored_patterns = []
+        # Check if hybrid search is available
+        hybrid_searcher = self._get_hybrid_searcher()
+
+        # Step 1: Filter by category and collect keyword scores
+        filtered_patterns = []
+        keyword_scores: Dict[str, int] = {}
+        exact_match_ids = []
+
         for pattern in self._patterns:
             # Filter by category if specified
             if category:
@@ -114,49 +333,78 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
                 if category != pattern_cats and category not in pattern_tags:
                     continue
 
-            # Check for exact match first
+            pattern_id = pattern.get('pattern_id') or pattern.get('id') or pattern.get('name', '')
+            if not pattern_id:
+                continue
+
+            # Check for exact match
             has_exact_match = False
-            has_substring_match = False
+            has_origin_word_match = False
             origin_query = pattern.get('origin_query', '').lower()
 
-            # Full exact match (highest priority)
             if origin_query == query_lower:
                 has_exact_match = True
-            # Substring match in origin_query (e.g., "gallette" matches "What is a recipe for a gallette")
-            elif query_lower in origin_query and len(query_lower) > 3:
-                has_substring_match = True
+            elif content_words:
+                for word in content_words:
+                    if word in origin_query:
+                        has_origin_word_match = True
+                        break
 
-            if not has_exact_match and not has_substring_match:
+            if not has_exact_match:
                 examples = pattern.get('examples', [])
                 if examples and query_lower in [str(ex).lower() for ex in examples]:
                     has_exact_match = True
 
-            # If exact_only mode, skip patterns without exact match
             if exact_only and not has_exact_match:
                 continue
 
-            # Count how many fields contain the query (simple relevance)
+            # Calculate keyword score
             match_count = self._count_matching_fields(pattern, query_lower)
 
-            # Exact matches get highest priority
             if has_exact_match:
-                match_count += 100  # Bonus for exact match
-            elif has_substring_match:
-                match_count += 50  # Bonus for substring match in origin_query
+                match_count += 100
+                exact_match_ids.append(pattern_id)
+            elif has_origin_word_match:
+                match_count += 30
 
-            if match_count > 0:
-                scored_patterns.append((pattern, match_count))
-                # DEBUG: Log each match
-                print(f"  [SEARCH] ✓ Match: '{pattern.get('name', '?')[:40]}...' (score: {match_count}, exact: {has_exact_match})")
+            # Store keyword score for all patterns (0 if no matches)
+            keyword_scores[pattern_id] = match_count
 
-        # DEBUG: Log results
-        print(f"  [SEARCH] Found {len(scored_patterns)} matches")
+            # For keyword-only search: only include patterns with matches
+            # For hybrid search: include all patterns (semantic can find relevance)
+            if hybrid_searcher and self.hybrid_config.semantic_weight > 0:
+                # Include all patterns for hybrid search
+                filtered_patterns.append(pattern)
+            else:
+                # Only include patterns with keyword matches for keyword-only search
+                base_score = match_count
+                if has_origin_word_match:
+                    base_score -= 30
+                if has_exact_match:
+                    base_score -= 100
 
-        # Sort by match count descending
-        scored_patterns.sort(key=lambda x: x[1], reverse=True)
+                if match_count > 0 and (base_score > 0 or has_origin_word_match or has_exact_match):
+                    filtered_patterns.append(pattern)
 
-        # Return top patterns
-        return [p for p, _ in scored_patterns[:limit]]
+        # Step 2: Use hybrid search if available, otherwise keyword-only
+        if hybrid_searcher and self.hybrid_config.semantic_weight > 0:
+            print(f"  [SEARCH] Using hybrid search (semantic enabled)")
+            results = hybrid_searcher.search(
+                query=query,
+                patterns=filtered_patterns,
+                keyword_scores=keyword_scores,
+                top_k=limit
+            )
+            return [r.pattern for r in results]
+        else:
+            print(f"  [SEARCH] Using keyword-only search")
+            # Convert to tuples for weighted_random_select
+            scored_patterns = [
+                (p, keyword_scores.get(p.get('pattern_id') or p.get('id') or p.get('name', ''), 0))
+                for p in filtered_patterns
+            ]
+            selected = weighted_random_select(scored_patterns, count=limit)
+            return selected
 
     async def get_by_id(self, pattern_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -367,16 +615,39 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
 
         return None
 
+    # Common stop words that shouldn't influence matching
+    STOP_WORDS = {
+        'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+        'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'what',
+        'which', 'who', 'whom', 'whose', 'where', 'when', 'why', 'how',
+        'there', 'here', 'this', 'that', 'these', 'those', 'for', 'of', 'with',
+        'by', 'from', 'in', 'on', 'at', 'to', 'into', 'onto', 'upon', 'about',
+        'between', 'among', 'through', 'during', 'before', 'after', 'above',
+        'below', 'up', 'down', 'out', 'off', 'over', 'under', 'again', 'further',
+        'then', 'once', 'and', 'or', 'but', 'if', 'because', 'as', 'until',
+        'while', 'though', 'although', 'i', 'you', 'your', 'my', 'me', 'make',
+        'get', 'give', 'know', 'take', 'see', 'come', 'think', 'look', 'want',
+        'tell', 'ask', 'work', 'seem', 'feel', 'try', 'leave', 'call', 'keep',
+        'let', 'begin', 'help', 'show', 'hear', 'play', 'run', 'move', 'live',
+        'believe', 'hold', 'bring', 'write', 'stand', 'set', 'learn', 'change',
+        'lead', 'understand', 'watch', 'follow', 'stop', 'create', 'speak',
+        'read', 'allow', 'add', 'spend', 'grow', 'open', 'walk', 'win', 'offer',
+        'remember', 'love', 'consider', 'appear', 'buy', 'wait', 'serve', 'die',
+        'send', 'expect', 'build', 'stay', 'fall', 'cut', 'reach', 'kill', 'remain',
+        'type', 'types', 'like', 'just', 'some', 'more', 'much', 'many', 'such'
+    }
+
     def _count_matching_fields(self, pattern: Dict[str, Any], query_lower: str) -> int:
         """
-        Count how many query words match in pattern fields.
+        Count how many content words match in pattern fields.
 
-        Splits query into words and counts matches - works for long queries.
+        Filters out stop words and counts meaningful content matches.
         """
         count = 0
 
-        # Split query into words (simple tokenization)
-        query_words = query_lower.split()
+        # Split query into words and filter out stop words
+        query_words = [w for w in query_lower.split() if w not in self.STOP_WORDS and len(w) > 2]
         if not query_words:
             return 0
 
@@ -393,6 +664,8 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
 
         # For each field, check if ANY query word matches
         for field_value in fields_to_check:
+            if not field_value:
+                continue
             field_lower = field_value.lower()
             for word in query_words:
                 if word in field_lower:

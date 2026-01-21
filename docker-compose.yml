@@ -31,11 +31,18 @@ services:
       - DOMAIN_REGISTRY_PATH=/app/data
       - UNIVERSES_BASE=/app/universes
 
+      # Model cache directory for sentence-transformers
+      - TRANSFORMERS_CACHE=/app/cache/models
+      - HF_HOME=/app/cache/huggingface
+
       # Log level
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
       # Persist domain registry
       - eeframe_data:/app/data
+
+      # Model cache for sentence-transformers
+      - eeframe_cache:/app/cache
 
       # Mount host pattern directories (bind mount for live sync)
       - ./data/patterns:/app/data/patterns:rw
@@ -43,7 +50,13 @@ services:
       # Mount universes directory (bind mount for live sync)
       - ./universes:/app/universes:rw
 
-      # Mount frontend for live updates during development
+      # Mount generic_framework subdirectories to override image copies
+      - ./generic_framework/core:/app/core:rw
+      - ./generic_framework/knowledge:/app/knowledge:rw
+      - ./generic_framework/plugins:/app/plugins:rw
+      - ./generic_framework/assist:/app/assist:rw
+      - ./generic_framework/api:/app/api:rw
+      - ./generic_framework/diagnostics:/app/diagnostics:rw
       - ./generic_framework/frontend:/app/frontend:ro
 
       # Mount built frontend (bind mount for live updates)
@@ -153,6 +166,9 @@ volumes:
   eeframe_data:
     driver: local
     name: eeframe_data
+  eeframe_cache:
+    driver: local
+    name: eeframe_cache
   eeframe_history:
     driver: local
     name: eeframe_history

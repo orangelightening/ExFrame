@@ -156,7 +156,7 @@ class GenericAssistantEngine:
         # Step 2: Search knowledge base for relevant patterns
         # Always do a full search - exact_only is too restrictive
         step2_time = datetime.utcnow()
-        patterns = await self.knowledge_base.search(query, limit=5)
+        patterns = await self.knowledge_base.search(query, limit=10)
 
         if trace:
             trace['steps'].append({
