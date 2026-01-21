@@ -265,7 +265,12 @@ Your response:"""
                 ]
             }
 
-        timeout = httpx.Timeout(60.0)  # Increased timeout for longer responses
+        # Configure timeouts: 120s for read, 30s for connect, 30s for pool
+        timeout = httpx.Timeout(
+            timeout=120.0,      # Read timeout (increased from 60s)
+            connect=30.0,     # Connection timeout
+            pool=30.0          # Pool acquisition timeout
+        )
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 # Use correct endpoint based on API type

@@ -22,7 +22,7 @@
     "examples": [],
     "created_at": "2026-01-06T04:57:15.252739",
     "updated_at": "2026-01-06T04:57:15.252770",
-    "times_accessed": 0,
+    "times_accessed": 5,
     "user_rating": null
   },
   {
@@ -49,7 +49,7 @@
     "domain": "first_aid",
     "created_at": "2026-01-11T02:48:47.852924",
     "updated_at": "2026-01-11T07:48:26.495089",
-    "times_accessed": 9,
+    "times_accessed": 14,
     "user_rating": null,
     "status": "certified",
     "origin": "llm_fallback",
@@ -63,5 +63,30 @@
     "usage_count": 0,
     "user_feedback": [],
     "llm_generated": false
+  },
+  {
+    "id": "first_aid_c8b685cf",
+    "pattern_id": "first_aid_c8b685cf",
+    "name": "What is narcolepsy",
+    "domain": "first_aid",
+    "problem": "what is narcolepsy",
+    "solution": "Although I am an AI assistant designed specifically for the **first_aid** domain, I must clarify that **narcolepsy** is a chronic neurological sleep disorder, not a physical injury or a condition typically managed with first aid.\n\nBased on the patterns available in my knowledge base\u2014specifically **Understanding Cuts and Scrapes: A First Aid Guide** and **what do I do if I cut myself?**\u2014my expertise is focused on trauma care, wound management, and emergency response.\n\nHere is an explanation of narcolepsy, along with important distinctions regarding when first aid might be necessary for someone with this condition.\n\n### What is Narcolepsy?\n\nNarcolepsy is a neurological disorder that affects the control of sleep and wakefulness. People with narcolepsy experience uncontrollable episodes of falling asleep during the day. They may also suffer from sudden loss of muscle tone (cataplexy), hallucinations, and sleep paralysis.\n\n**Key Symptoms:**\n*   **Excessive Daytime Sleepiness (EDS):** An overwhelming sense of tiredness, regardless of how much sleep was had the night before.\n*   **Cataplexy:** A sudden loss of muscle tone that leads to feelings of weakness and a loss of voluntary muscle control. It is often triggered by strong emotions like laughter, surprise, or anger.\n*   **Sleep Paralysis:** A temporary inability to move or speak while falling asleep or waking up.\n*   **Hallucinations:** Vivid and often frightening experiences that occur when falling asleep (hypnagogic) or waking up (hypnopompic).\n\n### First Aid Considerations\n\nWhile narcolepsy itself requires management by a medical professional (usually a neurologist or sleep specialist), there are situations where **first aid** knowledge becomes relevant for a person with narcolepsy.\n\n**1. Injuries from Falls (Cataplexy)**\nIf a person experiences a sudden episode of cataplexy (loss of muscle tone), they may collapse suddenly. This can lead to **cuts, scrapes, or lacerations**.\n*   If a person falls and suffers a cut, you should follow standard first aid protocols.\n*   As described in **what do I do if I cut myself?**, you should:\n    *   **Ensure Safety:** Stop any activity that caused the injury.\n    *   **Control the Bleeding:** Apply firm, direct pressure with a clean cloth.\n    *   **Clean the Wound:** Once bleeding stops, clean the area to prevent infection.\n\n**2. Managing Wounds**\nBecause a person with narcolepsy may be prone to sudden falls, understanding proper wound care is essential. As outlined in **Understanding Cuts and Scrapes: A First Aid Guide**, the skin is the body's primary defense against infection. Any break in the skin (laceration) requires attention to ensure it heals correctly.\n\n**Summary**\nNarcolepsy is a long-term medical condition rather than a first aid emergency. However, if you are with someone who has narcolepsy, the most helpful first aid skills you can possess are treating injuries resulting from unexpected falls, such as **controlling bleeding** and **cleaning wounds**.\n\n*Disclaimer: I am an AI assistant. If you or someone else has experienced a serious injury or has symptoms of narcolepsy, please consult a medical doctor or sleep specialist for proper diagnosis and treatment.*",
+    "description": "AI-generated from query: what is narcolepsy",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "what is narcolepsy",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-21T07:48:17.704Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-21T07:48:17.712867",
+    "times_accessed": 1,
+    "updated_at": "2026-01-21T07:48:17.712867"
   }
 ]

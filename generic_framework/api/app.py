@@ -778,7 +778,8 @@ async def create_pattern(request: Request) -> Dict[str, Any]:
     Create a new pattern from LLM-generated content.
 
     This endpoint allows users to accept AI-generated knowledge as a new pattern
-    in the knowledge base through the query portal.
+    in the knowledge base through the query portal. The pattern is immediately
+    available for semantic search after creation.
 
     Expected JSON body:
     {
@@ -796,7 +797,8 @@ async def create_pattern(request: Request) -> Dict[str, Any]:
         "validated_at": "2026-01-15T10:00:00Z",
         "validation_method": "query_portal_acceptance",
         "status": "validated",
-        "tags": ["external_search", "llm_generated"]
+        "tags": ["external_search", "llm_generated"],
+        "code": "def my_function():\\n    return 'hello'"  // Optional executable code
     }
     """
     import time
@@ -838,7 +840,8 @@ async def create_pattern(request: Request) -> Dict[str, Any]:
         "validation_method": data.get("validation_method", "query_portal_acceptance"),
         "tags": data.get("tags", ["llm_generated"]),
         "created_at": datetime.utcnow().isoformat() + "Z",
-        "times_accessed": 0
+        "times_accessed": 0,
+        "code": data.get("code")  # Optional executable code
     }
 
     # Add the pattern to the knowledge base

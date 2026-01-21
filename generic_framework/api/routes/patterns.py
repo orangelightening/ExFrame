@@ -34,6 +34,7 @@ class PatternCreate(BaseModel):
     sources: List[str] = []
     tags: List[str] = []
     examples: List[str] = []
+    code: Optional[str] = None  # Executable code associated with this pattern
 
 
 class PatternUpdate(BaseModel):

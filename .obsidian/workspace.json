@@ -1,0 +1,231 @@
+{
+  "main": {
+    "id": "53a514c783f05a05",
+    "type": "split",
+    "children": [
+      {
+        "id": "a9b0537397bd11ca",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e7c93198faf3d8a6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "release-plan.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "release-plan"
+            }
+          },
+          {
+            "id": "b46684e72c624a7c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "rag-search-design.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "rag-search-design"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "79ac2a81b9c8fab6",
+    "type": "split",
+    "children": [
+      {
+        "id": "a44858b577fc7600",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4e09c859bbd49864",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "7eb23b25b0161f15",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "14e6526ae31a55c0",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "c1b1e5cb484c5d09",
+    "type": "split",
+    "children": [
+      {
+        "id": "eb58f25a12d86cec",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0c3a335fd068ecc3",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "mimicry-proposed.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for mimicry-proposed"
+            }
+          },
+          {
+            "id": "fb98515a6bce3154",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "mimicry-proposed.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from mimicry-proposed"
+            }
+          },
+          {
+            "id": "6332142707710f87",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "76eaf7c30b6d21e0",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "e049c79d5423406b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "mimicry-proposed.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of mimicry-proposed"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b46684e72c624a7c",
+  "lastOpenFiles": [
+    "RELEASE_NOTES.md",
+    "INSTALL.md",
+    "universes/default/domains/psycho/embeddings.json",
+    "universes/default/domains/poetry_domain/embeddings.json",
+    "universes/default/domains/exframe_methods/embeddings.json",
+    "universes/default/domains/python/embeddings.json",
+    "universes/default/domains/llm_consciousness/embeddings.json",
+    "universes/default/domains/gardening/embeddings.json",
+    "universes/default/domains/first_aid/embeddings.json",
+    "universes/default/domains/binary_symmetry/embeddings.json",
+    "universes/default/domains/diy/embeddings.json",
+    "poetic.md",
+    "rag-search-design.md",
+    "universes/default/domains/cooking/embeddings.json",
+    "query-rewrite.md",
+    "query-todo.md",
+    "prompt-reply.md",
+    "emergence.md",
+    "Poetry domain discovery.md",
+    "release-plan.md",
+    "PHENOMENA_POETRY_DOMAIN.md",
+    "IMPLEMENTATION_SUMMARY.md",
+    "What is ExFrame.md",
+    "mimicry.md",
+    "mimicry-proposed.md",
+    "Leila the hero.md",
+    "pattern-notes.md"
+  ]
+}

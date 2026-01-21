@@ -1,0 +1,14 @@
+universe:
+  created_at: '2026-01-16T23:18:49.719219'
+  created_by: system
+  defaults: {}
+  description: Demo universe
+  domains: {}
+  domains_path: domains
+  is_default: false
+  load_on_startup: false
+  merge_strategy: merge
+  name: Demo
+  plugins_path: plugins
+  universe_id: demo_universe
+  version: 1.0.0

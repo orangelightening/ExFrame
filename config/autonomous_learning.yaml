@@ -1,0 +1,158 @@
+# Autonomous Learning System Configuration
+#
+# This file configures the autonomous learning system for EEFrame.
+# The system scrapes web sources, extracts patterns, certifies them
+# through a 5-judge AI panel, and stores validated expertise.
+#
+# Hierarchy: Multiverse → Universe → Neighbourhood → Domain → Patterns
+
+# -----------------------------------------------------------------------------
+# AI SUPERVISOR
+# -----------------------------------------------------------------------------
+supervisor:
+  api:
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions  # GLM-4 API
+    model: glm-4
+    max_tokens: 4096
+    temperature: 0.7
+
+  heartbeat:
+    interval: 30          # Seconds between heartbeat checks
+    timeout: 10           # Seconds before worker considered unresponsive
+    max_missed: 3         # Max missed heartbeats before intervention
+
+  focus:
+    window_size: 10       # Number of actions to analyze for drift
+    drift_threshold: 0.3  # Threshold for detecting task drift
+    repetition_threshold: 0.95  # Threshold for detecting repetitive actions
+
+# -----------------------------------------------------------------------------
+# CERTIFICATION PANEL (5 JUDGES)
+# -----------------------------------------------------------------------------
+certification:
+  judges:
+    # Judge 1: Generalist - Pattern structure review
+    - name: generalist
+      role: structure_review
+      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
+      model: glm-4
+      temperature: 0.3
+      weight: 1.0
+
+    # Judge 2: Specialist - Domain accuracy
+    - name: specialist
+      role: domain_accuracy
+      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
+      model: glm-4
+      temperature: 0.2
+      weight: 1.0
+
+    # Judge 3: Skeptic - Critical analysis (higher weight)
+    - name: skeptic
+      role: critical_analysis
+      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
+      model: glm-4
+      temperature: 0.5
+      weight: 1.5
+
+    # Judge 4: Contextualist - Context fit
+    - name: contextualist
+      role: context_fit
+      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
+      model: glm-4
+      temperature: 0.4
+      weight: 1.0
+
+    # Judge 5: Human - Last resort (escalation only)
+    - name: human
+      role: last_resort
+      type: human
+      escalation_only: true
+
+  thresholds:
+    certified: 0.8           # Consensus threshold for auto-certification
+    provisional: 0.6          # Consensus threshold for provisional certification
+    unanimous_bonus: 0.1      # Bonus for unanimous agreement
+    skeptic_veto_critical: true  # Skeptic can veto with critical issues
+
+  human_triggers:
+    - skeptic_critical_issues    # Require human review if skeptic finds critical issues
+    - consensus_below_threshold  # Require human review if consensus < 0.6
+    - judge_variance_high         # Require human review if judges disagree significantly
+    - user_flag                   # Allow users to flag patterns for human review
+
+# -----------------------------------------------------------------------------
+# SCRAPING ENGINE
+# -----------------------------------------------------------------------------
+scraping:
+  rate_limit:
+    requests_per_second: 1
+    burst: 5
+    exponential_backoff: true
+
+  stealth:
+    enable: true
+    user_agents:
+      - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      - "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+      - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    jitter_percent: 20
+    warm_up_requests: 3
+
+  error_handling:
+    max_retries: 3
+    skip_404: true
+    backoff_429: true
+
+  pilot_domain: cooking
+
+# -----------------------------------------------------------------------------
+# PATTERN INGESTION
+# -----------------------------------------------------------------------------
+ingestion:
+  validation:
+    strict_mode: true
+    required_fields:
+      - name
+      - description
+      - problem
+      - solution
+      - steps
+
+  deduplication:
+    similarity_threshold: 0.85
+    method: text_based  # word_overlap, jaccard (NOTE: embeddings skipped for v1)
+
+  storage:
+    pattern_directory: data/patterns/{domain}/
+    backup_enabled: true
+
+# -----------------------------------------------------------------------------
+# RESEARCH GENERATOR HOOKS
+# -----------------------------------------------------------------------------
+research_hooks:
+  enabled: false  # Set to true in Phase 10
+  pattern_storage_field: research_id
+
+# -----------------------------------------------------------------------------
+# LOGGING
+# -----------------------------------------------------------------------------
+logging:
+  level: INFO
+  log_dir: data/logs
+  json_output: true
+
+# -----------------------------------------------------------------------------
+# HIERARCHY (for reference)
+# -----------------------------------------------------------------------------
+# Multiverse: Collection of Universes
+#   └── Universe: Complete knowledge environment
+#       └── Neighbourhood: Logical grouping of Domains
+#           └── Domain: Area of expertise
+#               └── Patterns: Knowledge units
+#
+# Pilot Configuration:
+#   Universe: default
+#   Neighbourhood: parksville_bc
+#   Domain: cooking

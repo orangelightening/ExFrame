@@ -169,7 +169,8 @@ class GenericAssistantEngine:
                         'id': p.get('id'),
                         'name': p.get('name'),
                         'type': p.get('pattern_type'),
-                        'relevance': p.get('confidence', 0)
+                        'relevance': p.get('_semantic_score', p.get('confidence', 0)),  # Use semantic score if available
+                        'relevance_source': p.get('_relevance_source', 'unknown')
                     }
                     for p in patterns
                 ]

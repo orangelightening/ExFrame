@@ -101,11 +101,14 @@ class EmbeddingService:
         self.ensure_loaded()
         return self._model.encode(texts, convert_to_numpy=True)
 
+    MAX_TOKENS = 256  # all-MiniLM-L6-v2 limit
+
     def encode_pattern(self, pattern: Dict[str, Any]) -> np.ndarray:
         """
         Encode a pattern dictionary to an embedding vector.
 
         Combines multiple fields for better semantic representation.
+        Includes length protection to prevent truncation.
 
         Args:
             pattern: Pattern dictionary
@@ -113,35 +116,50 @@ class EmbeddingService:
         Returns:
             Embedding vector
         """
-        # Build combined text from relevant fields
+        # Build combined text from relevant fields (priority order)
         parts = []
 
+        # High-priority fields (always include)
         name = pattern.get('name', '')
         if name:
             parts.append(f"Name: {name}")
-
-        description = pattern.get('description', '')
-        if description:
-            parts.append(f"Description: {description}")
-
-        problem = pattern.get('problem', '')
-        if problem:
-            parts.append(f"Problem: {problem}")
 
         solution = pattern.get('solution', '')
         if solution:
             parts.append(f"Solution: {solution}")
 
-        tags = pattern.get('tags', [])
-        if tags:
-            parts.append(f"Tags: {', '.join(tags)}")
-
+        # Secondary fields (include if space permits)
+        description = pattern.get('description', '')
+        problem = pattern.get('problem', '')
         origin_query = pattern.get('origin_query', '')
-        if origin_query:
-            parts.append(f"Query: {origin_query}")
+        tags = pattern.get('tags', [])
 
-        # Join with newlines for better context
+        # Build text with length checking
         combined_text = "\n".join(parts)
+
+        # Rough token count check (1 token ≈ 4 characters for English text)
+        estimated_tokens = len(combined_text) // 4
+
+        if estimated_tokens > self.MAX_TOKENS:
+            # Need to truncate - prioritize name + solution
+            print(f"[EMBED] WARNING: Pattern {pattern.get('id')} may exceed token limit (est. {estimated_tokens} tokens)")
+
+            # Truncation strategy: keep name + solution, truncate rest
+            truncated_parts = [f"Name: {name}", f"Solution: {solution[:1500]}"]  # Limit solution to ~375 tokens
+            combined_text = "\n".join(truncated_parts)
+            print(f"[EMBED] Truncated to essential fields only")
+        else:
+            # Add secondary fields if there's space
+            if description:
+                parts.append(f"Description: {description}")
+            if problem:
+                parts.append(f"Problem: {problem}")
+            if origin_query:
+                parts.append(f"Query: {origin_query}")
+            if tags:
+                parts.append(f"Tags: {', '.join(tags)}")
+
+            combined_text = "\n".join(parts)
 
         return self.encode(combined_text)
 

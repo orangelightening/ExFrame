@@ -93,6 +93,13 @@
                         </div>
                     </div>
                 </div>
+                <!-- Domain Info Row -->
+                <div class="flex items-center justify-between py-2 border-t border-gray-700/50" x-show="domainDescription || domainLastUpdate">
+                    <div class="text-sm text-gray-400" x-show="domainDescription" x-text="domainDescription"></div>
+                    <div class="text-xs text-gray-500" x-show="domainLastUpdate">
+                        Last updated: <span x-text="formatTimestamp(domainLastUpdate)"></span>
+                    </div>
+                </div>
 
                 <!-- Navigation -->
                 <nav class="flex items-center gap-1 pb-0">
@@ -159,8 +166,8 @@
                             </div>
                         </div>
 
-                        <!-- Knowledge Constellation (ExFrame_Methods Welcome) -->
-                        <div class="glass rounded-xl overflow-hidden relative" x-show="currentDomain === 'exframe_methods' && !response">
+                        <!-- Knowledge Constellation (ExFrame_Methods Welcome) - DISABLED -->
+                        <div x-show="false" class="glass rounded-xl overflow-hidden relative" style="display: none;">
                             <canvas id="constellation-canvas" class="w-full" style="height: 350px; background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);"></canvas>
                             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <div class="text-center space-y-2">
@@ -194,15 +201,17 @@
                                 <span x-show="confidence" class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400">
                                     Confidence: <span x-text="(confidence * 100).toFixed(0) + '%'"></span>
                                 </span>
+                                <span x-show="direct_prompt" class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                                    🔓 Direct
+                                </span>
                                 <span x-show="llm_used || ai_generated" class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40">
                                     ⚡ AI-Generated
                                 </span>
                             </div>
                         </div>
-                        <div class="prose prose-invert max-w-none response-content text-gray-200" x-html="renderedResponse"></div>
 
                         <!-- Extend with AI Button -->
-                        <div x-show="canExtendWithAI" x-transition class="mt-6 pt-4 border-t border-gray-700">
+                        <div x-show="canExtendWithAI" x-transition class="mb-4 pb-4 border-b border-gray-700">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3 text-sm text-gray-400">
                                     <span class="px-2 py-1 bg-emerald-500/20 rounded" x-text="patternsFound + ' patterns found'"></span>
@@ -210,12 +219,34 @@
                                 </div>
                                 <button @click="extendWithAI()"
                                         :disabled="loading"
-                                                                        class="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2">
+                                        class="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
                                     Extend Search with AI
                                 </button>
+                            </div>
+                        </div>
+
+                        <div class="prose prose-invert max-w-none response-content text-gray-200" x-html="renderedResponse"></div>
+
+                        <!-- Accept as New Pattern Button (shows after LLM results) -->
+                        <div x-show="llm_used" x-transition class="mt-6 pt-4 border-t border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-gray-400">
+                                    <p>This content was generated from external sources.</p>
+                                    <p class="text-xs mt-1">Accept to add this knowledge to the domain.</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button @click="acceptAsPattern()"
+                                            :disabled="loading"
+                                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        Accept as New Pattern
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -363,7 +394,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <template x-for="example in currentExampleQueriesDisplay">
                                 <button
-                                    @click="query = example; processQuery();"
+                                    @click="query = example;"
                                     class="text-left px-4 py-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 hover:border-emerald-500 transition-all text-sm"
                                     x-text="example"
                                 ></button>
@@ -526,6 +557,10 @@
                             </div>
                         </div>
                     </template>
+                    <div x-show="patterns.length === 0" class="text-center py-12 text-gray-500">
+                        <p>No patterns found for this domain.</p>
+                        <p class="text-sm mt-2">Patterns loaded: <span x-text="patterns.length"></span> | Domain: <span x-text="currentDomain"></span></p>
+                    </div>
                 </div>
             </div>
 
@@ -1813,7 +1848,11 @@
 
             <!-- DIAGNOSTICS VIEW -->
             <div x-show="currentView === 'diagnostics'" x-transition>
-                <h2 class="text-2xl font-bold mb-6">System Diagnostics</h2>
+                <h2 class="text-2xl font-bold mb-2">System Diagnostics</h2>
+                <p class="text-gray-400 text-sm mb-6">
+                    Universe: <span class="text-emerald-400 font-medium" x-text="currentUniverse"></span>
+                    <span x-show="availableDomains.length === 0" class="text-yellow-400 ml-3">(No domains in this universe)</span>
+                </p>
 
                 <!-- System Health Overview -->
                 <div class="glass rounded-xl p-6 mb-6">
@@ -2050,6 +2089,7 @@
                 confidence: 0,
                 llm_used: false,
                 ai_generated: false,
+                direct_prompt: false,
                 // LLM confirmation state
                 showLLMConfirmation: false,
                 confirmationMessage: '',
@@ -2064,9 +2104,12 @@
                 availableUniverses: [],
                 newUniverseId: '',
                 newUniverseDescription: '',
-                availableDomains: ['cooking', 'llm_consciousness', 'exframe_methods'],
+                availableDomains: [],
                 patternCount: 0,
                 totalPatternCount: 0,
+                // Domain info display
+                domainDescription: '',
+                domainLastUpdate: '',
                 // Explicit display properties for example queries and placeholder
                 currentExampleQueriesDisplay: [],
                 currentPlaceholderDisplay: 'Type your cooking question here... (Press Enter to submit)',
@@ -2254,8 +2297,7 @@
 
                     await this.loadCurrentUniverse();
                     await this.loadUniverses();
-                    await this.loadAvailableDomains();
-                    console.log('After loadAvailableDomains, currentDomain:', this.currentDomain);
+                    console.log('After loadCurrentUniverse, availableDomains:', this.availableDomains);
 
                     // Load domain info BEFORE updating display properties
                     await this.loadDomainInfo();
@@ -2308,11 +2350,26 @@
                             // Find the active universe or default to 'default'
                             const activeUniverse = data.universes.find(u => u.is_active) || data.universes.find(u => u.universe_id === 'default') || data.universes[0];
                             this.currentUniverse = activeUniverse.universe_id;
-                            console.log('Loaded current universe:', this.currentUniverse);
+
+                            // Load the universe to get its domains
+                            const loadRes = await fetch(`/api/universes/${this.currentUniverse}/load`, {
+                                method: 'POST'
+                            });
+                            if (loadRes.ok) {
+                                const loadData = await loadRes.json();
+                                if (loadData.domains && Array.isArray(loadData.domains)) {
+                                    this.availableDomains = loadData.domains;
+                                } else {
+                                    this.availableDomains = [];
+                                }
+                            }
+
+                            console.log('Loaded current universe:', this.currentUniverse, 'Domains:', this.availableDomains);
                         }
                     } catch (error) {
                         console.error('Failed to load current universe:', error);
                         this.currentUniverse = 'default';
+                        this.availableDomains = [];
                     }
                 },
 
@@ -2320,12 +2377,33 @@
                     try {
                         const res = await fetch('/api/universes');
                         const data = await res.json();
-                        this.availableUniverses = data.universes || [];
+
+                        // Show all available universes from disk, not just loaded ones
+                        // The API returns: {available: [], loaded: [], universes: []}
+                        // We want to display all available universes
+                        const availableIds = data.available || [];
+                        const loadedUniverses = data.universes || [];
+
+                        // Merge available IDs with loaded metadata
+                        this.availableUniverses = availableIds.map(id => {
+                            const meta = loadedUniverses.find(u => u.universe_id === id);
+                            return meta || {
+                                universe_id: id,
+                                name: id.charAt(0).toUpperCase() + id.slice(1),
+                                description: 'Available but not loaded',
+                                state: 'available',
+                                domain_count: 0,
+                                total_patterns: 0,
+                                is_active: false
+                            };
+                        });
 
                         // Update total pattern count from current universe data
                         const currentUniv = this.availableUniverses.find(u => u.universe_id === this.currentUniverse);
-                        if (currentUniv && currentUniv.total_patterns !== undefined) {
-                            this.totalPatternCount = currentUniv.total_patterns;
+                        if (currentUniv) {
+                            this.totalPatternCount = currentUniv.total_patterns || 0;
+                        } else {
+                            this.totalPatternCount = 0;
                         }
 
                         console.log('Loaded universes:', this.availableUniverses);
@@ -2341,14 +2419,51 @@
                         });
                         const data = await res.json();
 
-                        if (data.success) {
+                        if (res.ok) {
                             this.currentUniverse = universeId;
-                            await this.loadAvailableDomains();
-                            await this.loadDomainInfo();
+                            // Update available domains from the loaded universe response
+                            if (data.domains && Array.isArray(data.domains)) {
+                                this.availableDomains = data.domains;
+                                // Set current domain to first available, or null if empty
+                                this.currentDomain = data.domains.length > 0 ? data.domains[0] : null;
+                            } else {
+                                this.availableDomains = [];
+                                this.currentDomain = null;
+                            }
+
+                            // Force Alpine to detect the change
+                            await this.$nextTick();
+
+                            // Update pattern count from current universe
                             await this.loadUniverses();
-                            console.log('Switched to universe:', universeId);
+                            // Update domains list for Domains tab
+                            await this.loadAllDomains();
+
+                            // Clear or reload domain info based on whether we have domains
+                            if (this.currentDomain) {
+                                await this.loadDomainInfo();
+                            } else {
+                                // Explicitly clear all domain-specific data for empty universe
+                                this.domainConfig = null;
+                                this.response = '';
+                                this.patterns_used = [];
+                                this.patterns = [];
+                                this.patternCount = 0;
+                                this.specialists = [];
+                                this.categories = [];
+                                this.domainDescription = '';
+                                this.domainLastUpdate = '';
+                                this.currentExampleQueriesDisplay = [];
+                                this.queryPlaceholder = '';
+                            }
+
+                            console.log('Switched to universe:', universeId, 'Domains:', this.availableDomains, 'currentDomain:', this.currentDomain);
+                            // Show success message after UI updates
+                            setTimeout(() => {
+                                alert(data.message || `Switched to ${universeId}`);
+                            }, 100);
                         } else {
-                            alert('Failed to switch universe: ' + (data.message || 'Unknown error'));
+                            alert('Failed to switch universe: ' + (data.detail || data.message || 'Unknown error'));
                         }
                     } catch (error) {
                         console.error('Failed to switch universe:', error);
@@ -2380,19 +2495,22 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 universe_id: this.newUniverseId,
-                                description: this.newUniverseDescription
+                                name: this.newUniverseId.charAt(0).toUpperCase() + this.newUniverseId.slice(1),  // Capitalize first letter for name
+                                description: this.newUniverseDescription || ''
                             })
                         });
 
                         const data = await res.json();
 
-                        if (data.success || res.ok) {
+                        if (res.ok) {
                             alert(`Universe "${this.newUniverseId}" created successfully!`);
                             this.newUniverseId = '';
                             this.newUniverseDescription = '';
                             await this.loadUniverses();
                         } else {
-                            alert('Failed to create universe: ' + (data.message || 'Unknown error'));
+                            // Extract error message from detail field (FastAPI error format)
+                            const errorMsg = data.detail || data.message || 'Unknown error';
+                            alert('Failed to create universe: ' + errorMsg);
                         }
                     } catch (error) {
                         console.error('Failed to create universe:', error);
@@ -2505,6 +2623,19 @@
                         console.log('Before load - this.patterns:', this.patterns);
                         console.log('Before load - this.patterns.length:', this.patterns.length);
 
+                        // Guard clause: if no domain is selected (empty universe), clear data
+                        if (!this.currentDomain) {
+                            console.log('No domain selected, clearing domain data');
+                            this.patterns = [];
+                            this.patternCount = 0;
+                            this.specialists = [];
+                            this.categories = [];
+                            this.domainDescription = '';
+                            this.domainLastUpdate = '';
+                            this.domainConfig = null;
+                            return;
+                        }
+
                         // Load specialists, patterns, health, and domain config in parallel
                         const [specsRes, patternsRes, healthRes, configRes] = await Promise.all([
                             fetch(`/api/domains/${this.currentDomain}/specialists`),
@@ -2537,6 +2668,9 @@
 
                         // Load domain config to get example_queries and placeholder
                         const configData = await configRes.json();
+                        // Store domain description and last update for display
+                        this.domainDescription = configData.description || '';
+                        this.domainLastUpdate = configData.updated_at || '';
                         if (configData.ui_config) {
                             if (configData.ui_config.example_queries) {
                                 this.exampleQueries[this.currentDomain] = configData.ui_config.example_queries;
@@ -2588,11 +2722,12 @@
                             type: c.status === 'candidate' ? 'candidate' : (c.type || 'pattern')
                         }));
 
-                        // Merge both lists
-                        const allPatterns = [
-                            ...normalizedPatterns,
-                            ...normalizedCandidates
-                        ];
+                        // Merge both lists, deduplicating by ID
+                        const patternMap = new Map();
+                        [...normalizedPatterns, ...normalizedCandidates].forEach(p => {
+                            patternMap.set(p.id, p);
+                        });
+                        const allPatterns = Array.from(patternMap.values());
 
                         // Load pattern health data for the domain
                         try {
@@ -2609,6 +2744,8 @@
                                     pattern.health_status = 'warning';
                                     pattern.health_issue = patternIssues[pattern.name] || 'Issue';
                                 } else {
+                                    // Candidates with status "candidate" get 'candidate' status (amber), not red
+                                    // Only non-healthy patterns get red borders
                                     pattern.health_status = 'healthy';
                                     pattern.health_issue = null;
                                 }
@@ -2662,6 +2799,7 @@
                     this.llm_used = false;
                     this.ai_generated = false;
                     this.canExtendWithAI = false;  // Reset AI extension button
+                    this.processingTime = 0;  // Reset processing time
                     this.trace = null;
                     this.selectedTrace = null;
 
@@ -2688,6 +2826,7 @@
                             this.specialist = partial.specialist || 'General';
                             this.confidence = partial.confidence || 0;
                             this.lastQuery = partial.query || data.query;
+                            this.processingTime = partial.processing_time_ms || 0;  // Set partial processing time
                             this.llm_used = false;
                             this.ai_generated = false;
                             this.queriesProcessed++;
@@ -2706,13 +2845,14 @@
                         }
 
                         this.response = data.response;
-                        this.specialist = data.specialist || 'General';
+                        this.specialist = data.direct_prompt ? 'Direct LLM' : (data.specialist || 'General');
                         this.confidence = data.confidence;
                         this.lastQuery = data.query;
                         this.processingTime = data.processing_time_ms || 0;
                         this.trace = data.trace || null;
                         this.llm_used = data.llm_used || false;
                         this.ai_generated = data.ai_generated || false;
+                        this.direct_prompt = data.direct_prompt || false;
                         this.canExtendWithAI = false;  // Reset for normal responses
                         this.queriesProcessed++;
 
@@ -2784,6 +2924,75 @@
                     this.showTraceViewer = !this.showTraceViewer;
                 },
 
+                async acceptAsPattern() {
+                    // Create a new pattern from the LLM response
+                    if (!this.response || !this.lastQuery) return;
+
+                    try {
+                        this.loading = true;
+
+                        // Generate pattern name from query (capitalize first letter)
+                        const patternName = this.lastQuery.charAt(0).toUpperCase() + this.lastQuery.slice(1);
+
+                        // Set origin and tags based on whether this was a direct prompt
+                        const origin = this.direct_prompt ? 'direct_prompt' : 'llm_external_search';
+                        const tags = this.direct_prompt
+                            ? ['direct_prompt', 'llm_generated']
+                            : ['external_search', 'llm_generated'];
+                        const description = this.direct_prompt
+                            ? 'Direct prompt accepted as knowledge: ' + this.lastQuery
+                            : 'AI-generated from query: ' + this.lastQuery;
+
+                        const res = await fetch('/api/patterns', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                domain: this.currentDomain,
+                                name: patternName,
+                                problem: this.lastQuery,
+                                solution: this.response,
+                                description: description,
+                                pattern_type: 'knowledge',
+                                origin: origin,
+                                origin_query: this.lastQuery,
+                                llm_generated: true,
+                                confidence: this.confidence || 0.5,
+                                validated_by: 'current_user',
+                                validated_at: new Date().toISOString(),
+                                validation_method: 'query_portal_acceptance',
+                                status: 'validated',
+                                tags: tags
+                            })
+                        });
+
+                        if (!res.ok) {
+                            const error = await res.json();
+                            throw new Error(error.detail || 'Failed to create pattern');
+                        }
+
+                        const result = await res.json();
+
+                        // Show success message
+                        alert(`Pattern "${patternName}" created successfully! It will appear in future queries.`);
+
+                        // Reload domain info to include the new pattern
+                        await this.loadDomainInfo();
+
+                        // Clear the response to indicate completion
+                        this.response = '';
+                        this.llm_used = false;
+                        this.ai_generated = false;
+                        this.direct_prompt = false;
+                        this.processingTime = 0;  // Reset processing time
+                        this.query = '';
+
+                    } catch (error) {
+                        alert('Error creating pattern: ' + error.message);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
                 formatTimestamp(ts) {
                     return new Date(ts).toLocaleTimeString();
                 },
@@ -2836,12 +3045,10 @@
 
                 async loadAllDomains() {
                     try {
-                        // Get list of domains from the active engines
-                        const res = await fetch('/api/domains');
-                        const data = await res.json();
-                        const domainIds = data.domains || [];
+                        // Only load domains that belong to the current universe
+                        const domainIds = this.availableDomains || [];
 
-                        // Fetch details for each domain
+                        // Fetch details for each domain in the current universe
                         this.allDomains = await Promise.all(
                             domainIds.map(async (id) => {
                                 const detailRes = await fetch(`/api/domains/${id}`);
@@ -3242,18 +3449,44 @@
 
                 async loadDiagnostics() {
                     try {
-                        const res = await fetch('/api/diagnostics/summary');
+                        // Get diagnostics filtered by current universe's domains
+                        const domainIds = this.availableDomains.join(',');
+                        const url = domainIds
+                            ? `/api/diagnostics/health?domain_ids=${domainIds}`
+                            : '/api/diagnostics/health';
 
-                        if (!res.ok) {
-                            throw new Error('Failed to load diagnostics');
+                        // Load health check for current universe
+                        const healthRes = await fetch(url);
+                        if (!healthRes.ok) throw new Error('Failed to load health');
+                        const healthData = await healthRes.json();
+
+                        // Load search metrics
+                        const metricsUrl = domainIds
+                            ? `/api/diagnostics/metrics?domain_id=${this.availableDomains[0]}`
+                            : '/api/diagnostics/metrics';
+                        const metricsRes = await fetch(metricsUrl);
+                        const metricsData = metricsRes.ok ? await metricsRes.json() : null;
+
+                        // Load pattern health for each domain
+                        const patternHealth = {};
+                        for (const domainId of this.availableDomains) {
+                            try {
+                                const patternRes = await fetch(`/api/diagnostics/patterns/health?domain_id=${domainId}`);
+                                if (patternRes.ok) {
+                                    const patternData = await patternRes.json();
+                                    patternHealth[domainId] = patternData;
+                                }
+                            } catch (e) {
+                                console.error(`Failed to load pattern health for ${domainId}:`, e);
+                            }
                         }
 
-                        const data = await res.json();
                         this.diagnosticsData = {
-                            health: data.health,
-                            search_metrics: data.search_metrics,
-                            pattern_health: data.pattern_health,
-                            generated_at: data.generated_at
+                            health: healthData,
+                            search_metrics: metricsData,
+                            pattern_health: Object.keys(patternHealth).length > 0 ? patternHealth : null,
+                            generated_at: new Date().toISOString(),
+                            universe_id: this.currentUniverse
                         };
                     } catch (error) {
                         console.error('Failed to load diagnostics:', error);

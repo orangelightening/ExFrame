@@ -4,8 +4,7 @@
   "description": "Culinary knowledge and recipes",
   "version": "1.0.0",
   "created_at": "2026-01-06T00:00:00Z",
-  "updated_at": "2026-01-09T10:00:00Z",
-
+  "updated_at": "2026-01-20T21:18:13.154992",
   "plugins": [
     {
       "plugin_id": "generalist",
@@ -17,15 +16,27 @@
       "config": {
         "name": "Cooking",
         "keywords": [
-          "cook", "recipe", "bake", "chicken", "oven", "temperature",
-          "ingredients", "preparation", "technique", "method", "prepare"
+          "cook",
+          "recipe",
+          "bake",
+          "chicken",
+          "oven",
+          "temperature",
+          "ingredients",
+          "preparation",
+          "technique",
+          "method",
+          "prepare"
         ],
-        "categories": ["technique", "recipe", "cooking_method"],
-        "threshold": 0.30
+        "categories": [
+          "technique",
+          "recipe",
+          "cooking_method"
+        ],
+        "threshold": 0.3
       }
     }
   ],
-
   "specialists": [
     {
       "specialist_id": "generalist",
@@ -33,15 +44,32 @@
       "description": "General expert in cooking and recipes",
       "persona_plugin": "cooking_expert",
       "expertise_keywords": [
-        "cook", "recipe", "bake", "chicken", "oven", "temperature", "how", "what", "make",
-        "ingredients", "preparation", "technique", "method", "prepare", "time", "long"
+        "cook",
+        "recipe",
+        "bake",
+        "chicken",
+        "oven",
+        "temperature",
+        "how",
+        "what",
+        "make",
+        "ingredients",
+        "preparation",
+        "technique",
+        "method",
+        "prepare",
+        "time",
+        "long"
       ],
-      "expertise_categories": ["technique", "recipe", "cooking_method"],
-      "confidence_threshold": 0.30,
+      "expertise_categories": [
+        "technique",
+        "recipe",
+        "cooking_method"
+      ],
+      "confidence_threshold": 0.3,
       "response_template": "structured"
     }
   ],
-
   "enrichers": [
     {
       "module": "plugins.enrichers.llm_enricher",
@@ -49,17 +77,25 @@
       "enabled": true,
       "config": {
         "mode": "fallback",
-        "min_confidence": 0.30,
+        "min_confidence": 0.3,
         "model": "glm-4.7",
         "max_patterns": 3,
         "require_confirmation": true
       }
     }
   ],
-
-  "categories": ["technique", "recipe", "cooking_method", "ingredient_substitution"],
-  "tags": ["baking", "chicken", "quick", "healthy"],
-
+  "categories": [
+    "technique",
+    "recipe",
+    "cooking_method",
+    "ingredient_substitution"
+  ],
+  "tags": [
+    "baking",
+    "chicken",
+    "quick",
+    "healthy"
+  ],
   "ui_config": {
     "placeholder_text": "Type your cooking question here... (Press Enter to submit)",
     "example_queries": [
@@ -68,10 +104,9 @@
       "How long do I cook a 4lb chicken?",
       "What's a quick weeknight dinner?"
     ],
-    "icon": "🍳",
+    "icon": "\ud83c\udf73",
     "color": "#FF9800"
   },
-
   "links": {
     "related_domains": [],
     "imports_patterns_from": [],

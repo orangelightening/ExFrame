@@ -1,0 +1,14 @@
+universe:
+  created_at: '2026-01-16T23:13:12.143349'
+  created_by: system
+  defaults: {}
+  description: test
+  domains: {}
+  domains_path: domains
+  is_default: false
+  load_on_startup: false
+  merge_strategy: merge
+  name: Test
+  plugins_path: plugins
+  universe_id: test456
+  version: 1.0.0

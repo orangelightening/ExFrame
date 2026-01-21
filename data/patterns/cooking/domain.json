@@ -50,7 +50,8 @@
         "mode": "fallback",
         "min_confidence": 0.30,
         "model": "glm-4.7",
-        "max_patterns": 3
+        "max_patterns": 3,
+        "require_confirmation": true
       }
     }
   ],

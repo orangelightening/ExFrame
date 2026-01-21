@@ -1,0 +1,60 @@
+{
+  "domain_id": "psycho",
+  "domain_name": "Psychiatrist",
+  "description": "The wonderous nature of the human mind",
+  "version": "1.0.0",
+  "categories": [
+    "Normal, Bent, Twisted,"
+  ],
+  "tags": [
+    "psychology"
+  ],
+  "storage_path": "/app/data/patterns/psycho",
+  "pattern_format": "json",
+  "plugins": [
+    {
+      "plugin_id": "psychiatrist",
+      "name": "Doctor Twist",
+      "description": "",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "Doctor Twist",
+        "description": "",
+        "keywords": [
+          "twist",
+          "twirl",
+          "spin",
+          "crash"
+        ],
+        "categories": [],
+        "threshold": 0.6
+      }
+    }
+  ],
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "Doctor Twist",
+      "description": "",
+      "expertise_keywords": [
+        "twist",
+        "twirl",
+        "spin",
+        "crash"
+      ],
+      "expertise_categories": [],
+      "confidence_threshold": 0.6
+    }
+  ],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true
+  },
+  "created_at": "2026-01-21T03:17:06.743485",
+  "updated_at": "2026-01-21T03:28:02.166668",
+  "enrichers": []
+}

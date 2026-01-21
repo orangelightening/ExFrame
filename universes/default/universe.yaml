@@ -58,6 +58,21 @@ universe:
       priority: 99
       config_override: {}
 
+    exframe_methods:
+      enabled: true
+      priority: 8
+      config_override: {}
+
+    poetry_domain:
+      enabled: true
+      priority: 9
+      config_override: {}
+
+    psycho:
+      enabled: true
+      priority: 10
+      config_override: {}
+
   # Paths (relative to universe base)
   domains_path: domains
   plugins_path: plugins

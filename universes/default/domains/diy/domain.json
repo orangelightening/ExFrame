@@ -4,7 +4,7 @@
   "description": "Dynamically loaded domain: diy",
   "version": "1.0.0",
   "created_at": "2026-01-09T22:43:14.965287",
-  "updated_at": "2026-01-09T22:43:14.965290",
+  "updated_at": "2026-01-20T22:22:35.018768",
   "plugins": [
     {
       "plugin_id": "generalist",
@@ -15,26 +15,41 @@
       "enabled": true,
       "config": {
         "name": "DIY",
-        "keywords": ["diy", "build", "make", "repair", "fix"],
+        "keywords": [
+          "diy",
+          "build",
+          "make",
+          "repair",
+          "fix"
+        ],
         "categories": [],
-        "threshold": 0.25
+        "threshold": 0.25,
+        "description": "Use only assigned names when referring to other works."
       }
     }
   ],
   "specialists": [
     {
       "specialist_id": "generalist",
-      "name": "DIY Expert",
-      "description": "General expert for diy",
-      "persona_plugin": "diy_expert",
-      "expertise_keywords": [],
+      "name": "DIY",
+      "description": "Use only assigned names when referring to other works.",
+      "expertise_keywords": [
+        "diy",
+        "build",
+        "make",
+        "repair",
+        "fix"
+      ],
       "expertise_categories": [],
-      "confidence_threshold": 0.6,
-      "response_template": "structured"
+      "confidence_threshold": 0.25
     }
   ],
-  "categories": [],
-  "tags": [],
+  "categories": [
+    "Do it yourself"
+  ],
+  "tags": [
+    "Mr fix it"
+  ],
   "ui_config": {
     "placeholder_text": "Ask about DIY projects and repairs...",
     "example_queries": [
@@ -50,5 +65,6 @@
     "related_domains": [],
     "imports_patterns_from": [],
     "suggest_on_confidence_below": 0.3
-  }
+  },
+  "enrichers": []
 }

@@ -1,0 +1,2 @@
+2026-01-15 22:26:08,231 - {"timestamp": "2026-01-16T06:26:08.231677", "domain": "exframe_methods", "query": "What is a pattern?", "specialist": null, "patterns_found": 5, "confidence": 0.8300000000000001, "llm_used": true, "llm_response_type": ["llm_fallback"], "processing_time_ms": 9}
+2026-01-15 22:26:18,281 - {"timestamp": "2026-01-16T06:26:18.281601", "domain": "exframe_methods", "query": "What is a pattern?", "specialist": null, "patterns_found": 5, "confidence": 0.8300000000000001, "llm_used": true, "llm_response_type": ["llm_fallback"], "processing_time_ms": 9}

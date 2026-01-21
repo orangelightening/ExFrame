@@ -1,7 +1,7 @@
 # Query System Rewrite: Knowledge Dashboard Design Specification
 
-**Version:** 1.0 (DRAFT)
-**Status:** Ready for Discussion
+**Version:** 1.1 (APPROVED)
+**Status:** Approved for Implementation - Phase 1
 **Author:** EEFrame Product Team
 **Date:** 2025-01-15
 
@@ -457,8 +457,7 @@ first_aid       → Internet search (medical sites, Red Cross)
 
 **Impact:** UI complexity, state management
 
-**Recommendation:** Start with A, evaluate need for B
-
+**DECISION:** Option A - Only one extension per query (simpler) 
 ---
 
 ### Q2: Concurrent Query Sessions
@@ -470,8 +469,7 @@ first_aid       → Internet search (medical sites, Red Cross)
 
 **Impact:** UI complexity, state management
 
-**Recommendation:** Start with A, consider B for power users
-
+**DECISION:** Option A - Single query session (simpler, focused)
 ---
 
 ### Q3: Bulk Pattern Operations
@@ -482,8 +480,7 @@ first_aid       → Internet search (medical sites, Red Cross)
 - Import/export of patterns
 - Batch operations from admin interface
 
-**Recommendation:** Query portal is single-pattern workflow. Bulk operations are separate admin feature.
-
+**DECISION:** Query portal is single-pattern workflow. Bulk operations are separate admin feature (later phase).
 ---
 
 ### Q4: Confidence Boost Formula
@@ -496,8 +493,7 @@ first_aid       → Internet search (medical sites, Red Cross)
 
 **Impact:** Pattern quality signals, search ranking
 
-**Recommendation:** Start with A, evaluate after real-world usage
-
+**DECISION:** Option A - Fixed boost (+0.01 for simplicity, evaluate after real-world usage)
 ---
 
 ### Q5: User Roles & Permissions
@@ -510,8 +506,7 @@ first_aid       → Internet search (medical sites, Red Cross)
 
 **Impact:** Knowledge quality, community contribution
 
-**Recommendation:** Start with A (any authenticated user), monitor quality
-
+**DECISION:** Option A - Any authenticated user can create patterns (monitor quality, adjust if needed)
 ---
 
 ### Q6: Scale Considerations
@@ -523,31 +518,29 @@ first_aid       → Internet search (medical sites, Red Cross)
 - Search performance with many patterns
 - Duplicate pattern detection
 
-**Recommendation:** Discuss separately after base workflow is implemented
-
+**DECISION:** Defer scale discussion until after base workflow is implemented and tested.
 ---
 
 ## Success Metrics
 
-### User Engagement
-- Query submission rate (baseline measurement)
-- Extend search usage rate (target: 20-30% of queries)
-- Pattern creation rate (target: 5-10% of extended searches)
+**DECISION:** Defer complex metrics for initial implementation. Track only essential metrics below.
 
-### Quality Metrics
-- Average confidence of created patterns (target: > 0.80)
-- User satisfaction with extended results (target: > 4.0/5.0)
-- Pattern edit rate before acceptance (target: < 30%)
-
-### Performance Metrics
+### Essential Metrics (Phase 1-4)
 - Local query response time (target: < 500ms)
 - External search response time (target: < 3 seconds)
-- Pattern creation time (target: < 1 second)
+- Pattern creation success rate (basic tracking)
 
-### Knowledge Growth
-- New patterns per domain per week (target: 5-10)
-- Domain coverage (pattern count) growth rate
-- External search contribution to knowledge base
+### Deferred Metrics (Future Phase)
+- Query submission rate baseline
+- Extend search usage rate
+- Pattern creation rate
+- Average confidence of created patterns
+- User satisfaction scores
+- Pattern edit rate before acceptance
+- New patterns per domain per week
+- Domain coverage growth rate
+
+**Rationale:** Focus on getting the workflow working correctly before adding analytics complexity.
 
 ---
 
@@ -625,6 +618,7 @@ first_aid       → Internet search (medical sites, Red Cross)
 
 ---
 
-**Document Status:** DRAFT - Ready for Discussion
-**Last Updated:** 2025-01-15
-**Next Review:** Upon user feedback and scale discussion
+**Document Status:** APPROVED - Phase 1 Implementation Started
+**Last Updated:** 2026-01-15
+**Decisions Made:** All Q1-Q6 resolved, metrics simplified
+**Next Milestone:** Phase 1 Foundation (Week 1-2)

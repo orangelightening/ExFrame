@@ -1,469 +1,449 @@
-# EEFrame - Consolidated Context Recovery File
+# EEFrame - Context for Claude (AI Assistant)
 
-**Purpose**: Complete context for resuming work on the EEFrame project after refactoring.
-
-**Last Updated**: 2026-01-12
-**Status**: Docker Compose distribution ready, security fixes applied
-**Version**: 3.1.0
-
----
-
-## IMPORTANT - Current Session (2026-01-12)
-
-**Shell Issue**: CLI was broken after deleting `/tmp/ExFrame-test` directory. User needs to restart and resume.
-
-**When Resuming**: See `/home/peter/development/eeframe/context.md` for current state and next steps.
-
-**Key Tasks Completed This Session**:
-1. Fixed Domain Management page (now uses `/api/domains`)
-2. Updated README with clear Docker installation instructions
-3. Fixed security issue: removed `.env` from git tracking
-4. Pushed all changes to GitHub
-
-**Next Task**: Test fresh install from GitHub in new test directory (see context.md)
+**Purpose**: Complete context for resuming work on the EEFrame project.
+**Last Updated**: 2026-01-20
+**Status**: Semantic Search Fully Implemented - Ready for Release
+**Version**: 1.5.0
 
 ---
 
-## System Overview
+## CURRENT STATE (2026-01-20)
 
-**EEFrame** is now a unified framework consisting of three integrated systems:
+### Semantic Search Implementation - COMPLETE ✅
 
-1. **Generic Framework**: Domain-agnostic assistant with pluggable domains
-   - Unified architecture for any domain (OMV, Cooking, Python, etc.)
-   - Specialist/Collector pattern for extensibility
-   - FastAPI backend (port 3001)
-   - Supports multiple domains simultaneously
+Pure semantic search is now fully operational across all domains:
 
-2. **Expertise Scanner**: Pattern extraction and knowledge graph system
-   - Extracts patterns from any domain
-   - AI inbox workflow (GLM-4.7 → JSON → patterns)
-   - 6 domains with patterns (cooking, python, omv, diy, first_aid, gardening)
-   - FastAPI backend (port 8889), React frontend (port 5173)
+- **Implementation**: 100% semantic similarity (0% keyword component)
+- **Model**: all-MiniLM-L6-v2 (384-dimensional vectors)
+- **Coverage**: All 10 domains have 100% embedding coverage
+- **Scoring**: Cosine similarity (0-1 range) visible in traces
+- **Status**: Production ready
 
-3. **Docker Infrastructure**: Monitoring stack
-   - Prometheus (9090), Grafana (3001), Loki (3100), Promtail
-   - Auto-provisioned dashboards and datasources
+### Domain Embedding Coverage
 
-**Removed**: AI Communications system (three-way chat protocol) - no longer needed
+| Domain | Patterns | Embeddings | Coverage |
+|--------|----------|------------|----------|
+| binary_symmetry | 20 | 20 | ✅ 100% |
+| cooking | 32 | 32 | ✅ 100% |
+| diy | 10 | 10 | ✅ 100% |
+| exframe_methods | 26 | 26 | ✅ 100% |
+| first_aid | 3 | 3 | ✅ 100% |
+| gardening | 3 | 3 | ✅ 100% |
+| llm_consciousness | 12 | 12 | ✅ 100% |
+| poetry_domain | 13 | 13 | ✅ 100% |
+| psycho | 6 | 6 | ✅ 100% |
+| python | 6 | 6 | ✅ 100% |
+
+**Total**: 131 patterns, all with semantic embeddings
+
+### Recent Fixes (2026-01-20)
+
+1. **JSON Serialization Fix** - Convert numpy float32 to Python float
+   - Fixed in `generic_framework/knowledge/json_kb.py:404`
+   - Ensures semantic scores are JSON serializable
+
+2. **Query Bug Fix** - Fixed unpacking error in keyword-only search
+   - Fixed in `generic_framework/knowledge/json_kb.py:415-425`
+   - Corrected pattern/score unpacking for keyword results
+
+3. **Length Protection** - Pattern truncation for token limit
+   - Added in `generic_framework/core/embeddings.py:104-164`
+   - Warns when patterns exceed 256 tokens (all-MiniLM-L6-v2 limit)
+   - Prioritizes name + solution fields when truncating
 
 ---
 
-## Quick Start Commands
+## QUICK RECOVERY GUIDE
 
-### Generic Framework
+### What is EEFrame?
+
+**EEFrame** (ExFrame) is a domain-agnostic AI-powered knowledge management system with:
+- Universe-based architecture (portable knowledge environments)
+- Plugin-based pipeline (Router → Specialist → Enricher → Formatter)
+- Pattern-based knowledge representation
+- Pure semantic search using embeddings
+
+### How Semantic Search Works
+
+```
+Query → Encode to embedding (384-dim) → Compare with all pattern embeddings
+       → Rank by cosine similarity → Return top patterns with scores
+```
+
+**Key Characteristics**:
+- No keyword matching (100% semantic)
+- Scores 0-1 (higher = more semantically related)
+- Visible in traces with `relevance_source: "semantic"`
+- Whole document embedding (no chunking)
+
+### Example: Semantic Search Results
+
+Query: "How do I use a hammer?"
+
+| Pattern | Semantic Score | Source |
+|---------|---------------|--------|
+| How do I hammer in a nail? | 0.7007 | semantic |
+| How do I build a simple shelf? | 0.2882 | semantic |
+| Laying the Foundation: How to Build a Floor | 0.1542 | semantic |
+| Wall and Floor Construction Basics | 0.1314 | semantic |
+| Choosing and Installing DIY Flooring | 0.0912 | semantic |
+
+**Note**: "hammer in a nail" has highest semantic similarity to "use a hammer" even though the word "hammer" appears in both - the model understands the meaning, not just keywords.
+
+---
+
+## CRITICAL FILES
+
+### Semantic Search Implementation
+
+| File | Purpose | Key Changes |
+|------|---------|-------------|
+| `generic_framework/core/embeddings.py` | Embedding generation | Length protection, whole document encoding |
+| `generic_framework/core/hybrid_search.py` | Hybrid search engine | Pure semantic mode (semantic_weight=1.0) |
+| `generic_framework/knowledge/json_kb.py` | Knowledge base | Semantic search integration, JSON fix |
+| `generic_framework/assist/engine.py` | Query engine | Semantic scores in traces |
+
+### Design Documentation
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `rag-search-design.md` | Semantic search design | Complete, up-to-date |
+| `query-rewrite.md` | Knowledge Dashboard spec | Complete, awaiting implementation |
+| `query-todo.md` | Query system todos | Ready for implementation |
+
+---
+
+## SYSTEM ARCHITECTURE
+
+### Core Components
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    EEFRAME APPLICATION                       │
+├─────────────────────────────────────────────────────────────┤
+│  1. Universe Manager                                         │
+│     - Multi-universe support                                 │
+│     - Domain auto-discovery                                  │
+│     - Pattern storage (JSON files)                           │
+│                                                              │
+│  2. Query Pipeline                                           │
+│     - Specialist Router                                      │
+│     - Knowledge Base (JSON with semantic search)             │
+│     - Enrichers (LLM, related patterns, code)                │
+│     - Formatters (Markdown, JSON, HTML)                      │
+│                                                              │
+│  3. Semantic Search                                          │
+│     - Embedding service (all-MiniLM-L6-v2)                  │
+│     - Vector store (embeddings.json)                         │
+│     - Cosine similarity ranking                              │
+│                                                              │
+│  4. Web Dashboard                                            │
+│     - Query interface with semantic results                 │
+│     - Pattern browser with health indicators                │
+│     - Trace inspector for debugging                         │
+│     - Domain management                                      │
+│     - Diagnostics dashboard                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Plugin Architecture
+
+**Pipeline**: Query → Router → Specialist → Enrichers → Formatter → Response
+
+**Plugin Types**:
+1. **Router Plugins** - Determine query handling strategy
+2. **Specialist Plugins** - Domain expertise (3 methods: can_handle, process_query, format_response)
+3. **Knowledge Base Plugins** - Pattern storage (JSON, SQLite)
+4. **Enricher Plugins** - Response enhancement (LLM, related patterns, code generation)
+5. **Formatter Plugins** - Output format (Markdown, JSON, HTML, Slack)
+
+---
+
+## INSTALLATION & DEPLOYMENT
+
+### Prerequisites
+
+**Required**:
+- Docker Engine (official, NOT snap)
+- Docker Compose v2
+- Git
+
+**Optional** (for LLM features):
+- LLM API key (GLM, OpenAI, Anthropic, etc.)
+
+### Quick Start
 
 ```bash
-# Navigate to project
-cd /home/peter/development/eeframe
+# Clone repository
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
 
-# Activate virtual environment
-source venv/bin/activate
+# Configure environment (optional - for LLM features)
+cp .env.example .env
+nano .env  # Edit with your API key
 
-# Start Generic Framework API (port 3001)
-python -m generic_framework.api.app
+# Start application
+docker compose up -d
 
-# Access API docs
-# http://localhost:3001/docs
+# Access application
+# Main UI: http://localhost:3000
+# API Docs: http://localhost:3000/docs
+# Health: http://localhost:3000/health
 ```
 
-### Expertise Scanner
+### LLM Configuration (.env)
 
+**For GLM (z.ai) - RECOMMENDED**:
 ```bash
-# Navigate to expertise scanner
-cd /home/peter/development/eeframe/expertise_scanner
-
-# Start backend API (port 8889)
-python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8889 --reload
-
-# Start frontend (port 5173)
-cd frontend && npm run dev
+LLM_MODEL=glm-4.7
+OPENAI_API_KEY=your-glm-key-here
+OPENAI_BASE_URL=https://api.z.ai/api/anthropic
 ```
 
-### Monitoring Stack
-
+**For OpenAI GPT**:
 ```bash
-# Start Docker Compose stack
-docker-compose up -d
-
-# Access services
-# Prometheus: http://localhost:9090
-# Grafana: http://localhost:3001 (admin/admin)
-# Loki: http://localhost:3100
+LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
-**Access URLs**:
-- Generic Framework API Docs: http://localhost:3001/docs
-- Expertise Scanner API Docs: http://localhost:8889/docs
-- Expertise Scanner UI: http://localhost:5173
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3001
-
----
-
-## Generic Framework Details
-
-### Current Status
-- **Phase**: Refactored with OMV domain integration
-- **Domains**: OMV (5 specialists), Cooking (4 specialists), LLM Consciousness (2 specialists)
-- **Architecture**: Abstract base classes (Domain, Specialist, Collector, KnowledgeBase)
-- **Extensibility**: Factory pattern for dynamic domain registration
-
-### OMV Domain (New)
-
-**Location**: `generic_framework/domains/omv/`
-
-**Components**:
-- **Domain**: `OMVDomain` - Manages OMV server management
-- **Specialists** (5 total):
-  1. `StorageSpecialist` - Disk management, RAID, filesystems
-  2. `NetworkSpecialist` - Network configuration, interfaces
-  3. `ServiceSpecialist` - Service management, SMB, NFS, SSH
-  4. `PerformanceSpecialist` - CPU, memory, optimization
-  5. `SecuritySpecialist` - Permissions, access control
-- **Collectors** (3 total):
-  1. `OMVSSHCollector` - Direct SSH command execution
-  2. `OMVPrometheusCollector` - Metrics collection
-  3. `OMVLokiCollector` - Log aggregation
-
-**Usage**:
-```python
-from generic_framework.domains.omv import OMVDomain
-from generic_framework.core.domain import DomainConfig
-
-config = DomainConfig(
-    domain_id="omv",
-    domain_name="OpenMediaVault",
-    version="1.0",
-    description="Server management domain"
-)
-
-domain = OMVDomain(
-    config=config,
-    knowledge_base=kb,
-    omv_host="192.168.1.100",
-    prometheus_url="http://localhost:9090",
-    loki_url="http://localhost:3100"
-)
-
-await domain.initialize()
-specialist = domain.get_specialist_for_query("How do I configure storage?")
-result = await specialist.process_query("How do I configure storage?")
-```
-
-### Key Components
-
-- **FastAPI Backend**: Port 3001
-- **Core Interfaces**: `Domain`, `Specialist`, `Collector`, `KnowledgeBase`
-- **Domain Factory**: Dynamic domain registration
-- **Assistant Engine**: Generic query processing
-- **Knowledge Base**: JSON-based pattern storage
-
-### Critical Configuration
-
+**For Anthropic Claude**:
 ```bash
-# Generic Framework
-FRAMEWORK_PORT=3001
-FRAMEWORK_HOST=0.0.0.0
-
-# OMV Domain (if using)
-OMV_HOSTNAME=192.168.1.100
-OMV_PORT=22
-OMV_USERNAME=root
-OMV_PASSWORD=[password]
-
-# LLM (GLM-4.7)
-LLM_API_ENDPOINT=https://api.z.ai/api/coding/paas/v4/chat/completions
-LLM_API_KEY=[your-api-key]
-
-# Monitoring
-MONITORING_PROMETHEUS_URL=http://localhost:9090
-MONITORING_LOKI_URL=http://localhost:3100
+LLM_MODEL=claude-3-5-sonnet-20241022
+OPENAI_API_KEY=sk-ant-your-anthropic-api-key-here
+OPENAI_BASE_URL=https://api.anthropic.com/v1
 ```
 
 ---
 
-## Expertise Scanner Details
+## DOMAIN MANAGEMENT
 
-### Current Status
-- **Validated and Working**: All core functionality operational
-- **Domains Created**: cooking, python, omv, diy, first_aid, gardening
-- **Test Patterns**: 14 synthetic patterns with proper structure
-- **Pattern Relationships**: 22 edges (related, prerequisites, alternatives)
-- **AI Inbox**: Primary data source via GLM-4.7 generated JSON files
+### Current Domains
 
-### Key Components
-- **FastAPI Backend**: Port 8889
-- **React Frontend**: Port 5173 with Tailwind CSS v3
-- **Pattern Storage**: JSON files per domain in `data/patterns/{domain}/`
-- **Knowledge Graph**: Basic structure in `data/knowledge_graph/`
-- **AI Inbox**: Directory at `/home/peter/development/eeframe/pattern-inbox/`
-
-### Pattern Data Model
-
-```python
-class Pattern:
-    id: str                    # "{domain}_{number:03d}"
-    domain: str                # "cooking", "python", "omv", etc.
-    name: str                  # Short descriptive name
-    pattern_type: str          # "troubleshooting", "procedure", etc.
-    description: str           # What this pattern does
-    problem: str               # What problem does it solve?
-    solution: str              # How is it solved?
-    steps: List[str]           # Procedural steps
-    conditions: Dict[str, str] # Decision points
-    related_patterns: List[str] # IDs of related patterns
-    prerequisites: List[str]   # Must do these first
-    alternatives: List[str]    # Other ways to solve this
-    confidence: float          # 0-1 reliability score
-    sources: List[str]         # URLs, references
-    tags: List[str]            # Free-form labels
-    examples: List[str]        # Concrete examples
-```
-
-### AI Inbox Workflow
-1. External GLM-4.7 generates JSON files with structured data
-2. Saves to `/home/peter/development/eeframe/pattern-inbox/`
-3. User clicks "Process" in AI Inbox section (frontend `/batch` page)
-4. System converts JSON to patterns and stores in appropriate domain
-
----
-
-## Architecture Changes (Refactoring)
-
-### Before Refactoring
-- 4 independent systems (OMV Co-Pilot, Expertise Scanner, Generic Framework, AI Communications)
-- Port conflicts (OMV Co-Pilot and Generic Framework both on 3000)
-- Duplicate functionality (pattern-based assistance in both OMV and Generic Framework)
-- File-based message protocol (AI Communications)
-
-### After Refactoring
-- 3 integrated systems (Generic Framework, Expertise Scanner, Docker Infrastructure)
-- Clear port allocation (Framework: 3001, Scanner: 8889/5173)
-- Unified architecture (all domains use same interfaces)
-- Direct API communication (no message queue)
-
-### Benefits
-- **Reduced Duplication**: Single pattern-based assistance pipeline
-- **Improved Maintainability**: Clear separation of concerns
-- **Better Extensibility**: New domains follow same pattern
-- **Simplified Communication**: Direct API calls
-
----
-
-## State Machine Overview
-
-### Generic Framework States
-
-```
-IDLE → QUERY_RECEIVED → DOMAIN_SELECTION → SPECIALIST_SELECTION →
-CONTEXT_COLLECTION → PATTERN_MATCHING → CONFIDENCE_CALCULATION →
-PROMPT_BUILDING → LLM_GENERATION → RESPONSE_ASSEMBLY → IDLE
-```
-
-### Expertise Scanner States
-
-```
-IDLE → VALIDATING → SCRAPING → EXTRACTING → STORING → INDEXING → IDLE
-```
-
-**Alternative Inputs**: `json_input`, `text_input`, `manual_create` go directly to appropriate states
-
----
-
-## Critical Configuration Details
-
-### GLM API Endpoint (IMPORTANT)
-```
-https://api.z.ai/api/coding/paas/v4/chat/completions
-```
-**NOT** `open.bigmodel.com` - that's the Chinese platform endpoint.
-
-### SSL Certificate Issue
-GLM API requires `verify=False` in httpx.AsyncClient due to certificate verification failures.
-
-### OMV SSH Collection
-OMV 7.x restricts RPC API to localhost only. Primary collection method is SSH-based.
-
-### Port Configuration
-- Generic Framework API: 3001 (was 3000, now unified)
-- Expertise Scanner API: 8889
-- Expertise Scanner Frontend: 5173
-- Prometheus: 9090
-- Grafana: 3001
-- Loki: 3100
-
-### Python Version
-- **Development**: Python 3.13.7
-- **Minimum**: Python 3.11+
-- **Tested**: 3.13.7
-
----
-
-## Known Issues & Solutions
-
-### Issue 1: Port Conflict (RESOLVED)
-**Cause**: OMV Co-Pilot and Generic Framework both on port 3000
-**Solution**: Generic Framework now on port 3001
-
-### Issue 2: Duplicate Functionality (RESOLVED)
-**Cause**: Both OMV Co-Pilot and Generic Framework implemented pattern-based assistance
-**Solution**: OMV integrated into Generic Framework as a domain
-
-### Issue 3: AI Communications Overhead (RESOLVED)
-**Cause**: File-based message protocol added complexity
-**Solution**: Removed AI Communications system, using direct API calls
-
-### Issue 4: GLM API SSL Certificate Error
-**Cause**: Certificate verification fails
-**Solution**: Added `verify=False` to httpx.AsyncClient
-
-### Issue 5: GLM API Returns `reasoning_content` Instead of `content`
-**Cause**: GLM-4.7 response format difference
-**Solution**: Updated `_extract_content()` to handle `reasoning_content` field
-
-### Issue 6: AllRecipes Scraper Data Quality
-**Cause**: Rule-based extraction produces malformed patterns
-**Solution**: Deprioritized scraping in favor of AI-generated JSON inbox
-
-### Issue 7: Tailwind CSS v4 White Screen Issue
-**Cause**: Compatibility problem in Expertise Scanner frontend
-**Solution**: Downgraded to Tailwind CSS v3
-
----
-
-## Development Workflow
+| Domain | Patterns | Specialists | Categories |
+|--------|----------|-------------|------------|
+| binary_symmetry | 20 | 3 | symmetry, transformation, algorithm |
+| cooking | 32 | 1 | technique, recipe, cooking_method |
+| diy | 10 | 1 | building, flooring, tools |
+| exframe_methods | 26 | - | methodology, pattern, design |
+| first_aid | 3 | - | emergency, medical, treatment |
+| gardening | 3 | - | planting, care, harvesting |
+| llm_consciousness | 12 | 2 | failure_mode, monitoring, detection |
+| poetry_domain | 13 | - | poetic, literary, verse |
+| psycho | 6 | - | psychology, therapy, analysis |
+| python | 6 | 1 | language_feature, best_practice |
 
 ### Adding New Domains
 
-1. Create domain directory: `generic_framework/domains/mydomain/`
-2. Implement `Domain` subclass with abstract methods
-3. Implement `Specialist` subclasses for domain expertise
-4. Implement `Collector` subclasses for data collection
-5. Register domain in factory
-6. Add patterns to Expertise Scanner
+**Method 1: Web UI (Recommended)**
+1. Go to **Domains** tab
+2. Click **Create Domain**
+3. Fill in domain details and specialists
+4. Click **Save Domain**
 
-### Adding New Specialists to OMV Domain
+**Method 2: Code-Based**
+1. Create domain directory: `universes/{universe}/domains/{domain}/`
+2. Create `domain.json` with configuration
+3. Add `patterns.json` with patterns
+4. Generate embeddings: `POST /api/embeddings/generate?domain={domain}`
 
-1. Create specialist class in `generic_framework/domains/omv/specialists.py`
-2. Inherit from `OMVSpecialistBase`
-3. Implement `can_handle()` and `process_query()` methods
-4. Register in `OMVDomain.initialize()`
+---
 
-### Adding Knowledge Patterns
+## SEMANTIC SEARCH API
 
-1. **Manual**: Use Expertise Scanner UI form
-2. **AI Inbox**: Place JSON files in `pattern-inbox/`, process via UI
-3. **API**: `POST /api/patterns/` with full pattern data
-
-### Testing Changes
+### Check Embedding Status
 
 ```bash
-# Test Generic Framework
-curl -s http://localhost:3001/docs
-
-# Test Expertise Scanner
-curl -s http://localhost:8889/api/patterns/ | jq '.patterns | length'
-
-# Validate Expertise Scanner
-cd expertise_scanner && python3 scripts/validate_system.py
+curl http://localhost:3000/api/embeddings/status
 ```
 
----
+Returns embedding coverage per domain.
 
-## Documentation Structure
+### Generate Embeddings
 
-**Main Documentation** (`docs/` directory):
-- `01-system-architecture.md` - High-level overview
-- `02-domain-co-pilot-guide.md` - Generic Framework guide
-- `03-expertise-scanner-guide.md` - Pattern extraction guide
-- `04-state-machines.md` - State machine diagrams
-- `05-api-reference.md` - API endpoints
-- `06-pattern-catalog.md` - Pattern documentation
-- `07-development-guide.md` - Development workflow
-
-**Additional Resources**:
-- `reverse.md` - System reverse engineering report
-- `REFACTORING_SUMMARY.md` - Refactoring details and migration guide
-- `claude.md` - This file (context recovery)
-
-**Archived/Obsolete** (`archive/docs/`):
-- Old design documents and specifications
-- Kept for historical reference
-
----
-
-## Next Phase Options
-
-### High Priority
-1. **Port Configuration**: Verify all ports are correctly configured
-2. **Pattern Migration**: Convert OMV patterns from YAML to JSON
-3. **Frontend Consolidation**: Decide on single vs multiple frontends
-4. **Documentation**: Update all docs to reflect new architecture
-
-### Medium Priority
-5. **Add More Domains**: DIY, Gardening, First Aid from Expertise Scanner
-6. **Enhanced Monitoring**: Integrate Prometheus/Grafana/Loki
-7. **Pattern Learning**: Implement feedback-based pattern confidence adjustment
-8. **Knowledge Graph**: Enhance with Neo4j for complex queries
-
-### Low Priority
-9. **User Authentication**: Basic auth for web interfaces
-10. **Advanced Workflows**: Multi-step diagnostics, solution verification
-11. **Community Features**: Pattern sharing, collaborative editing
-12. **Production Hardening**: Security audit, HA configuration
-
----
-
-## File Structure
-
-```
-generic_framework/
-├── domains/
-│   ├── omv/                    # OMV server management domain (NEW)
-│   │   ├── __init__.py
-│   │   ├── domain.py
-│   │   ├── specialists.py
-│   │   └── collectors.py
-│   ├── cooking/
-│   │   ├── __init__.py
-│   │   ├── domain.py
-│   │   └── specialists.py
-│   └── llm_consciousness/
-│       ├── __init__.py
-│       ├── domain.py
-│       └── specialists.py
-├── core/
-│   ├── domain.py
-│   ├── specialist.py
-│   ├── collector.py
-│   ├── knowledge_base.py
-│   └── factory.py
-├── api/
-│   └── app.py
-└── assist/
-    └── engine.py
+```bash
+curl -X POST "http://localhost:3000/api/embeddings/generate?domain={domain}"
 ```
 
----
+Generates embeddings for all patterns in a domain.
 
-## Verification Checklist
+### Adjust Search Weights (Advanced)
 
-- [x] AI Communications directory deleted
-- [x] OMV domain created with all components
-- [x] 5 OMV specialists implemented
-- [x] 3 OMV collectors implemented
-- [x] Module exports configured
-- [x] reverse.md updated with refactoring details
-- [x] REFACTORING_SUMMARY.md created
-- [x] README.md updated
-- [x] claude.md updated
-- [ ] docs/01-system-architecture.md updated
-- [ ] Port configuration verified
-- [ ] Pattern migration completed
-- [ ] Frontend consolidation completed
+```bash
+curl -X POST http://localhost:3000/api/embeddings/weights \
+  -H "Content-Type: application/json" \
+  -d '{"semantic": 1.0, "keyword": 0.0}'
+```
+
+**Current setting**: semantic=1.0, keyword=0.0 (pure semantic)
 
 ---
 
-**Document Version**: 3.0.0 (Refactored)  
-**Based on**: Previous claude.md with refactoring updates  
-**Implementation Status**: Generic Framework operational with OMV domain, Expertise Scanner operational, Docker Infrastructure ready
+## TROUBLESHOOTING
+
+### Semantic Search Not Working
+
+**Symptom**: Results show `relevance_source: "keyword"` instead of "semantic"
+
+**Causes**:
+1. Embeddings not generated for domain
+2. Vector store not loaded
+3. Model not loaded
+
+**Solutions**:
+1. Generate embeddings: `POST /api/embeddings/generate?domain={domain}`
+2. Restart API server to reload vector store
+3. Check logs for model loading errors
+
+### "Object of type float32 is not JSON serializable"
+
+**Status**: FIXED (2026-01-20)
+
+If you see this error, the fix has been applied. Restart the server:
+```bash
+docker compose restart
+```
+
+### Pattern Truncation Warnings
+
+**Symptom**: Logs show warnings about patterns exceeding token limit
+
+**Meaning**: Some patterns are >256 tokens and being truncated
+
+**Impact**: Truncated patterns use only name + solution fields
+
+**Solution**: Review and shorten large patterns, or accept truncation
+
+---
+
+## DESIGN DOCUMENTATION
+
+### Semantic Search Design
+
+**Document**: `rag-search-design.md`
+
+**Key Sections**:
+- Architecture overview (search flow)
+- Component details (EmbeddingService, VectorStore, HybridSearcher)
+- Configuration (model, weights, thresholds)
+- Search behavior examples
+- Performance characteristics
+- Monitoring & debugging
+
+### Query System Redesign
+
+**Document**: `query-rewrite.md`
+
+**Philosophy**: "The query position is a knowledge dashboard where Responsible Agents (human domain experts) directly accept AI-generated knowledge into curated domains."
+
+**Key Principle**: User acceptance IS the certification. No separate "candidate → certified" workflow.
+
+**Status**: Design complete, implementation pending
+
+---
+
+## NEXT STEPS
+
+### Immediate: Testing Phase
+
+User is conducting testing of pure semantic search:
+- Evaluate semantic similarity quality
+- Identify patterns that rank incorrectly
+- Note gaps in coverage
+- Determine if chunking is needed
+
+### Future Enhancements (Design Doc Ready)
+
+**From rag-search-design.md**:
+1. Feedback & Learning (implicit/explicit feedback, usage decay)
+2. Dynamic Weight Adjustment (adaptive semantic/keyword weights)
+3. Auto-Embedding on Pattern Change
+4. Pattern Discovery & Clustering
+5. Fine-tuning Embedding Model
+
+**From query-rewrite.md**:
+- Knowledge Dashboard UI implementation (4 phases, 8 weeks)
+- External search integration (local_docs, web_search)
+- Pattern acceptance workflow (direct creation, no intermediate state)
+
+### Current Known Limitations
+
+1. No feedback loop (pattern relevance doesn't improve with use)
+2. Static embeddings (not updated when patterns modified)
+3. Fixed thresholds (min_semantic_score configurable but static)
+4. No personalization (all users get same results)
+5. Embedding regeneration is manual process
+6. Some patterns exceed token limit (truncation warnings in logs)
+
+---
+
+## DEVELOPMENT NOTES
+
+### Pattern Encoding Strategy
+
+**Current**: Whole document embedding (no chunking)
+
+**Fields Combined** (in priority order):
+1. Name (always included)
+2. Solution (always included)
+3. Description (if space permits)
+4. Problem (if space permits)
+5. Origin query (if space permits)
+6. Tags (if space permits)
+
+**Token Limit**: 256 tokens (all-MiniLM-L6-v2 limit)
+**Estimation**: 1 token ≈ 4 characters
+
+**Truncation Strategy**: If pattern exceeds limit:
+1. Issue warning in logs
+2. Keep name + solution[:1500] only
+3. Drop secondary fields
+
+### Stop Words Filtered from Queries
+
+These words are removed during query processing:
+- Articles: a, an, the
+- Verbs: is, are, was, were, be, been, being, have, has, had, do, does, did, will, would, could, should, may, might
+- Pronouns: what, which, who, where, when, why, how, there, here, this, that, these, those
+- Prepositions: for, of, with, by, from, in, on, at, to
+- Conjunctions: and, or, but, if, because, as, until, while
+- Common query words: type, types, like, just, some, more, much, many
+
+---
+
+## GITHUB STATUS
+
+**Repository**: https://github.com/orangelightening/ExFrame.git
+**Working Directory**: `/home/peter/development/eeframe`
+**Current Branch**: main
+**Status**: Development changes pending commit
+
+---
+
+## DOCUMENTATION INDEX
+
+### Main Documentation
+- **README.md** - Project overview, installation, API reference
+- **claude.md** - This file (context recovery)
+- **context.md** - Detailed project context
+- **CHANGELOG.md** - Version history
+
+### Design Documents
+- **rag-search-design.md** - Semantic search implementation
+- **query-rewrite.md** - Knowledge Dashboard specification
+- **query-todo.md** - Query system implementation todos
+
+### Architecture Documentation
+- **PLUGIN_ARCHITECTURE.md** - Plugin development guide
+- **EXTENSION_POINTS.md** - Extension point reference
+
+### Historical Documentation (Archive)
+- **reverse.md** - System reverse engineering report
+- **REFACTORING_SUMMARY.md** - Refactoring details
+- **CONSOLIDATION_*.md** - Phase consolidation reports
+
+---
+
+**Last Updated**: 2026-01-20
+**Status**: Semantic search complete, user testing phase
+**Next Action**: Await user testing feedback, then commit

@@ -37,7 +37,7 @@
     "domain": "python",
     "created_at": "2026-01-06T04:34:38.244838",
     "updated_at": "2026-01-06T04:34:38.244843",
-    "times_accessed": 0,
+    "times_accessed": 2,
     "user_rating": null
   },
   {
@@ -75,7 +75,7 @@
     "domain": "python",
     "created_at": "2026-01-06T04:34:38.244845",
     "updated_at": "2026-01-06T04:34:38.244847",
-    "times_accessed": 0,
+    "times_accessed": 2,
     "user_rating": null
   },
   {
@@ -113,7 +113,7 @@
     "domain": "python",
     "created_at": "2026-01-06T04:34:38.244849",
     "updated_at": "2026-01-06T04:34:38.244850",
-    "times_accessed": 0,
+    "times_accessed": 2,
     "user_rating": null
   },
   {
@@ -146,7 +146,7 @@
     "domain": "python",
     "created_at": "2026-01-06T04:34:38.244852",
     "updated_at": "2026-01-06T04:34:38.244854",
-    "times_accessed": 0,
+    "times_accessed": 2,
     "user_rating": null
   },
   {
@@ -182,7 +182,7 @@
     "domain": "python",
     "created_at": "2026-01-06T04:34:38.244855",
     "updated_at": "2026-01-06T04:34:38.244857",
-    "times_accessed": 0,
+    "times_accessed": 2,
     "user_rating": null
   },
   {
@@ -215,7 +215,33 @@
     "domain": "python",
     "created_at": "2026-01-06T04:34:38.244858",
     "updated_at": "2026-01-06T04:34:38.244860",
-    "times_accessed": 0,
+    "times_accessed": 2,
     "user_rating": null
+  },
+  {
+    "id": "python_97cd8bd8",
+    "pattern_id": "python_97cd8bd8",
+    "name": "Test Pattern with Code",
+    "domain": "python",
+    "problem": "How to create a pattern with executable code?",
+    "solution": "Use the POST /api/patterns endpoint with a code field",
+    "description": "A test pattern to verify code storage works",
+    "pattern_type": "knowledge",
+    "confidence": 0.9,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-21T18:34:42.866826Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "test",
+      "code"
+    ],
+    "created_at": "2026-01-21T18:34:42.866840",
+    "times_accessed": 2,
+    "code": "def hello_world():\n    print(\"Hello, World!\")\n    return True",
+    "updated_at": "2026-01-21T18:34:42.866840"
   }
 ]

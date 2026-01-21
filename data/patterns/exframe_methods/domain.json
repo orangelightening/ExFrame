@@ -1,0 +1,95 @@
+{
+  "domain_id": "exframe_methods",
+  "domain_name": "EEFrame Guide",
+  "description": "Learn how to use EEFrame - self-documenting patterns",
+  "version": "1.0.0",
+  "created_at": "2026-01-12T00:00:00Z",
+  "updated_at": "2026-01-12T00:00:00Z",
+
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "EEFrame Guide",
+      "description": "Expert in EEFrame usage and features",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "EEFrame",
+        "keywords": [
+          "how", "what", "where", "when", "why", "use", "create", "find", "search",
+          "pattern", "domain", "query", "survey", "universe", "start", "begin", "help",
+          "eeframe", "system", "interface", "navigate", "understand", "learn"
+        ],
+        "categories": ["getting_started", "features", "how_to", "concepts"],
+        "threshold": 0.25
+      }
+    }
+  ],
+
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "EEFrame Guide",
+      "description": "Expert in EEFrame usage and features",
+      "expertise_keywords": [
+        "how", "what", "where", "when", "why", "use", "create", "find", "search",
+        "pattern", "domain", "query", "survey", "universe", "start", "begin", "help",
+        "eeframe", "system", "interface", "navigate", "understand", "learn",
+        "question", "problem", "solve", "answer", "ask"
+      ],
+      "expertise_categories": ["getting_started", "features", "how_to", "concepts", "troubleshooting"],
+      "confidence_threshold": 0.25,
+      "response_template": "structured"
+    }
+  ],
+
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMFallbackEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "fallback",
+        "min_confidence": 0.30,
+        "model": "glm-4.7",
+        "max_patterns": 5,
+        "research_strategy": {
+          "type": "document",
+          "base_path": "/home/peter/development/eeframe",
+          "documents": [
+            {"type": "file", "path": "user-guide.md"},
+            {"type": "file", "path": "context.md"},
+            {"type": "file", "path": "README.md"},
+            {"type": "file", "path": "generic_framework/frontend/index.html"}
+          ],
+          "chunk_size": 500,
+          "chunk_overlap": 100
+        }
+      }
+    }
+  ],
+
+  "categories": ["getting_started", "features", "how_to", "concepts", "troubleshooting"],
+  "tags": ["help", "tutorial", "guide", "documentation", "learn"],
+
+  "ui_config": {
+    "placeholder_text": "How can I help you learn EEFrame? (Press Enter to submit)",
+    "example_queries": [
+      "How do I ask a question?",
+      "What is a pattern?",
+      "How do I create a domain?",
+      "What is the Surveyor?",
+      "How do I get started?"
+    ],
+    "icon": "📚",
+    "color": "#4CAF50",
+    "is_default": true
+  },
+
+  "links": {
+    "related_domains": [],
+    "imports_patterns_from": [],
+    "suggest_on_confidence_below": 0.25
+  }
+}

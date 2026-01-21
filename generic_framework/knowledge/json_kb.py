@@ -114,11 +114,12 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         # Initialize embedding service (may be None if not available)
         self.embedding_service = get_embedding_service()
 
-        # Hybrid search configuration
+        # Hybrid search configuration - PURE SEMANTIC SEARCH
+        # No keyword component - search is based entirely on semantic similarity
         self.hybrid_config = HybridSearchConfig(
-            semantic_weight=0.5,
-            keyword_weight=0.5,
-            min_semantic_score=0.0,  # Allow any semantic match to be considered
+            semantic_weight=1.0,  # 100% semantic
+            keyword_weight=0.0,   # 0% keyword
+            min_semantic_score=0.0,
             min_keyword_score=0
         )
 
@@ -161,6 +162,62 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         if self._hybrid_searcher:
             self._hybrid_searcher.set_config(self.hybrid_config)
         print(f"[KB] Updated weights: semantic={self.hybrid_config.semantic_weight:.2f}, keyword={self.hybrid_config.keyword_weight:.2f}")
+
+    async def _update_pattern_embedding(self, pattern: Dict[str, Any], pattern_id: str) -> None:
+        """
+        Generate or update embedding for a single pattern.
+
+        Called automatically when patterns are created or updated.
+        Fails gracefully if embedding service is unavailable.
+        """
+        if not self.embedding_service or not self.embedding_service.is_available:
+            print(f"[KB] Embedding service not available, skipping auto-embed for pattern: {pattern_id}")
+            return
+
+        try:
+            # Ensure model is loaded (lazy load)
+            if not self.embedding_service.is_loaded:
+                print(f"[KB] Loading embedding model for auto-embed...")
+                self.embedding_service.load_model()
+
+            # Generate embedding for the pattern
+            embedding = self.embedding_service.encode_pattern(pattern)
+
+            # Store in vector store
+            self.vector_store.set(pattern_id, embedding)
+
+            # Persist to disk
+            self.vector_store.save()
+
+            print(f"[KB] Auto-embedded pattern: {pattern_id}")
+
+        except Exception as e:
+            # Don't fail the pattern operation if embedding fails
+            print(f"[KB] WARNING: Failed to auto-embed pattern {pattern_id}: {e}")
+
+    async def _remove_pattern_embedding(self, pattern_id: str) -> None:
+        """
+        Remove embedding for a deleted pattern.
+
+        Called automatically when patterns are deleted.
+        Fails gracefully if embedding service is unavailable.
+        """
+        if not self.vector_store.has(pattern_id):
+            # No embedding exists, nothing to remove
+            return
+
+        try:
+            # Remove from vector store
+            self.vector_store.remove(pattern_id)
+
+            # Persist to disk
+            self.vector_store.save()
+
+            print(f"[KB] Removed embedding for deleted pattern: {pattern_id}")
+
+        except Exception as e:
+            # Don't fail the delete operation if embedding removal fails
+            print(f"[KB] WARNING: Failed to remove embedding for {pattern_id}: {e}")
 
     async def generate_embeddings(self) -> Dict[str, str]:
         """
@@ -272,13 +329,16 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
             raise ValueError(f"Invalid JSON in patterns file: {e}")
 
     async def save_pattern(self, pattern: Dict[str, Any]) -> None:
-        """Save a pattern to the JSON file."""
+        """Save a pattern to the JSON file and generate embedding."""
         self._patterns.append(pattern)
         # Use same key priority as load_patterns: pattern_id -> id -> name
         key = pattern.get('pattern_id') or pattern.get('id') or pattern.get('name', '')
         if key:
             self._pattern_index[key] = pattern
         await self._persist()
+
+        # Auto-embed: Generate embedding for the new pattern
+        await self._update_pattern_embedding(pattern, key)
 
     async def _persist(self) -> None:
         """Persist patterns to file."""
@@ -395,7 +455,15 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
                 keyword_scores=keyword_scores,
                 top_k=limit
             )
-            return [r.pattern for r in results]
+            # Add semantic scores to patterns for trace visibility
+            enriched_patterns = []
+            for r in results:
+                pattern_copy = r.pattern.copy()
+                # Convert numpy float32 to Python float for JSON serialization
+                pattern_copy['_semantic_score'] = float(round(r.semantic_score, 4))
+                pattern_copy['_relevance_source'] = 'semantic'
+                enriched_patterns.append(pattern_copy)
+            return enriched_patterns
         else:
             print(f"  [SEARCH] Using keyword-only search")
             # Convert to tuples for weighted_random_select
@@ -404,7 +472,17 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
                 for p in filtered_patterns
             ]
             selected = weighted_random_select(scored_patterns, count=limit)
-            return selected
+            # Add scores to patterns for trace visibility
+            # weighted_random_select returns a list of patterns, not tuples
+            enriched_patterns = []
+            for p in selected:
+                pattern_copy = p.copy()
+                # Get the score from the scored_patterns
+                score = next((s for pat, s in scored_patterns if pat is p), 0)
+                pattern_copy['_keyword_score'] = score
+                pattern_copy['_relevance_source'] = 'keyword'
+                enriched_patterns.append(pattern_copy)
+            return enriched_patterns
 
     async def get_by_id(self, pattern_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -512,7 +590,7 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         return pattern['id']
 
     async def update_pattern(self, pattern_id: str, updates: Dict[str, Any]) -> None:
-        """Update an existing pattern."""
+        """Update an existing pattern and regenerate embedding."""
         pattern = self._pattern_index.get(pattern_id)
         if not pattern:
             raise ValueError(f"Pattern not found: {pattern_id}")
@@ -523,8 +601,11 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
 
         await self._persist()
 
+        # Auto-embed: Regenerate embedding for the updated pattern
+        await self._update_pattern_embedding(pattern, pattern_id)
+
     async def delete_pattern(self, pattern_id: str) -> None:
-        """Delete a pattern."""
+        """Delete a pattern and remove its embedding."""
         pattern = self._pattern_index.get(pattern_id)
         if not pattern:
             raise ValueError(f"Pattern not found: {pattern_id}")
@@ -532,6 +613,9 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         self._patterns.remove(pattern)
         del self._pattern_index[pattern_id]
         await self._persist()
+
+        # Auto-embed: Remove embedding for the deleted pattern
+        await self._remove_pattern_embedding(pattern_id)
 
     async def record_feedback(
         self,
@@ -589,20 +673,6 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
             await self.load_patterns()
 
         return self._patterns[:limit]
-
-    def get_all_categories(self) -> List[str]:
-        """Get all categories."""
-        if not self._loaded:
-            return []
-
-        categories = set()
-        for p in self._patterns:
-            if 'pattern_type' in p:
-                categories.add(p['pattern_type'])
-            if 'tags' in p:
-                categories.update(p['tags'])
-
-        return sorted(list(categories))
 
     def get_pattern_by_id(self, pattern_id: str) -> Optional[Dict[str, Any]]:
         """Get a specific pattern by its ID."""

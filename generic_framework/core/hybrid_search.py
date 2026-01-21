@@ -179,12 +179,20 @@ class HybridSearcher:
         # Sort by combined score (descending)
         results.sort(key=lambda r: r.combined_score, reverse=True)
 
-        # Log results
-        print(f"[HYBRID] Query: '{query[:50]}...'")
-        print(f"[HYBRID] Weights: semantic={self.config.semantic_weight:.2f}, keyword={self.config.keyword_weight:.2f}")
-        print(f"[HYBRID] Results: {len(results)} patterns matched")
-        for i, r in enumerate(results[:5], 1):
-            print(f"  {i}. {r.pattern.get('name', '?')[:30]}... (combined={r.combined_score:.3f}, kw={r.keyword_score}, sem={r.semantic_score:.3f})")
+        # Log results - simplified for pure semantic search
+        print(f"[SEMANTIC] Query: '{query[:50]}...'")
+        if self.config.semantic_weight == 1.0:
+            # Pure semantic search - cleaner output
+            print(f"[SEMANTIC] Mode: PURE SEMANTIC (100% semantic similarity)")
+            print(f"[SEMANTIC] Results: {len(results)} patterns matched")
+            for i, r in enumerate(results[:5], 1):
+                print(f"  {i}. {r.pattern.get('name', '?')[:35]}... (similarity={r.semantic_score:.4f})")
+        else:
+            # Hybrid mode - show both scores
+            print(f"[SEMANTIC] Mode: HYBRID (semantic={self.config.semantic_weight:.0%}, keyword={self.config.keyword_weight:.0%})")
+            print(f"[SEMANTIC] Results: {len(results)} patterns matched")
+            for i, r in enumerate(results[:5], 1):
+                print(f"  {i}. {r.pattern.get('name', '?')[:30]}... (combined={r.combined_score:.3f}, sem={r.semantic_score:.3f})")
 
         return results[:top_k]
 

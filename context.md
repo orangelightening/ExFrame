@@ -1,1357 +1,491 @@
 # ExFrame Project Context
 
-**Date**: 2026-01-12
+**Date**: 2026-01-20
 **Working Directory**: `/home/peter/development/eeframe`
+**Status**: Semantic Search Fully Implemented - Ready for Release
+**Version**: 1.5.0
 
 ---
 
-## Current Focus: Autonomous Learning System
+## EXECUTIVE SUMMARY
 
-### Primary Goal
+ExFrame is a domain-agnostic AI-powered knowledge management system featuring:
+- **Universe Architecture**: Complete isolation and portability of knowledge
+- **Plugin Pipeline**: Router → Specialist → Enricher → Formatter
+- **Pure Semantic Search**: 100% semantic similarity using embeddings
+- **Pattern-Based Knowledge**: Structured representation with relationships
 
-Build a **robust autonomous learning and certification system** for ExFrame that can:
-1. Scrape web sources autonomously
-2. Extract knowledge patterns
-3. Certify patterns through **5-judge AI panel**
-4. Store validated expertise
-5. **Include hooks for future Research Generator**
+### Current Status: Production Ready ✅
 
-### Strategy: Single Domain First
-
-**Start with ONE domain** (e.g., Cooking or Python) to perfect the system before expanding.
-
-**Why single domain?**
-- Faster iteration and validation
-- Easier to measure expertise quality
-- Simplifies debugging and risk assessment
-- Proves the concept before scaling
+Semantic search is fully operational across all 10 domains with 100% embedding coverage.
 
 ---
 
-## ExFrame Hierarchy (Spatial Confirmation)
+## CURRENT STATE (2026-01-20)
+
+### Semantic Search Implementation
+
+Pure semantic search using SentenceTransformers:
+
+| Setting | Value |
+|---------|-------|
+| **Model** | all-MiniLM-L6-v2 |
+| **Vector Dimensions** | 384 |
+| **Similarity Metric** | Cosine similarity |
+| **Semantic Weight** | 100% |
+| **Keyword Weight** | 0% |
+| **Coverage** | All 10 domains (131 patterns) |
+
+### Domain Status
+
+| Domain | Patterns | Embeddings | Status |
+|--------|----------|------------|--------|
+| binary_symmetry | 20 | 20 | ✅ Semantic |
+| cooking | 32 | 32 | ✅ Semantic |
+| diy | 10 | 10 | ✅ Semantic |
+| exframe_methods | 26 | 26 | ✅ Semantic |
+| first_aid | 3 | 3 | ✅ Semantic |
+| gardening | 3 | 3 | ✅ Semantic |
+| llm_consciousness | 12 | 12 | ✅ Semantic |
+| poetry_domain | 13 | 13 | ✅ Semantic |
+| psycho | 6 | 6 | ✅ Semantic |
+| python | 6 | 6 | ✅ Semantic |
+
+### Recent Fixes (2026-01-20)
+
+1. **JSON Serialization** - Fixed numpy float32 to Python float conversion
+2. **Query Bug** - Fixed unpacking error in keyword-only search path
+3. **Length Protection** - Added pattern truncation warnings and strategies
+
+---
+
+## SEMANTIC SEARCH ARCHITECTURE
+
+### Search Flow
+
+```
+Query Input
+    ↓
+Preprocessing (lowercase, remove stop words)
+    ↓
+Encode to 384-dim embedding (all-MiniLM-L6-v2)
+    ↓
+Compare with all pattern embeddings (cosine similarity)
+    ↓
+Rank by similarity score (0-1)
+    ↓
+Return top patterns with scores
+```
+
+### Key Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| EmbeddingService | `core/embeddings.py` | Generate embeddings, encode patterns |
+| VectorStore | `core/embeddings.py` | Persist embeddings to JSON |
+| HybridSearcher | `core/hybrid_search.py` | Combine semantic + keyword scores |
+| JSONKnowledgeBase | `knowledge/json_kb.py` | Search integration |
+
+### Pattern Encoding Strategy
+
+**Whole document embedding** (no chunking):
+
+1. **High-priority fields** (always included):
+   - Name
+   - Solution
+
+2. **Secondary fields** (included if space permits):
+   - Description
+   - Problem
+   - Origin query
+   - Tags
+
+3. **Token limit**: 256 tokens (all-MiniLM-L6-v2 constraint)
+4. **Estimation**: 1 token ≈ 4 characters
+5. **Truncation**: If exceeds limit, keep name + solution[:1500] only
+
+---
+
+## SYSTEM ARCHITECTURE
+
+### Core Pipeline
+
+```
+Query → Router → Specialist → Knowledge Base → Enrichers → Formatter → Response
+```
+
+### Plugin Architecture
+
+| Plugin Type | Interface | Purpose |
+|-------------|-----------|---------|
+| Router | RouterPlugin | Determine query handling strategy |
+| Specialist | SpecialistPlugin | Domain expertise (can_handle, process_query, format_response) |
+| Knowledge Base | KnowledgeBasePlugin | Pattern storage and retrieval |
+| Enricher | EnricherPlugin | Response enhancement (LLM, related patterns, code) |
+| Formatter | FormatterPlugin | Output format control |
+
+### Universe Hierarchy
 
 ```
 MULTIVERSE
     │
-    │   Collection of isolated Universes
-    │
-    └── UNIVERSE
+    └── UNIVERSE (e.g., "production", "testing")
         │
-        │   Complete, self-contained knowledge environment
-        │   (e.g., "production", "testing", "research", "customer_A")
-        │
-        └── NEIGHBOURHOOD (NEW)
+        └── DOMAIN (e.g., "cooking", "python")
             │
-            │   Logical grouping of related Domains
-            │   (e.g., "culinary_arts", "technical_skills", "diy_home")
-            │
-            └── DOMAIN
-                │
-                │   Area of expertise
-                │   (e.g., "cooking", "python", "gardening", "woodworking")
-                │
-                └── PATTERNS
-                    │
-                    │   Knowledge units
-                    │   (individual recipes, code patterns, techniques)
-```
-
-### Level Definitions
-
-| Level | Purpose | Examples | Contains |
-|-------|---------|----------|----------|
-| **Multiverse** | All Universes in system | Default installation | Multiple Universes |
-| **Universe** | Complete knowledge environment | `production`, `testing`, `research` | Neighbourhoods |
-| **Neighbourhood** | **Dynamic filter across domains** | User-defined: "baking under 30 min" | Filtered patterns from multiple domains |
-| **Domain** | Area of expertise | `cooking`, `python`, `gardening` | Patterns |
-| **Patterns** | Knowledge units | `recipe_001`, `list_comprehension` | Knowledge |
-
-### Neighbourhood: User-Defined Filter (CRITICAL CONCEPT)
-
-**Definition**: A **Neighbourhood** is a dynamic, user-defined filter that spans multiple domains to find patterns matching specific criteria.
-
-**NOT** a static grouping of domains. Instead:
-- The Surveyor defines a filter/criteria (e.g., "baking recipes under 30 minutes")
-- The system searches across ALL domains in the universe
-- Patterns matching the criteria are included in the survey
-- Enables cross-cutting surveys without rigid domain boundaries
-
-**Examples**:
-| Neighbourhood Definition | Matches From |
-|------------------------|--------------|
-| "baking recipes under 30 minutes" | cooking, baking, dessert domains |
-| "machine learning model evaluation" | python, data_science, ML domains |
-| "authentication security best practices" | webdev, security, backend domains |
-
-**Why this approach?**
-- Flexible: Define surveys by *what you want*, not *where it lives*
-- Cross-domain: Finds related patterns across domain boundaries
-- Adaptive: As new domains are added, neighbourhoods automatically include matching content
-
-**Domain vs Neighbourhood**:
-- **Domain Survey**: "I want everything from the cooking domain"
-- **Neighbourhood Survey**: "I want all quick recipes across ALL cooking-related domains"
-
-### Example Hierarchy
-
-```
-Multiverse: ExFrame Installation
-│
-└── Universe: production
-    │
-    ├── Neighbourhood: culinary_arts
-    │   ├── Domain: cooking
-    │   │   └── Patterns: 150 recipes
-    │   ├── Domain: baking
-    │   │   └── Patterns: 80 techniques
-    │   └── Domain: grilling
-    │       └── Patterns: 45 methods
-    │
-    ├── Neighbourhood: technical_skills
-    │   ├── Domain: python
-    │   │   └── Patterns: 200 code patterns
-    │   ├── Domain: javascript
-    │   │   └── Patterns: 180 code patterns
-    │   └── Domain: bash
-    │       └── Patterns: 60 scripts
-    │
-    └── Neighbourhood: home_maintenance
-        ├── Domain: woodworking
-        │   └── Patterns: 90 techniques
-        ├── Domain: gardening
-        │   └── Patterns: 70 tips
-        └── Domain: diy
-            └── Patterns: 120 projects
-```
-
-### Surveyor Scope
-
-Surveyor can operate at different hierarchy levels:
-
-| Survey Level | Target | Example |
-|--------------|--------|---------|
-| **Domain Survey** | Single domain | "Learn cooking recipes" |
-| **Neighbourhood Survey** | Multiple related domains | "Learn culinary_arts (cooking + baking + grilling)" |
-| **Universe Survey** | Entire universe | "Learn all production knowledge" |
-
----
-
-## Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                      HUMAN INTERFACE LAYER                          │
-│              (Surveyor UI + Strategic Direction + LAST RESORT)      │
-└─────────────────────────────────────┬───────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                     SURVEYOR UI (Replace Ingestions Tab)            │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐   │
-│  │ Survey List     │  │ Survey Detail   │  │ Real-time       │   │
-│  │ - Name/Desc     │  │ - Requirements  │  │ Metrics         │   │
-│  │ - Status        │  │ - Timeline      │  │ - Pulse         │   │
-│  │ - Domains/Patts │  │ - Controls      │  │ - Progress      │   │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘   │
-└─────────────────────────────────────┬───────────────────────────────┘
-                                      │
-                                      ▼
-╔═════════════════════════════════════════════════════════════════════════╗
-║                    PHASE 10: AGENT WRAPPER (Future Enhancement)       ║
-║  "Keep the working LLM sane during boring repetitive tasks"         ║
-║  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                  ║
-║  │ Pulse       │  │ Context     │  │ Guardrails  │                  ║
-║  │ Monitor     │  │ Cleanup     │  │             │                  ║
-║  └─────────────┘  └─────────────┘  └─────────────┘                  ║
-╚═════════════════════════════════════════════════════════════════════════╝
-                                      │
-                                      ▼ (v1: Direct connection)
-┌─────────────────────────────────────────────────────────────────────┐
-│                        AI SUPERVISOR                                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌───────────┐ │
-│  │ Heartbeat   │  │ Focus       │  │ Refocus     │  │ Watchdog  │ │
-│  │ Monitor     │  │ Drift Detect│  │ Strategies  │  │ Recovery  │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └───────────┘ │
-└─────────────────────────────────────┬───────────────────────────────┘
-                                      │
-              ┌───────────────────────┼───────────────────────┐
-              │                       │                       │
-              ▼                       ▼                       ▼
-    ┌───────────────────┐   ┌───────────────────┐   ┌───────────────────┐
-    │   SCRAPING        │   │  5-JUDGE PANEL    │   │  PATTERN          │
-    │   ENGINE          │   │  CERTIFICATION    │   │  INGESTION        │
-    │                   │   │                   │   │                   │
-    │  • Stealth        │   │  1. Generalist    │   │  • Validation     │
-    │  • Rate Limit     │   │  2. Specialist    │   │  • Deduplication  │
-    │  • Error Recovery │   │  3. Skeptic       │   │  • De-dup         │
-    │  • Proxy Rotation │   │  4. Contextualist │   │  • Storage        │
-    │                   │   │  5. Human (Last)  │   │                   │
-    └───────────────────┘   └───────────────────┘   └───────────────────┘
-              │                       │                       │
-              └───────────────────────┼───────────────────────┘
-                                      ▼
-                        ┌─────────────────────────────────┐
-                        │     ExFrame Knowledge Base      │
-                        │     (Certified Patterns)         │
-                        └─────────────────────────────────┘
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    ▼                                   ▼
-          ┌─────────────────────┐         ┌─────────────────────┐
-          │   Expertise Scanner │         │   Generic Framework │
-          │   (Pattern Storage) │         │   (Query Response)  │
-          └─────────────────────┘         └─────────────────────┘
-
-                    ╔═════════════════════════════════╗
-                    ║     FUTURE: Research Generator  ║
-                    ║     (Hooks in place)            ║
-                    ╚═════════════════════════════════╝
+            └── PATTERNS (knowledge units)
 ```
 
 ---
 
-## 5-Judge Certification Panel (CRITICAL COMPONENT)
+## INSTALLATION & DEPLOYMENT
 
-### The Judges
+### Prerequisites
 
-| Judge | Role | Model | Temp | Purpose |
-|-------|------|-------|------|---------|
-| **1. Generalist** | Pattern structure review | GPT-4 / GLM-4 | 0.3 | Validates format, completeness |
-| **2. Specialist** | Domain accuracy | Claude 3.5 Sonnet | 0.2 | Technical correctness |
-| **3. Skeptic** | Find flaws | Claude 3 Opus | 0.5 | Critical analysis |
-| **4. Contextualist** | Contextual fit | GLM-4 | 0.4 | Fits domain/applicability |
-| **5. Human** | **LAST RESORT** | Human review | N/A | Break ties, critical flags |
+**Required**:
+- Docker Engine (official, NOT snap)
+- Docker Compose v2
+- Git
 
-### Certification Flow
+**Optional** (for LLM features):
+- LLM API key (GLM, OpenAI, Anthropic, etc.)
 
-```
-Candidate Pattern
-        │
-        ▼
-┌─────────────────────────────────────────┐
-│  AI Judges 1-4 Review (Parallel)        │
-│  ┌────┐ ┌────┐ ┌────┐ ┌────┐           │
-│  │ J1 │ │ J2 │ │ J3 │ │ J4 │           │
-│  └─┬──┘ └─┬──┘ └─┬──┘ └─┬──┘           │
-└────┼─────┼─────┼─────┼──────────────────┘
-     │     │     │     │
-     └─────┴─────┴─────┴────┐
-                           ▼
-                 ┌──────────────────┐
-                 │ Consensus Engine │
-                 └────────┬─────────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        ▼                 ▼                 ▼
-   Strong Consensus   Weak Consensus    Conflict
-   (>0.8, unanimous)  (0.6-0.8)         (<0.6 or veto)
-        │                 │                 │
-        ▼                 ▼                 ▼
-   CERTIFIED        PROVISIONAL     ╔─────────────╗
-   (Auto)           (Auto)          ║ HUMAN JUDGE ║
-                                     ║  (Judge 5)  ║
-                                     ╚─────────────┘
+### Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+
+# Configure environment (optional - for LLM features)
+cp .env.example .env
+nano .env  # Edit with your API key
+
+# Start application
+docker compose up -d
+
+# Access application
+# Main UI: http://localhost:3000
+# API Docs: http://localhost:3000/docs
+# Health: http://localhost:3000/health
 ```
 
-### Decision Matrix
+### LLM Configuration
 
-| Consensus | Unanimous | Skeptic Veto | Result | Human Review |
-|-----------|-----------|--------------|--------|--------------|
-| ≥0.8 | Yes | No | **CERTIFIED** | No |
-| ≥0.8 | Yes | Yes | **FLAGGED** | **Yes (required)** |
-| 0.6-0.79 | Any | No critical | **PROVISIONAL** | No |
-| 0.6-0.79 | Any | Critical issues | **FLAGGED** | **Yes (required)** |
-| <0.6 | Any | Any | **REJECTED** | Log only |
-| Conflict | Any | Any | **ESCALATE** | **Yes (required)** |
-
----
-
-## Agent Wrapper (The "Claude Code" Pattern) - PHASE 10 ENHANCEMENT
-
-> **Status**: Deferred to Phase 10. v1 will use "black box" approach with status monitoring only.
-
-### Problem: Boring Repetitive Work Breaks LLMs
-
-**The Issue**: When LLMs perform autonomous scraping/certification tasks:
-- Context fills with failures and repetitive operations
-- LLM loses focus and starts "wandering" in chat mode
-- Failures accumulate, pushing out important context
-- LLM gives up or enters loops
-
-**The Solution**: An Agent Wrapper that:
-1. Monitors agent health (pulse)
-2. Cleans context of failures/junk
-3. Enforces guardrails to prevent wandering
-4. Locks focus to prevent task drift
-5. Detects and breaks loop/give-up patterns
-
-### Agent Wrapper Architecture
-
-```python
-# autonomous_learning/agent_wrapper/wrapper.py
-
-class AgentWrapper:
-    """
-    Claude Code-style wrapper for autonomous LLM agents.
-    Keeps the working LLM sane during boring repetitive tasks.
-    """
-
-    def __init__(self, config: AgentWrapperConfig):
-        self.pulse_monitor = PulseMonitor()
-        self.context_manager = ContextCleaner()
-        self.guardrails = Guardrails()
-        self.focus_lock = FocusLock()
-        self.sanity_checker = SanityChecker()
-
-    async def wrap_agent(self, agent: WorkingAgent, task: Task) -> TaskResult:
-        """Execute agent task with monitoring and guardrails"""
-
-        # Start pulse monitoring
-        pulse = self.pulse_monitor.start(agent.id)
-
-        while not task.complete:
-            # 1. Pulse check - is agent alive and responsive?
-            if not await pulse.check():
-                return await self._handle_unresponsive(agent, task)
-
-            # 2. Context cleanup - prune failures, keep useful context
-            await self.context_manager.cleanup(agent.context)
-
-            # 3. Guardrails - prevent wandering outside task scope
-            if not await self.guardrails.check(agent.state):
-                await self._refocus_agent(agent, task)
-
-            # 4. Focus lock - ensure agent stays on primary objective
-            focus_score = await self.focus_lock.verify(agent, task)
-            if focus_score < 0.7:
-                await self._reinforce_focus(agent, task)
-
-            # 5. Sanity check - detect loops, give-ups, hallucinations
-            sanity = await self.sanity_checker.analyze(agent.recent_actions)
-            if sanity.status == "looping":
-                await self._break_loop(agent, task)
-            elif sanity.status == "giving_up":
-                await self._intervene_giveup(agent, task)
-            elif sanity.status == "hallucinating":
-                await self._reset_agent(agent, task)
-
-            # Let agent continue
-            await agent.step()
-
-        return task.result
+**For GLM (z.ai) - RECOMMENDED**:
+```bash
+LLM_MODEL=glm-4.7
+OPENAI_API_KEY=your-glm-key-here
+OPENAI_BASE_URL=https://api.z.ai/api/anthropic
 ```
 
-### Wrapper Components
-
-#### Pulse Monitor
-```python
-class PulseMonitor:
-    """Health check for autonomous agents"""
-
-    async def check(self, agent_id: str) -> bool:
-        """Is the agent responsive?"""
-        # Check: last action within timeout
-        # Check: agent not stuck in same state
-        # Check: agent making progress (even if slow)
-        return is_alive
+**For OpenAI GPT**:
+```bash
+LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
-#### Context Cleaner
-```python
-class ContextCleaner:
-    """Prune failures and junk from agent context"""
-
-    async def cleanup(self, context: AgentContext):
-        """Keep context lean and focused"""
-        # Remove: failed attempts (keep summary only)
-        # Remove: redundant operations
-        # Keep: successful patterns
-        # Keep: current task and progress
-        # Keep: important errors (summarized)
-        return cleaned_context
-```
-
-#### Guardrails
-```python
-class Guardrails:
-    """Prevent agent from wandering off-task"""
-
-    async def check(self, agent_state: AgentState) -> bool:
-        """Is agent staying within task bounds?"""
-        # Check: agent not discussing unrelated topics
-        # Check: agent not generating irrelevant content
-        # Check: agent following established procedures
-        return is_within_bounds
-```
-
-#### Focus Lock
-```python
-class FocusLock:
-    """Ensure agent stays on primary objective"""
-
-    async def verify(self, agent: WorkingAgent, task: Task) -> float:
-        """Return focus score (0.0-1.0)"""
-        # Return: how focused is the agent?
-        return focus_score
-```
-
-#### Sanity Checker
-```python
-class SanityChecker:
-    """Detect unhealthy patterns in agent behavior"""
-
-    async def analyze(self, actions: List[AgentAction]) -> SanityReport:
-        """Check for loops, give-ups, hallucinations"""
-        # Loop detection: same action repeated > N times
-        # Give-up detection: "I can't", refusal patterns
-        # Hallucination detection: fact-check against known patterns
-        return SanityReport(status="healthy"|"looping"|"giving_up"|"hallucinating")
-```
-
-### Integration Point
-
-The Agent Wrapper sits **between the Surveyor UI and the AI Supervisor**:
-
-```
-Surveyor UI → Agent Wrapper → AI Supervisor → Workers (Scraping/Certification)
-                ↓
-           Keeps workers sane
-```
-
-**Decision**: Proceeding WITHOUT Agent Wrapper safeties for initial implementation.
-- Surveyor will be a "black box" with status monitoring
-- Pulse, progress, and metrics will be exposed
-- No context cleanup, guardrails, focus lock, or sanity checking (v1)
-- Agent Wrapper can be added as Phase 10 enhancement if needed
-
----
-
-## Surveyor UI (Replace Ingestions Tab in Generic Framework)
-
-### Purpose
-
-Replace the **Ingestion tab** in `generic_framework/frontend/index.html` with a proper **Surveyor interface** for managing autonomous learning sessions ("surveys").
-
-### What is a "Survey"?
-
-A **Survey** = An autonomous learning session focused on a hierarchy level:
-- **Domain Survey**: Single domain learning
-- **Neighbourhood Survey**: Multiple related domains
-- **Universe Survey**: Entire universe learning
-
-Survey operations:
-- Scrapes specified sources
-- Extracts patterns
-- Certifies through 5-judge panel
-- Stores validated expertise
-- Runs autonomously with monitoring
-
-### Surveyor UI Layout
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  ExFrame - Generic Framework                │
-├──────────┬──────────────────────────────────────────────────────┤
-│          │                                                       │
-│ Query    │  SURVEYOR - Autonomous Learning Manager              │
-│ Patterns │  ┌────────────────────────────────────────────────┐  │
-│ Sources  │  │  ┌─────────┐ ┌─────────────────┐ ┌──────────┐ │  │
-│ Domains  │  │  │ Survey  │ │  Survey Detail  │ │ Metrics  │ │  │
-│ Surveyor │  │  │  List   │ │                 │ │          │ │  │
-│          │  │  │ ┌─────┐ │ │ ┌─────────────┐ │ │ ┌──────┐ │ │  │
-│          │  │  │ │Culin-│ │ │Culinary Arts  │ │ │Pulse │ │ │  │
-│          │  │  │ │ary   │ │ │Survey         │ │ │●●●●●│ │ │  │
-│          │  │  │ │Arts  │ │ │               │ │ │      │ │ │  │
-│          │  │  │ │Survey│ │ │Desc: Auto-    │ │ │Progr │ │ │  │
-│          │  │  │ ├─────┤ │ │matic recipe    │ │ │▓▓▓▓░│ │ │  │
-│          │  │  │ │Python│ │ │ │extraction   │ │ │  85% │ │ │  │
-│          │  │  │ │Survey│ │ │ │from 3       │ │ │      │ │ │  │
-│          │  │  │ └─────┘ │ │ │domains...    │ │ │      │ │ │  │
-│          │  │  └─────────┘ │ └─────────────┘ │ └──────┘ │ │  │
-│          │  │              │ ┌─────────────┐ │          │ │  │
-│          │  │              │ │Survey Prompt │ │          │ │  │
-│          │  │              │ │ & Controls   │ │          │ │  │
-│          │  │              │ └─────────────┘ │          │ │  │
-│          │  │              │ ┌─────────────┐ │          │ │  │
-│          │  │              │ │ Activity Log │ │          │ │  │
-│          │  │              │ └─────────────┘ │          │ │  │
-│          │  │              └─────────────────┘          │ │  │
-│          │  └────────────────────────────────────────────┘  │
-│          │                                                       │
-└──────────┴──────────────────────────────────────────────────────┘
-```
-
-### Surveyor UI Components
-
-#### 1. Survey List Panel
-
-```
-┌─────────────────────┐
-│  SURVEYS            │
-├─────────────────────┤
-│ ▶ Quick Baking      │ ← Status (▶ running, ⏸ paused, ■ stopped, ○ idle)
-│   🔍 Baking under   │    Level badge: 📁 Domain, 🔍 Neighbourhood, 🌌 Universe
-│   30 minutes        │    Shows neighbourhood definition or domain name
-│   Status: Running   │
-│   P: 38/47  ⚠️3     │ ← Certified/Total, Flagged count
-├─────────────────────┤
-│ ○ Python Data Sci  │
-│   🔍 Python ML and  │
-│   data science...   │
-│   Status: Idle      │
-│   P: 0/0            │
-├─────────────────────┤
-│ ■ Cooking Domain    │
-│   📁 cooking        │
-│   Status: Paused    │
-│   P: 118/134 ⚠️8   │
-├─────────────────────┤
-│ [+ New Survey]      │
-└─────────────────────┘
-```
-
-#### 2. Survey Detail Panel
-
-```
-┌─────────────────────────────────────┐
-│  Quick Baking Recipes               │
-├─────────────────────────────────────┤
-│ Description:                        │
-│ Survey baking recipes that take     │
-│ under 30 minutes from multiple      │
-│ sources.                            │
-│                                     │
-│ Scope:                              │
-│ 🔍 Neighbourhood                     │
-│ "baking recipes under 30 minutes"   │
-│                                     │
-│ Progress:                           │
-│ ████████████████░░░░░░░  34%        │
-│                                     │
-│ Requirements:                       │
-│ • Target Patterns: 100              │
-│ • Min Confidence: 0.8               │
-│ • Universe: default                 │
-│                                     │
-│ Scraping Config:                    │
-│ • Seed: allrecipes.com/cookies      │
-│ • Sources: 2 additional URLs       │
-│ • Focus: temperature, ratios...    │
-│                                     │
-│ Controls:                           │
-│ [ ▶ START ] [ ⏸ PAUSE ] [ ■ STOP ] │
-│ [ ✏️ EDIT ]                          │
-│                                     │
-│ Certification:                      │
-│ ✅ 38 Certified  ⚠️3 Flagged        │
-│ ❌ 2 Rejected  ⏳ 4 Pending         │
-│                                     │
-│ Activity Log:                       │
-│ 22:19  Survey loaded                │
-│ 10:30  Started scraping...          │
-│ 10:32  Certified: Choc Chip Cookies │
-│ 10:33  Flagged: Cake Temp Guide     │
-└─────────────────────────────────────┘
-```
-
-#### 3. Scraping Control Panel (New Survey/Edit)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  ⚙️ Scraping Control Panel                                  │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  🔗 Seed URL                                                │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ https://www.allrecipes.com/recipes/17215/cookies   │   │
-│  └─────────────────────────────────────────────────────┘   │
-│  The starting point. Scraper begins here and follows      │
-│  relevant links.                                          │
-│                                                             │
-│  📎 Additional URLs (optional, one per line)              │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ https://www.foodnetwork.com/recipes/cookies         │   │
-│  │ https://www.tasty.co/recipe/baking-101              │   │
-│  └─────────────────────────────────────────────────────┘   │
-│  Extra sources to include.                                 │
-│                                                             │
-│  🤖 Collection Instructions                                │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ Focus on cookie baking techniques. Look for:        │   │
-│  │ - Temperature settings and their effects            │   │
-│  │ - Ingredient ratios and substitutions              │   │
-│  │ - Baking times and pan types                        │   │
-│  │ - Common mistakes and troubleshooting              │   │
-│  └─────────────────────────────────────────────────────┘   │
-│  Be specific about what patterns to extract. This guides  │
-│  the AI on what to look for and how to traverse links.    │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### 4. Real-time Metrics Panel
-
-```
-┌─────────────────────┐
-│  LIVE METRICS       │
-├─────────────────────┤
-│ Pulse: ●●●●●        │ ← Agent health
-│                     │
-│ Progress:           │
-│ ▓▓▓▓▓▓▓▓▓▓░░ 85%   │
-│                     │
-│ Throughput:         │
-│ 3.2 patterns/hr    │
-│                     │
-│ Certification:      │
-│ ✅ 47 Certified     │
-│ ⚠️  3 Flagged       │
-│ ❌ 2 Rejected       │
-│ ⏳ 5 Pending        │
-│                     │
-│ Judge Activity:     │
-│ J1: ████████░░ 80%  │
-│ J2: ████████░░ 82%  │
-│ J3: ████████░░ 78%  │
-│ J4: ████████░░ 85%  │
-│ J5: ████░░░░░░ 20%  │ ← Human (low activity = good)
-│                     │
-│ Errors: 2 (handled) │
-│ Focus: 94% (locked) │
-└─────────────────────┘
-```
-
-### Surveyor API Endpoints
-
-```typescript
-// Base path: /api/learning (mounted to Generic Framework)
-// Autonomous Learning API is mounted as a sub-app at /api/learning
-
-// Survey management
-GET    /api/learning/api/surveys                      // List all surveys
-POST   /api/learning/api/surveys                      // Create new survey
-GET    /api/learning/api/surveys/:id                  // Get survey details
-PUT    /api/learning/api/surveys/:id                  // Update survey (edit)
-DELETE /api/learning/api/surveys/:id                  // Delete survey
-
-// Survey control
-POST   /api/learning/api/surveys/:id/start            // Start survey
-POST   /api/learning/api/surveys/:id/stop             // Stop survey
-POST   /api/learning/api/surveys/:id/pause            // Pause survey
-POST   /api/learning/api/surveys/:id/resume           // Resume survey
-
-// Supervisor control
-GET    /api/learning/api/supervisor/workers           // List workers
-GET    /api/learning/api/supervisor/heartbeat         // Worker heartbeat
-POST   /api/learning/api/supervisor/refocus/:worker   // Trigger refocus
-
-// Certification control
-GET    /api/learning/api/certification/judges         // List judge status
-GET    /api/learning/api/certification/queue           // Get certification queue
-POST   /api/learning/api/certification/submit          // Submit pattern for certification
-GET    /api/learning/api/certification/status/:id      // Get certification status
-
-// Scraping control
-GET    /api/learning/api/scraping/status              // Get scraping status
-POST   /api/learning/api/scraping/start               // Start scraping
-POST   /api/learning/api/scraping/stop                // Stop scraping
-POST   /api/learning/api/scraping/targets             // Add scraping targets
-GET    /api/learning/api/scraping/targets             // List scraping targets
-GET    /api/learning/api/scraping/results             // Get scraping results
-
-// Real-time metrics (WebSocket or SSE)
-WS     /api/learning/api/surveys/:id/metrics          // Live metrics stream
-
-// Survey results
-GET    /api/learning/api/surveys/:id/patterns         // Get patterns from survey
-GET    /api/learning/api/surveys/:id/report           // Get survey report
-```
-
-### API Integration
-
-The Autonomous Learning API is **mounted as a FastAPI sub-application** to the Generic Framework:
-
-```python
-# generic_framework/api/app.py
-
-from autonomous_learning.api.app import app as learning_app
-
-# Mount at /api/learning path
-app.mount("/api/learning", learning_app)
-```
-
-**Frontend calls**:
-```javascript
-// Create survey
-POST /api/learning/api/surveys
-{
-  "name": "Quick Baking Recipes",
-  "level": "neighbourhood",
-  "neighbourhood": "baking under 30 minutes",
-  "seed_url": "https://allrecipes.com/cookies",
-  "additional_urls": ["https://foodnetwork.com/cookies"],
-  "scraping_prompt": "Focus on temperature, ratios...",
-  "target_patterns": 100,
-  "min_confidence": 0.8
-}
-
-// Update survey (edit)
-PUT /api/learning/api/surveys/survey_001
-{ "name": "Updated Name", "scraping_prompt": "New instructions" }
-```
-
-### Survey Data Model
-
-```python
-@dataclass
-class Survey:
-    id: str
-    name: str
-    description: str
-
-    # Hierarchy Level
-    level: SurveyLevel            # "domain", "neighbourhood", "universe"
-    universe: str                 # Universe name
-    neighbourhood: Optional[str]  # User-defined filter (if level is neighbourhood)
-    domain: Optional[str]         # Domain name (if level is domain)
-
-    # Requirements
-    target_patterns: int
-    min_confidence: float
-
-    # Scraping Control (NEW)
-    seed_url: Optional[str] = None         # Starting point for scraping
-    additional_urls: Optional[List[str]] = None  # Extra sources to include
-    scraping_prompt: Optional[str] = None   # Instructions for AI on what to collect
-
-    # Legacy (for backward compatibility)
-    sources: Optional[List[str]] = None    # URLs or source names (deprecated, use seed_url + additional_urls)
-    timeline_hours: Optional[int] = None
-    rate_limit: int = 1            # requests per second
-    max_retries: int = 3
-    enable_stealth: bool = True
-
-    # Status
-    status: SurveyStatus           # "idle", "running", "paused", "completed", "failed"
-    progress: float                # 0.0 to 1.0
-
-    # Results
-    domains_created: int = 0
-    patterns_created: int = 0
-    patterns_certified: int = 0
-    patterns_flagged: int = 0
-    patterns_rejected: int = 0
-    patterns_pending: int = 0
-
-    # Metadata
-    created_at: datetime
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    error_message: Optional[str] = None
-
-class SurveyLevel(str, Enum):
-    DOMAIN = "domain"           # Single domain
-    NEIGHBOURHOOD = "neighbourhood"  # Multiple related domains
-    UNIVERSE = "universe"       # Entire universe
-
-class SurveyStatus(str, Enum):
-    IDLE = "idle"
-    RUNNING = "running"
-    PAUSED = "paused"
-    COMPLETED = "completed"
-    FAILED = "failed"
-```
-
-### Implementation Notes
-
-**Frontend**: Plain HTML/JS + Alpine.js (matching Generic Framework)
-**Styling**: Tailwind CSS v3 (via CDN, matching Generic Framework)
-**Real-time**: Server-Sent Events (SSE) or polling for live metrics
-**Charts**: Optional - plain CSS bars or minimal canvas drawing
-
-**Location**: `generic_framework/frontend/index.html`
-- Replace "Ingestion" tab with "Surveyor" tab
-- Full-page Surveyor view matching Generic Framework style
-- No React build step required
-
-**Key Sections**:
-- Survey list (left sidebar)
-- Survey detail (center panel)
-- Real-time metrics (right panel)
-- Activity log (bottom panel)
-- Control panel (survey prompt construction, activation, duration)
-
----
-
-## Risk Management (CRITICAL)
-
-### Risks and Mitigations
-
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| **LLM Hallucination** | Medium | High | 5-judge consensus, skeptic veto, human tiebreaker |
-| **Low Quality Patterns** | Medium | High | Validation thresholds, provisional certification |
-| **Scraping Detection** | Low | Medium | Stealth techniques, rate limiting, proxy rotation |
-| **API Rate Limits** | Medium | Low | Exponential backoff, multiple API providers |
-| **Judge Unavailability** | Low | Medium | Graceful degradation (3-judge minimum), human escalation |
-| **System Crash** | Low | High | State persistence, watchdog restart, recovery logs |
-
-### Human Intervention Triggers
-
-**Humans are the LAST RESORT, but MUST intervene when:**
-
-1. **Skeptic Judge finds critical issues** → Human review required
-2. **Consensus < 0.6** → Human arbitration
-3. **Judge disagreement > 30% variance** → Add 4th AI judge, then human if still conflicted
-4. **Pattern rejected 3x** → Human review of source and extraction
-5. **System failure** → Human root cause analysis
-6. **User flag** → Human review of specific pattern
-
-### Quality Assurance Metrics
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Certification Accuracy** | >90% | Human spot-check of certified patterns |
-| **False Positive Rate** | <5% | Human review of rejected patterns |
-| **Pattern Utility** | >80% | User feedback on query responses |
-| **Expertise Solidity** | TBD | Domain expert validation (pilot) |
-
----
-
-## Probability of Solid Expertise
-
-### Confidence Scoring
-
-Each pattern receives a **confidence score** (0.0-1.0) based on:
-
-```python
-confidence = (
-    judge_average * 0.4 +          # Average of all 5 judges
-    unanimity_bonus * 0.2 +        # Bonus for unanimous agreement
-    source_quality * 0.2 +         # Quality of data source
-    validation_score * 0.1 +       # Schema validation
-    cross_reference_score * 0.1    # Matches other patterns
-)
-```
-
-### Expertise Solidity Estimate
-
-Based on 5-judge panel with human tiebreaker:
-
-| Confidence Range | Expected Quality | Action |
-|-----------------|------------------|--------|
-| 0.9-1.0 | **Excellent** | Deploy immediately |
-| 0.8-0.89 | **Good** | Deploy, monitor for feedback |
-| 0.6-0.79 | **Acceptable** | Provisional, review after use |
-| <0.6 | **Poor** | Reject or require human rewrite |
-
-**Expected distribution** (conservative estimate):
-- 60% will score 0.8+ (Good to Excellent)
-- 25% will score 0.6-0.79 (Acceptable, provisional)
-- 15% will score <0.6 (Rejected or flagged)
-
-**Human review rate target**: <5% of all candidates
-
----
-
-## Project Structure
-
-```
-autonomous_learning/
-├── __init__.py
-├── core/
-│   ├── __init__.py
-│   ├── config.py              # YAML configuration
-│   ├── state.py               # State persistence
-│   └── logger.py              # Structured logging
-├── supervisor/
-│   ├── __init__.py
-│   ├── supervisor.py          # Main supervisor
-│   ├── heartbeat.py           # Worker health monitoring
-│   ├── focus.py               # Drift detection (text-based)
-│   └── refocus.py             # Refocus strategies
-├── certification/
-│   ├── __init__.py
-│   ├── panel.py               # 5-judge panel orchestrator
-│   ├── judges/
-│   │   ├── __init__.py
-│   │   ├── base.py            # Base judge interface
-│   │   ├── generalist.py      # Judge 1: Structure
-│   │   ├── specialist.py      # Judge 2: Domain accuracy
-│   │   ├── skeptic.py         # Judge 3: Critical analysis
-│   │   ├── contextualist.py   # Judge 4: Context fit
-│   │   └── human.py           # Judge 5: Human last resort
-│   └── consensus.py           # Consensus calculation
-├── scraping/
-│   ├── __init__.py
-│   ├── engine.py              # Scraping orchestrator
-│   ├── stealth.py             # UA rotation, rate limiting
-│   ├── errors.py              # Error handling strategies
-│   └── extractors/
-│       ├── __init__.py
-│       ├── base.py
-│       ├── html.py
-│       └── {domain}_py        # Domain-specific extractors
-├── ingestion/
-│   ├── __init__.py
-│   ├── pipeline.py            # Main ingestion pipeline
-│   ├── validation.py          # Schema validation (Pydantic)
-│   ├── deduplication.py       # Similarity check (text-based)
-│   └── storage.py             # Integration with Expertise Scanner
-├── api/
-│   ├── __init__.py
-│   ├── supervisor.py          # Supervisor control endpoints
-│   ├── certification.py       # Certification endpoints
-│   └── scraping.py            # Scraping control endpoints
-└── research_hooks/            # ═══ FUTURE: Research Generator ═══
-    ├── __init__.py
-    ├── README.md              # "Future: Research Generator"
-    └── interfaces.py          # Placeholder interfaces
+**For Anthropic Claude**:
+```bash
+LLM_MODEL=claude-3-5-sonnet-20241022
+OPENAI_API_KEY=sk-ant-your-anthropic-api-key-here
+OPENAI_BASE_URL=https://api.anthropic.com/v1
 ```
 
 ---
 
-## Implementation Phases (Revised)
+## API REFERENCE
 
-### Phase 1: Foundation & Core Infrastructure (2-3 days)
-- Project structure
-- Configuration (YAML)
-- State persistence
-- Structured logging
+### Semantic Search Endpoints
 
-### Phase 2: AI Supervisor (3-4 days)
-- Supervisor core
-- Heartbeat monitoring
-- Focus drift detection (text-based)
-- Refocus strategies
-- Generic LLM client (GLM-4 compatible)
-
-### Phase 3: 5-Judge Certification Panel (4-5 days)
-- Certification panel orchestrator
-- Judge 1: Generalist (structure review)
-- Judge 2: Specialist (domain accuracy)
-- Judge 3: Skeptic (critical analysis)
-- Judge 4: Contextualist (context fit)
-- Judge 5: Human interface (last resort)
-- Consensus engine
-- Human escalation triggers
-
-### Phase 4: Scraping Engine (4-5 days)
-- Scraping supervisor
-- Stealth techniques (UA rotation, rate limiting, jitter)
-- Error handling (404, 403, 429, 500, 503)
-- Domain-specific extractors (start with ONE domain)
-- Content parsing and validation
-
-### Phase 5: Pattern Ingestion Pipeline (3-4 days)
-- Main pipeline orchestrator
-- Schema validation (Pydantic)
-- Deduplication (text-based similarity)
-- Integration with Expertise Scanner storage
-- Pattern certification workflow
-
-### Phase 6: API & Dashboard (4-5 days)
-- Supervisor control endpoints
-- Certification endpoints
-- Scraping control endpoints
-- Surveyor UI (Plain HTML/JS + Alpine.js in Generic Framework)
-- Real-time monitoring (SSE/polling)
-
-### Phase 7: Single Domain Pilot (3-4 days)
-- Pilot Domain: Cooking ✓
-- Pilot Neighbourhood: Parksville, BC ✓
-- Configure domain-specific extractors
-- Run 24-hour autonomous test
-- Measure quality metrics
-- Human spot-check validation
-- Document findings
-
-### Phase 8: Risk Assessment & Refinement (2-3 days)
-- Analyze pilot results
-- Adjust certification thresholds
-- Refine human escalation triggers
-- Document risk mitigations
-- Create runbook for human interventions
-
-### Phase 9: Production Hardening (2-3 days)
-- Authentication
-- Rate limiting
-- Monitoring dashboards
-- Backup/recovery
-- Graceful shutdown
-- Health checks
-
-**Total Estimated**: 27-36 days (~6-7 weeks)
-
----
-
-## FUTURE: Research Generator (Hooks)
-
-### Placeholder Interfaces
-
-```python
-# autonomous_learning/research_hooks/interfaces.py
-
-from abc import ABC, abstractmethod
-from typing import Optional
-
-class ResearchQueryInterface(ABC):
-    """Hook for future Research Generator"""
-
-    @abstractmethod
-    async def submit_research_query(self, query: str, deadline: Optional[str] = None) -> str:
-        """Submit a research query - FUTURE IMPLEMENTATION"""
-        raise NotImplementedError("Research Generator: Coming in Phase 10")
-
-    @abstractmethod
-    async def get_research_status(self, research_id: str) -> dict:
-        """Check research status - FUTURE IMPLEMENTATION"""
-        raise NotImplementedError("Research Generator: Coming in Phase 10")
-
-
-class PatternExtractionHook(ABC):
-    """Hook for extracting patterns from research"""
-
-    @abstractmethod
-    async def extract_patterns_from_research(self, research_data: dict) -> list:
-        """Extract expertise patterns from research findings - FUTURE"""
-        raise NotImplementedError("Research Generator: Coming in Phase 10")
+#### Check Embedding Status
+```bash
+curl http://localhost:3000/api/embeddings/status
 ```
 
-### Integration Points
+Returns embedding coverage per domain.
 
-- Pattern storage includes `research_id` field (nullable)
-- Certification panel can validate research-derived patterns
-- Scraping engine can be extended for research data sources
-- Supervisor can manage research tasks (future)
+#### Generate Embeddings
+```bash
+curl -X POST "http://localhost:3000/api/embeddings/generate?domain={domain}"
+```
 
----
+Generates embeddings for all patterns in a domain.
 
-## Configuration (YAML)
+#### Adjust Search Weights
+```bash
+curl -X POST http://localhost:3000/api/embeddings/weights \
+  -H "Content-Type: application/json" \
+  -d '{"semantic": 1.0, "keyword": 0.0}'
+```
 
-```yaml
-# config/autonomous_learning.yaml
+**Current**: semantic=1.0, keyword=0.0 (pure semantic)
 
-supervisor:
-  api:
-    url: https://api.z.ai/api/coding/paas/v4/chat/completions  # GLM-4
-    model: glm-4
-    max_tokens: 4096
-    temperature: 0.7
+### Core Query Endpoints
 
-  heartbeat:
-    interval: 30
-    timeout: 10
-    max_missed: 3
+#### Query a Domain
+```bash
+curl -X POST http://localhost:3000/api/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Your question here",
+    "domain": "cooking",
+    "include_trace": true
+  }'
+```
 
-  focus:
-    window_size: 10
-    drift_threshold: 0.3
-    repetition_threshold: 0.95
+#### List Domains
+```bash
+curl http://localhost:3000/api/domains
+```
 
-certification:
-  judges:
-    - name: generalist
-      role: structure_review
-      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
-      model: glm-4
-      temperature: 0.3
-      weight: 1.0
+#### Get Domain Info
+```bash
+curl http://localhost:3000/api/domains/{domain_id}
+```
 
-    - name: specialist
-      role: domain_accuracy
-      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
-      model: glm-4
-      temperature: 0.2
-      weight: 1.0
-
-    - name: skeptic
-      role: critical_analysis
-      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
-      model: glm-4
-      temperature: 0.5
-      weight: 1.5  # Higher weight for critical issues
-
-    - name: contextualist
-      role: context_fit
-      api_url: https://api.z.ai/api/coding/paas/v4/chat/completions
-      model: glm-4
-      temperature: 0.4
-      weight: 1.0
-
-    - name: human
-      role: last_resort
-      type: human
-      escalation_only: true
-
-  thresholds:
-    certified: 0.8
-    provisional: 0.6
-    unanimous_bonus: 0.1
-    skeptic_veto_critical: true
-
-  human_triggers:
-    - skeptic_critical_issues
-    - consensus_below_threshold
-    - judge_variance_high
-    - user_flag
-
-scraping:
-  rate_limit:
-    requests_per_second: 1
-    burst: 5
-    exponential_backoff: true
-
-  stealth:
-    user_agents:
-      - "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
-      - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)..."
-    jitter_percent: 20
-    warm_up_requests: 3
-
-  error_handling:
-    max_retries: 3
-    skip_404: true
-    backoff_429: true
-
-  pilot_domain: cooking  # Start with ONE domain
-
-ingestion:
-  validation:
-    strict_mode: true
-    required_fields: [name, description, problem, solution, steps]
-
-  deduplication:
-    similarity_threshold: 0.85
-    method: text_based  # word_overlap, jaccard
-
-  storage:
-    pattern_directory: data/patterns/{domain}/
-    backup_enabled: true
-
-research_hooks:
-  enabled: false  # FUTURE: Set to true in Phase 10
-  pattern_storage_field: research_id
+#### List Patterns
+```bash
+curl "http://localhost:3000/api/domains/{domain_id}/patterns"
 ```
 
 ---
 
-## Dependencies (All Free/Local)
+## EXAMPLE: SEMANTIC SEARCH IN ACTION
 
-```txt
-# pyproject.toml or requirements.txt
+### Query: "How do I use a hammer?"
 
-httpx>=0.25.0           # Async HTTP client
-pydantic>=2.0.0         # Data validation
-asyncio                 # Async orchestration
-pyyaml>=6.0             # Config parsing
-tenacity>=8.2.0         # Retry logic
-numpy>=1.24.0           # Calculations
+**Semantic Results**:
+| Pattern | Similarity | Notes |
+|---------|-----------|-------|
+| How do I hammer in a nail? | 0.7007 | Highest semantic match |
+| How do I build a simple shelf? | 0.2882 | Related DIY task |
+| Laying the Foundation: How to Build a Floor | 0.1542 | Construction-related |
+| Wall and Floor Construction Basics | 0.1314 | Construction-related |
+| Choosing and Installing DIY Flooring | 0.0912 | DIY-related |
 
-# NOTE: Embeddings SKIPPED - using simple text-based similarity instead
-# (no sentence-transformers, torch, or scikit-learn required)
+**Key Insight**: "hammer in a nail" has highest similarity even though both queries contain "hammer" - the model understands semantic meaning, not just keyword overlap.
 
-# Optional: Research hooks (future)
-geopy>=2.4.0            # Geographic calculations
-pandas>=2.0.0           # Data analysis
+### Different Queries, Different Results
+
+**Query: "What is a cake?"**
+
+| Pattern | Semantic Score |
+|---------|---------------|
+| profitiroll pattern | 0.346 |
+| gallette pattern | 0.331 |
+| flatbread pattern | 0.260 |
+
+**Query: "What is a pie?"**
+
+| Pattern | Semantic Score |
+|---------|---------------|
+| profitiroll pattern | 0.435 |
+| gallette pattern | 0.353 |
+| flatbread pattern | 0.217 |
+
+**Note**: "Pie" has higher semantic similarity to profitirolls than "cake" does - the model captures these nuanced differences.
+
+---
+
+## TROUBLESHOOTING
+
+### Semantic Search Not Working
+
+**Symptom**: Results show `relevance_source: "keyword"` instead of "semantic"
+
+**Solutions**:
+1. Generate embeddings: `POST /api/embeddings/generate?domain={domain}`
+2. Restart server to reload vector store
+3. Check logs for model loading errors
+
+### Pattern Truncation Warnings
+
+**Symptom**: Logs show `[EMBED] WARNING: Pattern {id} may exceed token limit`
+
+**Meaning**: Pattern is >256 tokens and being truncated
+
+**Impact**: Truncated patterns use only name + solution fields
+
+**Solution**: Review and shorten large patterns, or accept truncation
+
+### Docker Issues
+
+**Port 3000 already in use**:
+```bash
+sudo lsof -ti:3000 | xargs sudo kill -9
+docker compose restart
+```
+
+**Patterns not showing** (Docker snap issue):
+```bash
+sudo snap remove docker
+curl -fsSL https://get.docker.com | sh
+docker compose down
+docker compose up -d
 ```
 
 ---
 
-## Success Criteria
+## DESIGN DOCUMENTATION
 
-### Phase 7 (Pilot Domain) Success
+### Semantic Search Design
 
-- [ ] 24-hour autonomous run completed
-- [ ] >100 patterns ingested
-- [ ] <5% required human review
-- [ ] Certification accuracy >90% (human spot-check)
-- [ ] No critical failures (crashes, data loss)
-- [ ] Focus drift detected and corrected <5 occurrences
-- [ ] Supervisor maintained stable operation
+**Document**: `rag-search-design.md`
 
-### Overall System Success
+**Contents**:
+- Architecture overview
+- Component details (EmbeddingService, VectorStore, HybridSearcher)
+- Configuration (model, weights, thresholds)
+- Search behavior examples
+- Performance characteristics
+- Monitoring & debugging
+- Future enhancements (feedback loop, dynamic weights, auto-embedding)
 
-- [ ] Single domain operational
-- [ ] 5-judge panel functional with human escalation
-- [ ] Risk mitigation documented and tested
-- [ ] Expertise quality validated (human spot-check)
-- [ ] Dashboard functional and monitoring
-- [ ] Research generator hooks in place
-- [ ] Documentation complete
+### Query System Redesign
 
----
+**Document**: `query-rewrite.md`
 
-## Open Questions
+**Philosophy**: "The query position is a knowledge dashboard where Responsible Agents (human domain experts) directly accept AI-generated knowledge into curated domains."
 
-1. **Pilot Domain**: Cooking ✓
-2. **Pilot Neighbourhood**: Parksville, BC ✓ (geographic)
-3. **Embeddings**: SKIPPED - No embedding model (simpler implementation, use text-based similarity only)
-4. **Human Judge Interface**: Web UI, API, or email notifications?
-5. **State Persistence**: File-based (JSON) or SQLite?
-6. **Proxy Rotation**: Need for production? (Start without)
-7. **Surveyor Activity Log**: What events to log? (Scrape start/end, certification results, errors, focus drift, refocus actions)
+**Key Principle**: User acceptance IS the certification. No separate "candidate → certified" workflow.
 
-**Agent Wrapper**: Deferred to Phase 10. Proceeding with black box implementation (status monitoring only).
-
-**Decisions Made**:
-- Hierarchy: Multiverse → Universe → Neighbourhood → Domain → Patterns
-- Pilot Domain: Cooking
-- Pilot Neighbourhood: Parksville, BC (geographic region)
-- Embeddings: SKIPPED (no sentence-transformers, use simple text-based similarity for dedup)
+**Status**: Design complete, implementation pending (4 phases, 8 weeks)
 
 ---
 
-## GitHub Status
+## FUTURE ENHANCEMENTS
+
+### Near-Term (Design Complete)
+
+1. **Feedback & Learning**
+   - Implicit feedback (pattern views, usage)
+   - Explicit feedback (user ratings)
+   - Usage decay for stale patterns
+
+2. **Dynamic Weight Adjustment**
+   - Adaptive semantic/keyword weights based on query context
+   - Short queries → more keyword weight
+   - Long queries → more semantic weight
+
+3. **Auto-Embedding on Pattern Change**
+   - Automatically update embeddings when patterns are modified
+   - Eliminate manual embedding regeneration
+
+### Long-Term (Conceptual)
+
+4. **Pattern Discovery & Clustering**
+   - Query clustering to identify missing patterns
+   - Gap analysis for under-covered topics
+   - Redundancy detection
+
+5. **Fine-tuning Embedding Model**
+   - Domain-specific fine-tuning
+   - Use larger model (all-mpnet-base-v2: 768-dim)
+   - Ensemble multiple models
+
+---
+
+## PROJECT STRUCTURE
+
+```
+eeframe/
+├── generic_framework/          # Main framework
+│   ├── api/                    # FastAPI application
+│   ├── core/                   # Core interfaces
+│   │   ├── embeddings.py       # Semantic search
+│   │   ├── hybrid_search.py    # Hybrid search engine
+│   │   ├── domain.py           # Domain base class
+│   │   ├── specialist.py       # Specialist base class
+│   │   └── knowledge_base.py   # Knowledge base interface
+│   ├── knowledge/              # Knowledge base implementations
+│   │   └── json_kb.py          # JSON-based KB with semantic search
+│   ├── assist/                 # Assistant engine
+│   │   └── engine.py           # Query orchestration
+│   └── frontend/               # Web UI (Alpine.js + Tailwind)
+├── universes/                  # Knowledge universes
+│   └── default/                # Default universe
+│       └── domains/            # Domain patterns and embeddings
+├── config/                     # Monitoring configurations
+├── docker-compose.yml          # Docker deployment
+├── Dockerfile                  # Container definition
+└── requirements.txt            # Python dependencies
+```
+
+---
+
+## GITHUB STATUS
 
 - **Repository**: https://github.com/orangelightening/ExFrame.git
-- **Latest Commit**: `9895f23f` - "security: Remove .env from git and update credential setup"
-- **Status**: Fully synced with GitHub
+- **Working Directory**: `/home/peter/development/eeframe`
+- **Current Branch**: main
+- **Status**: Development changes pending commit
 
 ---
 
----
+## DOCUMENTATION INDEX
 
-## RECOVERY POINT: 2026-01-14
+### Main Documentation
+- **README.md** - Project overview, installation, API reference
+- **claude.md** - Context recovery for Claude (AI assistant)
+- **context.md** - This file (project context)
+- **CHANGELOG.md** - Version history
 
-**Status**: Pattern Health Diagnostics Implementation
+### Design Documents
+- **rag-search-design.md** - Semantic search implementation
+- **query-rewrite.md** - Knowledge Dashboard specification
+- **query-todo.md** - Query system implementation todos
 
-### Completed Work
+### Architecture Documentation
+- **PLUGIN_ARCHITECTURE.md** - Plugin development guide
+- **EXTENSION_POINTS.md** - Extension point reference
 
-1. **Pattern Content Threshold Lowered** - Changed from 50 to 30 characters in `pattern_analyzer.py:208`
-2. **Added `problematic_patterns` List** - PatternHealthReport now includes list of problematic pattern names for UI display
-3. **Health Indicators on Patterns Page** - Added visual badges and colored borders (green/yellow/red) based on health status
-4. **Diagnostics Page Enhancement** - Added problematic patterns list display in Diagnostics view
-5. **Docker Container Rebuilt** - Changes deployed
-
-### Files Modified
-
-- `generic_framework/diagnostics/pattern_analyzer.py` - Threshold lowered to 30, added problematic_patterns tracking
-- `generic_framework/frontend/index.html` - Health indicators on pattern cards, diagnostics page list display
-- `generic_framework/diagnostics/health_checker.py` - JSON KB validation support
-
-### Known Bug (RESOLVED)
-
-**Health Indicator State Bug** (FIXED 2026-01-14): Health indicators now appear correctly on all domain changes.
-
-**Previous Symptoms**:
-- Health indicators showed "healthy" for all patterns (incorrect)
-- When changing domains directly, health flags didn't appear at all
-- Health data only loaded properly after going through Query flow first
-
-**Root Cause**: `switchDomain()` called `loadDomainInfo()` which didn't fetch health data. `loadPatterns()` was the only function that fetched health data from `/api/diagnostics/patterns/health`.
-
-**Fix Applied**: Modified `switchDomain()` in `index.html:2368-2374` to check if current view is 'patterns' and call `loadPatterns()` instead of `loadDomainInfo()` when on the Patterns tab.
-
-**Location**: `generic_framework/frontend/index.html` line 2368-2374
+### Historical Documentation
+- **reverse.md** - System reverse engineering report
+- **REFACTORING_SUMMARY.md** - Refactoring details
+- **CONSOLIDATION_*.md** - Phase consolidation reports
 
 ---
 
-## RECOVERY POINT: 2026-01-15
+## STOP WORDS (Filtered from Queries)
 
-**Status**: Query System Rewrite - Knowledge Dashboard Design
+These words are removed during query processing:
 
-### Current Focus: Query System Redesign
+**Articles**: a, an, the
 
-**Philosophy**: The query position is a **Knowledge Dashboard** where Responsible Agents (human domain experts) directly accept AI-generated knowledge into curated domains.
+**Verbs**: is, are, was, were, be, been, being, have, has, had, do, does, did, will, would, could, should, may, might
 
-**Key Principle**: User acceptance IS the certification. When a Responsible Agent clicks "Accept as Pattern," that decision IS the validation. No separate "candidate → certified" workflow exists.
+**Pronouns**: what, which, who, where, when, why, how, there, here, this, that, these, those
 
-### Simplified Workflow
+**Prepositions**: for, of, with, by, from, in, on, at, to
 
-```
-OLD (Overcomplicated):
-Query → Extend → LLM → Create CANDIDATE → Later CERTIFY → Finally Use
+**Conjunctions**: and, or, but, if, because, as, until, while
 
-NEW (Current Vision):
-Query → Extend → LLM → User Accepts → Pattern Created & IMMEDIATELY USED
-```
-
-### Design Specification
-
-**Document**: `query-rewrite.md` (Complete, version 1.0)
-
-**Key Changes from Previous Model**:
-1. **No "candidate" status** - Patterns are either created or not created
-2. **User acceptance IS validation** - No separate certification step
-3. **Immediate use** - Patterns are searchable immediately after creation
-4. **Status is informational** - Not a gate for inclusion in search
-
-### Implementation Plan (8 Weeks)
-
-**Phase 1: Foundation (Week 1-2)**
-- Fresh state landing page
-- Submit Query button requirement (user confirmed ✅)
-- Separate local results from LLM results
-- Remove auto-LLM from initial query flow
-- Add "Extend Search" button
-
-**Phase 2: External Search (Week 3-4)**
-- Domain-specific data source configuration
-- LLM integration with local_docs and web_search
-- Source attribution in responses
-- Fallback strategies
-
-**Phase 3: Acceptance UI (Week 5-6)**
-- "Accept as New Pattern" button
-- Optional editing before creation
-- Immediate pattern creation
-- Direct inclusion in search index
-
-**Phase 4: Polish & Testing (Week 7-8)**
-- End-to-end testing
-- Performance optimization
-- Error handling
-- Documentation
-
-### Open Questions
-
-**Q6 (Scale)**: Multiple users, pattern count growth, search performance, duplicate detection - **To be discussed separately**
-
-### Files Modified (Recent Session)
-
-1. **LLM Fallback Confirmation Feature** (`generic_framework/plugins/enrichers/llm_enricher.py`)
-   - Added confirmation flow with partial responses
-   - Confidence calculation moved before enrichers
-   - User acceptance workflow
-
-2. **Query Response Handling** (`generic_framework/assist/engine.py`)
-   - Added `llm_confirmed` parameter to `process_query()`
-   - Confirmation data passed through pipeline
-   - Pattern creation on LLM usage
-
-3. **Frontend Query Interface** (`generic_framework/frontend/index.html`)
-   - Added `canExtendWithAI` state variable
-   - Modified response handling for confirmation
-   - Added "Extend with AI" button inline (not modal)
-
-4. **Pattern Schema Updates**
-   - Added `origin` field (local | llm_external_search | human_created)
-   - Added `validated_by` field (user who accepted)
-   - Added `validation_method` field (query_portal_acceptance, bulk_import, etc.)
-   - `status` is informational only (not a gate)
-
-### Known Issues (Not To Be Fixed in Current Session)
-
-1. **Source X References** - Partially addressed with text cleaning, but legacy patterns still contain "Source 2", "Source 3" references in their content
-
-2. **LLM Prompt Enhancement** - Added explicit instructions to use pattern names instead of "Source X", but legacy pattern content still contains old references
-
-### Next Steps
-
-1. **Review query-rewrite.md** - User review in progress
-2. **Discuss scale considerations** (Q6)
-3. **Make decisions on Q1-Q5**
-4. **Approve Phase 1** for implementation
-5. **Begin coding** once approved
-
-### Future Consideration (User Note)
-
-User mentioned interest in **multiple AI personas and consensus-based approach** (using different AI personas and then using consensus of the data) - **Deferred for now, noted for future discussion**
+**Common query words**: type, types, like, just, some, more, much, many
 
 ---
 
-**Last Updated**: 2026-01-15
-**Status**: Query rewrite design complete, awaiting user review
-**Next Action**: User reviewing query-rewrite.md, then discuss scale (Q6)
-**Commit Pending**: Update docs and commit current state
+## NEXT STEPS
+
+### Immediate: Testing Phase
+
+User is conducting testing of pure semantic search:
+- Evaluate semantic similarity quality
+- Identify patterns that rank incorrectly
+- Note gaps in coverage
+- Determine if chunking is needed
+
+### Pending: Commit
+
+After testing phase complete:
+1. Review semantic search results
+2. Identify any issues or improvements
+3. Commit current state to GitHub
+4. Tag release (v1.5.0)
+
+---
+
+**Last Updated**: 2026-01-20
+**Status**: Semantic search complete, user testing phase
+**Next Action**: Await user testing feedback, then commit and tag release
