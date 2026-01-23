@@ -16,4 +16,4 @@ if [ -d "/app/universes" ]; then
 fi
 
 # Run the main command as appuser
-exec su-exec appuser "$@"
+exec gosu appuser "$@"

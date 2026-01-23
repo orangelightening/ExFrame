@@ -45,7 +45,7 @@ WORKDIR $APP_HOME
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    su-exec \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python dependencies from builder to a shared location
