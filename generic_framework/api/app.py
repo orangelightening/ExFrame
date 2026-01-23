@@ -1218,12 +1218,46 @@ async def list_all_domains() -> Dict[str, Any]:
 @app.get("/api/admin/domains/{domain_id}")
 async def get_domain_config(domain_id: str) -> Dict[str, Any]:
     """Get full domain configuration including specialists."""
+    # Try registry first (for manually created domains)
     registry = _load_domain_registry()
 
-    if domain_id not in registry["domains"]:
-        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+    if domain_id in registry["domains"]:
+        domain_config = registry["domains"][domain_id]
+    else:
+        # Fall back to loading from universe system
+        if not universe_manager or not universe_manager.universes:
+            raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 
-    domain_config = registry["domains"][domain_id]
+        # Get the active universe
+        active_universe = None
+        from core.universe import UniverseState
+        for universe in universe_manager.universes.values():
+            if universe.state == UniverseState.ACTIVE:
+                active_universe = universe
+                break
+
+        if not active_universe:
+            # Try to load MINE universe
+            try:
+                active_universe = await universe_manager.load_universe("MINE")
+            except Exception as e:
+                raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+        domain = active_universe.get_domain(domain_id)
+        if not domain:
+            raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+        # Build domain config from loaded domain
+        from pathlib import Path
+        import os
+        universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+        domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
+        if domain_file.exists():
+            import json
+            with open(domain_file) as f:
+                domain_config = json.load(f)
+        else:
+            raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 
     # Add live specialist data if domain is loaded
     if domain_id in engines:
