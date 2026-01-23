@@ -190,6 +190,49 @@ def get_domain_registry_path() -> Path:
     return Path(base) / "domains.json"
 
 
+def _ensure_writable_permissions(universes_base: Path) -> None:
+    """
+    Ensure domain JSON files are writable by the container user.
+
+    When files are cloned from git, they may have restrictive permissions (644).
+    This fixes permissions to allow the app to write new patterns via AI extension.
+    """
+    try:
+        import stat
+        fixed_count = 0
+
+        # Find all domain.json and patterns.json files
+        for json_file in universes_base.rglob("*.json"):
+            # Skip embeddings.json (large, read-only)
+            if "embeddings.json" in str(json_file):
+                continue
+
+            try:
+                # Get current permissions
+                current_mode = json_file.stat().st_mode
+
+                # Check if writable by others (least restrictive check)
+                if not (current_mode & stat.S_IWOTH):
+                    # Make writable by all (666)
+                    json_file.chmod(0o666)
+                    fixed_count += 1
+            except Exception as e:
+                logger.debug(f"Could not fix permissions for {json_file}: {e}")
+
+        # Also ensure directories are writable
+        for domain_dir in (universes_base / "MINE" / "domains").iterdir():
+            if domain_dir.is_dir():
+                try:
+                    domain_dir.chmod(0o777)
+                except Exception:
+                    pass
+
+        if fixed_count > 0:
+            logger.info(f"✓ Fixed permissions on {fixed_count} JSON files for AI pattern creation")
+    except Exception as e:
+        logger.debug(f"Permission fix skipped: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
     """
@@ -211,6 +254,10 @@ async def startup_event():
     logger.info(f"ExFrame Runtime Starting")
     logger.info(f"Universes base: {universes_base}")
     logger.info(f"=" * 60)
+
+    # Fix permissions on universe domain files
+    # This ensures files from git clone are writable by the container user
+    _ensure_writable_permissions(universes_base)
 
     # Initialize UniverseManager
     universe_manager = UniverseManager(
