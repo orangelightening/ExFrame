@@ -33,8 +33,11 @@ ENV PYTHONUNBUFFERED=1 \
     APP_HOME=/app \
     PYTHONPATH=/app:$PYTHONPATH
 
-# Create a non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Create a non-root user with configurable UID (defaults to 1000 = first user on most systems)
+ARG USER_UID=1000
+ARG USER_GID=1000
+RUN groupadd -g $USER_GID appuser && \
+    useradd -u $USER_UID -g $USER_GID appuser
 
 # Set working directory
 WORKDIR $APP_HOME
