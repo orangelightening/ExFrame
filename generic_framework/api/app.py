@@ -166,6 +166,25 @@ engines: Dict[str, GenericAssistantEngine] = {}  # Legacy: for backward compatib
 universe_manager: Optional[UniverseManager] = None  # New: Universe-based architecture
 
 
+async def _regenerate_domain_embeddings(domain_id: str) -> None:
+    """
+    Regenerate embeddings for a domain after pattern changes.
+
+    This ensures semantic search stays synchronized when patterns are
+    added, updated, or deleted.
+    """
+    if domain_id not in engines:
+        return
+
+    try:
+        kb = engines[domain_id].knowledge_base
+        if hasattr(kb, 'generate_embeddings'):
+            result = await kb.generate_embeddings()
+            logger.info(f"[EMBED] Auto-regenerated embeddings for {domain_id}: {result}")
+    except Exception as e:
+        logger.error(f"[EMBED] Failed to regenerate embeddings for {domain_id}: {e}")
+
+
 def get_storage_path(domain_id: str) -> str:
     """
     Get the storage path for a domain's patterns.
@@ -900,6 +919,9 @@ async def create_pattern(request: Request) -> Dict[str, Any]:
             await kb.save_pattern(pattern)
         else:
             raise HTTPException(status_code=500, detail="Knowledge base does not support adding patterns")
+
+        # Auto-regenerate embeddings to keep search synchronized
+        await _regenerate_domain_embeddings(domain_id)
 
         return {
             "success": True,
@@ -1892,6 +1914,9 @@ async def update_pattern(
     if update_data.confidence_score is not None:
         await kb.update_pattern(pattern_id, {"confidence": update_data.confidence_score})
 
+    # Auto-regenerate embeddings to keep search synchronized
+    await _regenerate_domain_embeddings(domain_id)
+
     # Get updated pattern
     updated_pattern = await kb.get_by_id(pattern_id)
 
@@ -1922,6 +1947,9 @@ async def delete_pattern_admin(domain_id: str, pattern_id: str) -> Dict[str, Any
 
     # Delete the pattern
     await kb.delete_pattern(pattern_id)
+
+    # Auto-regenerate embeddings to keep search synchronized
+    await _regenerate_domain_embeddings(domain_id)
 
     return {
         "domain": domain_id,
