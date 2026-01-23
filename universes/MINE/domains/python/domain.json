@@ -1,0 +1,42 @@
+{
+  "domain_id": "python",
+  "domain_name": "Auto-loaded: python",
+  "description": "Dynamically loaded domain: python",
+  "version": "1.0.0",
+  "created_at": "2026-01-09T22:43:14.964108",
+  "updated_at": "2026-01-09T22:43:14.964112",
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "Python Generalist",
+      "description": "General expert for Python",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "Python",
+        "keywords": ["python", "code", "function", "class", "import"],
+        "categories": [],
+        "threshold": 0.25
+      }
+    }
+  ],
+  "categories": [],
+  "tags": [],
+  "ui_config": {
+    "placeholder_text": "Ask about Python programming...",
+    "example_queries": [
+      "How do I read a file in Python?",
+      "What is a list comprehension?",
+      "How do I handle exceptions in Python?",
+      "How do I create a class in Python?"
+    ],
+    "icon": "\ud83d\udcda",
+    "color": "#2196F3"
+  },
+  "links": {
+    "related_domains": [],
+    "imports_patterns_from": [],
+    "suggest_on_confidence_below": 0.3
+  }
+}

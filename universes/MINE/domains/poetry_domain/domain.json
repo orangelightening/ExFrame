@@ -1,0 +1,94 @@
+{
+  "domain_id": "poetry_domain",
+  "domain_name": "Poetry & Literary Arts",
+  "description": "Knowledge about poetry forms, techniques, and literary analysis",
+  "version": "1.0.0",
+  "created_at": "2026-01-19T00:00:00Z",
+  "updated_at": "2026-01-20T23:07:49.547384",
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "Poetry Generalist",
+      "description": "General expert in poetry and literary arts",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "Poetry",
+        "keywords": [
+          "poem",
+          "poetry",
+          "verse",
+          "stanza",
+          "rhyme",
+          "meter",
+          "rhythm",
+          "metaphor",
+          "simile",
+          "alliteration",
+          "imagery",
+          "sonnet",
+          "haiku",
+          "limerick",
+          "ballad",
+          "ode",
+          "elegy",
+          "free verse",
+          "form",
+          "structure"
+        ],
+        "categories": [
+          "poetic_form",
+          "technique",
+          "analysis",
+          "literary_device"
+        ],
+        "threshold": 0.3,
+        "description": "Use only assigned names when referring to other works. Limit off topic discussions to 100 words.  within the main reply."
+      }
+    }
+  ],
+  "enrichers": [],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true
+  },
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
+  },
+  "categories": [
+    "reference"
+  ],
+  "tags": [
+    "tag1"
+  ]
+}

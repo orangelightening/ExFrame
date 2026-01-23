@@ -215,7 +215,7 @@ async def startup_event():
     # Initialize UniverseManager
     universe_manager = UniverseManager(
         universes_base_path=universes_base,
-        default_universe_id="default"
+        default_universe_id="MINE"
     )
 
     # Load default universe
@@ -1272,7 +1272,7 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
     # Create domain.json file in the universe structure
     try:
         universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-        domain_file = Path(universes_base) / "default" / "domains" / request.domain_id / "domain.json"
+        domain_file = Path(universes_base) / "MINE" / "domains" / request.domain_id / "domain.json"
         domain_file.parent.mkdir(parents=True, exist_ok=True)
 
         with open(domain_file, 'w') as f:
@@ -1340,7 +1340,7 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
     # Also update the universe's domain.json file if it exists
     try:
         universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-        domain_file = Path(universes_base) / "default" / "domains" / domain_id / "domain.json"
+        domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
 
         if domain_file.exists():
             # Load the domain.json file
@@ -1423,26 +1423,53 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
 @app.delete("/api/admin/domains/{domain_id}")
 async def delete_domain(domain_id: str) -> Dict[str, Any]:
     """Delete a domain."""
+    import shutil
+    from pathlib import Path
+
     registry = _load_domain_registry()
 
-    if domain_id not in registry["domains"]:
+    # Track if domain was in registry
+    was_in_registry = domain_id in registry["domains"]
+
+    # Get domain config if in registry, otherwise create minimal config
+    if was_in_registry:
+        domain_config = registry["domains"][domain_id]
+
+        # Unload domain if loaded
+        if domain_id in engines:
+            await engines[domain_id].domain.cleanup()
+            del engines[domain_id]
+
+        # Remove from registry
+        del registry["domains"][domain_id]
+        _save_domain_registry(registry)
+    else:
+        print(f"  Domain '{domain_id}' not in registry, checking if directory exists...")
+        # Domain might exist on disk but not in registry (orphaned domain)
+        domain_config = {"domain_id": domain_id, "domain_name": domain_id}
+
+    # Delete the actual domain directory (even if not in registry)
+    domain_path = _get_universes_domains_path() / domain_id
+
+    deleted_dir = False
+    if domain_path.exists():
+        try:
+            shutil.rmtree(domain_path)
+            print(f"  Deleted domain directory: {domain_path}")
+            deleted_dir = True
+        except Exception as e:
+            print(f"  Warning: Failed to delete domain directory {domain_path}: {e}")
+            # Don't fail the deletion if directory removal fails
+            # The domain is already removed from registry
+
+    # If domain wasn't in registry and directory didn't exist, raise 404
+    if not was_in_registry and not deleted_dir:
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
-
-    domain_config = registry["domains"][domain_id]
-
-    # Unload domain if loaded
-    if domain_id in engines:
-        await engines[domain_id].domain.cleanup()
-        del engines[domain_id]
-
-    # Remove from registry
-    del registry["domains"][domain_id]
-    _save_domain_registry(registry)
 
     return {
         "domain_id": domain_id,
         "status": "deleted",
-        "message": f"Domain '{domain_config['domain_name']}' deleted successfully"
+        "message": f"Domain '{domain_config.get('domain_name', domain_id)}' deleted successfully"
     }
 
 
@@ -1851,7 +1878,7 @@ def _get_universes_domains_path() -> Path:
     else:
         universes_base = Path(os.getenv("UNIVERSES_BASE",
                                         "/home/peter/development/eeframe/universes"))
-    return universes_base / "default" / "domains"
+    return universes_base / "MINE" / "domains"
 
 
 def get_pattern_analyzer_instance() -> PatternAnalyzer:

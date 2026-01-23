@@ -40,7 +40,7 @@ def get_pattern_analyzer() -> PatternAnalyzer:
     if _pattern_analyzer is None:
         import os
         # Use universe-based path structure
-        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/default/domains'))
+        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/MINE/domains'))
         _pattern_analyzer = PatternAnalyzer(universe_path)
     return _pattern_analyzer
 
@@ -51,7 +51,7 @@ def get_health_checker() -> HealthChecker:
     if _health_checker is None:
         import os
         # Use universe-based path structure
-        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/default/domains'))
+        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/MINE/domains'))
         _health_checker = HealthChecker(universe_path, get_search_metrics())
     return _health_checker
 
@@ -183,7 +183,7 @@ async def get_all_pattern_health(
         reports = analyzer.analyze_universe(domains)
     else:
         # Get all domains from universe path
-        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/default/domains'))
+        universe_path = Path(os.getenv('UNIVERSE_PATH', '/app/universes/MINE/domains'))
         domains = [d.name for d in universe_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
         logger.info(f"Auto-discovered domains: {domains}")
         reports = analyzer.analyze_universe(domains)

@@ -1,0 +1,299 @@
+[
+  {
+    "id": "python_001",
+    "name": "List Comprehension Pattern",
+    "pattern_type": "optimization",
+    "description": "Replace loop+append with list comprehension for readability",
+    "problem": "Verbose for loop with append clutters code",
+    "solution": "Use list comprehension for concise, readable transformation",
+    "steps": [
+      "Identify loop that builds a list",
+      "Extract transformation logic",
+      "Rewrite as [expr for item in iterable if condition]",
+      "Test that output matches original"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "python_002"
+    ],
+    "prerequisites": [],
+    "alternatives": [
+      "python_003"
+    ],
+    "confidence": 0.92,
+    "sources": [
+      "https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions"
+    ],
+    "tags": [
+      "lists",
+      "readability",
+      "optimization",
+      "functional"
+    ],
+    "examples": [
+      "[x*2 for x in range(10)]",
+      "[s.upper() for s in strings if s]"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244838",
+    "updated_at": "2026-01-06T04:34:38.244843",
+    "times_accessed": 6,
+    "user_rating": null
+  },
+  {
+    "id": "python_002",
+    "name": "Generator Expression for Memory",
+    "pattern_type": "optimization",
+    "description": "Use generator expressions instead of list comprehensions for large datasets",
+    "problem": "List comprehension loads entire result into memory",
+    "solution": "Use generator expression (no brackets) for lazy evaluation",
+    "steps": [
+      "Identify large data processing",
+      "Replace list comprehension with generator",
+      "Pass directly to consuming function (sum, max, etc.)",
+      "Or use with next() for iteration"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "python_001"
+    ],
+    "prerequisites": [
+      "python_001"
+    ],
+    "alternatives": [],
+    "confidence": 0.9,
+    "sources": [],
+    "tags": [
+      "memory",
+      "generators",
+      "optimization"
+    ],
+    "examples": [
+      "sum(x*2 for x in range(1000000))",
+      "max(len(s) for s in large_list)"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244845",
+    "updated_at": "2026-01-06T04:34:38.244847",
+    "times_accessed": 6,
+    "user_rating": null
+  },
+  {
+    "id": "python_003",
+    "name": "Map Function for Transformations",
+    "pattern_type": "optimization",
+    "description": "Use map() for applying functions to sequences",
+    "problem": "Need to apply function to all elements",
+    "solution": "Use map(function, iterable) for functional transformation",
+    "steps": [
+      "Define transformation function",
+      "Apply map(function, sequence)",
+      "Convert to list if needed: list(map(...))",
+      "Or use directly in iteration"
+    ],
+    "conditions": {},
+    "related_patterns": [
+      "python_001"
+    ],
+    "prerequisites": [],
+    "alternatives": [
+      "python_001"
+    ],
+    "confidence": 0.75,
+    "sources": [],
+    "tags": [
+      "functional",
+      "map",
+      "transform"
+    ],
+    "examples": [
+      "list(map(str.upper, names))",
+      "map(int, string_numbers)"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244849",
+    "updated_at": "2026-01-06T04:34:38.244850",
+    "times_accessed": 6,
+    "user_rating": null
+  },
+  {
+    "id": "python_004",
+    "name": "Try-Except-Else Pattern",
+    "pattern_type": "procedure",
+    "description": "Use else clause with try-except for no-exception flow",
+    "problem": "Unclear control flow when exception doesn't occur",
+    "solution": "Put normal flow in else block, only exceptions in except",
+    "steps": [
+      "Put risky code in try block",
+      "Handle specific exceptions in except",
+      "Put no-exception flow in else block",
+      "Cleanup in finally if needed"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.85,
+    "sources": [],
+    "tags": [
+      "exception-handling",
+      "control-flow",
+      "readability"
+    ],
+    "examples": [
+      "try: risky() except Error: handle() else: success()"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244852",
+    "updated_at": "2026-01-06T04:34:38.244854",
+    "times_accessed": 6,
+    "user_rating": null
+  },
+  {
+    "id": "python_005",
+    "name": "Context Manager for Resources",
+    "pattern_type": "procedure",
+    "description": "Use 'with' statement for automatic resource cleanup",
+    "problem": "Resources not properly closed, leading to leaks",
+    "solution": "Use context managers to ensure cleanup happens",
+    "steps": [
+      "Identify resource that needs cleanup (file, lock, connection)",
+      "Wrap in 'with' statement",
+      "Indent all usage inside with block",
+      "Cleanup happens automatically on exit"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [
+      "python_006"
+    ],
+    "confidence": 0.98,
+    "sources": [],
+    "tags": [
+      "resources",
+      "cleanup",
+      "files",
+      "best-practice"
+    ],
+    "examples": [
+      "with open('file.txt') as f: content = f.read()"
+    ],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244855",
+    "updated_at": "2026-01-06T04:34:38.244857",
+    "times_accessed": 6,
+    "user_rating": null
+  },
+  {
+    "id": "python_006",
+    "name": "Explicit Close Pattern",
+    "pattern_type": "procedure",
+    "description": "Manually close resources when context manager unavailable",
+    "problem": "Resources not closed in all code paths",
+    "solution": "Use try-finally to ensure close is always called",
+    "steps": [
+      "Open resource before try block",
+      "Use resource in try block",
+      "Call close() in finally block",
+      "Handle exceptions appropriately"
+    ],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [
+      "python_005"
+    ],
+    "confidence": 0.7,
+    "sources": [],
+    "tags": [
+      "resources",
+      "cleanup",
+      "legacy"
+    ],
+    "examples": [],
+    "domain": "python",
+    "created_at": "2026-01-06T04:34:38.244858",
+    "updated_at": "2026-01-06T04:34:38.244860",
+    "times_accessed": 6,
+    "user_rating": null
+  },
+  {
+    "id": "python_97cd8bd8",
+    "pattern_id": "python_97cd8bd8",
+    "name": "Test Pattern with Code",
+    "domain": "python",
+    "problem": "How to create a pattern with executable code?",
+    "solution": "Use the POST /api/patterns endpoint with a code field",
+    "description": "A test pattern to verify code storage works",
+    "pattern_type": "knowledge",
+    "confidence": 0.9,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-21T18:34:42.866826Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "test",
+      "code"
+    ],
+    "created_at": "2026-01-21T18:34:42.866840",
+    "times_accessed": 6,
+    "code": "def hello_world():\n    print(\"Hello, World!\")\n    return True",
+    "updated_at": "2026-01-21T18:34:42.866840"
+  },
+  {
+    "id": "python_52688898",
+    "pattern_id": "python_52688898",
+    "name": "My python eats mice. Which flavor are yours?",
+    "domain": "python",
+    "problem": "My python eats mice. Which flavor are yours?",
+    "solution": "I see there might be a playful confusion between the snake and the programming language! While I don't eat mice, I can tell you about the \"flavors\" of Python\u2014specifically the coding patterns that make Python code elegant and efficient. Let me share some insights based on Python best practices:\n\n---\n\n### 1. **Generator Expression for Memory Efficiency**  \nAccording to **Generator Expression for Memory**, if you're working with large datasets, avoid list comprehensions that load everything into memory upfront. Instead, use generator expressions (e.g., `(x for x in data)`) for lazy evaluation. This \"flavor\" of Python is ideal when memory conservation is critical, like processing files or streams.\n\n---\n\n### 2. **List Comprehension for Readability**  \nAs described in **List Comprehension Pattern**, Python\u2019s syntactic sugar\u2014list comprehensions\u2014replaces verbose `for` loops with `append()`. For example:  \n```python\n# Verbose (less Pythonic)\nsquares = []\nfor x in range(10):\n    squares.append(x**2)\n\n# Pythonic flavor (list comprehension)\nsquares = [x**2 for x in range(10)]\n```\nThis pattern emphasizes clarity and conciseness, a hallmark of Python\u2019s design philosophy.\n\n---\n\n### 3. **Try-Except-Else for Robust Error Handling**  \nThe **Try-Except-Else Pattern** highlights using `else` blocks to separate normal flow from exception handling. For instance:  \n```python\ntry:\n    data = parse_file(file)\nexcept ValueError:\n    print(\"Invalid file format\")\nelse:\n    process(data)  # Only runs if no exception occurred\n```\nThis structure avoids cluttering `try` blocks with non-exception logic, improving maintainability.\n\n---\n\n### Bonus: Python\u2019s \"Flavors\" in Practice  \n- **Iterables vs. Iterators**: Prefer generators for memory efficiency (Pattern 1), but use lists for repeated access (Pattern 2).  \n- **Zen of Python**: These patterns align with principles like \"Simple is better than complex\" and \"Readability counts.\"  \n- **Error Handling**: Pattern 3 ensures exceptions don\u2019t hide happy-path logic.  \n\nIf you meant the literal snake, though, I\u2019d suggest consulting a herpetologist! \ud83d\udc0d For coding help, these patterns are your \"tasty\" shortcuts. Want more examples or edge cases?",
+    "description": "AI-generated from query: My python eats mice. Which flavor are yours?",
+    "pattern_type": "knowledge",
+    "confidence": 0.8571428571428571,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "My python eats mice. Which flavor are yours?",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-22T01:46:18.597Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-22T01:46:18.602623",
+    "times_accessed": 2,
+    "code": null,
+    "updated_at": "2026-01-22T01:46:18.602623"
+  },
+  {
+    "id": "python_ddefe1a5",
+    "pattern_id": "python_ddefe1a5",
+    "name": "Is there a python/rust library",
+    "domain": "python",
+    "problem": "Is there a python/rust library",
+    "solution": "I can definitely help you explore the landscape of libraries!\n\nWhile your question seems open-ended about whether a specific library exists (\"Is there a python/rust library?\"), I can provide some expert guidance on how to evaluate, build, or search for them effectively. Additionally, the knowledge patterns available here highlight crucial best practices in Python that any high-quality library should adhere to.\n\nHere is a synthesis of insights based on the **Generator Expression for Memory**, **List Comprehension Pattern**, and **Context Manager for Resources** patterns.\n\n### 1. Evaluating Library Performance: Memory vs. Readability\nIf you are looking for a library to handle data processing or transformation, it is vital to check if the library respects memory constraints.\n\nAccording to the **Generator Expression for Memory** pattern, standard list comprehensions load the entire result into memory. This is fine for small datasets, but for large datasets, it creates massive memory overhead. A good Python library will utilize generator expressions (using parentheses or no brackets) for lazy evaluation, yielding items one at a time rather than building the whole list in memory.\n\nConversely, for smaller datasets where readability and speed of access are paramount, the **List Comprehension Pattern** suggests that libraries should offer concise, readable APIs (perhaps using list comprehensions internally) to replace verbose loops and manual appends.\n\n**Why this matters for Rust integration:**\nWhen mixing Python and Rust, memory management is critical. Rust is often used to build high-performance extensions for Python. If you are using a library that binds Python to Rust, ensure it supports streaming or generators (aligning with the **Generator Expression for Memory** pattern) so you don't lose the lazy evaluation benefits when crossing the language boundary.\n\n### 2. Evaluating Safety: Resource Management\nIf the library you are looking for involves file handling, network connections, or database I/O, safety is a priority.\n\nAs described in the **Context Manager for Resources** pattern, improper resource handling leads to leaks. A well-architected library will utilize the `with` statement (context managers) to ensure that cleanup happens automatically, regardless of whether the code succeeds or raises an exception.\n\n### 3. Python/Rust Interoperability\nSince you mentioned \"python/rust,\" you might be looking for tools that bridge these two ecosystems.\n\n*   **PyO3:** This is the de-facto standard for Rust bindings to Python. It allows you to write native Python modules in Rust. If you are looking for a library *to* write such bindings, this is likely it.\n*   **Maturin:** A tool often used with PyO3 to build and publish Python packages backed by Rust.\n\nIf you are looking for a specific library that implements a certain algorithm or feature using Rust to speed up Python, knowing the **List Comprehension Pattern** and **Generator Expression for Memory** patterns will help you audit that library's API to see if it \"feels\" Pythonic (i.e., does it offer a generator interface, or does it force a block of RAM?)\n\n### Summary Recommendation\nTo give you a specific name, I would need to know the functionality you are after (e.g., web scraping, numerical computation, audio processing). However, based on the patterns we have:\n\n1.  If you need to **write** such a library: Look into **PyO3**.\n2.  If you need to **audit** such a library: Check if it uses Context Managers (Pattern 3) for resources and Generators (Pattern 1) for data processing.\n\nIf you can clarify what domain or problem you are trying to solve, I can provide a more specific recommendation",
+    "description": "AI-generated from query: Is there a python/rust library",
+    "pattern_type": "knowledge",
+    "confidence": 0.857142857142857,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Is there a python/rust library",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-22T01:48:06.988Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-22T01:48:06.995632",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-22T01:48:06.995632"
+  }
+]

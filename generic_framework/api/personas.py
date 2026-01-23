@@ -122,7 +122,7 @@ async def get_specialist_persona(domain_id: str, specialist_id: str):
     import json
 
     # Load domain config
-    domain_path = Path(f"universes/default/domains/{domain_id}/domain.json")
+    domain_path = Path(f"universes/MINE/domains/{domain_id}/domain.json")
     if not domain_path.exists():
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 

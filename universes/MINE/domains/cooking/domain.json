@@ -1,0 +1,82 @@
+{
+  "domain_id": "cooking",
+  "domain_name": "Cooking & Recipes",
+  "description": "Culinary knowledge and recipes",
+  "version": "1.0.0",
+  "created_at": "2026-01-06T00:00:00Z",
+  "updated_at": "2026-01-20T21:18:13.154992",
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "Cooking Generalist",
+      "description": "General expert in cooking and recipes",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "Cooking",
+        "keywords": [
+          "cook",
+          "recipe",
+          "bake",
+          "chicken",
+          "oven",
+          "temperature",
+          "ingredients",
+          "preparation",
+          "technique",
+          "method",
+          "prepare"
+        ],
+        "categories": [
+          "technique",
+          "recipe",
+          "cooking_method"
+        ],
+        "threshold": 0.3
+      }
+    }
+  ],
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMFallbackEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "fallback",
+        "min_confidence": 0.3,
+        "model": "glm-4.7",
+        "max_patterns": 3,
+        "require_confirmation": true
+      }
+    }
+  ],
+  "categories": [
+    "technique",
+    "recipe",
+    "cooking_method",
+    "ingredient_substitution"
+  ],
+  "tags": [
+    "baking",
+    "chicken",
+    "quick",
+    "healthy"
+  ],
+  "ui_config": {
+    "placeholder_text": "Type your cooking question here... (Press Enter to submit)",
+    "example_queries": [
+      "How do I bake chicken breast?",
+      "What's the internal temperature for cooked chicken?",
+      "How long do I cook a 4lb chicken?",
+      "What's a quick weeknight dinner?"
+    ],
+    "icon": "\ud83c\udf73",
+    "color": "#FF9800"
+  },
+  "links": {
+    "related_domains": [],
+    "imports_patterns_from": [],
+    "suggest_on_confidence_below": 0.3
+  }
+}

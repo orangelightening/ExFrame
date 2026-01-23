@@ -1,0 +1,118 @@
+[
+  {
+    "id": "first_aid_001",
+    "domain": "first_aid",
+    "name": "Death",
+    "pattern_type": "procedure",
+    "description": "It terminates the life of the subject",
+    "problem": "No more worries no more cares",
+    "solution": "It is the solution\n",
+    "steps": [
+      "Lie still and just fade away would be nice."
+    ],
+    "conditions": {
+      "custom": "If Alive else Dead"
+    },
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.5,
+    "sources": [],
+    "tags": [],
+    "examples": [],
+    "created_at": "2026-01-06T04:57:15.252739",
+    "updated_at": "2026-01-06T04:57:15.252770",
+    "times_accessed": 9,
+    "user_rating": null
+  },
+  {
+    "id": "first_aid_candidate_002",
+    "name": "what do I do if I cut myself?",
+    "pattern_type": "how_to",
+    "description": "Auto-generated from query: what do I do if I cut myself?",
+    "problem": "what do I do if I cut myself?",
+    "solution": "If you have cut yourself, follow these standard first aid steps to manage the wound and prevent infection. **Please remember: I am an AI, not a doctor. If the injury is severe, please call emergency services (911 in the US) or go to the nearest emergency room immediately.**\n\n### 1. Ensure Safety\nStop whatever you are doing. If the cut was caused by a dirty object (like a rusty nail or glass), be careful not to injure yourself further.\n\n### 2. Control the Bleeding\n*   **Apply Pressure:** Use a clean cloth, gauze, or sterile bandage to apply firm, direct pressure to the wound.\n*   **Elevate:** If possible, raise the injured area above the level of the heart. This helps reduce blood flow to the area and slows bleeding.\n*   **Maintain Pressure:** Do not peek to check if the bleeding has stopped for at least 5\u201310 minutes. Removing pressure too soon can disrupt the clotting process.\n\n### 3. Clean the Wound\nOnce the bleeding has stopped or slowed:\n*   **Wash Hands:** Clean your own hands thoroughly with soap and water to avoid introducing bacteria.\n*   **Rinse the Cut:** Use cool, clean running water to rinse out dirt and debris.\n*   **Clean Around the Wound:** Use soap and a washcloth to clean the skin *around* the cut. Try to avoid getting soap directly inside the deep part of the wound, as it can cause irritation.\n*   **Remove Debris:** If there are small pieces of dirt or debris that you cannot remove by rinsing, use sterilized tweezers (cleaned with alcohol) to pick them out.\n\n### 4. Protect the Wound\n*   **Apply Antibiotic Ointment:** Apply a thin layer of an over-the-counter antibiotic ointment (like Neosporin or Bacitracin) if you are not allergic. This helps keep the wound moist and prevents infection.\n*   **Cover it:** Cover the cut with a sterile bandage or adhesive strip. Change the bandage at least once a day or whenever it gets wet or dirty.\n\n---\n\n## When to Seek Medical Attention\nYou should see a doctor or visit urgent care if:\n*   **The bleeding is heavy or does not stop** after 10\u201315 minutes of applied pressure.\n*   **The cut is deep or jagged** (e.g., you can see fat, muscle, or bone, or the edges of the skin are far apart).\n*   **The wound is caused by a dirty or rusty object** (You may need a tetanus shot).\n*   **There is numbness or loss of function** in the area below the wound (this may indicate nerve or tendon damage).\n*   **Signs of infection develop:** Redness spreading from the wound, increasing pain, warmth, swelling, or oozing pus.",
+    "steps": [],
+    "conditions": {},
+    "related_patterns": [],
+    "prerequisites": [],
+    "alternatives": [],
+    "confidence": 0.5,
+    "sources": [],
+    "tags": [
+      "candidate",
+      "llm_generated"
+    ],
+    "examples": [
+      "what do I do if I cut myself?"
+    ],
+    "domain": "first_aid",
+    "created_at": "2026-01-11T02:48:47.852924",
+    "updated_at": "2026-01-11T07:48:26.495089",
+    "times_accessed": 18,
+    "user_rating": null,
+    "status": "certified",
+    "origin": "llm_fallback",
+    "origin_query": "what do I do if I cut myself?",
+    "generated_at": "2026-01-11T02:48:47.852883",
+    "generated_by": "glm-4.7",
+    "confidence_score": 0.8,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": null,
+    "usage_count": 0,
+    "user_feedback": [],
+    "llm_generated": false
+  },
+  {
+    "id": "first_aid_c8b685cf",
+    "pattern_id": "first_aid_c8b685cf",
+    "name": "What is narcolepsy",
+    "domain": "first_aid",
+    "problem": "what is narcolepsy",
+    "solution": "Although I am an AI assistant designed specifically for the **first_aid** domain, I must clarify that **narcolepsy** is a chronic neurological sleep disorder, not a physical injury or a condition typically managed with first aid.\n\nBased on the patterns available in my knowledge base\u2014specifically **Understanding Cuts and Scrapes: A First Aid Guide** and **what do I do if I cut myself?**\u2014my expertise is focused on trauma care, wound management, and emergency response.\n\nHere is an explanation of narcolepsy, along with important distinctions regarding when first aid might be necessary for someone with this condition.\n\n### What is Narcolepsy?\n\nNarcolepsy is a neurological disorder that affects the control of sleep and wakefulness. People with narcolepsy experience uncontrollable episodes of falling asleep during the day. They may also suffer from sudden loss of muscle tone (cataplexy), hallucinations, and sleep paralysis.\n\n**Key Symptoms:**\n*   **Excessive Daytime Sleepiness (EDS):** An overwhelming sense of tiredness, regardless of how much sleep was had the night before.\n*   **Cataplexy:** A sudden loss of muscle tone that leads to feelings of weakness and a loss of voluntary muscle control. It is often triggered by strong emotions like laughter, surprise, or anger.\n*   **Sleep Paralysis:** A temporary inability to move or speak while falling asleep or waking up.\n*   **Hallucinations:** Vivid and often frightening experiences that occur when falling asleep (hypnagogic) or waking up (hypnopompic).\n\n### First Aid Considerations\n\nWhile narcolepsy itself requires management by a medical professional (usually a neurologist or sleep specialist), there are situations where **first aid** knowledge becomes relevant for a person with narcolepsy.\n\n**1. Injuries from Falls (Cataplexy)**\nIf a person experiences a sudden episode of cataplexy (loss of muscle tone), they may collapse suddenly. This can lead to **cuts, scrapes, or lacerations**.\n*   If a person falls and suffers a cut, you should follow standard first aid protocols.\n*   As described in **what do I do if I cut myself?**, you should:\n    *   **Ensure Safety:** Stop any activity that caused the injury.\n    *   **Control the Bleeding:** Apply firm, direct pressure with a clean cloth.\n    *   **Clean the Wound:** Once bleeding stops, clean the area to prevent infection.\n\n**2. Managing Wounds**\nBecause a person with narcolepsy may be prone to sudden falls, understanding proper wound care is essential. As outlined in **Understanding Cuts and Scrapes: A First Aid Guide**, the skin is the body's primary defense against infection. Any break in the skin (laceration) requires attention to ensure it heals correctly.\n\n**Summary**\nNarcolepsy is a long-term medical condition rather than a first aid emergency. However, if you are with someone who has narcolepsy, the most helpful first aid skills you can possess are treating injuries resulting from unexpected falls, such as **controlling bleeding** and **cleaning wounds**.\n\n*Disclaimer: I am an AI assistant. If you or someone else has experienced a serious injury or has symptoms of narcolepsy, please consult a medical doctor or sleep specialist for proper diagnosis and treatment.*",
+    "description": "AI-generated from query: what is narcolepsy",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "what is narcolepsy",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-21T07:48:17.704Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-21T07:48:17.712867",
+    "times_accessed": 5,
+    "updated_at": "2026-01-21T07:48:17.712867"
+  },
+  {
+    "id": "first_aid_ffe55fb7",
+    "pattern_id": "first_aid_ffe55fb7",
+    "name": "What if we find someone unconscious on the floor?\n",
+    "domain": "first_aid",
+    "problem": "What if we find someone unconscious on the floor?\n",
+    "solution": "Finding someone unconscious is a high-stakes situation. While my knowledge base contains specific patterns like **what do I do if I cut myself?** for bleeding injuries or **What is narcolepsy** for sleep disorders, an unconscious person requires a different, immediate protocol.\n\nHere is the critical first aid response for this scenario, synthesized to address the urgency of the situation.\n\n### 1. Check for Responsiveness and Safety\nBefore you do anything else, you must determine if the person is truly unconscious or just sleeping.\n*   **Check the Scene:** Ensure the environment is safe for *you* to enter. If there is traffic, fire, or toxic fumes, do not approach; call emergency services immediately.\n*   **Try to Wake Them:** Tap the person firmly on the shoulder and shout loudly, \"Are you okay?\"\n*   **Check for Breathing:**\n    *   Look at their chest to see if it is rising and falling.\n    *   Listen for breath sounds.\n    *   Feel for air from their nose or mouth.\n    *   **Do this for no more than 10 seconds.**\n\n### 2. Call Emergency Services Immediately\nIf the person does not wake up or is not breathing normally:\n*   **Call 911** (or your local emergency number) immediately.\n*   If you are not alone, point to a specific person and instruct them to call. Don't just yell \"someone call 911,\" as bystanders may assume someone else is doing it.\n*   If you are alone, call 911 first before starting any prolonged treatment (like CPR), unless the person is a drowning victim or a child who collapsed suddenly, in which case 2 minutes of CPR is recommended before calling.\n\n### 3. Provide Care Based on Breathing\n**Scenario A: The person is NOT breathing or is only gasping (agonal breathing)**\n*   This is a cardiac emergency.\n*   Begin **CPR** (Cardiopulmonary Resuscitation) immediately.\n*   Push hard and fast in the center of the chest.\n*   If you are trained, provide rescue breaths; if not, perform \"Hands-Only CPR.\"\n*   Continue until help arrives or the person starts breathing.\n\n**Scenario B: The person IS breathing**\n*   If they are breathing but unconscious, they are at high risk of airway obstruction (their tongue falling back or choking on vomit).\n*   **Recovery Position:** Gently roll the person onto their side.\n    *   This keeps the airway clear and allows fluids (like vomit) to drain out, preventing them from choking.\n    *   Bend their top leg to form a right-angle triangle, which keeps them stable.\n*   **Monitor Them:** Stay with them and check their breathing constantly until help arrives. If they stop breathing, start CPR.\n\n### Important Contexts to Consider\nWhile the immediate steps above are universal, context matters:\n\n*   **Head Injury:** If you suspect they fell (as implied by \"on the floor\") and hit their head, try not to move their neck unnecessarily unless they are in immediate danger (like a fire). Support their head and neck while rolling them if possible.\n*   **Narcolepsy or Sleep Disorders:** As described in the **What is narcolepsy** pattern, conditions like narcolepsy can cause sudden sleep episodes, but true unconsciousness (unresponsiveness to stimuli) is different from falling asleep. However, if the person is known to have a seizure disorder or narcolepsy, they may just need time to recover and their airway protected. **Assume the worst first (unconsciousness) until proven otherwise.**\n*   **Bleeding:** If the person is unconscious because of a severe injury, you may need to control bleeding *while* waiting for help, similar to the steps in **what do I do if I cut myself?** (applying pressure). **However, never prioritize bleeding control over opening the airway if they are not breathing.**\n\n**Summary:**\nIf you find someone unconscious, **Safety -> Check Response/Breathing -> Call 911 -> CPR or Recovery Position.**",
+    "description": "AI-generated from query: What if we find someone unconscious on the floor?\n",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "What if we find someone unconscious on the floor?\n",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-22T02:55:55.113Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-22T02:55:55.117628",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-22T02:55:55.117628"
+  }
+]

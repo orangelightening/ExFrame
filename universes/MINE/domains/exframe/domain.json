@@ -1,0 +1,87 @@
+{
+  "domain_id": "exframe",
+  "domain_name": "ExFrame Guide",
+  "description": "Learn how to use ExFrame - self-documenting patterns",
+  "version": "1.0.0",
+  "created_at": "2026-01-12T00:00:00Z",
+  "updated_at": "2026-01-12T00:00:00Z",
+
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "ExFrame Guide",
+      "description": "Expert in ExFrame usage and features",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "ExFrame",
+        "keywords": [
+          "pattern", "domain", "query", "survey", "universe",
+          "eeframe", "exframe", "interface", "specialist", "enricher",
+          "knowledge", "trace", "diagnostics", "autopilot"
+        ],
+        "categories": ["getting_started", "features", "how_to", "concepts"],
+        "threshold": 0.40
+      }
+    }
+  ],
+
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMFallbackEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "fallback",
+        "min_confidence": 0.50,
+        "model": "glm-4.7",
+        "max_patterns": 5,
+        "research_strategy": {
+          "type": "document",
+          "use_chunking": false,
+          "base_path": "/app",
+          "documents": [
+            {"type": "file", "path": "README.md"},
+            {"type": "file", "path": "context.md"},
+            {"type": "file", "path": "claude-exframe.md"},
+            {"type": "file", "path": "ready-set.md"},
+            {"type": "file", "path": "LAUNCH_MANIFESTO.md"},
+            {"type": "file", "path": "LAUNCH_CHECKLIST.md"},
+            {"type": "file", "path": "OPEN_SOURCE_GUIDE.md"},
+            {"type": "file", "path": "GITHUB_LAUNCH_GUIDE.md"},
+            {"type": "file", "path": "INSTALL.md"},
+            {"type": "file", "path": "RELEASE_NOTES.md"},
+            {"type": "file", "path": "PLUGIN_ARCHITECTURE.md"},
+            {"type": "file", "path": "EXTENSION_POINTS.md"},
+            {"type": "file", "path": "rag-search-design.md"},
+            {"type": "file", "path": "query-rewrite.md"}
+          ]
+        }
+      }
+    }
+  ],
+
+  "categories": ["getting_started", "features", "how_to", "concepts", "troubleshooting"],
+  "tags": ["help", "tutorial", "guide", "documentation", "learn"],
+
+  "ui_config": {
+    "placeholder_text": "How can I help you explore ExFrame? (Press Enter to submit)",
+    "example_queries": [
+      "ExFrame domains and patterns",
+      "Surveyor and autonomous learning",
+      "Query interface and traces",
+      "Creating specialists and plugins",
+      "Diagnostics and health checks"
+    ],
+    "icon": "📚",
+    "color": "#4CAF50",
+    "is_default": true
+  },
+
+  "links": {
+    "related_domains": [],
+    "imports_patterns_from": [],
+    "suggest_on_confidence_below": 0.40
+  }
+}

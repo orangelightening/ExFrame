@@ -1,27 +1,54 @@
 # ExFrame Project Context
 
-**Date**: 2026-01-20
+**Date**: 2026-01-22
 **Working Directory**: `/home/peter/development/eeframe`
-**Status**: Semantic Search Fully Implemented - Ready for Release
-**Version**: 1.5.0
+**Status**: Self-Documenting Landing Page - Ready for Release
+**Version**: 1.6.0
+**Default Universe**: MINE
+**Default Domain**: exframe
 
 ---
 
 ## EXECUTIVE SUMMARY
 
 ExFrame is a domain-agnostic AI-powered knowledge management system featuring:
+- **Emergent Personas**: Each domain has one specialist that evolves from its pattern corpus
 - **Universe Architecture**: Complete isolation and portability of knowledge
 - **Plugin Pipeline**: Router → Specialist → Enricher → Formatter
 - **Pure Semantic Search**: 100% semantic similarity using embeddings
 - **Pattern-Based Knowledge**: Structured representation with relationships
+- **Self-Documenting**: New users are welcomed with an intro query that explains the system
+
+### The Emergent Persona Theory
+
+**Knowledge comes from patterns. Persona emerges from knowledge.**
+
+1. Patterns capture human expertise
+2. Knowledge is the corpus of patterns
+3. The specialist is the AI persona that emerges from that corpus
+4. As patterns increase, the specialist becomes more coherent and expert-like
+5. The specialist is not a "person" - it's the collective voice of the domain
+
+Each domain has **one specialist** whose personality comes entirely from:
+- The domain's pattern corpus (what it knows)
+- The domain's name and description (who it is)
+- The domain's categories (what it cares about)
 
 ### Current Status: Production Ready ✅
 
-Semantic search is fully operational across all 10 domains with 100% embedding coverage.
+Self-documenting landing page with semantic search fully operational across all 11 domains.
 
 ---
 
-## CURRENT STATE (2026-01-20)
+## CURRENT STATE (2026-01-22)
+
+### New: Self-Documenting Landing Page
+
+The landing page now welcomes new users with:
+- **Default Universe**: MINE (renamed from "default")
+- **Default Domain**: exframe (renamed from "exframe_methods")
+- **Preloaded Query**: "What is ExFrame and how do I get started?"
+- **Response**: Hits the intro pattern explaining where to go next
 
 ### Semantic Search Implementation
 
@@ -34,28 +61,31 @@ Pure semantic search using SentenceTransformers:
 | **Similarity Metric** | Cosine similarity |
 | **Semantic Weight** | 100% |
 | **Keyword Weight** | 0% |
-| **Coverage** | All 10 domains (131 patterns) |
+| **Coverage** | All 11 domains (145 patterns) |
 
 ### Domain Status
 
 | Domain | Patterns | Embeddings | Status |
 |--------|----------|------------|--------|
-| binary_symmetry | 20 | 20 | ✅ Semantic |
-| cooking | 32 | 32 | ✅ Semantic |
-| diy | 10 | 10 | ✅ Semantic |
-| exframe_methods | 26 | 26 | ✅ Semantic |
-| first_aid | 3 | 3 | ✅ Semantic |
+| binary_symmetry | 21 | 21 | ✅ Semantic |
+| cooking | 33 | 33 | ✅ Semantic |
+| diy | 12 | 12 | ✅ Semantic |
+| exframe | 26 | 26 | ✅ Semantic |
+| first_aid | 4 | 4 | ✅ Semantic |
 | gardening | 3 | 3 | ✅ Semantic |
 | llm_consciousness | 12 | 12 | ✅ Semantic |
-| poetry_domain | 13 | 13 | ✅ Semantic |
-| psycho | 6 | 6 | ✅ Semantic |
-| python | 6 | 6 | ✅ Semantic |
+| poetry_domain | 17 | 17 | ✅ Semantic |
+| psycho | 8 | 8 | ✅ Semantic |
+| python | 9 | 9 | ✅ Semantic |
+| test_domain | 0 | 0 | Empty |
 
-### Recent Fixes (2026-01-20)
+### Recent Changes (2026-01-22)
 
-1. **JSON Serialization** - Fixed numpy float32 to Python float conversion
-2. **Query Bug** - Fixed unpacking error in keyword-only search path
-3. **Length Protection** - Added pattern truncation warnings and strategies
+1. **Universe Rename** - "default" → "MINE" (never use "default" as a name)
+2. **Domain Rename** - "exframe_methods" → "exframe"
+3. **Landing Page Defaults** - Preloaded query for new users
+4. **Research Strategy** - Read-only access to project documentation for LLM fallback
+5. **Self-Documenting** - System introduces itself to new users automatically
 
 ---
 

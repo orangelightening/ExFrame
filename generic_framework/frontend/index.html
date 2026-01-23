@@ -387,20 +387,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Example Queries -->
-                    <div class="glass rounded-xl p-6">
-                        <h2 class="text-lg font-semibold mb-4">Example Queries</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <template x-for="example in currentExampleQueriesDisplay">
-                                <button
-                                    @click="query = example;"
-                                    class="text-left px-4 py-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 hover:border-emerald-500 transition-all text-sm"
-                                    x-text="example"
-                                ></button>
-                            </template>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Right Column: Specialists & Patterns -->
@@ -1053,7 +1039,7 @@
                                 </label>
                                 <input type="text" x-model="newSurveyForm.docs_base_path"
                                        class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none text-white placeholder-gray-500"
-                                       placeholder="/app/universes/default/docs">
+                                       placeholder="/app/universes/MINE/docs">
                                 <p class="text-xs text-gray-400 mt-1">Path inside Docker container where documents are stored</p>
                             </div>
 
@@ -1465,7 +1451,7 @@
                                     <label class="block text-xs text-gray-400 mb-2">Documents Path (in container)</label>
                                     <input type="text" x-model="domainForm.research_base_path"
                                            class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none"
-                                           placeholder="/app/universes/default/docs">
+                                           placeholder="/app/universes/MINE/docs">
                                     <p class="text-xs text-gray-500 mt-1">Absolute path inside Docker container</p>
                                 </div>
 
@@ -2083,7 +2069,7 @@
     <script>
         function assistantApp() {
             return {
-                query: '',
+                query: 'What is ExFrame and how do I get started?',
                 response: '',
                 specialist: '',
                 confidence: 0,
@@ -2099,8 +2085,8 @@
                 canExtendWithAI: false,  // Show "Extend with AI" button when true
                 loading: false,
                 lastQuery: '',
-                currentDomain: 'exframe_methods',
-                currentUniverse: 'default',
+                currentDomain: 'exframe',
+                currentUniverse: 'MINE',
                 availableUniverses: [],
                 newUniverseId: '',
                 newUniverseDescription: '',
@@ -2152,7 +2138,7 @@
                     specialists: [],
                     // Research Strategy (LLM Fallback) fields
                     research_strategy_type: 'none', // 'none', 'llm_only', 'document', 'internet'
-                    research_base_path: '/app/universes/default/docs',
+                    research_base_path: '/app/universes/MINE/docs',
                     research_documents: '',
                     research_chunk_size: 500,
                     research_chunk_overlap: 100,
@@ -2213,7 +2199,7 @@
                     additional_urls: '',
                     scraping_prompt: '',
                     // Document control (documents)
-                    docs_base_path: '/app/universes/default/docs',
+                    docs_base_path: '/app/universes/MINE/docs',
                     docs_list: '',
                     docs_chunk_size: 500,
                     docs_chunk_overlap: 100
@@ -2235,7 +2221,7 @@
                     additional_urls: '',
                     scraping_prompt: '',
                     // Document control (documents)
-                    docs_base_path: '/app/universes/default/docs',
+                    docs_base_path: '/app/universes/MINE/docs',
                     docs_list: '',
                     docs_chunk_size: 500,
                     docs_chunk_overlap: 100
@@ -2250,32 +2236,7 @@
                     { id: 'universes', label: 'Universes' },
                     { id: 'diagnostics', label: 'Diagnostics' },
                 ],
-                exampleQueries: {
-                    'cooking': [
-                        'How do I cook chicken breast?',
-                        'My cake is too dense, what did I do wrong?',
-                        'Can I substitute oil for butter?',
-                        'I need a quick dinner tonight',
-                        'How long should I bake chicken?',
-                        'What\'s the internal temperature for cooked chicken?'
-                    ],
-                    'llm_consciousness': [
-                        'How do I detect when an LLM is hallucinating?',
-                        'What are the common failure modes in autonomous agents?',
-                        'How can I monitor for quality drift in LLM responses?',
-                        'What should I do when an agent gets stuck in a loop?',
-                        'How do I prevent tool refusal issues?',
-                        'What is perseveration in LLM agents?'
-                    ],
-                    'binary_symmetry': [
-                        'What is the opposite of 0xFF in binary?',
-                        'How do I reverse the bits in a byte?',
-                        'What numbers are palindromic in binary?',
-                        'What\'s the Hamming distance between 0x55 and 0xAA?',
-                        'How do I detect if a number is a power of two?',
-                        'What is Gray code and why is it useful?'
-                    ]
-                },
+                exampleQueries: {},  // Populated from recent traces per domain
 
                 // Computed property for the trace to display
                 get displayTrace() {
@@ -2322,7 +2283,7 @@
                     // Watch for domain/response changes to control constellation
                     this.$watch('currentDomain', (val) => {
                         this.$nextTick(() => {
-                            if (val === 'exframe_methods' && !this.response) {
+                            if (val === 'exframe' && !this.response) {
                                 this.initConstellation();
                             } else {
                                 if (this.constellation.animationId) {
@@ -2348,7 +2309,7 @@
                         // Get the active/default universe
                         if (data.universes && data.universes.length > 0) {
                             // Find the active universe or default to 'default'
-                            const activeUniverse = data.universes.find(u => u.is_active) || data.universes.find(u => u.universe_id === 'default') || data.universes[0];
+                            const activeUniverse = data.universes.find(u => u.is_active) || data.universes.find(u => u.universe_id === 'MINE') || data.universes[0];
                             this.currentUniverse = activeUniverse.universe_id;
 
                             // Load the universe to get its domains
@@ -2368,7 +2329,7 @@
                         }
                     } catch (error) {
                         console.error('Failed to load current universe:', error);
-                        this.currentUniverse = 'default';
+                        this.currentUniverse = 'MINE';
                         this.availableDomains = [];
                     }
                 },
@@ -2535,8 +2496,8 @@
 
                         // Set currentDomain to API's default, but prioritize exframe_methods if available
                         let apiDefault = data.default || data.domains[0];
-                        if (data.domains.includes('exframe_methods')) {
-                            apiDefault = 'exframe_methods';
+                        if (data.domains.includes('exframe')) {
+                            apiDefault = 'exframe';
                             console.log('Overriding to exframe_methods as default');
                         }
                         console.log('Setting currentDomain to:', apiDefault);
@@ -2579,20 +2540,18 @@
                 },
 
                 updateDisplayProperties() {
-                    // Update example queries display
-                    this.currentExampleQueriesDisplay = this.exampleQueries[this.currentDomain] || this.exampleQueries['cooking'];
+                    // Update example queries display - use recent queries or empty array
+                    this.currentExampleQueriesDisplay = this.exampleQueries[this.currentDomain] || [];
 
-                    // Update placeholder display - use dynamic if available, otherwise fallback
+                    // Update placeholder display - use dynamic if available, otherwise generate from domain name
                     const domainPlaceholder = this.exampleQueries[this.currentDomain + '_placeholder'];
                     if (domainPlaceholder) {
                         // Domain config already includes "(Press Enter to submit)" in the placeholder
                         this.currentPlaceholderDisplay = domainPlaceholder;
-                    } else if (this.currentDomain === 'llm_consciousness') {
-                        this.currentPlaceholderDisplay = 'Type your question about LLM failure modes... (Press Enter to submit)';
-                    } else if (this.currentDomain === 'binary_symmetry') {
-                        this.currentPlaceholderDisplay = 'Ask about binary patterns, bitwise operations, or bit manipulation... (Press Enter to submit)';
                     } else {
-                        this.currentPlaceholderDisplay = 'Type your question here... (Press Enter to submit)';
+                        // Generate placeholder from domain name
+                        const domainLabel = this.availableDomains.find(d => d.value === this.currentDomain)?.label || this.currentDomain;
+                        this.currentPlaceholderDisplay = `Ask about ${domainLabel}... (Press Enter to submit)`;
                     }
 
                     console.log('Updated display properties for domain:', this.currentDomain);
@@ -2636,12 +2595,13 @@
                             return;
                         }
 
-                        // Load specialists, patterns, health, and domain config in parallel
-                        const [specsRes, patternsRes, healthRes, configRes] = await Promise.all([
+                        // Load specialists, patterns, health, domain config, and recent traces in parallel
+                        const [specsRes, patternsRes, healthRes, configRes, tracesRes] = await Promise.all([
                             fetch(`/api/domains/${this.currentDomain}/specialists`),
                             fetch(`/api/domains/${this.currentDomain}/patterns`),
                             fetch(`/api/domains/${this.currentDomain}/health`),
-                            fetch(`/api/admin/domains/${this.currentDomain}`)
+                            fetch(`/api/admin/domains/${this.currentDomain}`),
+                            fetch(`/api/traces?domain=${this.currentDomain}&limit=20`)
                         ]);
 
                         const specsData = await specsRes.json();
@@ -2666,21 +2626,31 @@
                         const healthData = await healthRes.json();
                         this.categories = healthData.categories || [];
 
-                        // Load domain config to get example_queries and placeholder
+                        // Load domain config to get placeholder text
                         const configData = await configRes.json();
                         // Store domain description and last update for display
                         this.domainDescription = configData.description || '';
                         this.domainLastUpdate = configData.updated_at || '';
                         if (configData.ui_config) {
-                            if (configData.ui_config.example_queries) {
-                                this.exampleQueries[this.currentDomain] = configData.ui_config.example_queries;
-                                console.log('Loaded example queries for', this.currentDomain, ':', configData.ui_config.example_queries);
-                            }
                             if (configData.ui_config.placeholder_text) {
                                 this.exampleQueries[this.currentDomain + '_placeholder'] = configData.ui_config.placeholder_text;
                                 console.log('Loaded placeholder for', this.currentDomain, ':', configData.ui_config.placeholder_text);
                             }
                         }
+
+                        // Load recent queries from traces instead of static examples
+                        const tracesData = await tracesRes.json();
+                        const recentQueries = [];
+                        const seenQueries = new Set();
+                        for (const trace of (tracesData.traces || [])) {
+                            if (trace.query && !seenQueries.has(trace.query)) {
+                                recentQueries.push(trace.query);
+                                seenQueries.add(trace.query);
+                                if (recentQueries.length >= 6) break;
+                            }
+                        }
+                        this.exampleQueries[this.currentDomain] = recentQueries;
+                        console.log('Loaded recent queries for', this.currentDomain, ':', recentQueries);
                     } catch (error) {
                         console.error('=== ERROR in loadDomainInfo ===');
                         console.error('Error:', error);
@@ -3085,7 +3055,7 @@
 
                         // Extract research strategy config from enrichers
                         let research_strategy_type = 'none';
-                        let research_base_path = '/app/universes/default/docs';
+                        let research_base_path = '/app/universes/MINE/docs';
                         let research_documents = '';
                         let research_chunk_size = 500;
                         let research_chunk_overlap = 100;
@@ -3098,7 +3068,7 @@
                                 const rs_config = llm_enricher.config?.research_strategy;
                                 if (rs_config) {
                                     research_strategy_type = rs_config.type || 'document';
-                                    research_base_path = rs_config.base_path || '/app/universes/default/docs';
+                                    research_base_path = rs_config.base_path || '/app/universes/MINE/docs';
                                     research_documents = (rs_config.documents || []).map(d => d.path || d).join('\n');
                                     research_chunk_size = rs_config.chunk_size || 500;
                                     research_chunk_overlap = rs_config.chunk_overlap || 100;
@@ -3238,7 +3208,7 @@
                         specialists: [],
                         // Research Strategy fields
                         research_strategy_type: 'none',
-                        research_base_path: '/app/universes/default/docs',
+                        research_base_path: '/app/universes/MINE/docs',
                         research_documents: '',
                         research_chunk_size: 500,
                         research_chunk_overlap: 100,
@@ -3266,7 +3236,25 @@
 
                         const data = await res.json();
                         alert(data.message || 'Domain deleted successfully');
+
+                        // Store the deleted domain ID to check if we need to switch
+                        const deletedDomainId = this.domainToDelete.domain_id;
                         this.domainToDelete = null;
+
+                        // Reload the domains list to get updated available domains
+                        await this.loadDomains();
+
+                        // If we deleted the current domain, switch to another one
+                        if (this.currentDomain === deletedDomainId) {
+                            if (this.availableDomains.length > 0) {
+                                await this.switchDomain(this.availableDomains[0]);
+                            } else {
+                                this.currentDomain = null;
+                                this.domainConfig = null;
+                            }
+                        }
+
+                        // Reload the domains list for the Domains tab
                         await this.loadAllDomains();
                     } catch (error) {
                         console.error('Failed to delete domain:', error);
@@ -3460,12 +3448,29 @@
                         if (!healthRes.ok) throw new Error('Failed to load health');
                         const healthData = await healthRes.json();
 
-                        // Load search metrics
-                        const metricsUrl = domainIds
-                            ? `/api/diagnostics/metrics?domain_id=${this.availableDomains[0]}`
-                            : '/api/diagnostics/metrics';
-                        const metricsRes = await fetch(metricsUrl);
-                        const metricsData = metricsRes.ok ? await metricsRes.json() : null;
+                        // Load search metrics - aggregate across all domains
+                        // We need to fetch metrics for each domain and combine them
+                        let metricsData = null;
+                        if (this.availableDomains.length > 0) {
+                            const allMetrics = [];
+                            for (const domainId of this.availableDomains) {
+                                try {
+                                    const metricsRes = await fetch(`/api/diagnostics/metrics?domain_id=${domainId}`);
+                                    if (metricsRes.ok) {
+                                        const domainMetrics = await metricsRes.json();
+                                        if (domainMetrics) {
+                                            allMetrics.push(domainMetrics);
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error(`Failed to load metrics for ${domainId}:`, e);
+                                }
+                            }
+                            // Aggregate metrics across all domains
+                            if (allMetrics.length > 0) {
+                                metricsData = this._aggregateMetrics(allMetrics);
+                            }
+                        }
 
                         // Load pattern health for each domain
                         const patternHealth = {};
@@ -3492,6 +3497,45 @@
                         console.error('Failed to load diagnostics:', error);
                         alert('Failed to load diagnostics: ' + error.message);
                     }
+                },
+
+                // Helper to aggregate metrics across multiple domains
+                _aggregateMetrics(metricsList) {
+                    if (!metricsList || metricsList.length === 0) return null;
+
+                    // Sum up all the metrics
+                    const totalSearches = metricsList.reduce((sum, m) => sum + (m.total_searches || 0), 0);
+                    const successfulSearches = metricsList.reduce((sum, m) => sum + (m.successful_searches || 0), 0);
+                    const totalDuration = metricsList.reduce((sum, m) => sum + (m.total_duration_ms || 0), 0);
+                            const noResultsSearches = metricsList.reduce((sum, m) => sum + (m.no_results_searches || 0), 0);
+                            const errorSearches = metricsList.reduce((sum, m) => sum + (m.error_searches || 0), 0);
+                            const llmFallbackSearches = metricsList.reduce((sum, m) => sum + (m.llm_fallback_searches || 0), 0);
+
+                            // Get the max p95 duration across all domains
+                            const p95Duration = Math.max(...metricsList.map(m => m.p95_duration_ms || 0));
+
+                            // Get weighted average confidence
+                            const weightedConfidence = metricsList.reduce((sum, m) => {
+                                const count = m.total_searches || 0;
+                                const avg = m.avg_confidence || 0;
+                                return sum + (count * avg);
+                            }, 0) / totalSearches;
+
+                            return {
+                                total_searches: totalSearches,
+                                successful_searches: successfulSearches,
+                                no_results_searches: noResultsSearches,
+                                error_searches: errorSearches,
+                                llm_fallback_searches: llmFallbackSearches,
+                                total_duration_ms: totalDuration,
+                                avg_duration_ms: totalDuration / totalSearches,
+                                p95_duration_ms: p95Duration,
+                                avg_confidence: weightedConfidence || 0,
+                                success_rate: (successfulSearches / totalSearches) || 0,
+                                no_results_rate: (noResultsSearches / totalSearches) || 0,
+                                error_rate: (errorSearches / totalSearches) || 0,
+                                llm_fallback_rate: (llmFallbackSearches / totalSearches) || 0
+                            };
                 },
 
                 // ==================== SURVEYOR FUNCTIONS ====================
@@ -3522,7 +3566,7 @@
                             name: 'Quick Baking Recipes',
                             description: 'Survey baking recipes that take under 30 minutes',
                             level: 'neighbourhood',
-                            universe: 'default',
+                            universe: 'MINE',
                             neighbourhood: 'baking recipes under 30 minutes',
                             domain: null,
                             status: 'running',
@@ -3541,7 +3585,7 @@
                             name: 'Python Data Science',
                             description: 'Survey Python patterns related to data science and ML',
                             level: 'neighbourhood',
-                            universe: 'default',
+                            universe: 'MINE',
                             neighbourhood: 'Python data science and machine learning patterns',
                             domain: null,
                             status: 'idle',
@@ -3560,7 +3604,7 @@
                             name: 'Cooking Domain',
                             description: 'Full survey of the cooking domain',
                             level: 'domain',
-                            universe: 'default',
+                            universe: 'MINE',
                             neighbourhood: null,
                             domain: 'cooking',
                             status: 'paused',
@@ -3786,7 +3830,7 @@
                         additional_urls: '',
                         scraping_prompt: '',
                         // Document control (documents)
-                        docs_base_path: '/app/universes/default/docs',
+                        docs_base_path: '/app/universes/MINE/docs',
                         docs_list: '',
                         docs_chunk_size: 500,
                         docs_chunk_overlap: 100
