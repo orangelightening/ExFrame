@@ -45,6 +45,7 @@ WORKDIR $APP_HOME
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    su-exec \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python dependencies from builder to a shared location
@@ -63,6 +64,13 @@ RUN mkdir -p $APP_HOME/data \
     $APP_HOME/expertise_scanner/data/patterns \
     $APP_HOME/expertise_scanner/data/history && \
     chown -R appuser:appuser $APP_HOME
+
+# Copy entrypoint script and set permissions
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Set entrypoint (runs as root, then switches to appuser)
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Switch to non-root user
 USER appuser
