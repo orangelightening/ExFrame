@@ -71,11 +71,8 @@ RUN mkdir -p $APP_HOME/data \
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Set entrypoint (runs as root, then switches to appuser)
+# Set entrypoint (runs as root to fix permissions, then switches to appuser)
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-# Switch to non-root user
-USER appuser
 
 # Expose the application port
 EXPOSE 3000
