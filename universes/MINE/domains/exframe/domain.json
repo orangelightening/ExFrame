@@ -8,21 +8,23 @@
 
   "plugins": [
     {
-      "plugin_id": "generalist",
-      "name": "ExFrame Guide",
-      "description": "Expert in ExFrame usage and features",
-      "module": "plugins.generalist",
-      "class": "GeneralistPlugin",
+      "plugin_id": "exframe_specialist",
+      "name": "ExFrame Knowledge Specialist",
+      "description": "Two-stage search: document store (primary) + local patterns (fallback)",
+      "module": "plugins.exframe.exframe_specialist",
+      "class": "ExFrameSpecialistPlugin",
       "enabled": true,
       "config": {
-        "name": "ExFrame",
-        "keywords": [
-          "pattern", "domain", "query", "survey", "universe",
-          "eeframe", "exframe", "interface", "specialist", "enricher",
-          "knowledge", "trace", "diagnostics", "autopilot"
-        ],
-        "categories": ["getting_started", "features", "how_to", "concepts"],
-        "threshold": 0.40
+        "document_store_enabled": true,
+        "local_patterns_enabled": true,
+        "reply_capture_enabled": true,
+        "session_tracking": true,
+        "document_store_config": {
+          "type": "exframe_instance",
+          "remote_url": "",
+          "timeout": 30,
+          "api_key": null
+        }
       }
     }
   ],
@@ -40,7 +42,7 @@
         "research_strategy": {
           "type": "document",
           "use_chunking": false,
-          "base_path": "/app",
+          "base_path": "/app/project",
           "documents": [
             {"type": "file", "path": "README.md"},
             {"type": "file", "path": "context.md"},
@@ -55,7 +57,8 @@
             {"type": "file", "path": "PLUGIN_ARCHITECTURE.md"},
             {"type": "file", "path": "EXTENSION_POINTS.md"},
             {"type": "file", "path": "rag-search-design.md"},
-            {"type": "file", "path": "query-rewrite.md"}
+            {"type": "file", "path": "query-rewrite.md"},
+            {"type": "file", "path": "needed.md"}
           ]
         }
       }

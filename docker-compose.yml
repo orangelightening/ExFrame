@@ -62,6 +62,9 @@ services:
       # Mount built frontend (bind mount for live updates)
       # - ./frontend/dist:/app/frontend/dist:ro  # TEMPORARILY DISABLED TO RESTORE NICE UI
 
+      # Mount project root for document search access
+      - .:/app/project:ro
+
       # Persist logs (optional - container logs also captured)
       - eeframe_logs:/app/logs
     restart: unless-stopped
