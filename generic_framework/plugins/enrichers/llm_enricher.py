@@ -10,12 +10,15 @@ import os
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 import asyncio
+import logging
 
 # Add framework to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.enrichment_plugin import EnrichmentPlugin, EnrichmentContext
 from core.research import create_research_strategy, SearchResult
+
+logger = logging.getLogger(__name__)
 
 
 class LLMEnricher(EnrichmentPlugin):
@@ -387,6 +390,18 @@ class LLMFallbackEnricher(LLMEnricher):
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         config = config or {}
+
+        # CONFIG OVERRIDE DETECTION: Log when hard-coded defaults override user config
+        if "mode" in config and config["mode"] != "fallback":
+            logger.warning(
+                "[CONFIG] llm_enricher: hard-coded default 'mode=fallback' is overriding user config "
+                f"'mode={config['mode']}'. User config value will be ignored."
+            )
+            print(
+                f"  [CONFIG OVERRIDE WARNING] llm_enricher: hard-coded default 'mode=fallback' "
+                f"is overriding user config 'mode={config['mode']}'"
+            )
+
         config["mode"] = "fallback"
         super().__init__(config)
 
