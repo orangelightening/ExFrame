@@ -273,6 +273,93 @@ The fix is considered successful when:
 
 ---
 
+## Bonus: Kilo Code Communication API
+
+During testing, a simple HTTP API was added to enable communication between Kilo Code instances running on the same local network.
+
+### What Was Added
+
+**New API Endpoints** (mounted at `/api/kilo`):
+
+1. **POST `/api/kilo/communicate`** - Send a message to another instance
+   ```bash
+   curl -X POST http://localhost:3000/api/kilo/communicate \
+     -H "Content-Type: application/json" \
+     -d '{"message": "Hello!", "sender_id": "instance-a"}'
+   ```
+
+2. **GET `/api/kilo/messages`** - Get all received messages
+   ```bash
+   curl http://localhost:3000/api/kilo/messages
+   ```
+
+3. **DELETE `/api/kilo/messages`** - Clear all messages
+   ```bash
+   curl -X DELETE http://localhost:3000/api/kilo/messages
+   ```
+
+### How to Use Between Two Instances
+
+**Instance A (192.168.1.100:3000) sends to Instance B (192.168.1.101:3000):**
+```python
+import requests
+
+# Send message from Instance A to Instance B
+response = requests.post(
+    "http://192.168.1.101:3000/api/kilo/communicate",
+    json={"message": "Can you help me analyze this pattern?", "sender_id": "instance-a"}
+)
+print(f"Message sent: {response.json()}")
+```
+
+**Instance B receives and can respond:**
+```python
+import requests
+
+# Get messages from Instance A
+response = requests.get("http://192.168.1.100:3000/api/kilo/messages")
+messages = response.json()["messages"]
+
+for msg in messages:
+    print(f"From {msg['sender_id']}: {msg['message']}")
+    
+# Send response back
+requests.post(
+    "http://192.168.1.100:3000/api/kilo/communicate",
+    json={"message": "Yes, I can help!", "sender_id": "instance-b"}
+)
+```
+
+### Features
+
+- ✅ **Simple HTTP API** - No additional infrastructure needed
+- ✅ **In-memory storage** - Messages stored in memory (cleared on restart)
+- ✅ **Message ID tracking** - Each message gets unique ID
+- ✅ **Timestamp logging** - All messages include timestamp
+- ✅ **Logging** - All Kilo Code communications logged to application logs
+
+### Limitations
+
+- Messages are stored in memory only (lost on restart)
+- No built-in discovery (need to know other instance's IP:port)
+- No persistence or delivery guarantees
+
+### Testing
+
+The API has been tested and is working:
+- POST endpoint successfully receives messages
+- GET endpoint returns all messages
+- Messages are logged in application logs
+
+### Next Steps (Optional Enhancements)
+
+If you need more reliable communication, consider:
+1. **Shared SQLite database** - Add persistent storage
+2. **Redis pub/sub** - Add message broker for guaranteed delivery
+3. **WebSocket** - Add real-time bidirectional communication
+
+---
+
 ## References
 
 - Original file: `generic_framework/core/embeddings.py`

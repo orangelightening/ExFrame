@@ -21,6 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Use `POST /api/embeddings/generate?domain={domain}` for each domain
   - All domains now show 100% embedding coverage
 
+### Added
+- **Kilo Code Communication API** - Simple HTTP API for inter-instance communication
+  - POST `/api/kilo/communicate` - Send messages between Kilo Code instances
+  - GET `/api/kilo/messages` - Retrieve all received messages
+  - DELETE `/api/kilo/messages` - Clear message history
+  - In-memory storage with message ID tracking and timestamps
+  - Enables Kilo Code instances on same local network to collaborate
+  - See SA-1 checklist for usage examples
+
 ## [1.1.0] - 2026-01-09
 
 ### Router & Formatter Plugin Systems
