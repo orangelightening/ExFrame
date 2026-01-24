@@ -602,6 +602,18 @@ class LLMSummarizerEnricher(LLMEnricher):
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         config = config or {}
+
+        # CONFIG OVERRIDE DETECTION: Log when hard-coded defaults override user config
+        if "mode" in config and config["mode"] != "enhance":
+            logger.warning(
+                "[CONFIG] llm_summarizer: hard-coded default 'mode=enhance' is overriding user config "
+                f"'mode={config['mode']}'. User config value will be ignored."
+            )
+            print(
+                f"  [CONFIG OVERRIDE WARNING] llm_summarizer: hard-coded default 'mode=enhance' "
+                f"is overriding user config 'mode={config['mode']}'"
+            )
+
         config["mode"] = "enhance"
         super().__init__(config)
         self.min_patterns_for_summary = self.config.get("min_patterns_for_summary", 3)

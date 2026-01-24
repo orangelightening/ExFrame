@@ -6,6 +6,7 @@ Useful when queries span multiple domains or need multiple perspectives.
 """
 
 import sys
+import logging
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
@@ -13,6 +14,8 @@ from typing import Dict, List, Any, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.router_plugin import RouterPlugin, RouteResult
+
+logger = logging.getLogger(__name__)
 
 
 class MultiSpecialistRouter(RouterPlugin):
@@ -130,8 +133,19 @@ class ParallelRouter(MultiSpecialistRouter):
     router_id = "parallel"
 
     def __init__(self, config: Dict[str, Any] = None):
-        # Default to parallel strategy
         config = config or {}
+
+        # CONFIG OVERRIDE DETECTION: Log when hard-coded defaults override user config
+        if "strategy" in config and config["strategy"] != "parallel":
+            logger.warning(
+                "[CONFIG] parallel_router: hard-coded default 'strategy=parallel' is overriding user config "
+                f"'strategy={config['strategy']}'. User config value will be ignored."
+            )
+            print(
+                f"  [CONFIG OVERRIDE WARNING] parallel_router: hard-coded default 'strategy=parallel' "
+                f"is overriding user config 'strategy={config['strategy']}'"
+            )
+
         config["strategy"] = "parallel"
         super().__init__(config)
 
@@ -148,7 +162,18 @@ class SequentialRouter(MultiSpecialistRouter):
     router_id = "sequential"
 
     def __init__(self, config: Dict[str, Any] = None):
-        # Default to sequential strategy
         config = config or {}
+
+        # CONFIG OVERRIDE DETECTION: Log when hard-coded defaults override user config
+        if "strategy" in config and config["strategy"] != "sequential":
+            logger.warning(
+                "[CONFIG] sequential_router: hard-coded default 'strategy=sequential' is overriding user config "
+                f"'strategy={config['strategy']}'. User config value will be ignored."
+            )
+            print(
+                f"  [CONFIG OVERRIDE WARNING] sequential_router: hard-coded default 'strategy=sequential' "
+                f"is overriding user config 'strategy={config['strategy']}'"
+            )
+
         config["strategy"] = "sequential"
         super().__init__(config)

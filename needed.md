@@ -178,17 +178,27 @@ def __init__(self, config: Optional[Dict[str, Any]] = None):
 
 ---
 
-### Pending Override Detection Work
+### Override Detection Applied (COMPLETED ✓)
 
-**Found during scan (2026-01-24):**
+**Date:** 2026-01-24 (continued)
 
-| File | Line | Issue | Priority |
-|------|------|-------|----------|
-| `generic_framework/plugins/enrichers/llm_enricher.py` | 605 | `LLMSummarizerEnricher` hard-codes `config["mode"] = "enhance"` | Medium |
-| `generic_framework/plugins/routers/multi_specialist_router.py` | 135 | `ParallelRouter` hard-codes `config["strategy"] = "parallel"` | Low |
-| `generic_framework/plugins/routers/multi_specialist_router.py` | 153 | `SequentialRouter` hard-codes `config["strategy"] = "sequential"` | Low |
+All 3 remaining items from scan completed:
 
-**Note:** The router hard-codes may be acceptable since they're setting their own default behavior (parallel router defaults to parallel). The enricher hard-code is more problematic since it's overriding user configuration intent.
+| File | Class | Hard-coded default | Status |
+|------|-------|-------------------|--------|
+| `generic_framework/plugins/enrichers/llm_enricher.py` | `LLMSummarizerEnricher` | `config["mode"] = "enhance"` | ✓ Fixed |
+| `generic_framework/plugins/routers/multi_specialist_router.py` | `ParallelRouter` | `config["strategy"] = "parallel"` | ✓ Fixed |
+| `generic_framework/plugins/routers/multi_specialist_router.py` | `SequentialRouter` | `config["strategy"] = "sequential"` | ✓ Fixed |
+
+**Changes made:**
+- Added `import logging` to `multi_specialist_router.py`
+- Added override detection to all 3 classes
+- All follow same pattern as `LLMFallbackEnricher`
+
+**Result:**
+- All hard-coded config overrides now visible at startup
+- System started successfully with changes
+- No errors or warnings (except expected document store warning)
 
 ---
 
