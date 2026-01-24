@@ -5,6 +5,22 @@ All notable changes to EEFrame will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-01-24
+
+### Fixed
+- **Smart truncation for pattern embeddings** - Improved semantic diversity when patterns exceed the 256-token limit
+  - Replaced simple truncation (name + solution only) with priority-based field inclusion
+  - New strategy: name + solution (800 chars) + description (200 chars) when space permits
+  - Fallback to name + solution (800 chars) + problem (200 chars) if no description
+  - Final fallback to name + solution (1000 chars) only
+  - This improves search result quality by preserving more semantic context in embeddings
+  - See SA-1 checklist for implementation details
+
+### Changed
+- **Embedding regeneration required** - All existing embeddings must be regenerated after this update
+  - Use `POST /api/embeddings/generate?domain={domain}` for each domain
+  - All domains now show 100% embedding coverage
+
 ## [1.1.0] - 2026-01-09
 
 ### Router & Formatter Plugin Systems

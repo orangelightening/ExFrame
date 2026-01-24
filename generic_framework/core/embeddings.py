@@ -141,13 +141,35 @@ class EmbeddingService:
         estimated_tokens = len(combined_text) // 4
 
         if estimated_tokens > self.MAX_TOKENS:
-            # Need to truncate - prioritize name + solution
+            # Need to truncate - use smarter strategy to preserve semantic diversity
             print(f"[EMBED] WARNING: Pattern {pattern.get('id')} may exceed token limit (est. {estimated_tokens} tokens)")
 
-            # Truncation strategy: keep name + solution, truncate rest
-            truncated_parts = [f"Name: {name}", f"Solution: {solution[:1500]}"]  # Limit solution to ~375 tokens
-            combined_text = "\n".join(truncated_parts)
-            print(f"[EMBED] Truncated to essential fields only")
+            # Smart truncation: prioritize name + solution, but also include description/problem if space permits
+            # This helps maintain semantic diversity between patterns
+            name_len = len(f"Name: {name}")
+            solution_len = len(f"Solution: {solution}")
+            header_len = name_len + solution_len + 2  # +2 for newlines
+
+            # Calculate remaining space for secondary fields
+            remaining_tokens = self.MAX_TOKENS - (header_len // 4)  # Convert chars to estimated tokens
+
+            # Try to include description first (most important for semantics)
+            if description and remaining_tokens > 20:
+                desc_text = f"Description: {description[:200]}"  # Limit to ~50 tokens
+                parts = [f"Name: {name}", f"Solution: {solution[:800]}", desc_text]  # Truncate solution to ~200 tokens to make room
+                combined_text = "\n".join(parts)
+                print(f"[EMBED] Truncated with description included")
+            # If no space for description, try problem
+            elif problem and remaining_tokens > 20:
+                prob_text = f"Problem: {problem[:200]}"
+                parts = [f"Name: {name}", f"Solution: {solution[:800]}", prob_text]
+                combined_text = "\n".join(parts)
+                print(f"[EMBED] Truncated with problem included")
+            # Otherwise, just name + truncated solution
+            else:
+                truncated_parts = [f"Name: {name}", f"Solution: {solution[:1000]}"]  # Limit to ~250 tokens
+                combined_text = "\n".join(truncated_parts)
+                print(f"[EMBED] Truncated to name + solution only")
         else:
             # Add secondary fields if there's space
             if description:
