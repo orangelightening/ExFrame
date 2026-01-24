@@ -178,6 +178,20 @@ def __init__(self, config: Optional[Dict[str, Any]] = None):
 
 ---
 
+### Pending Override Detection Work
+
+**Found during scan (2026-01-24):**
+
+| File | Line | Issue | Priority |
+|------|------|-------|----------|
+| `generic_framework/plugins/enrichers/llm_enricher.py` | 605 | `LLMSummarizerEnricher` hard-codes `config["mode"] = "enhance"` | Medium |
+| `generic_framework/plugins/routers/multi_specialist_router.py` | 135 | `ParallelRouter` hard-codes `config["strategy"] = "parallel"` | Low |
+| `generic_framework/plugins/routers/multi_specialist_router.py` | 153 | `SequentialRouter` hard-codes `config["strategy"] = "sequential"` | Low |
+
+**Note:** The router hard-codes may be acceptable since they're setting their own default behavior (parallel router defaults to parallel). The enricher hard-code is more problematic since it's overriding user configuration intent.
+
+---
+
 ## Current State (For Git Commit)
 
 Changes made during debugging session:
