@@ -273,9 +273,9 @@ The fix is considered successful when:
 
 ---
 
-## Bonus: Kilo Code Communication API
+## Bonus: Claude Code Communication API
 
-During testing, a simple HTTP API was added to enable communication between Kilo Code instances running on the same local network.
+During testing, a simple HTTP API was added to enable communication between Claude Code instances running on the same local network.
 
 ### What Was Added
 
@@ -336,7 +336,7 @@ requests.post(
 - ✅ **In-memory storage** - Messages stored in memory (cleared on restart)
 - ✅ **Message ID tracking** - Each message gets unique ID
 - ✅ **Timestamp logging** - All messages include timestamp
-- ✅ **Logging** - All Kilo Code communications logged to application logs
+- ✅ **Logging** - All Claude Code communications logged to application logs
 
 ### Limitations
 

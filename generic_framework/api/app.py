@@ -172,9 +172,9 @@ except Exception as e:
     logger.warning(f"✗ Error mounting Personas API: {e}")
 
 # =============================================================================
-# KILO CODE COMMUNICATION API
+# CLAUDE CODE COMMUNICATION API
 # =============================================================================
-# Simple HTTP API for communication between Kilo Code instances
+# Simple HTTP API for communication between Claude Code instances
 from fastapi import APIRouter
 
 kilo_router = APIRouter(prefix="/api/kilo")
@@ -183,7 +183,7 @@ kilo_router = APIRouter(prefix="/api/kilo")
 kilo_messages: List[Dict[str, Any]] = []
 
 class KiloMessage(BaseModel):
-    """Message from one Kilo Code instance to another."""
+    """Message from one Claude Code instance to another."""
     message: str
     sender_id: str
     timestamp: Optional[str] = None
@@ -197,9 +197,9 @@ class KiloMessageResponse(BaseModel):
 @kilo_router.post("/communicate", response_model=KiloMessageResponse)
 async def send_message(msg: KiloMessage) -> KiloMessageResponse:
     """
-    Receive a message from another Kilo Code instance.
+    Receive a message from another Claude Code instance.
     
-    This allows Kilo Code instances running on the same network to communicate
+    This allows Claude Code instances running on the same network to communicate
     with each other via simple HTTP API calls.
     
     Args:
@@ -224,7 +224,7 @@ async def send_message(msg: KiloMessage) -> KiloMessageResponse:
 @kilo_router.get("/messages")
 async def get_messages() -> Dict[str, Any]:
     """
-    Get all messages from other Kilo Code instances.
+    Get all messages from other Claude Code instances.
     
     Returns:
         List of all received messages
@@ -244,9 +244,9 @@ async def clear_messages() -> Dict[str, Any]:
     logger.info(f"[KILO] Cleared {count} messages")
     return {"status": "cleared", "count": count}
 
-# Mount the Kilo Code communication router
+# Mount the Claude Code communication router
 app.include_router(kilo_router)
-logger.info("✓ Kilo Code communication API mounted at /api/kilo")
+logger.info("✓ Claude Code communication API mounted at /api/kilo")
 
 # Mount static files from built React app
 frontend_dist_path = Path(__file__).parent.parent / "frontend" / "dist"
