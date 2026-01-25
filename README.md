@@ -50,6 +50,53 @@ ExFrame is a unified, domain-agnostic framework for building AI-powered knowledg
 
 ---
 
+## License
+
+This project is licensed under the **Apache License 2.0**.
+
+```
+Copyright 2025 ExFrame Contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+### What You Can Do
+
+Under the Apache 2.0 license, you are free to:
+
+- ✅ **Use** this software for commercial or personal projects
+- ✅ **Modify** the source code for your needs
+- ✅ **Distribute** copies of the original or modified software
+- ✅ **Sublicense** your modified versions to others
+- ✅ **Combine** with other software under different licenses
+
+### Requirements
+
+When redistributing this software or modifications, you must:
+
+- 📄 Include the original copyright notice
+- 📄 Include the full text of the Apache 2.0 license
+- 📄 Clearly state any changes you made to the original files
+- 📄 Include the NOTICE file with any redistributions
+
+For the full license text, see [LICENSE](LICENSE) in this repository.
+
+### Third-Party Licenses
+
+This project uses open-source libraries with compatible licenses. See [NOTICE](NOTICE) for details.
+
+---
+
 ## Plugin Architecture
 
 ExFrame v1.3.0 features a complete pluggable pipeline that separates **data** (patterns) from **transformation logic** (plugins).

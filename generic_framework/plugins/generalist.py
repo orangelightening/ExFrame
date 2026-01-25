@@ -1,3 +1,19 @@
+#
+# Copyright 2025 ExFrame Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 """
 Generalist Plugin
 
@@ -89,12 +105,16 @@ class GeneralistPlugin(SpecialistPlugin):
                 seen.add(pid)
                 unique_patterns.append(pattern)
 
+        # When LLM enricher is active, don't pre-fill answer with pattern result
+        # Let the LLM provide the complete response instead
+        use_llm_instead = self.kb.domain and hasattr(self.kb.domain, 'enrichers') and self.kb.domain.enrichers
+
         return {
             "query": query,
             "specialist": "generalist",
             "patterns_found": len(unique_patterns),
             "patterns": unique_patterns[:5],
-            "answer": self._synthesize_answer(query, unique_patterns),
+            "answer": "" if use_llm_instead else self._synthesize_answer(query, unique_patterns),
             "confidence": self.can_handle(query)
         }
 

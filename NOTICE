@@ -1,0 +1,107 @@
+ExFrame - Expertise Framework
+Copyright 2025 ExFrame Contributors
+
+This product includes software developed at:
+https://github.com/orangelightening/ExFrame
+
+The following third-party libraries and components are used in this project:
+
+================================================================================
+Python Libraries (see requirements.txt for specific versions):
+================================================================================
+
+- FastAPI: Modern, fast web framework for building APIs
+  License: MIT
+  https://fastapi.tiangolo.com/
+
+- Uvicorn: ASGI server
+  License: BSD-3-Clause
+  https://www.uvicorn.org/
+
+- Pydantic: Data validation using Python type annotations
+  License: MIT
+  https://docs.pydantic.dev/
+
+- NumPy: Fundamental package for scientific computing with Python
+  License: BSD-3-Clause
+  https://numpy.org/
+
+- Transformers: Machine learning framework for PyTorch and TensorFlow
+  License: Apache-2.0
+  https://huggingface.co/docs/transformers/
+
+- PyTorch: Tensors and dynamic neural networks in Python
+  License: BSD-3-Clause (with PyTorch license variant)
+  https://pytorch.org/
+
+- httpx: Next generation HTTP client
+  License: BSD-3-Clause
+  https://www.python-httpx.org/
+
+- aiofiles: File operations for asyncio
+  License: Apache-2.0
+  https://github.com/Tinche/aiofiles
+
+- PyYAML: YAML parser and emitter for Python
+  License: MIT
+  https://pyyaml.org/
+
+- python-dotenv: Read environment variables from .env file
+  License: BSD-3-Clause
+  https://github.com/theskumar/python-dotenv
+
+- prometheus-client: Python client for the Prometheus monitoring system
+  License: Apache-2.0
+  https://github.com/prometheus/client_python
+
+- rich: Make beautiful and rich terminal output
+  License: MIT
+  https://rich.readthedocs.io/
+
+================================================================================
+JavaScript Libraries (frontend):
+================================================================================
+
+- Alpine.js: rugged, minimal JavaScript framework
+  License: MIT
+  https://alpinejs.dev/
+
+================================================================================
+Infrastructure & DevOps:
+================================================================================
+
+- Docker: Container platform
+  License: Apache-2.0
+  https://www.docker.com/
+
+- Prometheus: Monitoring system & time series database
+  License: Apache-2.0
+  https://prometheus.io/
+
+- Grafana: Analytics & interactive visualization platform
+  License: AGPL-3.0 (when used without enterprise edition)
+  https://grafana.com/
+
+- Loki: Log aggregation system
+  License: AGPL-3.0
+  https://grafana.com/oss/loki/
+
+- Promtail: Agent for shipping logs to Loki
+  License: AGPL-3.0
+  https://grafana.com/oss/loki/
+
+================================================================================
+AI/ML Models:
+================================================================================
+
+This software may integrate with various AI language models. These models
+are not included in the distribution but are accessed via API. Users are
+responsible for ensuring their use of such models complies with the
+respective model provider's terms of service.
+
+================================================================================
+
+This NOTICE file is provided for informational purposes and does not
+modify the Apache License 2.0 under which this software is licensed.
+
+For full license text, see the LICENSE file.
