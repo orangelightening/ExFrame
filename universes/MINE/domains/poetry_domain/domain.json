@@ -35,7 +35,12 @@
           "elegy",
           "free verse",
           "form",
-          "structure"
+          "structure",
+          "write",
+          "create",
+          "make",
+          "generate",
+          "compose"
         ],
         "categories": [
           "poetic_form",
@@ -43,7 +48,7 @@
           "analysis",
           "literary_device"
         ],
-        "threshold": 0.3,
+        "threshold": 0.2,
         "description": "Use only assigned names when referring to other works. Limit off topic discussions to 100 words.  within the main reply."
       }
     }

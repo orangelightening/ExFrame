@@ -75,6 +75,7 @@ class LLMEnricher(EnrichmentPlugin):
     ) -> Dict[str, Any]:
         """Enrich response using LLM."""
         patterns = response_data.get("patterns", [])
+        query = response_data.get("query", "")
         confidence = response_data.get("confidence", 0.0)
 
         # Decide whether to use LLM based on mode and confidence
@@ -84,15 +85,31 @@ class LLMEnricher(EnrichmentPlugin):
             # Skip LLM enrichment
             return response_data
 
-        # Generate LLM enhancement
-        llm_response = await self._generate_llm_response(
-            response_data,
-            context,
-            patterns
-        )
+        # Check if this is a creative query (write, create, make, generate)
+        # For creative queries, use direct prompt without pattern context
+        creative_keywords = ["write", "create", "make", "generate", "compose", "draft", "author"]
+        is_creative_query = any(keyword in query.lower() for keyword in creative_keywords)
+
+        # DEBUG: Log the decision
+        print(f"  [LLMEnricher] Query: '{query[:50]}...', creative={is_creative_query}, patterns={len(patterns)}")
+
+        # Generate LLM response
+        if is_creative_query and patterns:
+            print(f"  [LLMEnricher] Using direct prompt (creative query)")
+            # Use direct prompt for creative requests - don't distract with patterns
+            llm_response = await self._call_llm(self._build_direct_prompt(query, context))
+        else:
+            print(f"  [LLMEnricher] Using pattern-based enhancement")
+            # Use pattern-based enhancement for informational queries
+            llm_response = await self._generate_llm_response(
+                response_data,
+                context,
+                patterns
+            )
 
         # Merge based on mode
-        if self.mode == self.MODE_REPLACE:
+        # For creative queries, always use llm_response to replace pattern-based content entirely
+        if is_creative_query or self.mode == self.MODE_REPLACE:
             # Replace entire response with LLM output
             response_data["llm_response"] = llm_response
             response_data["llm_used"] = True
@@ -101,7 +118,7 @@ class LLMEnricher(EnrichmentPlugin):
             if confidence < self.min_confidence or not patterns:
                 response_data["llm_fallback"] = llm_response
                 response_data["llm_used"] = True
-        else:  # enhance
+        else:  # enhance (informational queries)
             # Add LLM enhancement to existing response
             response_data["llm_enhancement"] = llm_response
             response_data["llm_used"] = True
@@ -201,14 +218,13 @@ We found {len(patterns)} relevant pattern(s) from our knowledge base:
 
 {pattern_text}
 
-Build upon these patterns to provide a comprehensive, helpful answer:
+Provide a comprehensive, helpful response:
 1. Synthesize the key insights from these patterns
 2. Keep it conversational and natural
 3. Add relevant context and details when patterns are incomplete
 4. Be thorough - don't cut short, provide complete information
 5. Use markdown formatting for readability
-6. **CRITICAL**: When citing information, ALWAYS use the actual pattern name. For example: "According to **EEFrame Pattern Structure**..." or "As described in **Asking Questions in EEFrame**..."
-7. NEVER use references like "Source 1", "Source 2", or numbered sources - these are meaningless to users
+6. **IMPORTANT**: Respond directly to the user's request. Do NOT include a "Patterns referenced" section or list patterns at the end - the user will see patterns separately if needed.
 
 Provide your detailed response:"""
 
@@ -216,17 +232,17 @@ Provide your detailed response:"""
 
     def _build_direct_prompt(self, query: str, context: EnrichmentContext) -> str:
         """Build prompt for direct LLM response without pattern context."""
+        # For creative queries, don't emphasize domain expertise - let the LLM be creative
+        # Only mention domain if it provides useful context
         domain_id = context.domain_id
 
-        prompt = f"""You are a helpful AI assistant with expertise in {domain_id}.
+        prompt = f"""A user asked: "{query}"
 
-A user asked: "{query}"
-
-Provide a comprehensive, detailed response using markdown formatting:
-- Be thorough and complete
-- Include practical details and examples
-- Draw on your knowledge while staying accurate
-- Don't cut short - give a full, helpful answer
+Provide a creative, original response using markdown formatting:
+- Be imaginative and original
+- Follow the requested format or style precisely
+- Don't reference other works or patterns unless explicitly asked
+- Make it engaging and well-crafted
 
 Your response:"""
 
