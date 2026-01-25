@@ -65,6 +65,8 @@ class LLMEnricher(EnrichmentPlugin):
         self.min_confidence = self.config.get("min_confidence", 0.3)
         self.max_patterns = self.config.get("max_patterns", 10)
         self.mode = self.config.get("mode", "enhance")
+        # Temperature for LLM (default 0.7 for focused, consistent responses)
+        self.temperature = self.config.get("temperature", 0.7)
 
     async def enrich(
         self,
@@ -253,6 +255,7 @@ Your response:"""
             payload = {
                 "model": model_name,
                 "max_tokens": 8192,  # Book chapter length responses
+                "temperature": self.temperature,  # Control response randomness
                 "messages": [
                     {"role": "user", "content": prompt}
                 ]
@@ -262,6 +265,7 @@ Your response:"""
             payload = {
                 "model": self.model,
                 "max_tokens": 8192,  # Book chapter length responses
+                "temperature": self.temperature,  # Control response randomness
                 "messages": [
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}

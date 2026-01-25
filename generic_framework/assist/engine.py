@@ -153,39 +153,63 @@ class GenericAssistantEngine:
                 'all_scores': sorted(specialist_scores, key=lambda x: x['score'], reverse=True)
             })
 
-        # Step 2: Search knowledge base for relevant patterns
-        # Always do a full search - exact_only is too restrictive
+        # Step 2: Search knowledge base for relevant patterns (only if no specialist)
+        # Specialists do their own search to maintain control over search strategy
         step2_time = datetime.utcnow()
-        patterns = await self.knowledge_base.search(query, limit=10)
-
-        if trace:
-            trace['steps'].append({
-                'step': 2,
-                'action': 'knowledge_search',
-                'timestamp': step2_time.isoformat(),
-                'patterns_found': len(patterns),
-                'patterns': [
-                    {
-                        'id': p.get('id'),
-                        'name': p.get('name'),
-                        'type': p.get('pattern_type'),
-                        'relevance': p.get('_semantic_score', p.get('confidence', 0)),  # Use semantic score if available
-                        'relevance_source': p.get('_relevance_source', 'unknown')
-                    }
-                    for p in patterns
-                ]
-            })
+        patterns = []
+        
+        if specialist:
+            # Specialist will do its own search - don't pre-search
+            if trace:
+                trace['steps'].append({
+                    'step': 2,
+                    'action': 'specialist_search',
+                    'timestamp': step2_time.isoformat(),
+                    'note': 'Specialist will perform its own search strategy'
+                })
+        else:
+            # No specialist - do general knowledge base search
+            patterns = await self.knowledge_base.search(query, limit=10)
+            
+            if trace:
+                trace['steps'].append({
+                    'step': 2,
+                    'action': 'knowledge_search',
+                    'timestamp': step2_time.isoformat(),
+                    'patterns_found': len(patterns),
+                    'patterns': [
+                        {
+                            'id': p.get('id'),
+                            'name': p.get('name'),
+                            'type': p.get('pattern_type'),
+                            'relevance': p.get('_semantic_score', p.get('confidence', 0)),  # Use semantic score if available
+                            'relevance_source': p.get('_relevance_source', 'unknown')
+                        }
+                        for p in patterns
+                    ]
+                })
 
         # Step 3: Process query through specialist or general processing
         step3_time = datetime.utcnow()
         if specialist:
-            # Pass pre-found patterns to specialist via context
+            # Specialist does its own search - don't pass pre-found patterns
             specialist_context = context or {}
-            specialist_context['prematched_patterns'] = patterns
             response_data = await specialist.process_query(query, specialist_context)
             response = specialist.format_response(response_data)
             specialist_id = specialist.specialist_id
             processing_method = 'specialist'
+            # Extract patterns from specialist response for consistency
+            patterns = response_data.get('patterns_used', [])
+            if isinstance(patterns[0], str) if patterns else False:
+                # Patterns are IDs - need to fetch full pattern objects
+                patterns = []
+                for pattern_id in response_data.get('patterns_used', []):
+                    try:
+                        pattern = await self.knowledge_base.get_by_id(pattern_id)
+                        if pattern:
+                            patterns.append(pattern)
+                    except:
+                        pass
         else:
             # General query processing
             response_data = await self._general_processing(query, patterns, context)
@@ -269,6 +293,14 @@ class GenericAssistantEngine:
             import traceback
             traceback.print_exc()
             # Continue without enrichment if it fails
+
+        # Append source list if specialist provided one (for research-based results)
+        if specialist and hasattr(specialist, 'specialist_id'):
+            # Check if response_data has a source list to append
+            source_list = response_data.get('_source_list', '')
+            if source_list and response:
+                # Add separator and source list at the end
+                response += f"\n\n---\n\n**Sources searched:**\n\n{source_list}"
 
         # Step 4: Record query for learning
         await self._record_query(query, response, specialist_id, patterns)

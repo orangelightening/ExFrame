@@ -359,8 +359,8 @@ class GenericDomain(Domain):
                 enricher = enricher_class(enricher_config.get("config", {}))
                 self._enrichers.append(enricher)
 
-                # Check if this is an LLM fallback enricher
-                if class_name == 'LLMFallbackEnricher':
+                # Check if this is an LLM enricher (any LLM-based enricher)
+                if class_name in ('LLMFallbackEnricher', 'LLMEnricher', 'LLMSummarizerEnricher', 'LLMExplanationEnricher'):
                     has_llm_fallback = True
 
                 print(f"  Enricher: {enricher.name} (plugin: {class_name})")

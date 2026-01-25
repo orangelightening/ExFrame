@@ -48,7 +48,19 @@
       }
     }
   ],
-  "enrichers": [],
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "model": "glm-4.7",
+        "max_patterns": 10,
+        "temperature": 0.8
+      }
+    }
+  ],
   "knowledge_base": {
     "type": "json",
     "storage_path": "patterns.json",

@@ -1,10 +1,10 @@
 """
 ExFrame Specialist Plugin for ExFrame Domain Exception
 
-This specialist implements the two-stage search process:
-1. Search document store (external knowledge)
-2. Search local patterns
-3. Combine results for reply formation
+This specialist implements the three-stage search process:
+1. Research docs (local markdown files) - PRIMARY
+2. Document store (external knowledge) - SECONDARY
+3. Local patterns (cached data) - FALLBACK
 """
 
 from typing import List, Dict, Any, Optional
@@ -12,17 +12,18 @@ import logging
 
 from core.specialist_plugin import SpecialistPlugin
 from knowledge.document_store import DocumentStorePlugin, ExFrameInstanceStore
+from core.research import create_research_strategy
 
 logger = logging.getLogger(__name__)
 
 
 class ExFrameSpecialistPlugin(SpecialistPlugin):
-    """Specialist for ExFrame domain with document store access.
-    
-    This specialist implements the two-stage search process:
-    - Stage 1: Search document store (external knowledge)
-    - Stage 2: Search local patterns
-    - Combine results for reply formation
+    """Specialist for ExFrame domain with research strategy integration.
+
+    This specialist implements the three-stage search process:
+    - Stage 1: Research docs (local markdown files) - PRIMARY
+    - Stage 2: Document store (external knowledge) - SECONDARY
+    - Stage 3: Local patterns (cached data) - FALLBACK
     """
     
     name: str = "ExFrame Knowledge Specialist"
@@ -30,7 +31,7 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
     
     def __init__(self, knowledge_base, config: Dict[str, Any]):
         """Initialize ExFrame specialist.
-        
+
         Args:
             knowledge_base: Knowledge base instance for local pattern search
             config: Configuration dictionary with:
@@ -39,6 +40,7 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
                 - reply_capture_enabled: Enable reply capture (default: True)
                 - session_tracking: Enable session tracking (default: True)
                 - document_store_config: Configuration for document store
+                - research_strategy: Configuration for document research strategy
         """
         self.domain = knowledge_base  # Store knowledge base as domain for compatibility
         self.config = config
@@ -46,15 +48,15 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
         self.local_patterns_enabled = config.get("local_patterns_enabled", True)
         self.reply_capture_enabled = config.get("reply_capture_enabled", True)
         self.session_tracking = config.get("session_tracking", True)
-        
+
         # Initialize document store
         self.document_store: Optional[DocumentStorePlugin] = None
         doc_store_config = config.get("document_store_config", {})
-        
+
         if self.document_store_enabled and doc_store_config:
             try:
                 doc_store_type = doc_store_config.get("type", "exframe_instance")
-                
+
                 if doc_store_type == "exframe_instance":
                     self.document_store = ExFrameInstanceStore(doc_store_config)
                     logger.info("[EXFRAME_SPEC] Initialized ExFrameInstanceStore")
@@ -65,14 +67,26 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
                 #     self.document_store = ElasticsearchDocumentStore(doc_store_config)
                 # elif doc_store_type == "web_search":
                 #     self.document_store = WebSearchDocumentStore(doc_store_config)
-                
+
             except Exception as e:
                 logger.error(f"[EXFRAME_SPEC] Failed to initialize document store: {e}")
                 self.document_store = None
-        
+
+        # Initialize research strategy (PRIMARY document search)
+        self.research_strategy = None
+        research_config = config.get("research_strategy")
+
+        if research_config:
+            try:
+                logger.info(f"[EXFRAME_SPEC] Initializing research strategy: {research_config.get('type')}")
+                self.research_strategy = create_research_strategy(research_config)
+            except Exception as e:
+                logger.error(f"[EXFRAME_SPEC] Failed to initialize research strategy: {e}")
+                self.research_strategy = None
+
         # Session tracking
         self.sessions: Dict[str, Dict] = {}
-        
+
         logger.info(f"[EXFRAME_SPEC] Initialized with config: {config}")
     
     def can_handle(self, query: str) -> float:
@@ -90,17 +104,17 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
         return 1.0
     
     async def process_query(self, query: str, context: Optional[Dict] = None) -> Dict:
-        """Process query with two-stage search.
-        
-        ExFrame domain prioritizes FRESH document store searches over cached patterns.
-        This ensures current documentation is always available, not stale cached patterns.
-        
+        """Process query with three-stage search.
+
+        ExFrame domain prioritizes FRESH documentation searches over cached patterns.
+        Search order: Research docs (local markdown) → Document store → Local patterns.
+
         Args:
             query: User's query
             context: Optional context dictionary with:
                 - session_id: Session identifier for tracking
                 - llm_confirmed: Whether LLM fallback is confirmed
-            
+
         Returns:
             Dictionary with:
                 - response: Formatted response text
@@ -114,77 +128,161 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
         session_id = None
         if context and isinstance(context, dict):
             session_id = context.get("session_id")
-        
-        # Stage 1: Search document store (PRIMARY - always fresh)
+
+        # Stage 1: Research Strategy (PRIMARY - search local documentation files)
+        research_results = []
+        if self.research_strategy:
+            try:
+                # Initialize research strategy if needed
+                if not hasattr(self.research_strategy, '_initialized') or not self.research_strategy._initialized:
+                    await self.research_strategy.initialize()
+
+                # Search using research strategy
+                search_results = await self.research_strategy.search(query, limit=5)
+
+                # Convert SearchResult objects to document results format
+                for result in search_results:
+                    # SearchResult has: content, source (filename), relevance_score, metadata
+                    research_results.append({
+                        "id": result.source,  # Use source (filename) as ID
+                        "title": result.source,  # Use source (filename) as title
+                        "content": result.content,  # Full document content
+                        "description": result.metadata.get("summary", f"Full document: {result.source}"),
+                        "source": "Research Docs",
+                        "metadata": {
+                            "file": result.source,
+                            "path": result.metadata.get("path", ""),
+                            "relevance": result.relevance_score
+                        }
+                    })
+
+                logger.info(f"[EXFRAME_SPEC] Research strategy search returned {len(research_results)} results (PRIMARY)")
+            except Exception as e:
+                logger.error(f"[EXFRAME_SPEC] Research strategy search failed: {e}")
+
+        # Stage 2: Search document store (external knowledge)
         document_results = []
         if self.document_store_enabled and self.document_store:
             try:
                 document_results = await self.document_store.search(query, limit=5)
-                logger.info(f"[EXFRAME_SPEC] Document store search returned {len(document_results)} results (PRIMARY)")
+                logger.info(f"[EXFRAME_SPEC] Document store search returned {len(document_results)} results (SECONDARY)")
             except Exception as e:
                 logger.error(f"[EXFRAME_SPEC] Document store search failed: {e}")
 
-        # Stage 1.5: Search local documentation files (if document store returned nothing)
-        # This is the "extended search" - searching local markdown files
-        if not document_results:
-            try:
-                document_results = await self._search_local_docs(query, limit=5)
-                logger.info(f"[EXFRAME_SPEC] Local doc search returned {len(document_results)} results (PRIMARY)")
-            except Exception as e:
-                logger.error(f"[EXFRAME_SPEC] Local doc search failed: {e}")
-        
-        # Stage 2: Search local patterns (ALWAYS run - merge with document results)
+        # Stage 3: Search local patterns (FALLBACK - only if no research/doc results)
         local_results = []
-        if self.local_patterns_enabled:
-            try:
-                kb = self.domain  # self.domain IS the knowledge_base (passed from generic_domain.py)
-                local_results = await kb.search(query=query, limit=5)
-                logger.info(f"[EXFRAME_SPEC] Local pattern search returned {len(local_results)} results (FALLBACK)")
-            except Exception as e:
-                logger.error(f"[EXFRAME_SPEC] Local pattern search failed: {e}")
-        
+        if not research_results and not document_results:
+            if self.local_patterns_enabled:
+                try:
+                    kb = self.domain  # self.domain IS the knowledge_base (passed from generic_domain.py)
+                    local_results = await kb.search(query=query, limit=5)
+                    logger.info(f"[EXFRAME_SPEC] Local pattern search returned {len(local_results)} results (FALLBACK)")
+                except Exception as e:
+                    logger.error(f"[EXFRAME_SPEC] Local pattern search failed: {e}")
+
+        # Combine primary results (research + doc store)
+        primary_results = research_results + document_results
+
         # Track session
         if session_id and self.session_tracking:
             if session_id not in self.sessions:
                 self.sessions[session_id] = {
                     "query": query,
                     "created_at": self._get_timestamp(),
+                    "research_results": [],
                     "document_results": [],
                     "local_results": [],
                     "replies": []
                 }
-            
+
+            self.sessions[session_id]["research_results"] = research_results
             self.sessions[session_id]["document_results"] = document_results
             self.sessions[session_id]["local_results"] = local_results
-        
-        # Determine primary results (document store takes priority)
-        primary_results = document_results if document_results else local_results
-        
+
         # Calculate confidence
-        # High confidence if document store has results (fresh data)
+        # High confidence if research/docs have results (fresh data)
         # Lower confidence if falling back to local patterns (cached data)
         confidence = 0.5
-        if document_results:
-            confidence = 0.85  # Document store results are fresh and authoritative
+        if research_results:
+            confidence = 0.90  # Research results are fresh and authoritative
+        elif document_results:
+            confidence = 0.85  # Document store results are fresh
         elif local_results:
-            confidence = 0.6   # Local patterns are fallback only
-        
-        # Form response (prioritize document results)
-        response_text = self._form_response(query, document_results, local_results)
-        
-        # Return combined results with document store as primary
+            confidence = 0.60  # Local patterns are fallback only
+
+        # Form response (prioritize research/doc results)
+        # When we have research results, let LLM provide the main answer first
+        # Store the file list separately to be appended at the end
+        response_text = ""  # Empty response - LLM will provide the main answer
+
+        # Format source list for display at the end
+        source_list = self._form_source_list(primary_results, local_results) if primary_results or local_results else ""
+
+        # Convert research_results to pattern format so they're passed to enricher
+        research_patterns = []
+        for r in research_results:
+            research_patterns.append({
+                "id": f"research_{r.get('id', '')}",  # Prefix to avoid KB lookup
+                "name": r.get("title", r.get("id", "Unknown")),
+                "description": r.get("description", ""),
+                "solution": r.get("content", ""),
+                "pattern_type": "knowledge",
+                "confidence": r["metadata"].get("relevance", 0.8),
+                "status": "certified",
+                "tags": ["document_search", "research_docs"],
+                "_source": "research_strategy"
+            })
+
+        # Return combined results with research/docs as primary
+        # IMPORTANT: Include full pattern objects (not just IDs) so engine can pass them to enricher
+        # Research patterns are synthetic (not from KB), so they must be passed as full objects
+        all_patterns = research_patterns + local_results  # Full objects, not IDs
+
         return {
-            "response": response_text,
-            "patterns_used": [r.get("id") for r in local_results],  # For reference
-            "documents_used": [d.get("id") for d in document_results],  # PRIMARY
-            "document_results": document_results,  # PRIMARY RESULTS
+            "response": response_text,  # Empty - LLM provides main answer
+            "patterns_used": all_patterns,  # Full pattern objects (engine handles both IDs and objects)
+            "documents_used": [d.get("id") for d in primary_results],  # PRIMARY
+            "research_results": research_results,  # PRIMARY RESULTS (for reference)
+            "document_results": document_results,  # SECONDARY RESULTS
             "local_results": local_results,  # FALLBACK/REFERENCE
             "session_id": session_id,
             "confidence": confidence,
             "query": query,
-            "search_strategy": "document_store_primary"  # Indicate strategy used
+            "search_strategy": "research_primary",  # Indicate strategy used
+            "_source_list": source_list  # File list to append after LLM response
         }
-    
+
+    def _form_source_list(self, document_results: List, local_results: List) -> str:
+        """Format source list for display at the end of response.
+
+        Args:
+            document_results: Results from research + document store
+            local_results: Results from local pattern search
+
+        Returns:
+            Formatted source list string
+        """
+        if not document_results and not local_results:
+            return ""
+
+        # Format results
+        output = []
+
+        # Add document results (research + document store)
+        for i, result in enumerate(document_results):
+            source = result.get("source", "Document Store")
+            title = result.get("title", result.get("name", "Unknown"))
+            output.append(f"{i+1}. {source}: {title}")
+
+        # Add local pattern results
+        offset = len(document_results)
+        for i, result in enumerate(local_results):
+            source = "Local Patterns"
+            name = result.get("name", "Unknown")
+            output.append(f"{offset + i + 1}. {source}: {name}")
+
+        return "\n".join(output)
+
     def _form_response(self, query: str, document_results: List, local_results: List) -> str:
         """Form response text from query and search results.
 
@@ -320,34 +418,47 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
             Formatted response string
         """
         query = response_data.get("query", "")
+        # IMPORTANT: Research results are PRIMARY, document store is SECONDARY
+        # Use research_results + document_results for the combined list
+        research_results = response_data.get("research_results", [])
         document_results = response_data.get("document_results", [])
         local_results = response_data.get("local_results", [])
-        
-        if not document_results and not local_results:
+
+        # Combine research + document store results (both are document-based)
+        doc_results = research_results + document_results
+
+        if not doc_results and not local_results:
             return f"I couldn't find any relevant information for '{query}'."
-        
+
+        # When we have research results, let LLM provide the main answer first.
+        # The source list will be appended at the end by the engine.
+        # Return empty string so LLM response appears first.
+        if research_results:
+            return ""
+
+        # For document store or local-only results, show the list
         # Format results
         output = []
-        
+
         # Add document store results
-        for i, result in enumerate(document_results):
+        for i, result in enumerate(doc_results):
             source = result.get("source", "Document Store")
             title = result.get("title", result.get("name", "Unknown"))
             output.append(f"{i+1}. {source}: {title}")
-        
+
         # Add local pattern results
-        offset = len(document_results)
+        offset = len(doc_results)
         for i, result in enumerate(local_results):
             source = "Local Patterns"
             name = result.get("name", "Unknown")
             output.append(f"{offset + i + 1}. {source}: {name}")
-        
+
         response = "\n".join(output)
-        
+
         # Add reply capture prompt if enabled
         if self.reply_capture_enabled:
             response += "\n\nWould you like me to elaborate on any of these?"
-        
+
         return response
     
     def _get_timestamp(self) -> str:

@@ -10,7 +10,7 @@
     {
       "plugin_id": "exframe_specialist",
       "name": "ExFrame Knowledge Specialist",
-      "description": "Two-stage search: document store (primary) + local patterns (fallback)",
+      "description": "Three-stage search: research docs (primary) + document store + local patterns (fallback)",
       "module": "plugins.exframe.exframe_specialist",
       "class": "ExFrameSpecialistPlugin",
       "enabled": true,
@@ -24,21 +24,7 @@
           "remote_url": "",
           "timeout": 30,
           "api_key": null
-        }
-      }
-    }
-  ],
-
-  "enrichers": [
-    {
-      "module": "plugins.enrichers.llm_enricher",
-      "class": "LLMFallbackEnricher",
-      "enabled": true,
-      "config": {
-        "mode": "fallback",
-        "min_confidence": 0.50,
-        "model": "glm-4.7",
-        "max_patterns": 5,
+        },
         "research_strategy": {
           "type": "document",
           "use_chunking": false,
@@ -61,6 +47,20 @@
             {"type": "file", "path": "needed.md"}
           ]
         }
+      }
+    }
+  ],
+
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "model": "glm-4.7",
+        "max_patterns": 20,
+        "temperature": 0.6
       }
     }
   ],
