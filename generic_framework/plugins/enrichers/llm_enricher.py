@@ -103,8 +103,17 @@ class LLMEnricher(EnrichmentPlugin):
 
         # Check if this is a creative query (write, create, make, generate)
         # For creative queries, use direct prompt without pattern context
-        creative_keywords = ["write", "create", "make", "generate", "compose", "draft", "author"]
-        is_creative_query = any(keyword in query.lower() for keyword in creative_keywords)
+        creative_keywords = ["write", "create", "make", "generate", "compose", "draft", "author", "poem", "haiku", "sonnet", "verse"]
+        # Also check for patterns like "a poem about", "write me a poem", etc.
+        query_lower = query.lower()
+        is_creative_query = (
+            any(keyword in query_lower for keyword in creative_keywords) or
+            "poem about" in query_lower or
+            "haiku about" in query_lower or
+            "sonnet about" in query_lower or
+            "verse about" in query_lower or
+            "write me" in query_lower
+        )
 
         # DEBUG: Log the decision
         print(f"  [LLMEnricher] Query: '{query[:50]}...', creative={is_creative_query}, patterns={len(patterns)}")

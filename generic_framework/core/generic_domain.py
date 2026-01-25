@@ -193,7 +193,8 @@ class GenericDomain(Domain):
                 kb_config = KnowledgeBaseConfig(
                     storage_path=self.config.pattern_storage_path,
                     pattern_format=self.config.pattern_format,
-                    pattern_schema=self.config.pattern_schema
+                    pattern_schema=self.config.pattern_schema,
+                    similarity_threshold=kb_config_spec.get("similarity_threshold", 0.5)
                 )
 
                 # Instantiate plugin with additional config if provided
@@ -212,7 +213,8 @@ class GenericDomain(Domain):
         kb_config = KnowledgeBaseConfig(
             storage_path=self.config.pattern_storage_path,
             pattern_format=self.config.pattern_format,
-            pattern_schema=self.config.pattern_schema
+            pattern_schema=self.config.pattern_schema,
+            similarity_threshold=kb_config_spec.get("similarity_threshold", 0.5)
         )
         self._knowledge_base = JSONKnowledgeBase(kb_config)
         await self._knowledge_base.load_patterns()

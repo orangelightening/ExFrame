@@ -48,7 +48,7 @@
           "analysis",
           "literary_device"
         ],
-        "threshold": 0.2,
+        "threshold": 0.1,
         "description": "Use only assigned names when referring to other works. Limit off topic discussions to 100 words.  within the main reply."
       }
     }
@@ -70,7 +70,8 @@
     "type": "json",
     "storage_path": "patterns.json",
     "pattern_format": "embedded",
-    "auto_save": true
+    "auto_save": true,
+    "similarity_threshold": 0.2
   },
   "pattern_schema": {
     "required_fields": [
