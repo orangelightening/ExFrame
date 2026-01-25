@@ -105,40 +105,9 @@ class GeneralistPlugin(SpecialistPlugin):
         if not patterns:
             return f"[{self.name}] No patterns found for: {response_data.get('query', '')}"
 
-        result = f"[{self.name}] Found {response_data.get('patterns_found', 0)} patterns:\n\n"
-
-        for pattern in patterns[:3]:
-            result += f"**{pattern.get('name', 'Unknown')}**\n"
-
-            if pattern.get('type'):
-                result += f"Type: {pattern.get('type')}"
-            if pattern.get('category'):
-                result += f" | Category: {pattern.get('category')}"
-            result += "\n\n"
-
-            if "problem" in pattern:
-                result += f"**Problem:** {pattern['problem']}\n\n"
-
-            if "solution" in pattern:
-                result += f"**Solution:** {pattern['solution']}\n\n"
-
-            if "description" in pattern:
-                result += f"{pattern['description']}\n\n"
-
-            if "examples" in pattern and pattern["examples"]:
-                result += "**Examples:**\n"
-                for ex in pattern["examples"][:2]:
-                    result += "   • "
-                    if isinstance(ex, str):
-                        result += ex
-                    elif isinstance(ex, dict):
-                        for key, value in ex.items():
-                            if key != "notes":
-                                result += f"{key}={value} "
-                    result += "\n"
-                result += "\n"
-
-        return result
+        # When LLM enricher is active, return empty so LLM response appears first
+        # Pattern details will still be available in the response_data for the LLM to use
+        return ""
 
     def _synthesize_answer(self, query: str, patterns: List[Dict[str, Any]]) -> str:
         """Synthesize an answer from the patterns."""
