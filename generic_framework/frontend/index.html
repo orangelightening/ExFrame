@@ -497,7 +497,7 @@
             <div x-show="currentView === 'patterns'" x-transition class="glass rounded-xl p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold">Knowledge Patterns</h2>
-                    <button class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-sm font-medium transition-colors">
+                    <button @click="openCreatePatternModal()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-sm font-medium transition-colors">
                         + Create Pattern
                     </button>
                 </div>
@@ -1712,6 +1712,117 @@
                 </div>
             </div>
 
+            <!-- Create Pattern Modal -->
+            <div x-show="showCreatePatternModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                <div class="glass rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="flex items-start justify-between mb-6">
+                        <h3 class="text-xl font-bold text-emerald-400">Create New Pattern</h3>
+                        <button @click="closeCreatePatternModal()" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="submitCreatePattern()" class="space-y-4">
+                        <!-- Name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Pattern Name *</label>
+                            <input type="text" x-model="createPatternForm.name" required
+                                   class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none"
+                                   placeholder="e.g., Handling Authentication Errors">
+                        </div>
+
+                        <!-- Pattern Type -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Pattern Type</label>
+                            <select x-model="createPatternForm.pattern_type"
+                                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none">
+                                <option value="knowledge">Knowledge (informational)</option>
+                                <option value="algorithm">Algorithm (step-by-step)</option>
+                                <option value="heuristic">Heuristic (rule of thumb)</option>
+                                <option value="pattern">Design Pattern (structural)</option>
+                            </select>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Description</label>
+                            <textarea x-model="createPatternForm.description" rows="2"
+                                      class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none resize-none"
+                                      placeholder="Brief description of what this pattern covers..."></textarea>
+                        </div>
+
+                        <!-- Problem -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Problem / Question *</label>
+                            <textarea x-model="createPatternForm.problem" required rows="3"
+                                      class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none resize-none"
+                                      placeholder="What problem does this pattern solve? What question does it answer?"></textarea>
+                        </div>
+
+                        <!-- Solution -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Solution *</label>
+                            <textarea x-model="createPatternForm.solution" required rows="5"
+                                      class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none resize-none"
+                                      placeholder="The solution - detailed explanation, steps, or answer..."></textarea>
+                        </div>
+
+                        <!-- Tags -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Tags</label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="text" x-model="createPatternForm.newTag" @keydown.enter.prevent="addTagToCreateForm()"
+                                       class="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-emerald-500 outline-none"
+                                       placeholder="Add a tag and press Enter">
+                                <button type="button" @click="addTagToCreateForm()"
+                                        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium">
+                                    Add
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap gap-2" x-show="createPatternForm.tags.length > 0">
+                                <template x-for="tag in createPatternForm.tags" :key="tag">
+                                    <span class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-sm flex items-center gap-1">
+                                        <span x-text="tag"></span>
+                                        <button type="button" @click="removeTagFromCreateForm(tag)" class="hover:text-red-400">&times;</button>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Confidence Score -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">
+                                Confidence Score: <span x-text="(createPatternForm.confidence * 100).toFixed(0) + '%'"></span>
+                            </label>
+                            <input type="range" x-model="createPatternForm.confidence" min="0" max="1" step="0.05"
+                                   class="w-full">
+                            <p class="text-xs text-gray-500 mt-1">Higher confidence = pattern appears more in search results</p>
+                        </div>
+
+                        <!-- AI Generated Flag -->
+                        <div>
+                            <label class="flex items-center gap-3 text-sm text-gray-400 cursor-pointer">
+                                <input type="checkbox" x-model="createPatternForm.llm_generated"
+                                       class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-500">
+                                <span>Mark as AI-Generated (shows badge to users)</span>
+                            </label>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-700">
+                            <button type="button" @click="closeCreatePatternModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-sm font-medium">
+                                Create Pattern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Delete Pattern Confirmation Modal -->
             <div x-show="patternToDelete" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
                 <div class="glass rounded-xl p-6 max-w-md w-full">
@@ -2160,6 +2271,19 @@
                     confidence_score: 0.5
                 },
                 patternToDelete: null,
+                // Create pattern state
+                showCreatePatternModal: false,
+                createPatternForm: {
+                    name: '',
+                    description: '',
+                    problem: '',
+                    solution: '',
+                    pattern_type: 'knowledge',
+                    tags: [],
+                    newTag: '',
+                    confidence: 0.7,
+                    llm_generated: false
+                },
                 diagnosticsData: {
                     health: null,
                     search_metrics: null,
@@ -3432,6 +3556,83 @@
                     } catch (error) {
                         console.error('Failed to delete pattern:', error);
                         alert('Failed to delete pattern: ' + error.message);
+                    }
+                },
+
+                openCreatePatternModal() {
+                    // Reset form to default values
+                    this.createPatternForm = {
+                        name: '',
+                        description: '',
+                        problem: '',
+                        solution: '',
+                        pattern_type: 'knowledge',
+                        tags: [],
+                        newTag: '',
+                        confidence: 0.7,
+                        llm_generated: false
+                    };
+                    this.showCreatePatternModal = true;
+                },
+
+                closeCreatePatternModal() {
+                    this.showCreatePatternModal = false;
+                },
+
+                addTagToCreateForm() {
+                    if (this.createPatternForm.newTag && !this.createPatternForm.tags.includes(this.createPatternForm.newTag)) {
+                        this.createPatternForm.tags.push(this.createPatternForm.newTag);
+                        this.createPatternForm.newTag = '';
+                    }
+                },
+
+                removeTagFromCreateForm(tag) {
+                    this.createPatternForm.tags = this.createPatternForm.tags.filter(t => t !== tag);
+                },
+
+                async submitCreatePattern() {
+                    try {
+                        this.loading = true;
+
+                        // Build the pattern payload
+                        const payload = {
+                            domain: this.currentDomain,
+                            name: this.createPatternForm.name || 'Untitled Pattern',
+                            description: this.createPatternForm.description || '',
+                            problem: this.createPatternForm.problem || '',
+                            solution: this.createPatternForm.solution || '',
+                            pattern_type: this.createPatternForm.pattern_type || 'knowledge',
+                            confidence: this.createPatternForm.confidence || 0.7,
+                            llm_generated: this.createPatternForm.llm_generated || false,
+                            tags: this.createPatternForm.tags || [],
+                            origin: 'manual',
+                            origin_query: '',
+                            status: 'validated',
+                            validated_by: 'current_user',
+                            validated_at: new Date().toISOString(),
+                            validation_method: 'manual_entry'
+                        };
+
+                        const res = await fetch('/api/patterns', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!res.ok) {
+                            const error = await res.json();
+                            throw new Error(error.detail || 'Failed to create pattern');
+                        }
+
+                        const result = await res.json();
+                        alert(`Pattern "${payload.name}" created successfully!`);
+                        this.closeCreatePatternModal();
+                        await this.loadPatterns();
+                    } catch (error) {
+                        console.error('Failed to create pattern:', error);
+                        alert('Failed to create pattern: ' + error.message);
+                    } finally {
+                        this.loading = false;
                     }
                 },
 
