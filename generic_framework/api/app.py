@@ -82,7 +82,7 @@ class DomainCreate(BaseModel):
     tags: List[str]
     specialists: List[SpecialistConfig]
     storage_path: Optional[str] = None
-    enrichers: Optional[List[Dict[str, Any]]] None
+    enrichers: Optional[List[Dict[str, Any]]] = None
     # Domain Type System (Types 1-5)
     domain_type: Optional[str] = None
     # Type 1: Creative
@@ -1525,7 +1525,6 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
         "status": "created",
         "message": f"Domain '{request.domain_name}' created successfully",
         "config": domain_config
-    }
     }
 
 
