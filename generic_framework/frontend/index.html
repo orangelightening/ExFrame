@@ -1569,21 +1569,21 @@
                         </div>
 
                         <!-- Description -->
-                        <div>
+                        <div x-show="selectedPattern?.description">
                             <h4 class="text-sm font-semibold text-gray-300 mb-2">Description</h4>
-                            <p class="text-gray-400 text-sm" x-text="selectedPattern?.description"></p>
+                            <div class="prose prose-invert prose-sm max-w-none text-gray-400" x-html="renderedPatternDescription"></div>
                         </div>
 
                         <!-- Problem -->
                         <div x-show="selectedPattern?.problem">
                             <h4 class="text-sm font-semibold text-red-400 mb-2">Problem</h4>
-                            <p class="text-gray-400 text-sm" x-text="selectedPattern?.problem"></p>
+                            <div class="prose prose-invert prose-sm max-w-none text-gray-400" x-html="renderedPatternProblem"></div>
                         </div>
 
                         <!-- Solution -->
                         <div x-show="selectedPattern?.solution">
                             <h4 class="text-sm font-semibold text-emerald-400 mb-2">Solution</h4>
-                            <p class="text-gray-400 text-sm whitespace-pre-wrap" x-text="selectedPattern?.solution"></p>
+                            <div class="prose prose-invert prose-sm max-w-none text-gray-400" x-html="renderedPatternSolution"></div>
                         </div>
 
                         <!-- Steps -->
@@ -2373,6 +2373,34 @@
                         return marked.parse(this.response);
                     } catch (e) {
                         return this.response;
+                    }
+                },
+
+                // Computed properties for pattern detail markdown rendering
+                get renderedPatternSolution() {
+                    if (!this.selectedPattern?.solution) return '';
+                    try {
+                        return marked.parse(this.selectedPattern.solution);
+                    } catch (e) {
+                        return this.selectedPattern.solution;
+                    }
+                },
+
+                get renderedPatternProblem() {
+                    if (!this.selectedPattern?.problem) return '';
+                    try {
+                        return marked.parse(this.selectedPattern.problem);
+                    } catch (e) {
+                        return this.selectedPattern.problem;
+                    }
+                },
+
+                get renderedPatternDescription() {
+                    if (!this.selectedPattern?.description) return '';
+                    try {
+                        return marked.parse(this.selectedPattern.description);
+                    } catch (e) {
+                        return this.selectedPattern.description;
                     }
                 },
 
