@@ -82,7 +82,30 @@ class DomainCreate(BaseModel):
     tags: List[str]
     specialists: List[SpecialistConfig]
     storage_path: Optional[str] = None
-    enrichers: Optional[List[Dict[str, Any]]] = None
+    enrichers: Optional[List[Dict[str, Any]]] None
+    # Domain Type System (Types 1-5)
+    domain_type: Optional[str] = None
+    # Type 1: Creative
+    creative_keywords: Optional[str] = None
+    # Type 2: Knowledge Retrieval
+    similarity_threshold: Optional[float] = None
+    max_patterns: Optional[int] = None
+    # Type 3: Document Store
+    document_store_type: Optional[str] = None
+    remote_url: Optional[str] = None
+    api_key: Optional[str] = None
+    show_sources: Optional[bool] = None
+    # Type 4: Analytical
+    max_research_steps: Optional[int] = None
+    research_timeout: Optional[int] = None
+    report_format: Optional[str] = None
+    enable_web_search: Optional[bool] = None
+    # Type 5: Hybrid
+    require_confirmation: Optional[bool] = None
+    research_on_fallback: Optional[bool] = None
+    # Common to all types
+    temperature: Optional[float] = None
+    llm_min_confidence: Optional[float] = None
 
 
 class DomainUpdate(BaseModel):
@@ -1397,7 +1420,7 @@ async def get_domain_config(domain_id: str) -> Dict[str, Any]:
 
 @app.post("/api/admin/domains")
 async def create_domain(request: DomainCreate) -> Dict[str, Any]:
-    """Create a new domain."""
+    """Create a new domain using the domain type system."""
     registry = _load_domain_registry()
 
     # Validate domain_id is unique
@@ -1412,58 +1435,67 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
             detail="Domain ID must start with a lowercase letter and contain only lowercase letters, numbers, and underscores"
         )
 
-    # Create storage directory
-    storage_path = request.storage_path or get_storage_path(request.domain_id)
-    Path(storage_path).mkdir(parents=True, exist_ok=True)
+    # Import the domain factory
+    from core.domain_factory import DomainConfigGenerator
 
-    # Create domain config
-    domain_config = {
-        "domain_id": request.domain_id,
-        "domain_name": request.domain_name,
-        "description": request.description,
-        "version": "1.0.0",
-        "categories": request.categories,
-        "tags": request.tags,
-        "storage_path": storage_path,
-        "pattern_format": "json",
-        "plugins": [
-            {
-                "plugin_id": s.specialist_id,
-                "name": s.name,
-                "description": s.description,
-                "module": "plugins.generalist",
-                "class": "GeneralistPlugin",
-                "enabled": True,
-                "config": {
-                    "name": s.name,
-                    "description": s.description,
-                    "keywords": s.expertise_keywords,
-                    "categories": s.expertise_categories,
-                    "threshold": s.confidence_threshold
-                }
-            }
-            for s in request.specialists
-        ],
-        "specialists": [
-            {
+    # Generate domain configuration using the factory
+    try:
+        domain_config = DomainConfigGenerator.generate(
+            domain_id=request.domain_id,
+            domain_name=request.domain_name,
+            description=request.description,
+            categories=request.categories or [],
+            tags=request.tags or [],
+            specialists=[{
                 "specialist_id": s.specialist_id,
                 "name": s.name,
                 "description": s.description,
                 "expertise_keywords": s.expertise_keywords,
                 "expertise_categories": s.expertise_categories,
                 "confidence_threshold": s.confidence_threshold
-            }
-            for s in request.specialists
-        ],
-        "knowledge_base": {
-            "type": "json",
-            "storage_path": "patterns.json",
-            "pattern_format": "embedded",
-            "auto_save": True
-        },
-        "created_at": datetime.utcnow().isoformat(),
-        "updated_at": datetime.utcnow().isoformat()
-    }
+            } for s in request.specialists],
+            domain_type=request.domain_type or "",
+            # Type 1: Creative
+            creative_keywords=request.creative_keywords,
+            # Type 2: Knowledge
+            similarity_threshold=request.similarity_threshold,
+            max_patterns=request.max_patterns,
+            # Type 3: Document Store
+            document_store_type=request.document_store_type,
+            remote_url=request.remote_url,
+            api_key=request.api_key,
+            show_sources=request.show_sources,
+            # Type 4: Analytical
+            max_research_steps=request.max_research_steps,
+            research_timeout=request.research_timeout,
+            report_format=request.report_format,
+            enable_web_search=request.enable_web_search,
+            # Type 5: Hybrid
+            require_confirmation=request.require_confirmation,
+            research_on_fallback=request.research_on_fallback,
+            # Common
+            temperature=request.temperature,
+            llm_min_confidence=request.llm_min_confidence,
+            storage_path=request.storage_path
+        )
+
+        # Add any custom enrichers if provided
+        if request.enrichers:
+            domain_config["enrichers"] = request.enrichers
+
+    except Exception as e:
+        print(f"Warning: Domain factory generation failed, using defaults: {e}")
+        # Fall back to basic config if factory fails
+        domain_config = {
+            "domain_id": request.domain_id,
+            "domain_name": request.domain_name,
+            "description": request.description,
+            "version": "1.0.0",
+            "categories": request.categories or [],
+            "tags": request.tags or [],
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            "updated_at": datetime.utcnow().isoformat() + "Z"
+        }
 
     # Create domain.json file in the universe structure
     try:
@@ -1489,9 +1521,11 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
 
     return {
         "domain_id": request.domain_id,
+        "domain_type": request.domain_type,
         "status": "created",
         "message": f"Domain '{request.domain_name}' created successfully",
         "config": domain_config
+    }
     }
 
 

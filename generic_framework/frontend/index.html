@@ -1337,6 +1337,216 @@
                                       placeholder="What this domain covers..."></textarea>
                         </div>
 
+                        <!-- Domain Type Selection -->
+                        <div class="p-4 rounded-lg bg-emerald-900/10 border border-emerald-500/30">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-emerald-400">🎯</span>
+                                <h3 class="font-semibold text-emerald-400">Domain Type</h3>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-4">Select a domain type to load recommended configuration presets. Different types show different configuration options.</p>
+
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-400 mb-2">Select Type</label>
+                                <select x-model="domainForm.domain_type" @change="onDomainTypeChange()"
+                                        class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm focus:border-emerald-500 outline-none">
+                                    <option value="">-- Select Domain Type --</option>
+                                    <option value="1">Type 1: Creative Generator (poems, stories, art)</option>
+                                    <option value="2">Type 2: Knowledge Retrieval (how-to, FAQs, docs)</option>
+                                    <option value="3">Type 3: Document Store Search (external docs, APIs)</option>
+                                    <option value="4">Type 4: Analytical Engine (research, analysis)</option>
+                                    <option value="5">Type 5: Hybrid Assistant (general purpose)</option>
+                                </select>
+                            </div>
+
+                            <!-- Type Description -->
+                            <div x-show="domainForm.domain_type" class="p-3 rounded bg-gray-800/50 border border-gray-700 text-sm">
+                                <template x-if="domainForm.domain_type === '1'">
+                                    <div>
+                                        <p class="font-medium text-purple-400 mb-1">Creative Generator</p>
+                                        <p class="text-gray-400">For creative content like poems, stories, and art. High temperature, no pattern display shown to users.</p>
+                                    </div>
+                                </template>
+                                <template x-if="domainForm.domain_type === '2'">
+                                    <div>
+                                        <p class="font-medium text-blue-400 mb-1">Knowledge Retrieval</p>
+                                        <p class="text-gray-400">For how-to guides, FAQs, and technical documentation. Shows patterns, medium temperature.</p>
+                                    </div>
+                                </template>
+                                <template x-if="domainForm.domain_type === '3'">
+                                    <div>
+                                        <p class="font-medium text-amber-400 mb-1">Document Store Search</p>
+                                        <p class="text-gray-400">For external documentation and live data. Searches document store first, then local patterns.</p>
+                                    </div>
+                                </template>
+                                <template x-if="domainForm.domain_type === '4'">
+                                    <div>
+                                        <p class="font-medium text-green-400 mb-1">Analytical Engine</p>
+                                        <p class="text-gray-400">For research and multi-step analysis. Progress tracking, report generation.</p>
+                                    </div>
+                                </template>
+                                <template x-if="domainForm.domain_type === '5'">
+                                    <div>
+                                        <p class="font-medium text-teal-400 mb-1">Hybrid Assistant</p>
+                                        <p class="text-gray-400">General purpose with LLM fallback. User confirmation before extending search.</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Type-Specific Settings -->
+                        <div x-show="domainForm.domain_type === '1'" class="p-4 rounded-lg bg-purple-900/30 border-2 border-purple-500">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-purple-400">🎨</span>
+                                <h3 class="font-semibold text-purple-400">Creative Settings</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.8).toFixed(1)"></span></label>
+                                    <input type="range" x-model="domainForm.temperature" min="0.7" max="0.9" step="0.05" class="w-full">
+                                    <p class="text-xs text-gray-500 mt-1">Higher temperature = more creative</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Creative Keywords</label>
+                                    <input type="text" x-model="domainForm.creative_keywords"
+                                           class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-purple-500 outline-none"
+                                           placeholder="poem, story, write, create, compose">
+                                    <p class="text-xs text-gray-500 mt-1">Comma-separated keywords that trigger creative mode</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="domainForm.domain_type === '2'" class="p-4 rounded-lg bg-blue-900/30 border-2 border-blue-500">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-blue-400">📚</span>
+                                <h3 class="font-semibold text-blue-400">Knowledge Retrieval Settings</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.4).toFixed(1)"></span></label>
+                                    <input type="range" x-model="domainForm.temperature" min="0.3" max="0.5" step="0.05" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Similarity Threshold: <span x-text="(domainForm.similarity_threshold || 0.3).toFixed(2)"></span></label>
+                                    <input type="range" x-model="domainForm.similarity_threshold" min="0.3" max="0.5" step="0.05" class="w-full">
+                                    <p class="text-xs text-gray-500 mt-1">Lower = more results, Higher = stricter matching</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Max Patterns: <span x-text="domainForm.max_patterns || 10"></span></label>
+                                    <input type="range" x-model="domainForm.max_patterns" min="5" max="20" step="1" class="w-full">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="domainForm.domain_type === '3'" class="p-4 rounded-lg bg-amber-900/30 border-2 border-amber-500">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-amber-400">🔍</span>
+                                <h3 class="font-semibold text-amber-400">Document Store Settings</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Document Store Type</label>
+                                    <select x-model="domainForm.document_store_type"
+                                            class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none">
+                                        <option value="exframe_instance">ExFrame Instance</option>
+                                        <option value="vector_store">Vector Store</option>
+                                        <option value="web_search">Web Search</option>
+                                    </select>
+                                </div>
+                                <div x-show="domainForm.document_store_type === 'exframe_instance' || domainForm.document_store_type === 'vector_store'">
+                                    <label class="block text-xs text-gray-400 mb-2">Remote URL</label>
+                                    <input type="text" x-model="domainForm.remote_url"
+                                           class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none"
+                                           placeholder="http://localhost:3000 or http://remote-host:3000">
+                                </div>
+                                <div x-show="domainForm.document_store_type === 'vector_store'">
+                                    <label class="block text-xs text-gray-400 mb-2">API Key (optional)</label>
+                                    <input type="password" x-model="domainForm.api_key"
+                                           class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-amber-500 outline-none"
+                                           placeholder="Enter API key if required">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.6).toFixed(1)"></span></label>
+                                    <input type="range" x-model="domainForm.temperature" min="0.5" max="0.7" step="0.05" class="w-full">
+                                </div>
+                                <div class="p-3 rounded bg-gray-800/50 border border-gray-700">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" x-model="domainForm.show_sources"
+                                               class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-500">
+                                        <span class="text-sm text-gray-300">Show sources in response</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="domainForm.domain_type === '4'" class="p-4 rounded-lg bg-green-900/30 border-2 border-green-500">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-green-400">🔬</span>
+                                <h3 class="font-semibold text-green-400">Analytical Engine Settings</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Max Research Steps: <span x-text="domainForm.max_research_steps || 10"></span></label>
+                                    <input type="range" x-model="domainForm.max_research_steps" min="1" max="20" step="1" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Timeout (seconds): <span x-text="domainForm.research_timeout || 300"></span></label>
+                                    <input type="range" x-model="domainForm.research_timeout" min="30" max="600" step="30" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.5).toFixed(1)"></span></label>
+                                    <input type="range" x-model="domainForm.temperature" min="0.4" max="0.6" step="0.05" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Report Format</label>
+                                    <select x-model="domainForm.report_format"
+                                            class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-green-500 outline-none">
+                                        <option value="structured">Structured</option>
+                                        <option value="narrative">Narrative</option>
+                                        <option value="bullets">Bullets</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" x-model="domainForm.enable_web_search"
+                                               class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-green-500 focus:ring-green-500">
+                                        <span class="text-sm text-gray-300">Enable Web Search</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="domainForm.domain_type === '5'" class="p-4 rounded-lg bg-teal-900/30 border-2 border-teal-500">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-teal-400">🤝</span>
+                                <h3 class="font-semibold text-teal-400">Hybrid Assistant Settings</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Similarity Threshold: <span x-text="(domainForm.similarity_threshold || 0.3).toFixed(2)"></span></label>
+                                    <input type="range" x-model="domainForm.similarity_threshold" min="0.3" max="0.7" step="0.05" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Confidence Threshold: <span x-text="(domainForm.llm_min_confidence || 0.3).toFixed(2)"></span></label>
+                                    <input type="range" x-model="domainForm.llm_min_confidence" min="0.3" max="0.7" step="0.05" class="w-full">
+                                    <p class="text-xs text-gray-500 mt-1">If confidence below this, offer LLM extension</p>
+                                </div>
+                                <div class="p-3 rounded bg-gray-800/50 border border-gray-700">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" x-model="domainForm.require_confirmation"
+                                               class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-teal-500 focus:ring-teal-500">
+                                        <span class="text-sm text-gray-300">Require user confirmation before LLM fallback</span>
+                                    </label>
+                                </div>
+                                <div class="p-3 rounded bg-gray-800/50 border border-gray-700">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" x-model="domainForm.research_on_fallback"
+                                               class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-teal-500 focus:ring-teal-500">
+                                        <span class="text-sm text-gray-300">Enable document search on fallback</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Categories -->
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-2">Categories</label>
@@ -2247,6 +2457,27 @@
                     categories: [],
                     tags: [],
                     specialists: [],
+                    // Domain Type (1-5)
+                    domain_type: '',
+                    // Type-specific settings
+                    temperature: 0.5,
+                    similarity_threshold: 0.3,
+                    max_patterns: 10,
+                    // Type 1: Creative
+                    creative_keywords: '',
+                    // Type 3: Document Store
+                    document_store_type: 'exframe_instance',
+                    remote_url: '',
+                    api_key: '',
+                    show_sources: true,
+                    // Type 4: Analytical
+                    max_research_steps: 10,
+                    research_timeout: 300,
+                    report_format: 'structured',
+                    enable_web_search: false,
+                    // Type 5: Hybrid
+                    require_confirmation: true,
+                    research_on_fallback: false,
                     // Research Strategy (LLM Fallback) fields
                     research_strategy_type: 'none', // 'none', 'llm_only', 'document', 'internet'
                     research_base_path: '/app/universes/MINE/docs',
@@ -3193,10 +3424,77 @@
                         description: '',
                         categories: [],
                         tags: [],
-                        specialists: []
+                        specialists: [],
+                        // Domain Type (1-5)
+                        domain_type: '',
+                        // Type-specific settings
+                        temperature: 0.5,
+                        similarity_threshold: 0.3,
+                        max_patterns: 10,
+                        // Type 1: Creative
+                        creative_keywords: '',
+                        // Type 3: Document Store
+                        document_store_type: 'exframe_instance',
+                        remote_url: '',
+                        api_key: '',
+                        show_sources: true,
+                        // Type 4: Analytical
+                        max_research_steps: 10,
+                        research_timeout: 300,
+                        report_format: 'structured',
+                        enable_web_search: false,
+                        // Type 5: Hybrid
+                        require_confirmation: true,
+                        research_on_fallback: false,
+                        // Research Strategy (LLM Fallback) fields
+                        research_strategy_type: 'none',
+                        research_base_path: '/app/universes/MINE/docs',
+                        research_documents: '',
+                        research_chunk_size: 500,
+                        research_chunk_overlap: 100,
+                        auto_certify_docs: true,
+                        llm_model: 'glm-4.7',
+                        llm_min_confidence: 0.3
                     };
                     this.newCategory = '';
                     this.newTag = '';
+                },
+
+                onDomainTypeChange() {
+                    // Apply default settings based on selected domain type
+                    const type = this.domainForm.domain_type;
+
+                    if (type === '1') {
+                        // Type 1: Creative Generator
+                        this.domainForm.temperature = 0.8;
+                        this.domainForm.similarity_threshold = 0.2;
+                        this.domainForm.creative_keywords = 'poem, story, write, create, compose, generate';
+                        this.domainForm.max_patterns = 5;
+                    } else if (type === '2') {
+                        // Type 2: Knowledge Retrieval
+                        this.domainForm.temperature = 0.4;
+                        this.domainForm.similarity_threshold = 0.3;
+                        this.domainForm.max_patterns = 10;
+                    } else if (type === '3') {
+                        // Type 3: Document Store Search
+                        this.domainForm.temperature = 0.6;
+                        this.domainForm.similarity_threshold = 0.3;
+                        this.domainForm.document_store_type = 'exframe_instance';
+                        this.domainForm.show_sources = true;
+                    } else if (type === '4') {
+                        // Type 4: Analytical Engine
+                        this.domainForm.temperature = 0.5;
+                        this.domainForm.similarity_threshold = 0.3;
+                        this.domainForm.max_research_steps = 10;
+                        this.domainForm.research_timeout = 300;
+                        this.domainForm.report_format = 'structured';
+                    } else if (type === '5') {
+                        // Type 5: Hybrid Assistant
+                        this.domainForm.temperature = 0.5;
+                        this.domainForm.similarity_threshold = 0.3;
+                        this.domainForm.llm_min_confidence = 0.3;
+                        this.domainForm.require_confirmation = true;
+                    }
                 },
 
                 async editDomain(domain_id) {
