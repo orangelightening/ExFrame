@@ -115,6 +115,29 @@ class DomainUpdate(BaseModel):
     tags: Optional[List[str]] = None
     specialists: Optional[List[SpecialistConfig]] = None
     enrichers: Optional[List[Dict[str, Any]]] = None
+    # Domain Type System (Types 1-5)
+    domain_type: Optional[str] = None
+    # Type 1: Creative
+    creative_keywords: Optional[str] = None
+    # Type 2: Knowledge Retrieval
+    similarity_threshold: Optional[float] = None
+    max_patterns: Optional[int] = None
+    # Type 3: Document Store
+    document_store_type: Optional[str] = None
+    remote_url: Optional[str] = None
+    api_key: Optional[str] = None
+    show_sources: Optional[bool] = None
+    # Type 4: Analytical
+    max_research_steps: Optional[int] = None
+    research_timeout: Optional[int] = None
+    report_format: Optional[str] = None
+    enable_web_search: Optional[bool] = None
+    # Type 5: Hybrid
+    require_confirmation: Optional[bool] = None
+    research_on_fallback: Optional[bool] = None
+    # Common to all types
+    temperature: Optional[float] = None
+    llm_min_confidence: Optional[float] = None
 
 
 class QueryResponse(BaseModel):
@@ -1530,113 +1553,166 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
 
 @app.put("/api/admin/domains/{domain_id}")
 async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]:
-    """Update an existing domain."""
+    """Update an existing domain. Supports domain type system changes."""
     registry = _load_domain_registry()
+    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+    domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
 
-    if domain_id not in registry["domains"]:
+    # Try to get existing domain config from registry or file
+    domain_config = None
+    if domain_id in registry["domains"]:
+        domain_config = registry["domains"][domain_id]
+    elif domain_file.exists():
+        with open(domain_file, 'r') as f:
+            domain_config = json.load(f)
+
+    if not domain_config:
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 
-    domain_config = registry["domains"][domain_id]
+    # If domain_type is being set/changed, regenerate config using factory
+    if request.domain_type is not None and request.domain_type != domain_config.get("domain_type", ""):
+        from core.domain_factory import DomainConfigGenerator
 
-    # Update fields
-    if request.domain_name is not None:
-        domain_config["domain_name"] = request.domain_name
-    if request.description is not None:
-        domain_config["description"] = request.description
-    if request.categories is not None:
-        domain_config["categories"] = request.categories
-    if request.tags is not None:
-        domain_config["tags"] = request.tags
-    if request.specialists is not None:
-        domain_config["specialists"] = [
-            {
-                "specialist_id": s.specialist_id,
-                "name": s.name,
-                "description": s.description,
-                "keywords": s.expertise_keywords,
-                "categories": s.expertise_categories,
-                "confidence_threshold": s.confidence_threshold
-            }
-            for s in request.specialists
-        ]
-    if request.enrichers is not None:
-        domain_config["enrichers"] = request.enrichers
+        # Build specialist list from existing config or request
+        specialists = request.specialists if request.specialists is not None else []
+        if not specialists and "specialists" in domain_config:
+            # Convert existing specialists to the format expected by factory
+            for s in domain_config["specialists"]:
+                specialists.append({
+                    "specialist_id": s.get("specialist_id", f"{domain_id}_specialist"),
+                    "name": s.get("name", domain_config.get("domain_name", domain_id)),
+                    "description": s.get("description", ""),
+                    "expertise_keywords": s.get("expertise_keywords", []),
+                    "expertise_categories": s.get("expertise_categories", []),
+                    "confidence_threshold": s.get("confidence_threshold", 0.6)
+                })
+
+        # Generate new config using factory
+        new_config = DomainConfigGenerator.generate(
+            domain_id=domain_id,
+            domain_name=request.domain_name if request.domain_name is not None else domain_config.get("domain_name", ""),
+            description=request.description if request.description is not None else domain_config.get("description", ""),
+            categories=request.categories if request.categories is not None else domain_config.get("categories", []),
+            tags=request.tags if request.tags is not None else domain_config.get("tags", []),
+            specialists=specialists,
+            domain_type=request.domain_type,
+            # Type 1: Creative
+            creative_keywords=request.creative_keywords if request.creative_keywords is not None else domain_config.get("creative_keywords"),
+            # Type 2: Knowledge
+            similarity_threshold=request.similarity_threshold if request.similarity_threshold is not None else domain_config.get("similarity_threshold"),
+            max_patterns=request.max_patterns if request.max_patterns is not None else domain_config.get("max_patterns"),
+            # Type 3: Document Store
+            document_store_type=request.document_store_type if request.document_store_type is not None else domain_config.get("document_store_type"),
+            remote_url=request.remote_url if request.remote_url is not None else domain_config.get("remote_url"),
+            show_sources=request.show_sources if request.show_sources is not None else domain_config.get("show_sources"),
+            # Type 4: Analytical
+            max_research_steps=request.max_research_steps if request.max_research_steps is not None else domain_config.get("max_research_steps"),
+            research_timeout=request.research_timeout if request.research_timeout is not None else domain_config.get("research_timeout"),
+            report_format=request.report_format if request.report_format is not None else domain_config.get("report_format"),
+            enable_web_search=request.enable_web_search if request.enable_web_search is not None else domain_config.get("enable_web_search"),
+            # Type 5: Hybrid
+            require_confirmation=request.require_confirmation if request.require_confirmation is not None else domain_config.get("require_confirmation"),
+            research_on_fallback=request.research_on_fallback if request.research_on_fallback is not None else domain_config.get("research_on_fallback"),
+            # Common
+            temperature=request.temperature if request.temperature is not None else domain_config.get("temperature"),
+            llm_min_confidence=request.llm_min_confidence if request.llm_min_confidence is not None else domain_config.get("llm_min_confidence"),
+            storage_path=domain_config.get("storage_path")
+        )
+
+        # Merge with existing config to preserve any fields not in factory output
+        for key, value in domain_config.items():
+            if key not in new_config:
+                new_config[key] = value
+
+        domain_config = new_config
+    else:
+        # Simple field updates when domain_type is not changing
+        if request.domain_name is not None:
+            domain_config["domain_name"] = request.domain_name
+        if request.description is not None:
+            domain_config["description"] = request.description
+        if request.categories is not None:
+            domain_config["categories"] = request.categories
+        if request.tags is not None:
+            domain_config["tags"] = request.tags
+        if request.specialists is not None:
+            domain_config["specialists"] = [
+                {
+                    "specialist_id": s.specialist_id,
+                    "name": s.name,
+                    "description": s.description,
+                    "expertise_keywords": s.expertise_keywords,
+                    "expertise_categories": s.expertise_categories,
+                    "confidence_threshold": s.confidence_threshold
+                }
+                for s in request.specialists
+            ]
+            # Also update plugins
+            domain_config["plugins"] = []
+            for s in request.specialists:
+                domain_config["plugins"].append({
+                    "plugin_id": s.specialist_id,
+                    "name": s.name,
+                    "description": s.description,
+                    "module": "plugins.generalist",
+                    "class": "GeneralistPlugin",
+                    "enabled": True,
+                    "config": {
+                        "name": s.name,
+                        "description": s.description,
+                        "keywords": s.expertise_keywords,
+                        "categories": s.expertise_categories,
+                        "threshold": s.confidence_threshold
+                    }
+                })
+        if request.enrichers is not None:
+            domain_config["enrichers"] = request.enrichers
+
+        # Update domain type fields
+        if request.domain_type is not None:
+            domain_config["domain_type"] = request.domain_type
+        if request.temperature is not None:
+            domain_config["temperature"] = request.temperature
+        if request.llm_min_confidence is not None:
+            domain_config["llm_min_confidence"] = request.llm_min_confidence
+        if request.creative_keywords is not None:
+            domain_config["creative_keywords"] = request.creative_keywords
+        if request.similarity_threshold is not None:
+            domain_config["similarity_threshold"] = request.similarity_threshold
+        if request.max_patterns is not None:
+            domain_config["max_patterns"] = request.max_patterns
+        if request.document_store_type is not None:
+            domain_config["document_store_type"] = request.document_store_type
+        if request.remote_url is not None:
+            domain_config["remote_url"] = request.remote_url
+        if request.show_sources is not None:
+            domain_config["show_sources"] = request.show_sources
+        if request.max_research_steps is not None:
+            domain_config["max_research_steps"] = request.max_research_steps
+        if request.research_timeout is not None:
+            domain_config["research_timeout"] = request.research_timeout
+        if request.report_format is not None:
+            domain_config["report_format"] = request.report_format
+        if request.enable_web_search is not None:
+            domain_config["enable_web_search"] = request.enable_web_search
+        if request.require_confirmation is not None:
+            domain_config["require_confirmation"] = request.require_confirmation
+        if request.research_on_fallback is not None:
+            domain_config["research_on_fallback"] = request.research_on_fallback
 
     domain_config["updated_at"] = datetime.utcnow().isoformat()
 
+    # Save to registry
+    registry["domains"][domain_id] = domain_config
     _save_domain_registry(registry)
 
-    # Also update the universe's domain.json file if it exists
-    try:
-        universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-        domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
-
-        if domain_file.exists():
-            # Load the domain.json file
-            with open(domain_file, 'r') as f:
-                universe_domain_config = json.load(f)
-
-            # Update enrichers in the universe domain config
-            if request.enrichers is not None:
-                universe_domain_config["enrichers"] = request.enrichers
-
-            # Update other fields
-            if request.domain_name is not None:
-                universe_domain_config["domain_name"] = request.domain_name
-            if request.description is not None:
-                universe_domain_config["description"] = request.description
-            if request.categories is not None:
-                universe_domain_config["categories"] = request.categories
-            if request.tags is not None:
-                universe_domain_config["tags"] = request.tags
-            if request.specialists is not None:
-                universe_domain_config["specialists"] = [
-                    {
-                        "specialist_id": s.specialist_id,
-                        "name": s.name,
-                        "description": s.description,
-                        "expertise_keywords": s.expertise_keywords,
-                        "expertise_categories": s.expertise_categories,
-                        "confidence_threshold": s.confidence_threshold
-                    }
-                    for s in request.specialists
-                ]
-
-                # Also update the corresponding plugin config if it exists
-                # This ensures the plugin (which reads from plugins[].config) gets the updated data
-                if "plugins" in universe_domain_config:
-                    for specialist in request.specialists:
-                        specialist_id = specialist.specialist_id
-                        # Find the plugin with matching plugin_id
-                        for plugin in universe_domain_config["plugins"]:
-                            if plugin.get("plugin_id") == specialist_id:
-                                # Update plugin config with specialist data
-                                if "config" not in plugin:
-                                    plugin["config"] = {}
-                                if specialist.name is not None:
-                                    plugin["config"]["name"] = specialist.name
-                                if specialist.description is not None:
-                                    plugin["config"]["description"] = specialist.description
-                                if specialist.expertise_keywords:
-                                    plugin["config"]["keywords"] = specialist.expertise_keywords
-                                if specialist.expertise_categories:
-                                    plugin["config"]["categories"] = specialist.expertise_categories
-                                if specialist.confidence_threshold is not None:
-                                    plugin["config"]["threshold"] = specialist.confidence_threshold
-
-            universe_domain_config["updated_at"] = datetime.utcnow().isoformat()
-
-            # Save back to the universe domain.json
-            with open(domain_file, 'w') as f:
-                json.dump(universe_domain_config, f, indent=2)
-
-            print(f"Updated universe domain file: {domain_file}")
-    except Exception as e:
-        print(f"Warning: Failed to update universe domain file: {e}")
+    # Save to universe domain.json file
+    domain_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(domain_file, 'w') as f:
+        json.dump(domain_config, f, indent=2)
 
     # Reload domain if it's currently loaded
     if domain_id in engines:
-        # Trigger a reload of the domain
         try:
             await engines[domain_id].reload()
         except Exception as e:

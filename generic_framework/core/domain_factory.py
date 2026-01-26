@@ -69,6 +69,7 @@ class DomainConfigGenerator:
             "updated_at": datetime.utcnow().isoformat() + "Z",
             "categories": categories or [],
             "tags": tags or [],
+            "domain_type": domain_type,
             "pattern_schema": {
                 "required_fields": ["id", "name", "pattern_type", "problem", "solution"],
                 "optional_fields": [
