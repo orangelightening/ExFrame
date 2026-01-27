@@ -129,11 +129,21 @@
                     <div class="lg:col-span-2 space-y-6">
                         <!-- Query Input -->
                         <div class="glass rounded-xl p-6">
-                            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                                </svg>
-                                Ask a Question
+                            <h2 class="text-lg font-semibold mb-4 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                    </svg>
+                                    Ask a Question
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span x-show="currentDomainType" class="px-2 py-1 rounded bg-gray-700 text-gray-300 text-xs" title="Domain Type">
+                                        Type <span x-text="currentDomainType"></span>
+                                    </span>
+                                    <span x-show="currentTemperature" class="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-sm" title="Current LLM Temperature">
+                                        🌡️ <span x-text="currentTemperature.toFixed(1)"></span>
+                                    </span>
+                                </div>
                             </h2>
                             <div class="space-y-4">
                                 <textarea
