@@ -1574,8 +1574,19 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
         from core.domain_factory import DomainConfigGenerator
 
         # Build specialist list from existing config or request
-        specialists = request.specialists if request.specialists is not None else []
-        if not specialists and "specialists" in domain_config:
+        specialists = []
+        if request.specialists is not None and len(request.specialists) > 0:
+            # Convert Pydantic SpecialistConfig objects to dictionaries
+            for s in request.specialists:
+                specialists.append({
+                    "specialist_id": s.specialist_id,
+                    "name": s.name,
+                    "description": s.description,
+                    "expertise_keywords": s.expertise_keywords,
+                    "expertise_categories": s.expertise_categories,
+                    "confidence_threshold": s.confidence_threshold
+                })
+        elif "specialists" in domain_config and domain_config["specialists"]:
             # Convert existing specialists to the format expected by factory
             for s in domain_config["specialists"]:
                 specialists.append({
