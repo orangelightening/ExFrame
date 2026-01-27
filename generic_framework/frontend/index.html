@@ -1416,8 +1416,8 @@
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-2">Temperature</label>
                                     <div class="flex items-center gap-3">
-                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="flex-1">
-                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">Higher = more creative (recommended: 0.7-0.9)</p>
                                 </div>
@@ -1440,8 +1440,8 @@
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-2">Temperature</label>
                                     <div class="flex items-center gap-3">
-                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="flex-1">
-                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">Lower = more factual (recommended: 0.3-0.5)</p>
                                 </div>
@@ -1487,8 +1487,8 @@
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-2">Temperature</label>
                                     <div class="flex items-center gap-3">
-                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="flex-1">
-                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
                                     </div>
                                 </div>
                                 <div class="p-3 rounded bg-gray-800/50 border border-gray-700">
@@ -1518,8 +1518,8 @@
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-2">Temperature</label>
                                     <div class="flex items-center gap-3">
-                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="flex-1">
-                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="1" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0" max="2" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
                                     </div>
                                 </div>
                                 <div>
@@ -3703,6 +3703,10 @@
                         const data = await res.json();
                         alert(data.message || 'Domain saved successfully');
                         await this.loadAllDomains();
+                        // If we saved the current domain, reload its info to update temperature/domain type display
+                        if (this.domainForm.domain_id === this.currentDomain) {
+                            await this.loadDomainInfo();
+                        }
                         this.cancelDomainEdit();
                     } catch (error) {
                         console.error('Failed to save domain:', error);
