@@ -40,51 +40,64 @@ class ReplyFormationEnricher(EnricherPlugin):
     
     def __init__(self, config: Dict[str, Any]):
         """Initialize reply formation enricher.
-        
+
         Args:
             config: Configuration dictionary with:
                 - combine_strategy: How to combine results ("merge", "document_first", "local_first")
                 - max_results: Maximum number of results to include
+                - show_results: Whether to show pattern hits in response (default: true)
+                - show_sources: Whether to show sources in pattern hits (default: true)
         """
         self.config = config
         self.combine_strategy = config.get("combine_strategy", "merge")
         self.max_results = config.get("max_results", 10)
+        self.show_results = config.get("show_results", True)
+        self.show_sources = config.get("show_sources", True)
         
         logger.info(f"[REPLY_FORM] Initialized with strategy={self.combine_strategy}, max_results={self.max_results}")
     
     async def enrich(self, response_data: Dict, context: Optional[Dict] = None) -> Dict:
         """Form reply from document store and local patterns.
-        
+
         Args:
             response_data: Response data from specialist
             context: Optional context dictionary
-            
+
         Returns:
             Enriched response data with combined results and reply
         """
+        # Get all result types (research results from docs, document store, local patterns)
+        research_results = response_data.get("research_results", [])
         document_results = response_data.get("document_results", [])
         local_results = response_data.get("local_results", [])
-        
-        if not document_results and not local_results:
-            # No results from either source
+
+        # Research + document store results are the primary sources
+        primary_results = research_results + document_results
+
+        if not primary_results and not local_results:
+            # No results from any source
             return response_data
-        
+
         # Combine based on strategy
         if self.combine_strategy == "merge":
-            combined = self._merge_results(document_results, local_results)
+            combined = self._merge_results(primary_results, local_results)
         elif self.combine_strategy == "document_first":
-            combined = self._document_first_strategy(document_results, local_results)
+            combined = self._document_first_strategy(primary_results, local_results)
         elif self.combine_strategy == "local_first":
-            combined = self._local_first_strategy(document_results, local_results)
+            combined = self._local_first_strategy(primary_results, local_results)
         else:
             # Default to merge
-            combined = self._merge_results(document_results, local_results)
-        
+            combined = self._merge_results(primary_results, local_results)
+
         response_data["combined_results"] = combined
         response_data["reply"] = self._form_reply(combined)
-        
-        logger.info(f"[REPLY_FORM] Formed reply from {len(combined)} results")
-        
+
+        # Replace patterns with combined results so LLM uses correct context
+        # This prevents duplicate pattern lists in the response
+        response_data["patterns"] = combined
+
+        logger.info(f"[REPLY_FORM] Formed reply from {len(combined)} results (research: {len(research_results)}, doc: {len(document_results)}, local: {len(local_results)})")
+
         return response_data
     
     def _merge_results(self, document_results: List[Dict], local_results: List[Dict]) -> List[Dict]:
@@ -185,30 +198,34 @@ class ReplyFormationEnricher(EnricherPlugin):
     
     def _format_markdown(self, results: List[Dict], reply: str) -> str:
         """Format results as Markdown.
-        
+
         Args:
             results: List of combined results
             reply: Formatted reply text
-            
+
         Returns:
             Markdown formatted string
         """
+        # If show_results is False, only return the AI reply
+        if not self.show_results:
+            return reply
+
         if not results:
             return reply
-        
+
         output = []
-        for result in results:
+        for result in results[:5]:
             source = "Document Store" if "source" in result or result.get("source") == "exframe_instance" else "Local Pattern"
             title = result.get("title", result.get("name", "Unknown"))
             content = result.get("content", result.get("solution", ""))
-            
+
             output.append(f"### {source}: {title}")
             output.append(f"{content}")
             output.append("")
-        
+
         output.append("---")
         output.append(reply)
-        
+
         return "\n".join(output)
     
     def _format_json(self, results: List[Dict], reply: str) -> str:

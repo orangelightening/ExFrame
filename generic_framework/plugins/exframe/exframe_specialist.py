@@ -427,55 +427,20 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
     def format_response(self, response_data: Dict) -> str:
         """Format response for user.
 
+        For Type 3 (Document Store) domains, always return empty string.
+        This allows the LLM to generate the main response using the documents as context,
+        without showing duplicate pattern lists.
+
         Args:
             response_data: Response data from process_query
 
         Returns:
-            Formatted response string
+            Formatted response string (always empty for Type 3)
         """
-        query = response_data.get("query", "")
-        # IMPORTANT: Research results are PRIMARY, document store is SECONDARY
-        # Use research_results + document_results for the combined list
-        research_results = response_data.get("research_results", [])
-        document_results = response_data.get("document_results", [])
-        local_results = response_data.get("local_results", [])
-
-        # Combine research + document store results (both are document-based)
-        doc_results = research_results + document_results
-
-        if not doc_results and not local_results:
-            return f"I couldn't find any relevant information for '{query}'."
-
-        # When we have research results, let LLM provide the main answer first.
-        # The source list will be appended at the end by the engine.
-        # Return empty string so LLM response appears first.
-        if research_results:
-            return ""
-
-        # For document store or local-only results, show the list
-        # Format results
-        output = []
-
-        # Add document store results
-        for i, result in enumerate(doc_results):
-            source = result.get("source", "Document Store")
-            title = result.get("title", result.get("name", "Unknown"))
-            output.append(f"{i+1}. {source}: {title}")
-
-        # Add local pattern results
-        offset = len(doc_results)
-        for i, result in enumerate(local_results):
-            source = "Local Patterns"
-            name = result.get("name", "Unknown")
-            output.append(f"{offset + i + 1}. {source}: {name}")
-
-        response = "\n".join(output)
-
-        # Add reply capture prompt if enabled
-        if self.reply_capture_enabled:
-            response += "\n\nWould you like me to elaborate on any of these?"
-
-        return response
+        # For Type 3 domains, always return empty string
+        # The LLM enricher will provide the main response using document context
+        # This prevents duplicate pattern lists from being shown
+        return ""
     
     def _get_timestamp(self) -> str:
         """Get current timestamp in ISO format."""

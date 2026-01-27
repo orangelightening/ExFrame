@@ -311,10 +311,20 @@ class GenericAssistantEngine:
             # Continue without enrichment if it fails
 
         # Append source list if specialist provided one (for research-based results)
+        # Skip if ReplyFormationEnricher has processed the results (Type 3 domain)
         if specialist and hasattr(specialist, 'specialist_id'):
-            # Check if response_data has a source list to append
             source_list = response_data.get('_source_list', '')
-            if source_list and response:
+            # Check if this is a Type 3 (exframe) specialist
+            is_exframe_specialist = specialist.specialist_id == 'exframe_specialist'
+
+            # Only append source list if:
+            # 1. There IS a source list AND
+            # 2. This is NOT an exframe specialist (Type 3 domains handle their own formatting)
+            should_append_source_list = (
+                source_list and
+                not is_exframe_specialist
+            )
+            if should_append_source_list:
                 # Add separator and source list at the end
                 response += f"\n\n---\n\n**Sources searched:**\n\n{source_list}"
 

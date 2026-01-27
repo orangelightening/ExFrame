@@ -173,10 +173,23 @@ class LLMEnricher(EnrichmentPlugin):
         query = response_data.get("query", "")
         specialist_id = response_data.get("specialist_id", "")
 
+        # Check if this is a Type 3 (document store) domain
+        # Type 3 domains use exframe_specialist which should have combined_results
+        is_type3_domain = (
+            specialist_id == "exframe_specialist" or
+            "combined_results" in response_data or
+            response_data.get("search_strategy") == "research_primary"
+        )
+
         # Build prompt based on mode and available patterns
-        if patterns and self.mode != self.MODE_REPLACE:
+        if patterns and self.mode != self.MODE_REPLACE and not is_type3_domain:
+            # Use pattern-based enhancement for local patterns
             prompt = self._build_enhancement_prompt(query, patterns, specialist_id, context)
+        elif is_type3_domain:
+            # Use document-context prompt for Type 3 document search results
+            prompt = self._build_document_context_prompt(query, patterns, context)
         else:
+            # Use direct prompt when no patterns or in replace mode
             prompt = self._build_direct_prompt(query, context)
 
         # Call LLM API
@@ -268,6 +281,59 @@ Provide a creative, original response using markdown formatting:
 - Follow the requested format or style precisely
 - Don't reference other works or patterns unless explicitly asked
 - Make it engaging and well-crafted
+
+Your response:"""
+
+        return prompt
+
+    def _build_document_context_prompt(
+        self,
+        query: str,
+        patterns: List,
+        context: EnrichmentContext
+    ) -> str:
+        """Build prompt with document context for Type 3 (Document Store) domains.
+
+        Unlike the enhancement prompt, this doesn't ask the LLM to list patterns.
+        The LLM should use the documents as context to answer naturally.
+        """
+        domain_id = context.domain_id
+
+        # Format documents as context (not as patterns to be listed)
+        # Use the document content directly to provide context
+        context_text = ""
+        for i, doc in enumerate(patterns[:self.max_patterns], 1):
+            # For document results, use the content field
+            content = doc.get("content", doc.get("solution", ""))
+            title = doc.get("title", doc.get("name", "Document"))
+
+            # Clean up any existing source references
+            content = self._clean_pattern_text(content)
+
+            # Truncate if too long
+            if len(content) > 1500:
+                content = content[:1500] + "..."
+
+            context_text += f"""
+--- Document {i}: {title} ---
+{content}
+---
+"""
+
+        prompt = f"""You are a helpful AI assistant with access to documentation.
+
+A user asked: "{query}"
+
+Here are the relevant documents from our knowledge base:
+
+{context_text}
+
+Using the information from these documents, provide a clear, comprehensive answer to the user's question:
+1. Draw directly from the document content above
+2. Organize the information in a natural, conversational way
+3. Include specific details from the documents when relevant
+4. Use markdown formatting for readability (headers, bullet points, etc.)
+5. Do NOT include a "Sources" or "References" section at the end - just provide the answer naturally
 
 Your response:"""
 
