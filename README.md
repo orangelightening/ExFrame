@@ -247,6 +247,69 @@ ExFrame v1.5.0 features **pure semantic search** using SentenceTransformers embe
 ### Configuration
 
 **Model**: all-MiniLM-L6-v2 (384-dimensional vectors)
+
+---
+
+## Domain Type System
+
+ExFrame v1.6.0 introduces a **domain type system** with 5 pre-configured archetypes that optimize settings for different use cases.
+
+### Domain Types
+
+| Type | Name | Use Cases | Temperature | Key Features |
+|------|------|-----------|-------------|--------------|
+| **1** | Creative Generator | Poems, stories, creative content | 0.7-0.9 (high) | Creative mode, keywords |
+| **2** | Knowledge Retrieval | How-to guides, FAQs, documentation | 0.3-0.5 (medium) | Pattern display, similarity threshold |
+| **3** | Document Store Search | External docs, API docs, live data | 0.5-0.7 | Document-first strategy, ExFrame specialist |
+| **4** | Analytical Engine | Research, analysis, reports | 0.4-0.6 | Research specialist, progress tracking |
+| **5** | Hybrid Assistant | General purpose, flexible | 0.3-0.7 | LLM fallback, user confirmation |
+
+### Type Configurations
+
+**Type 1: Creative Generator**
+- High temperature (0.7-0.9) for diverse, creative outputs
+- Creative keyword detection (poem, story, write, create)
+- Lower similarity threshold for broader pattern matching
+
+**Type 2: Knowledge Retrieval**
+- Medium temperature (0.3-0.5) for focused, factual responses
+- Configurable max patterns display
+- Higher similarity threshold for precision
+
+**Type 3: Document Store Search**
+- Prioritizes external documents over local patterns
+- ExFrame specialist with document-first combine strategy
+- Configurable remote URLs and API keys
+
+**Type 4: Analytical Engine**
+- Research specialist for multi-step analysis
+- Configurable research steps and timeout
+- Optional web search integration
+- Structured report format
+
+**Type 5: Hybrid Assistant**
+- LLM fallback when pattern confidence is low
+- User confirmation before LLM extension
+- Configurable confidence thresholds
+
+### Using Domain Types
+
+When creating or editing a domain:
+1. Select a domain type from the dropdown
+2. Adjust type-specific settings (temperature, thresholds, etc.)
+3. Save - the system generates optimal plugins and enrichers automatically
+
+### Current Domain Mappings
+
+| Domain | Type | Temperature |
+|--------|------|-------------|
+| poetry_domain | Type 1 (Creative) | 0.85 |
+| cooking | Type 2 (Knowledge) | 0.7 |
+| python | Type 2 (Knowledge) | 0.4 |
+| first_aid | Type 2 (Knowledge) | 0.4 |
+| gardening | Type 2 (Knowledge) | 0.4 |
+| llm_consciousness | Type 2 (Knowledge) | 0.5 |
+| exframe | Type 2 (Knowledge) | variable |
 **Similarity Metric**: Cosine similarity
 **Semantic Weight**: 100% (pure semantic)
 **Keyword Weight**: 0% (no keyword component)
@@ -904,8 +967,16 @@ curl -X DELETE http://localhost:3000/api/admin/domains/{domain_id}
    - **Description**: What the domain covers
    - **Categories**: Knowledge categories
    - **Tags**: Searchable tags
-   - **Specialists**: Add one or more specialists
+   - **Domain Type** (NEW): Choose a pre-configured archetype:
+     - **Type 1: Creative Generator** - Poems, stories, creative content (high temp)
+     - **Type 2: Knowledge Retrieval** - How-to guides, FAQs, docs (medium temp)
+     - **Type 3: Document Store Search** - External docs, APIs, live data
+     - **Type 4: Analytical Engine** - Research, analysis, reports
+     - **Type 5: Hybrid Assistant** - General purpose with LLM fallback
+   - **Type-specific settings**: Adjust temperature, similarity thresholds, etc.
 4. Click **Save Domain**
+
+The domain type system automatically configures optimal plugins, enrichers, and settings for your use case.
 
 ### Method 2: Code-Based (Advanced)
 

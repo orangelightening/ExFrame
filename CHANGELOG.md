@@ -5,6 +5,38 @@ All notable changes to EEFrame will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-01-27
+
+### Added - Domain Type System
+
+Complete domain type system with 5 pre-configured archetypes for different use cases:
+
+#### Domain Types
+- **Type 1: Creative Generator** - Poems, stories, creative content (high temp 0.7-0.9)
+- **Type 2: Knowledge Retrieval** - How-to guides, FAQs, docs (medium temp 0.3-0.5)
+- **Type 3: Document Store Search** - External docs, API docs, live data (document-first)
+- **Type 4: Analytical Engine** - Research, analysis, reports (multi-step with progress)
+- **Type 5: Hybrid Assistant** - General purpose with LLM fallback (user choice)
+
+#### Features
+- **Domain Creator UI** - Type selector with colored settings panels for each type
+- **Type-specific configurations** - Each type has optimized plugins, enrichers, and settings
+- **Temperature control** - Slider + number input with visual badge on query screen
+- **Domain type indicator** - Shows current type (1-5) on dashboard
+- **Automatic config generation** - `DomainConfigGenerator` factory creates optimized configs
+
+#### Backend
+- `DomainConfigGenerator` in `generic_framework/core/domain_factory.py`
+- Domain create/update endpoints support type-specific fields
+- Temperature passes through to LLM API correctly
+- Existing domains migrated to appropriate types
+
+### Fixed
+- **Create Pattern button** - Added missing modal for pattern creation
+- **Markdown rendering** - Pattern fields now render markdown instead of raw text
+- **Temperature display** - Fixed slider/number input visual mismatch
+- **Domain save refresh** - Temperature badge updates immediately after saving
+
 ## [1.5.1] - 2026-01-24
 
 ### Fixed
