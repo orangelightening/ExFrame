@@ -1573,7 +1573,8 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
     if request.domain_type is not None and request.domain_type != domain_config.get("domain_type", ""):
         from core.domain_factory import DomainConfigGenerator
 
-        # Build specialist list from existing config or request
+        # When changing domain type, use type-specific plugins instead of existing specialists
+        # Only use specialists if explicitly provided in the request
         specialists = []
         if request.specialists is not None and len(request.specialists) > 0:
             # Convert Pydantic SpecialistConfig objects to dictionaries
@@ -1586,17 +1587,8 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
                     "expertise_categories": s.expertise_categories,
                     "confidence_threshold": s.confidence_threshold
                 })
-        elif "specialists" in domain_config and domain_config["specialists"]:
-            # Convert existing specialists to the format expected by factory
-            for s in domain_config["specialists"]:
-                specialists.append({
-                    "specialist_id": s.get("specialist_id", f"{domain_id}_specialist"),
-                    "name": s.get("name", domain_config.get("domain_name", domain_id)),
-                    "description": s.get("description", ""),
-                    "expertise_keywords": s.get("expertise_keywords", []),
-                    "expertise_categories": s.get("expertise_categories", []),
-                    "confidence_threshold": s.get("confidence_threshold", 0.6)
-                })
+        # Note: NOT using existing specialists when domain_type changes
+        # This allows type-specific plugins (e.g., exframe_specialist for Type 3) to be used
 
         # Generate new config using factory
         new_config = DomainConfigGenerator.generate(
