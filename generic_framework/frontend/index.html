@@ -201,6 +201,9 @@
                                 <span x-show="confidence" class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400">
                                     Confidence: <span x-text="(confidence * 100).toFixed(0) + '%'"></span>
                                 </span>
+                                <span x-show="currentTemperature" class="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400" title="LLM Temperature setting">
+                                    🌡️ <span x-text="currentTemperature.toFixed(1)"></span>
+                                </span>
                                 <span x-show="direct_prompt" class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">
                                     🔓 Direct
                                 </span>
@@ -1401,8 +1404,12 @@
                             </div>
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.8).toFixed(1)"></span></label>
-                                    <input type="range" x-model="domainForm.temperature" min="0.7" max="0.9" step="0.05" class="w-full">
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0.5" max="1.0" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0.1" max="1.0" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Higher = more creative (0.5-1.0)</p>
                                     <p class="text-xs text-gray-500 mt-1">Higher temperature = more creative</p>
                                 </div>
                                 <div>
@@ -1422,8 +1429,12 @@
                             </div>
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.4).toFixed(1)"></span></label>
-                                    <input type="range" x-model="domainForm.temperature" min="0.3" max="0.5" step="0.05" class="w-full">
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0.1" max="0.7" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0.1" max="1.0" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Lower = more factual (0.1-0.7)</p>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-2">Similarity Threshold: <span x-text="(domainForm.similarity_threshold || 0.3).toFixed(2)"></span></label>
@@ -1465,8 +1476,11 @@
                                            placeholder="Enter API key if required">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.6).toFixed(1)"></span></label>
-                                    <input type="range" x-model="domainForm.temperature" min="0.5" max="0.7" step="0.05" class="w-full">
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0.3" max="0.8" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0.1" max="1.0" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                    </div>
                                 </div>
                                 <div class="p-3 rounded bg-gray-800/50 border border-gray-700">
                                     <label class="flex items-center gap-2 cursor-pointer">
@@ -1493,8 +1507,11 @@
                                     <input type="range" x-model="domainForm.research_timeout" min="30" max="600" step="30" class="w-full">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-400 mb-2">Temperature: <span x-text="(domainForm.temperature || 0.5).toFixed(1)"></span></label>
-                                    <input type="range" x-model="domainForm.temperature" min="0.4" max="0.6" step="0.05" class="w-full">
+                                    <label class="block text-xs text-gray-400 mb-2">Temperature</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="range" x-model.number="domainForm.temperature" min="0.2" max="0.7" step="0.05" class="flex-1">
+                                        <input type="number" x-model.number="domainForm.temperature" min="0.1" max="1.0" step="0.05" class="w-20 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-center">
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-2">Report Format</label>
@@ -2417,6 +2434,8 @@
                 // Domain info display
                 domainDescription: '',
                 domainLastUpdate: '',
+                currentTemperature: 0.5,
+                currentDomainType: '',
                 // Explicit display properties for example queries and placeholder
                 currentExampleQueriesDisplay: [],
                 currentPlaceholderDisplay: 'Type your cooking question here... (Press Enter to submit)',
@@ -3014,6 +3033,9 @@
                         // Store domain description and last update for display
                         this.domainDescription = configData.description || '';
                         this.domainLastUpdate = configData.updated_at || '';
+                        // Store temperature and domain type for display
+                        this.currentTemperature = configData.temperature || 0.5;
+                        this.currentDomainType = configData.domain_type || '';
                         if (configData.ui_config) {
                             if (configData.ui_config.placeholder_text) {
                                 this.exampleQueries[this.currentDomain + '_placeholder'] = configData.ui_config.placeholder_text;
@@ -3552,7 +3574,23 @@
                             research_chunk_overlap,
                             auto_certify_docs: true, // Default to true
                             llm_model,
-                            llm_min_confidence
+                            llm_min_confidence,
+                            // Domain Type System fields
+                            domain_type: data.domain_type || '',
+                            temperature: data.temperature || 0.5,
+                            similarity_threshold: data.similarity_threshold || 0.3,
+                            max_patterns: data.max_patterns || 10,
+                            creative_keywords: data.creative_keywords || '',
+                            document_store_type: data.document_store_type || 'exframe_instance',
+                            remote_url: data.remote_url || '',
+                            api_key: data.api_key || '',
+                            show_sources: data.show_sources !== undefined ? data.show_sources : true,
+                            max_research_steps: data.max_research_steps || 10,
+                            research_timeout: data.research_timeout || 300,
+                            report_format: data.report_format || 'structured',
+                            enable_web_search: data.enable_web_search || false,
+                            require_confirmation: data.require_confirmation !== undefined ? data.require_confirmation : true,
+                            research_on_fallback: data.research_on_fallback || false
                         };
                         this.newCategory = '';
                         this.newTag = '';
@@ -3619,7 +3657,24 @@
                                 expertise_categories: spec.expertise_categories,
                                 confidence_threshold: parseFloat(spec.confidence_threshold)
                             })),
-                            enrichers: enrichers
+                            enrichers: enrichers,
+                            // Domain Type System fields
+                            domain_type: this.domainForm.domain_type || null,
+                            temperature: parseFloat(this.domainForm.temperature) || null,
+                            similarity_threshold: parseFloat(this.domainForm.similarity_threshold) || null,
+                            max_patterns: parseInt(this.domainForm.max_patterns) || null,
+                            creative_keywords: this.domainForm.creative_keywords || null,
+                            document_store_type: this.domainForm.document_store_type || null,
+                            remote_url: this.domainForm.remote_url || null,
+                            api_key: this.domainForm.api_key || null,
+                            show_sources: this.domainForm.show_sources,
+                            max_research_steps: parseInt(this.domainForm.max_research_steps) || null,
+                            research_timeout: parseInt(this.domainForm.research_timeout) || null,
+                            report_format: this.domainForm.report_format || null,
+                            enable_web_search: this.domainForm.enable_web_search,
+                            require_confirmation: this.domainForm.require_confirmation,
+                            research_on_fallback: this.domainForm.research_on_fallback,
+                            llm_min_confidence: parseFloat(this.domainForm.llm_min_confidence) || null
                         };
 
                         const url = this.creatingDomain ? '/api/admin/domains' : `/api/admin/domains/${this.domainForm.domain_id}`;

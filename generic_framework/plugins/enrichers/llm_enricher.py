@@ -289,6 +289,9 @@ Your response:"""
         # Determine if this is OpenAI or Anthropic-compatible API
         is_anthropic = "anthropic" in self.base_url.lower()
 
+        # Debug: Log temperature being used
+        print(f"  [LLMEnricher] Using model={self.model}, temperature={self.temperature}")
+
         if is_anthropic:
             # Anthropic/GLM API format (uses user role only)
             # For GLM models (glm-4.7, etc.), use model as-is

@@ -87,27 +87,52 @@ class DomainConfigGenerator:
             config.update(DomainConfigGenerator._type1_creative(
                 creative_keywords, temperature
             ))
+            # Store type-specific fields at top level for UI/reuse
+            config["temperature"] = temperature or 0.8
+            config["creative_keywords"] = creative_keywords or "poem, story, write, create, make, generate, compose"
         elif domain_type == "2":
             config.update(DomainConfigGenerator._type2_knowledge(
                 similarity_threshold, max_patterns, temperature
             ))
+            # Store type-specific fields at top level for UI/reuse
+            config["temperature"] = temperature or 0.4
+            config["similarity_threshold"] = similarity_threshold or 0.3
+            config["max_patterns"] = max_patterns or 10
         elif domain_type == "3":
             config.update(DomainConfigGenerator._type3_document_store(
                 document_store_type, remote_url, show_sources, temperature
             ))
+            # Store type-specific fields at top level for UI/reuse
+            config["temperature"] = temperature or 0.6
+            config["document_store_type"] = document_store_type or "exframe_instance"
+            config["remote_url"] = remote_url or ""
+            config["show_sources"] = show_sources if show_sources is not None else True
         elif domain_type == "4":
             config.update(DomainConfigGenerator._type4_analytical(
                 max_research_steps, research_timeout, report_format,
                 enable_web_search, temperature
             ))
+            # Store type-specific fields at top level for UI/reuse
+            config["temperature"] = temperature or 0.5
+            config["max_research_steps"] = max_research_steps or 10
+            config["research_timeout"] = research_timeout or 300
+            config["report_format"] = report_format or "structured"
+            config["enable_web_search"] = enable_web_search if enable_web_search is not None else False
         elif domain_type == "5":
             config.update(DomainConfigGenerator._type5_hybrid(
                 similarity_threshold, llm_min_confidence,
                 require_confirmation, research_on_fallback, temperature
             ))
+            # Store type-specific fields at top level for UI/reuse
+            config["temperature"] = temperature or 0.5
+            config["similarity_threshold"] = similarity_threshold or 0.3
+            config["llm_min_confidence"] = llm_min_confidence or 0.3
+            config["require_confirmation"] = require_confirmation if require_confirmation is not None else True
+            config["research_on_fallback"] = research_on_fallback if research_on_fallback is not None else False
         else:
             # No type specified or unknown - use default configuration
             config.update(DomainConfigGenerator._default())
+            config["temperature"] = temperature or 0.5
 
         # Add specialists (common to all types)
         if specialists:
