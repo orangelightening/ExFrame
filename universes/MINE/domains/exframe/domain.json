@@ -52,22 +52,48 @@
   },
   "plugins": [
     {
-      "plugin_id": "generalist",
-      "name": "ExFrame Knowledge Specialist",
-      "description": "",
-      "module": "plugins.generalist",
-      "class": "GeneralistPlugin",
+      "plugin_id": "exframe_specialist",
+      "module": "plugins.exframe.exframe_specialist",
+      "class": "ExFrameSpecialistPlugin",
       "enabled": true,
       "config": {
-        "name": "ExFrame Knowledge Specialist",
-        "description": "",
-        "keywords": [],
-        "categories": [],
-        "threshold": 0.5
+        "document_store_enabled": true,
+        "local_patterns_enabled": true,
+        "document_store_config": {
+          "type": "exframe_instance",
+          "remote_url": ""
+        },
+        "research_strategy": {
+          "type": "document",
+          "base_path": "/app/project",
+          "auto_discover": true,
+          "file_pattern": "*.md"
+        }
       }
     }
   ],
-  "enrichers": [],
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.reply_formation",
+      "class": "ReplyFormationEnricher",
+      "enabled": true,
+      "config": {
+        "combine_strategy": "document_first",
+        "max_results": 10,
+        "show_sources": true,
+        "show_results": false
+      }
+    },
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "temperature": 0.6
+      }
+    }
+  ],
   "knowledge_base": {
     "type": "json",
     "storage_path": "patterns.json",
@@ -75,7 +101,7 @@
     "auto_save": true,
     "similarity_threshold": 0.3
   },
-  "temperature": 0.7,
+  "temperature": 0.6,
   "document_store_type": "exframe_instance",
   "remote_url": "",
   "show_sources": true,
@@ -84,11 +110,16 @@
   "specialists": [
     {
       "specialist_id": "generalist",
-      "name": "ExFrame Knowledge Specialist",
+      "name": "Knowledge",
       "description": "",
-      "expertise_keywords": [],
+      "expertise_keywords": [
+        "how",
+        "what",
+        "explain",
+        "guide"
+      ],
       "expertise_categories": [],
-      "confidence_threshold": 0.5
+      "confidence_threshold": 0.2
     }
   ],
   "ui_config": {

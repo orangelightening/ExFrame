@@ -50,6 +50,8 @@ class DocumentResearchStrategy(ResearchStrategy):
         self.chunk_size = config.get('chunk_size', 500)
         self.chunk_overlap = config.get('chunk_overlap', 100)
         self.base_path = config.get('base_path', os.getcwd())
+        self.auto_discover = config.get('auto_discover', False)
+        self.file_pattern = config.get('file_pattern', '*.md')  # Default to all markdown files
 
         # Storage (will be initialized)
         self._chunks: List[Dict[str, Any]] = []
@@ -61,10 +63,55 @@ class DocumentResearchStrategy(ResearchStrategy):
         if self._initialized:
             return
 
+        # Auto-discover markdown files if enabled
+        if self.auto_discover:
+            await self._auto_discover_documents()
+        elif not self.documents:
+            # If no documents specified and auto_discover is off, enable it by default
+            print(f"  [DocumentResearchStrategy] No documents specified, enabling auto-discovery")
+            await self._auto_discover_documents()
+            self._initialized = True
+            return
+
         mode = "chunked" if self.use_chunking else "full context"
         print(f"  [DocumentResearchStrategy] Initializing with {len(self.documents)} documents ({mode} mode)")
 
         # Load and process each document
+        for doc_config in self.documents:
+            await self._load_document(doc_config)
+
+        if self.use_chunking:
+            print(f"  [DocumentResearchStrategy] Loaded {len(self._chunks)} chunks from {len(self.documents)} documents")
+        else:
+            print(f"  [DocumentResearchStrategy] Loaded {len(self._full_documents)} full documents")
+        self._initialized = True
+
+    async def _auto_discover_documents(self) -> None:
+        """Auto-discover all markdown files in the base_path."""
+        import glob
+        pattern_path = Path(self.base_path) / self.file_pattern
+        discovered_files = glob.glob(str(pattern_path))
+
+        if not discovered_files:
+            print(f"  [DocumentResearchStrategy] No files found matching {pattern_path}")
+            return
+
+        print(f"  [DocumentResearchStrategy] Auto-discovered {len(discovered_files)} files matching {self.file_pattern}")
+
+        # Convert discovered files to document configs
+        self.documents = []
+        for file_path in discovered_files:
+            # Get relative path from base_path
+            rel_path = Path(file_path).relative_to(self.base_path)
+            self.documents.append({
+                'type': 'file',
+                'path': str(rel_path)
+            })
+
+        mode = "chunked" if self.use_chunking else "full context"
+        print(f"  [DocumentResearchStrategy] Loading {len(self.documents)} auto-discovered documents ({mode} mode)")
+
+        # Load and process each discovered document
         for doc_config in self.documents:
             await self._load_document(doc_config)
 
