@@ -117,7 +117,7 @@ class DomainConfigGenerator:
             config["max_research_steps"] = max_research_steps or 10
             config["research_timeout"] = research_timeout or 300
             config["report_format"] = report_format or "structured"
-            config["enable_web_search"] = enable_web_search if enable_web_search is not None else False
+            config["enable_web_search"] = enable_web_search if enable_web_search is not None else True
         elif domain_type == "5":
             config.update(DomainConfigGenerator._type5_hybrid(
                 similarity_threshold, llm_min_confidence,
@@ -340,7 +340,8 @@ class DomainConfigGenerator:
         steps = max_research_steps or 10
         timeout = research_timeout or 300
         fmt = report_format or "structured"
-        web_search = enable_web_search if enable_web_search is not None else False
+        # Type 4 defaults to web search enabled since it's a core feature
+        web_search = enable_web_search if enable_web_search is not None else True
         temp = temperature or 0.5
 
         return {
@@ -358,6 +359,17 @@ class DomainConfigGenerator:
                 }
             ],
             "enrichers": [
+                {
+                    "module": "plugins.enrichers.reply_formation",
+                    "class": "ReplyFormationEnricher",
+                    "enabled": True,
+                    "config": {
+                        "combine_strategy": "document_first",
+                        "max_results": 10,
+                        "show_sources": True,
+                        "show_results": True  # Show both AI reply and sources
+                    }
+                },
                 {
                     "module": "plugins.enrichers.llm_enricher",
                     "class": "LLMEnricher",

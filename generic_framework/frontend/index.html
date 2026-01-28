@@ -3571,40 +3571,20 @@
                 },
 
                 onDomainTypeChange() {
-                    // Apply default settings based on selected domain type
+                    // Domain type change triggers full reconfiguration via backend on save.
+                    // No defaults set here - domain_factory.py is the single source of truth.
+                    // When saved, backend will regenerate complete config for the new type.
                     const type = this.domainForm.domain_type;
 
-                    if (type === '1') {
-                        // Type 1: Creative Generator
-                        this.domainForm.temperature = 0.8;
-                        this.domainForm.similarity_threshold = 0.2;
-                        this.domainForm.creative_keywords = 'poem, story, write, create, compose, generate';
-                        this.domainForm.max_patterns = 5;
-                    } else if (type === '2') {
-                        // Type 2: Knowledge Retrieval
-                        this.domainForm.temperature = 0.4;
-                        this.domainForm.similarity_threshold = 0.3;
-                        this.domainForm.max_patterns = 10;
-                    } else if (type === '3') {
-                        // Type 3: Document Store Search
-                        this.domainForm.temperature = 0.6;
-                        this.domainForm.similarity_threshold = 0.3;
-                        this.domainForm.document_store_type = 'exframe_instance';
-                        this.domainForm.show_sources = true;
-                    } else if (type === '4') {
-                        // Type 4: Analytical Engine
-                        this.domainForm.temperature = 0.5;
-                        this.domainForm.similarity_threshold = 0.3;
-                        this.domainForm.max_research_steps = 10;
-                        this.domainForm.research_timeout = 300;
-                        this.domainForm.report_format = 'structured';
-                    } else if (type === '5') {
-                        // Type 5: Hybrid Assistant
-                        this.domainForm.temperature = 0.5;
-                        this.domainForm.similarity_threshold = 0.3;
-                        this.domainForm.llm_min_confidence = 0.3;
-                        this.domainForm.require_confirmation = true;
-                    }
+                    // Show notification that config will be regenerated
+                    const typeNames = {
+                        '1': 'Creative Generator',
+                        '2': 'Knowledge Retrieval',
+                        '3': 'Document Store Search',
+                        '4': 'Analytical Engine',
+                        '5': 'Hybrid Assistant'
+                    };
+                    console.log(`Domain type changing to ${typeNames[type] || type}. Full configuration will be regenerated on save.`);
                 },
 
                 async editDomain(domain_id) {

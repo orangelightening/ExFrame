@@ -200,6 +200,148 @@ class FailureDetectionPlugin(SpecialistPlugin):
 - Access to knowledge base for pattern search
 - Simple, testable interface
 
+### 1.1. ResearchSpecialistPlugin (Type 4 Domains)
+
+**Purpose**: Multi-stage research with web search and local pattern retrieval.
+
+**Interface**: Same 3 methods as SpecialistPlugin, with two-stage query flow.
+
+```python
+# plugins/research/research_specialist.py
+from core.specialist_plugin import SpecialistPlugin
+from knowledge.json_kb import JSONKnowledgeBase
+from typing import Dict, Any, Optional, List
+
+class ResearchSpecialistPlugin(SpecialistPlugin):
+    """
+    Research specialist with web search capability.
+
+    Implements two-stage query flow:
+    1. Local pattern search (always done, fast)
+    2. Web search (on user request via "Extended Search" button)
+
+    Context flags:
+        - web_search_confirmed: True to perform web search
+    """
+
+    name = "Research Specialist"
+    specialist_id = "researcher"
+
+    def __init__(self, knowledge_base: JSONKnowledgeBase, config: Dict = None):
+        self.kb = knowledge_base
+        self.config = config or {}
+
+        # Research configuration
+        self.enable_web_search = self.config.get("enable_web_search", True)
+        self.max_research_steps = self.config.get("max_research_steps", 10)
+        self.research_timeout = self.config.get("research_timeout", 300)
+
+        # Initialize research strategy (DuckDuckGo web search)
+        self.research_strategy = None
+        if self.enable_web_search:
+            from core.research import create_research_strategy
+            research_config = {
+                "type": "internet",
+                "search_provider": "auto",
+                "max_results": 10,
+                "timeout": 10
+            }
+            self.research_strategy = create_research_strategy(research_config)
+
+    def can_handle(self, query: str) -> float:
+        """Research specialist handles all queries."""
+        return 1.0
+
+    async def process_query(
+        self,
+        query: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Two-stage query processing:
+        1. Local search (always)
+        2. Web search (if web_search_confirmed in context)
+        """
+        web_search_confirmed = context and context.get("web_search_confirmed", False)
+
+        # Stage 1: Local pattern search
+        local_patterns = await self.kb.search(query, limit=10)
+
+        research_results = []
+        if web_search_confirmed and self.research_strategy:
+            # Stage 2: Web search
+            await self.research_strategy.initialize()
+            search_results = await self.research_strategy.search(query, limit=5)
+
+            # Convert to standard format
+            for result in search_results:
+                research_results.append({
+                    "title": result.metadata.get("title", result.source),
+                    "content": result.content,
+                    "source": result.source,
+                    "url": result.source,
+                    "relevance": result.relevance_score
+                })
+
+        # Combine results (web + local)
+        all_results = []
+        for i, result in enumerate(research_results):
+            all_results.append({
+                "pattern_id": f"web_{i}",
+                "name": result.get("title", "Web Search Result"),
+                "solution": result.get("content", ""),
+                "source": "web_search",
+                "url": result.get("source", "")
+            })
+        for pattern in local_patterns:
+            pattern["source"] = "local"
+            all_results.append(pattern)
+
+        return {
+            "query": query,
+            "specialist": "researcher",
+            "patterns_found": len(all_results),
+            "patterns_used": [p.get("id") or p.get("pattern_id") for p in all_results[:10]],
+            "patterns": all_results[:10],
+            "local_results": local_patterns,
+            "research_results": research_results,
+            "confidence": 0.8 if research_results else 0.5,
+            "can_extend_with_web_search": self.enable_web_search and not web_search_confirmed
+        }
+
+    def format_response(self, response_data: Dict[str, Any]) -> str:
+        """Return empty string - LLM will format the response."""
+        return ""
+```
+
+**Configuration Example:**
+```json
+{
+  "plugin_id": "researcher",
+  "module": "plugins.research.research_specialist",
+  "class": "ResearchSpecialistPlugin",
+  "enabled": true,
+  "config": {
+    "enable_web_search": true,
+    "max_research_steps": 10,
+    "research_timeout": 300,
+    "search_provider": "auto",
+    "max_results": 10,
+    "timeout": 10
+  }
+}
+```
+
+**Two-Stage Query Flow:**
+1. **Initial Query**: Returns local patterns only, sets `can_extend_with_web_search: true`
+2. **Extended Search**: User clicks button, `web_search_confirmed: true` in context, returns web + local results
+
+**Key Features:**
+- DuckDuckGo web search (no API key required)
+- Web sources displayed with URLs and emoji indicators
+- LLM synthesizes from both web and local sources
+- User controls when to search the web
+
 ### 2. Knowledge Base Plugins
 
 **Purpose**: Store and retrieve patterns.
@@ -432,6 +574,174 @@ class SQLiteKnowledgeBase(KnowledgeBasePlugin):
 - JSON for simplicity, SQLite for performance
 - Easy to add Vector DB, Graph DB, etc.
 - Async interface throughout
+
+### 3. Enricher Plugins
+
+**Purpose**: Transform and enhance query responses after specialist processing.
+
+**Interface**: `core/enrichment_plugin.py`
+
+```python
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional
+
+class EnricherPlugin(ABC):
+    """
+    An enricher transforms specialist responses.
+
+    Enrichers run in a pipeline after the specialist produces results.
+    Each enricher can modify, enhance, or format the response data.
+    """
+
+    name: str = "Enricher"
+
+    @abstractmethod
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: "EnrichmentContext"
+    ) -> Dict[str, Any]:
+        """
+        Enrich the response data.
+
+        Args:
+            response_data: Response from specialist, including:
+                - query: The original query
+                - patterns: Found patterns
+                - research_results: Web search results (if any)
+                - local_results: Local pattern results (if any)
+                - response: Formatted response string
+                - confidence: Confidence score
+            context: Enrichment context with domain, KB, etc.
+
+        Returns:
+            Enriched response data (may add fields, modify content)
+        """
+        pass
+```
+
+**Example Enrichers:**
+
+1. **LLMEnricher**: Uses LLM to synthesize responses from patterns and web search results
+2. **ReplyFormationEnricher**: Formats and displays web search sources with URLs
+3. **LLMFallbackEnricher**: Provides LLM fallback when patterns are weak
+
+**LLMEnricher with Web Search Support:**
+
+```python
+# plugins/enrichers/llm_enricher.py
+class LLMEnricher(EnricherPlugin):
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext
+    ) -> Dict[str, Any]:
+        """Enrich response using LLM with web search context."""
+        query = response_data.get("query", "")
+        patterns = response_data.get("patterns", [])
+
+        # Check for web search results
+        research_results = response_data.get("research_results", [])
+        has_web_search = len(research_results) > 0
+
+        if has_web_search:
+            # Use web search results as primary context
+            prompt = self._build_web_search_prompt(
+                query,
+                research_results,
+                patterns,
+                context
+            )
+        else:
+            # Use local patterns
+            prompt = self._build_enhancement_prompt(
+                query,
+                patterns,
+                context
+            )
+
+        llm_response = await self._call_llm(prompt)
+
+        response_data["llm_enhancement"] = llm_response
+        response_data["llm_used"] = True
+
+        return response_data
+```
+
+**ReplyFormationEnricher (Source Display):**
+
+```python
+# plugins/enrichers/reply_formation.py
+class ReplyFormationEnricher(EnricherPlugin):
+    async def enrich(
+        self,
+        response_data: Dict[str, Any],
+        context: EnrichmentContext
+    ) -> Dict[str, Any]:
+        """Format web search sources for display."""
+        research_results = response_data.get("research_results", [])
+        local_results = response_data.get("local_results", [])
+
+        # Combine web and local results
+        combined = research_results + local_results
+
+        # Format with source indicators
+        formatted = []
+        for result in combined[:5]:
+            if result.get("source") == "web_search":
+                formatted.append({
+                    "emoji": "🌐",
+                    "label": "Web Search",
+                    "title": result.get("title", ""),
+                    "url": result.get("url", ""),
+                    "content": result.get("content", "")
+                })
+            else:
+                formatted.append({
+                    "emoji": "📚",
+                    "label": "Local Pattern",
+                    "title": result.get("name", ""),
+                    "content": result.get("solution", "")
+                })
+
+        response_data["combined_results"] = formatted
+        response_data["reply"] = self._form_reply(formatted)
+
+        return response_data
+```
+
+**Enricher Pipeline Flow:**
+
+```
+Query → Specialist → response_data {
+    patterns: [...],
+    research_results: [...],
+    local_results: [...],
+    response: "..."
+}
+         ↓
+    Enricher 1: ReplyFormationEnricher
+    - Formats sources for display
+    - Adds combined_results
+         ↓
+    Enricher 2: LLMEnricher
+    - Synthesizes response from web + local
+    - Adds llm_enhancement
+         ↓
+    Final Response {
+        combined_results: [...],  # Formatted sources
+        reply: "...",              # Formatted text
+        llm_enhancement: "...",    # LLM synthesis
+        can_extend_with_web_search: true/false
+    }
+```
+
+**Key Points:**
+- Enrichers run in sequence after specialist
+- Each enricher can modify/add to response_data
+- Web search results flow through enricher chain
+- LLM receives web results as context
+- Sources displayed with emoji indicators and URLs
 
 ## Domain Configuration
 

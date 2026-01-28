@@ -189,7 +189,7 @@ Instead of complex "archetypes" with workflows and state machines, we use a **si
 
 ### Type 4: Analytical Engine
 
-**Use for:** Research, analysis, correlation, reports
+**Use for:** Research, analysis, correlation, reports, web search
 
 **Config Fields:**
 - Domain name
@@ -197,7 +197,7 @@ Instead of complex "archetypes" with workflows and state machines, we use a **si
 - Max research steps: 1-20 (slider)
 - Timeout (seconds): 30-600 (slider)
 - Research capabilities: [checkboxes]
-  - Web search
+  - Web search (enabled by default)
   - Document search
   - Data correlation
 - Temperature: 0.4-0.6 (slider)
@@ -212,17 +212,36 @@ Instead of complex "archetypes" with workflows and state machines, we use a **si
   "plugins": [
     {
       "plugin_id": "researcher",
+      "module": "plugins.research.research_specialist",
       "class": "ResearchSpecialistPlugin",
+      "enabled": true,
       "config": {
-        "max_steps": 10,
-        "timeout": 300
+        "enable_web_search": true,
+        "max_research_steps": 10,
+        "research_timeout": 300,
+        "report_format": "structured",
+        "search_provider": "auto",
+        "max_results": 10,
+        "timeout": 10
       }
     }
   ],
   "enrichers": [
     {
+      "module": "plugins.enrichers.reply_formation",
+      "class": "ReplyFormationEnricher",
+      "enabled": true,
+      "config": {
+        "combine_strategy": "document_first",
+        "max_results": 10,
+        "show_sources": true,
+        "show_results": true
+      }
+    },
+    {
       "module": "plugins.enrichers.llm_enricher",
       "class": "LLMEnricher",
+      "enabled": true,
       "config": {
         "mode": "enhance",
         "temperature": 0.5,
@@ -234,10 +253,20 @@ Instead of complex "archetypes" with workflows and state machines, we use a **si
 ```
 
 **UI Hints:**
-- Progress indicator (step 3/10...)
-- "Download report" button
-- Interim results shown
-- "Save as pattern" button
+- Two-stage query flow:
+  1. Local search returns immediately
+  2. "Extended Search (Internet)" button appears
+  3. User clicks to perform web search
+- Web search sources shown with 🌐 emoji and URLs
+- "Save as pattern" button to capture web results
+- Local patterns are used as fallback
+
+**Behavior:**
+- Local patterns searched first (fast response)
+- Web search available on-demand (user control)
+- Web results integrated with local knowledge
+- LLM synthesizes from both sources
+- Sources displayed with URLs for verification
 
 ---
 

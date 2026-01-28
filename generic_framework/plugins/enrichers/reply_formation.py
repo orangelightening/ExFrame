@@ -149,28 +149,40 @@ class ReplyFormationEnricher(EnricherPlugin):
     
     def _form_reply(self, results: List[Dict]) -> str:
         """Form a coherent reply from results.
-        
+
         Args:
             results: List of combined results
-            
+
         Returns:
             Formatted reply string
         """
         if not results:
             return "I couldn't find any relevant information."
-        
+
         # Simple reply formation
         reply_parts = []
-        
+
         for i, result in enumerate(results[:5]):
-            source = "Document Store" if "source" in result or result.get("source") == "exframe_instance" else "Local Pattern"
+            source = result.get("source", "local")
             title = result.get("title", result.get("name", "Unknown"))
-            
-            reply_parts.append(f"{i+1}. {source}: {title}")
-        
+            url = result.get("url", "")
+
+            # Format source label
+            if source == "web_search":
+                source_label = "Web"
+            elif source == "exframe_instance" or "source" in result:
+                source_label = "Doc"
+            else:
+                source_label = "Local"
+
+            if url:
+                reply_parts.append(f"{i+1}. [{source_label}] {title}\n   {url}")
+            else:
+                reply_parts.append(f"{i+1}. [{source_label}] {title}")
+
         reply = "\n".join(reply_parts)
         reply += "\n\nWould you like me to elaborate on any of these?"
-        
+
         return reply
     
     def format_response(self, response_data: Dict, format_type: str = "markdown") -> str:
@@ -215,11 +227,25 @@ class ReplyFormationEnricher(EnricherPlugin):
 
         output = []
         for result in results[:5]:
-            source = "Document Store" if "source" in result or result.get("source") == "exframe_instance" else "Local Pattern"
+            source = result.get("source", "local")
             title = result.get("title", result.get("name", "Unknown"))
             content = result.get("content", result.get("solution", ""))
+            url = result.get("url", "")
 
-            output.append(f"### {source}: {title}")
+            # Format source label
+            if source == "web_search":
+                source_label = "🌐 Web Search"
+            elif source == "exframe_instance" or "source" in result:
+                source_label = "📄 Document Store"
+            else:
+                source_label = "📚 Local Pattern"
+
+            output.append(f"### {source_label}: {title}")
+
+            # Show URL for web search results if enabled
+            if source == "web_search" and url and self.show_sources:
+                output.append(f"**Source:** {url}")
+
             output.append(f"{content}")
             output.append("")
 
@@ -247,24 +273,36 @@ class ReplyFormationEnricher(EnricherPlugin):
     
     def _format_compact(self, results: List[Dict], reply: str) -> str:
         """Format results as compact text.
-        
+
         Args:
             results: List of combined results
             reply: Formatted reply text
-            
+
         Returns:
             Compact formatted string
         """
         if not results:
             return reply
-        
+
         output = []
         for i, result in enumerate(results):
-            source = "DOC" if "source" in result or result.get("source") == "exframe_instance" else "LOC"
-            title = result.get("title", result.get("name", "Unknown")[:30]
-            
-            output.append(f"{i+1}. [{source}] {title}")
-        
+            source = result.get("source", "local")
+            title = result.get("title", result.get("name", "Unknown")[:30])
+            url = result.get("url", "")
+
+            # Format source label
+            if source == "web_search":
+                source_label = "WEB"
+            elif source == "exframe_instance" or "source" in result:
+                source_label = "DOC"
+            else:
+                source_label = "LOC"
+
+            if url:
+                output.append(f"{i+1}. [{source_label}] {title}\n    {url}")
+            else:
+                output.append(f"{i+1}. [{source_label}] {title}")
+
         output.append(f"\n{reply}")
-        
+
         return "\n".join(output)

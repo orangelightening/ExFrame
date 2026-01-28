@@ -269,6 +269,15 @@ class GenericAssistantEngine:
             'processing_method': processing_method
         }
 
+        # Include specialist's research results and local results if available
+        if response_data:
+            if 'research_results' in response_data:
+                enricher_input['research_results'] = response_data['research_results']
+            if 'local_results' in response_data:
+                enricher_input['local_results'] = response_data['local_results']
+            if 'document_results' in response_data:
+                enricher_input['document_results'] = response_data['document_results']
+
         # Initialize enriched_data to avoid undefined variable
         enriched_data = {}
 

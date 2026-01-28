@@ -181,8 +181,16 @@ class LLMEnricher(EnrichmentPlugin):
             response_data.get("search_strategy") == "research_primary"
         )
 
+        # Check if we have web search results (research_results from web search)
+        research_results = response_data.get("research_results", [])
+        has_web_search = len(research_results) > 0
+
         # Build prompt based on mode and available patterns
-        if patterns and self.mode != self.MODE_REPLACE and not is_type3_domain:
+        if has_web_search:
+            # Use web search results as context
+            print(f"  [LLMEnricher] Using web search results ({len(research_results)} results)")
+            prompt = self._build_web_search_prompt(query, research_results, patterns, context)
+        elif patterns and self.mode != self.MODE_REPLACE and not is_type3_domain:
             # Use pattern-based enhancement for local patterns
             prompt = self._build_enhancement_prompt(query, patterns, specialist_id, context)
         elif is_type3_domain:
@@ -334,6 +342,69 @@ Using the information from these documents, provide a clear, comprehensive answe
 3. Include specific details from the documents when relevant
 4. Use markdown formatting for readability (headers, bullet points, etc.)
 5. Do NOT include a "Sources" or "References" section at the end - just provide the answer naturally
+
+Your response:"""
+
+        return prompt
+
+    def _build_web_search_prompt(
+        self,
+        query: str,
+        research_results: List[Dict],
+        local_patterns: List,
+        context: EnrichmentContext
+    ) -> str:
+        """Build prompt with web search results context.
+
+        Web search results provide fresh, external information that should
+        be used as the primary source for answering.
+        """
+        domain_id = context.domain_id
+
+        # Format web search results as context
+        web_context = ""
+        for i, result in enumerate(research_results[:10], 1):
+            title = result.get("title", "Untitled")
+            content = result.get("content", "")
+            url = result.get("source", "")
+
+            # Clean up content
+            content = self._clean_pattern_text(content)
+
+            # Truncate if too long
+            if len(content) > 800:
+                content = content[:800] + "..."
+
+            web_context += f"""
+--- Web Result {i}: {title} ---
+{content}
+Source: {url}
+---
+"""
+
+        # Add note about local patterns if they exist
+        local_note = ""
+        if local_patterns:
+            local_note = f"""
+
+Note: We also have {len(local_patterns)} local patterns that may provide additional context, but prioritize the web search results above as they contain fresher, more specific information for this query.
+"""
+
+        prompt = f"""You are a helpful AI assistant with access to web search results.
+
+A user asked: "{query}"
+
+Here are the relevant web search results:
+
+{web_context}{local_note}
+
+Using the web search results above, provide a comprehensive answer to the user's question:
+1. Draw primarily from the web search results (they are fresh and specific to this query)
+2. Organize the information in a natural, conversational way
+3. Include specific details, URLs, and information from the web results
+4. If multiple results are relevant, synthesize them into a coherent answer
+5. Use markdown formatting for readability (headers, bullet points, links)
+6. **IMPORTANT**: When mentioning information, cite the source URLs
 
 Your response:"""
 

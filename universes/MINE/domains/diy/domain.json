@@ -63,6 +63,17 @@
   ],
   "enrichers": [
     {
+      "module": "plugins.enrichers.reply_formation",
+      "class": "ReplyFormationEnricher",
+      "enabled": true,
+      "config": {
+        "combine_strategy": "document_first",
+        "max_results": 10,
+        "show_sources": true,
+        "show_results": true
+      }
+    },
+    {
       "module": "plugins.enrichers.llm_enricher",
       "class": "LLMEnricher",
       "enabled": true,
