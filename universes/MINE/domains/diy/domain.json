@@ -3,37 +3,106 @@
   "domain_name": "Auto-loaded: diy",
   "description": "Dynamically loaded domain: diy",
   "version": "1.0.0",
-  "created_at": "2026-01-09T22:43:14.965287",
-  "updated_at": "2026-01-20T22:22:35.018768",
-  "plugins": [
-    {
-      "plugin_id": "generalist",
-      "name": "DIY Generalist",
-      "description": "General expert for DIY",
-      "module": "plugins.generalist",
-      "class": "GeneralistPlugin",
-      "enabled": true,
-      "config": {
-        "name": "DIY",
-        "keywords": [
-          "diy",
-          "build",
-          "make",
-          "repair",
-          "fix"
-        ],
-        "categories": [],
-        "threshold": 0.25,
-        "description": "Use only assigned names when referring to other works."
-      }
-    }
-  ],
+  "created_at": "2026-01-28T02:38:19.297976Z",
+  "updated_at": "2026-01-28T02:38:19.298047",
   "categories": [
     "Do it yourself"
   ],
   "tags": [
     "Mr fix it"
   ],
+  "domain_type": "4",
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
+  },
+  "plugins": [
+    {
+      "plugin_id": "researcher",
+      "name": "DIY Research",
+      "description": "DIY specialist with web search",
+      "module": "plugins.research.research_specialist",
+      "class": "ResearchSpecialistPlugin",
+      "enabled": true,
+      "config": {
+        "enable_web_search": true,
+        "max_research_steps": 10,
+        "research_timeout": 300,
+        "report_format": "structured",
+        "search_provider": "auto",
+        "max_results": 10,
+        "timeout": 10
+      }
+    }
+  ],
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "temperature": 0.5,
+        "max_tokens": 8192
+      }
+    }
+  ],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true,
+    "similarity_threshold": 0.3
+  },
+  "temperature": 0.5,
+  "max_research_steps": 10,
+  "research_timeout": 300,
+  "report_format": "structured",
+  "enable_web_search": true,
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "DIY",
+      "description": "",
+      "expertise_keywords": [
+        "diy",
+        "build",
+        "make",
+        "repair",
+        "fix"
+      ],
+      "expertise_categories": [],
+      "confidence_threshold": 0.25
+    }
+  ],
+  "similarity_threshold": 0.3,
+  "max_patterns": 10,
   "ui_config": {
     "placeholder_text": "Ask about DIY projects and repairs...",
     "example_queries": [
@@ -49,6 +118,5 @@
     "related_domains": [],
     "imports_patterns_from": [],
     "suggest_on_confidence_below": 0.3
-  },
-  "enrichers": []
+  }
 }

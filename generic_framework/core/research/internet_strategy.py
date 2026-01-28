@@ -166,16 +166,19 @@ class InternetResearchStrategy(ResearchStrategy):
         # Extract URLs and titles
         url_matches = re.findall(result_pattern, html, re.DOTALL)
 
-        # Extract snippets from result__snippet class
-        snippet_pattern = r'<a[^>]*class="result__snippet"[^>]*>([^<]+)</a>'
+        # Extract snippets from result__snippet class (may contain HTML tags)
+        snippet_pattern = r'<a[^>]*class="result__snippet"[^>]*>(.+?)</a>'
         snippet_matches = re.findall(snippet_pattern, html, re.DOTALL)
 
         from urllib.parse import unquote
 
         # Process results
         for i, (redirect_url, title) in enumerate(url_matches):
-            # Get snippet if available
-            snippet = snippet_matches[i] if i < len(snippet_matches) else ""
+            # Get snippet if available and clean HTML tags from it
+            raw_snippet = snippet_matches[i] if i < len(snippet_matches) else ""
+            # Strip HTML tags from snippet
+            snippet = re.sub(r'<[^>]+>', ' ', raw_snippet)
+            snippet = ' '.join(snippet.split())  # Normalize whitespace
 
             # Decode the DuckDuckGo redirect URL
             # Format: //duckduckgo.com/l/?uddg=ENCODED_URL&amp;rut=HASH

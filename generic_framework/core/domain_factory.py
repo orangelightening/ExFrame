@@ -305,7 +305,8 @@ class DomainConfigGenerator:
                     "config": {
                         "combine_strategy": "document_first",
                         "max_results": 10,
-                        "show_sources": show_src
+                        "show_sources": show_src,
+                        "show_results": False  # Only show AI reply, not pattern hits
                     }
                 },
                 {
