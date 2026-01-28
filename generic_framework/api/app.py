@@ -159,6 +159,8 @@ class QueryResponse(BaseModel):
     requires_confirmation: Optional[bool] = None
     confirmation_message: Optional[str] = None
     partial_response: Optional[Dict[str, Any]] = None
+    # Web search extension field
+    can_extend_with_web_search: Optional[bool] = None
 
 
 class DomainInfo(BaseModel):
@@ -1157,6 +1159,28 @@ async def confirm_llm_fallback(request: ConfirmLLMRequest) -> Response:
         query=request.query,
         domain_id=request.domain,
         context={"llm_confirmed": True},  # Pass llm_confirmed flag
+        include_trace=request.include_trace,
+        format_type=request.format
+    )
+
+
+@app.post("/api/query/extend-web-search")
+async def extend_web_search(request: ConfirmLLMRequest) -> Response:
+    """
+    Process query with extended web search.
+
+    Called when user clicks "Extended Search (Internet)" button.
+    Performs web search and returns results with NEW knowledge only.
+
+    Example:
+        curl -X POST http://localhost:3000/api/query/extend-web-search \\
+          -H "Content-Type: application/json" \\
+          -d '{"query": "What is gastronomy?", "domain": "cooking"}'
+    """
+    return await _process_query_impl(
+        query=request.query,
+        domain_id=request.domain,
+        context={"web_search_confirmed": True},  # Pass web_search_confirmed flag
         include_trace=request.include_trace,
         format_type=request.format
     )

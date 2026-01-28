@@ -207,6 +207,11 @@ class GenericAssistantEngine:
 
         # Step 3: Process query through specialist or general processing
         step3_time = datetime.utcnow()
+
+        # Variable to store web search extension flag across the function
+        can_extend_with_web_search = False
+        response_data = None  # Initialize for access later
+
         if specialist:
             # Specialist does its own search - don't pass pre-found patterns
             specialist_context = context or {}
@@ -214,6 +219,11 @@ class GenericAssistantEngine:
             response = specialist.format_response(response_data)
             specialist_id = specialist.specialist_id
             processing_method = 'specialist'
+
+            # Store web search extension flag if present
+            if response_data and response_data.get('can_extend_with_web_search'):
+                can_extend_with_web_search = True
+
             # Extract patterns from specialist response for consistency
             patterns = response_data.get('patterns_used', [])
             if isinstance(patterns[0], str) if patterns else False:
@@ -361,6 +371,13 @@ class GenericAssistantEngine:
 
             # Reduce confidence when confirmation is pending (user hasn't seen LLM yet)
             result['confidence'] = min(confidence * 0.7, 0.7)
+
+        # Pass through web search extension flag from specialist
+        if can_extend_with_web_search:
+            result['can_extend_with_web_search'] = True
+            print(f"[DEBUG] Web search extension available for query: {query}")
+
+        print(f"[DEBUG] can_extend_with_web_search = {can_extend_with_web_search}")
 
         # Save LLM response as candidate pattern for future learning
         # This happens regardless of confirmation - whenever LLM is used, we create a pattern

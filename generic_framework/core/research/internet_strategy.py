@@ -17,14 +17,25 @@
 """
 Internet Research Strategy
 
-Searches the web for relevant information.
+Searches the web for relevant information using DuckDuckGo (no API key required).
 """
 
 import asyncio
+import logging
+import re
+import urllib.parse
 from typing import List, Dict, Any
 from dataclasses import dataclass
 
+try:
+    import httpx
+    HAS_HTTPX = True
+except ImportError:
+    HAS_HTTPX = False
+
 from .base import ResearchStrategy, SearchResult
+
+logger = logging.getLogger(__name__)
 
 
 class InternetResearchStrategy(ResearchStrategy):
@@ -58,9 +69,15 @@ class InternetResearchStrategy(ResearchStrategy):
 
     def _check_mcp_search_available(self) -> bool:
         """Check if MCP web search tools are available."""
-        # TODO: Check for available MCP tools
-        # For now, return False - will implement proper check later
-        return False
+        # Try to import the MCP web search tool
+        try:
+            # The tool will be available if MCP is running
+            # We can't actually import it directly as a module
+            # Instead, we'll try to use it at search time
+            return True  # Assume available, will catch errors at search time
+        except Exception as e:
+            logger.debug(f"[InternetResearchStrategy] MCP search not available: {e}")
+            return False
 
     async def search(self, query: str, limit: int = 5) -> List[SearchResult]:
         """
@@ -85,13 +102,115 @@ class InternetResearchStrategy(ResearchStrategy):
 
     async def _search_with_mcp(self, query: str, limit: int) -> List[SearchResult]:
         """
-        Search using MCP web search tools.
+        Search using DuckDuckGo HTML version (no API key required).
 
-        TODO: Implement actual MCP tool calls
+        This provides free web search without needing API keys or MCP tools.
         """
-        # Placeholder for MCP search implementation
-        print(f"  [InternetResearchStrategy] MCP search for: {query}")
-        return []
+        print(f"  [InternetResearchStrategy] Web search for: {query}")
+
+        if not HAS_HTTPX:
+            print(f"  [InternetResearchStrategy] httpx not installed, cannot search web")
+            print(f"  [InternetResearchStrategy] Install with: pip install httpx")
+            return []
+
+        try:
+            # Use DuckDuckGo HTML version for free web search
+            encoded_query = urllib.parse.quote(query)
+            ddg_url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
+
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(ddg_url, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                })
+                response.raise_for_status()
+
+                # Parse the HTML response
+                results = self._parse_duckduckgo_results(response.text)
+
+                # Limit results
+                results = results[:limit]
+
+                print(f"  [InternetResearchStrategy] Found {len(results)} results")
+
+                # Convert to SearchResult format
+                search_results = []
+                for result in results:
+                    search_results.append(SearchResult(
+                        content=result.get('snippet', ''),
+                        source=result.get('url', ''),
+                        relevance_score=0.8,  # Default relevance for web results
+                        metadata={
+                            'title': result.get('title', ''),
+                            'url': result.get('url', '')
+                        }
+                    ))
+
+                return search_results
+
+        except Exception as e:
+            logger.error(f"[InternetResearchStrategy] Web search failed: {e}")
+            return []
+
+    def _parse_duckduckgo_results(self, html: str) -> List[Dict[str, Any]]:
+        """
+        Parse DuckDuckGo HTML results.
+
+        Extracts search results from the HTML response.
+        """
+        results = []
+
+        # DuckDuckGo HTML structure - updated pattern
+        # Format: <a class="result__a" href="//duckduckgo.com/l/?uddg=ENCODED_URL&amp;rut=...">TITLE</a>
+        result_pattern = r'<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([^<]+)</a>'
+
+        # Extract URLs and titles
+        url_matches = re.findall(result_pattern, html, re.DOTALL)
+
+        # Extract snippets from result__snippet class
+        snippet_pattern = r'<a[^>]*class="result__snippet"[^>]*>([^<]+)</a>'
+        snippet_matches = re.findall(snippet_pattern, html, re.DOTALL)
+
+        from urllib.parse import unquote
+
+        # Process results
+        for i, (redirect_url, title) in enumerate(url_matches):
+            # Get snippet if available
+            snippet = snippet_matches[i] if i < len(snippet_matches) else ""
+
+            # Decode the DuckDuckGo redirect URL
+            # Format: //duckduckgo.com/l/?uddg=ENCODED_URL&amp;rut=HASH
+            try:
+                if 'uddg=' in redirect_url:
+                    # Extract the encoded URL
+                    encoded_part = redirect_url.split('uddg=')[1].split('&')[0]
+                    # Decode twice (once for HTML entities, once for URL encoding)
+                    import html as html_module
+                    decoded_once = html_module.unescape(encoded_part)
+                    actual_url = unquote(decoded_once)
+                else:
+                    actual_url = redirect_url
+                    # Add https: if missing
+                    if actual_url.startswith('//'):
+                        actual_url = 'https:' + actual_url
+            except Exception as e:
+                logger.debug(f"[InternetResearchStrategy] Failed to decode URL: {e}")
+                actual_url = redirect_url
+                if actual_url.startswith('//'):
+                    actual_url = 'https:' + actual_url
+
+            # Clean up HTML entities from title and snippet
+            import html as html_module
+            title = html_module.unescape(title)
+            snippet = html_module.unescape(snippet)
+
+            if title:
+                results.append({
+                    'title': title.strip(),
+                    'url': actual_url,
+                    'snippet': snippet.strip()
+                })
+
+        return results
 
     async def _search_fallback(self, query: str, limit: int) -> List[SearchResult]:
         """

@@ -241,6 +241,24 @@
                             </div>
                         </div>
 
+                        <!-- Extended Search (Internet) Button -->
+                        <div x-show="canExtendWithWebSearch" x-transition class="mb-4 pb-4 border-b border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3 text-sm text-gray-400">
+                                    <span class="px-2 py-1 bg-emerald-500/20 rounded">Local search complete</span>
+                                    <span class="px-2 py-1 bg-cyan-500/20 rounded">Web search available</span>
+                                </div>
+                                <button @click="extendWithWebSearch()"
+                                        :disabled="loading"
+                                        class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                                    </svg>
+                                    Extended Search (Internet)
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="prose prose-invert max-w-none response-content text-gray-200" x-html="renderedResponse"></div>
 
                         <!-- Accept as New Pattern Button (shows after LLM results) -->
@@ -2430,6 +2448,7 @@
                 patternsFound: 0,
                 pendingConfidence: 0,
                 canExtendWithAI: false,  // Show "Extend with AI" button when true
+                canExtendWithWebSearch: false,  // Show "Extended Search (Internet)" button when true
                 loading: false,
                 lastQuery: '',
                 currentDomain: 'exframe',
@@ -3183,6 +3202,7 @@
                     this.llm_used = false;
                     this.ai_generated = false;
                     this.canExtendWithAI = false;  // Reset AI extension button
+                    this.canExtendWithWebSearch = false;  // Reset web search extension button
                     this.processingTime = 0;  // Reset processing time
                     this.trace = null;
                     this.selectedTrace = null;
@@ -3238,6 +3258,18 @@
                         this.ai_generated = data.ai_generated || false;
                         this.direct_prompt = data.direct_prompt || false;
                         this.canExtendWithAI = false;  // Reset for normal responses
+
+                        // Check if web search extension is available
+                        if (data.can_extend_with_web_search) {
+                            // Store pending query for web search extension
+                            this.pendingQuery = {
+                                query: this.query,
+                                domain: this.currentDomain,
+                                include_trace: this.enableTrace
+                            };
+                            this.canExtendWithWebSearch = true;  // Show the "Extended Search (Internet)" button
+                        }
+
                         this.queriesProcessed++;
 
                         // Reload patterns if a new one was created (LLM used or AI generated)
@@ -3299,6 +3331,53 @@
 
                     } catch (error) {
                         this.response = 'Error extending search: ' + error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async extendWithWebSearch() {
+                    // User clicked "Extended Search (Internet)" - call web search endpoint
+                    if (!this.pendingQuery) return;
+
+                    try {
+                        this.loading = true;
+                        const res = await fetch('/api/query/extend-web-search', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                query: this.pendingQuery.query,
+                                domain: this.currentDomain,
+                                include_trace: this.pendingQuery.include_trace
+                            })
+                        });
+
+                        if (!res.ok) throw new Error('Web search failed');
+
+                        const data = await res.json();
+                        this.response = data.response;
+                        this.specialist = data.specialist || 'Researcher';
+                        this.confidence = data.confidence;
+                        this.lastQuery = data.query;
+                        this.processingTime = data.processing_time_ms || 0;
+                        this.trace = data.trace || null;
+                        this.llm_used = data.llm_used || false;
+                        this.ai_generated = data.ai_generated || false;
+                        this.canExtendWithWebSearch = false;  // Hide the button after extending
+                        this.queriesProcessed++;
+
+                        // Reload patterns if a new one was created
+                        if (this.llm_used || this.ai_generated) {
+                            await this.loadDomainInfo();
+                        }
+
+                        // Reload historical traces
+                        if (this.enableTrace) {
+                            await this.loadHistoricalTraces();
+                        }
+
+                    } catch (error) {
+                        this.response = 'Error extending search with web: ' + error.message;
                     } finally {
                         this.loading = false;
                     }
