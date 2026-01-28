@@ -51,7 +51,11 @@ class DocumentResearchStrategy(ResearchStrategy):
         self.chunk_overlap = config.get('chunk_overlap', 100)
         self.base_path = config.get('base_path', os.getcwd())
         self.auto_discover = config.get('auto_discover', False)
-        self.file_pattern = config.get('file_pattern', '*.md')  # Default to all markdown files
+        self.file_pattern = config.get('file_pattern', '**/*')  # Default to all files recursive
+        # Default exclude patterns for common directories to ignore
+        default_excludes = ['.env', '.git', '__pycache__', 'node_modules', '.pytest_cache',
+                           'venv', '.venv', 'dist', 'build', '.eggs', '*.egg-info', '.tox']
+        self.exclude_patterns = config.get('exclude_patterns', default_excludes)
 
         # Storage (will be initialized)
         self._chunks: List[Dict[str, Any]] = []
@@ -87,22 +91,40 @@ class DocumentResearchStrategy(ResearchStrategy):
         self._initialized = True
 
     async def _auto_discover_documents(self) -> None:
-        """Auto-discover all markdown files in the base_path."""
-        import glob
-        pattern_path = Path(self.base_path) / self.file_pattern
-        discovered_files = glob.glob(str(pattern_path))
+        """
+        Auto-discover all files in the base_path recursively.
+
+        Uses rglob for recursive discovery and filters out:
+        - Directories (only includes files)
+        - Paths matching exclude_patterns
+        - Common ignore patterns (.git, __pycache__, node_modules, etc.)
+        """
+        base = Path(self.base_path)
+        discovered_files = []
+
+        # Use rglob for recursive discovery of all files
+        for path in base.rglob("*"):
+            # Skip directories (only process files)
+            if path.is_dir():
+                continue
+
+            # Skip if path matches any exclude pattern
+            if self._is_excluded(path, base):
+                continue
+
+            discovered_files.append(path)
 
         if not discovered_files:
-            print(f"  [DocumentResearchStrategy] No files found matching {pattern_path}")
+            print(f"  [DocumentResearchStrategy] No files found in {base}")
             return
 
-        print(f"  [DocumentResearchStrategy] Auto-discovered {len(discovered_files)} files matching {self.file_pattern}")
+        print(f"  [DocumentResearchStrategy] Auto-discovered {len(discovered_files)} files")
 
         # Convert discovered files to document configs
         self.documents = []
         for file_path in discovered_files:
             # Get relative path from base_path
-            rel_path = Path(file_path).relative_to(self.base_path)
+            rel_path = file_path.relative_to(base)
             self.documents.append({
                 'type': 'file',
                 'path': str(rel_path)
@@ -120,6 +142,38 @@ class DocumentResearchStrategy(ResearchStrategy):
         else:
             print(f"  [DocumentResearchStrategy] Loaded {len(self._full_documents)} full documents")
         self._initialized = True
+
+    def _is_excluded(self, path: Path, base: Path) -> bool:
+        """
+        Check if a path should be excluded based on exclude_patterns.
+
+        Args:
+            path: The file path to check
+            base: The base path for resolving relative paths
+
+        Returns:
+            True if the path should be excluded, False otherwise
+        """
+        rel_path = path.relative_to(base)
+        parts = rel_path.parts
+
+        for pattern in self.exclude_patterns:
+            # Check if any part of the path matches the exclude pattern
+            if pattern in parts:
+                return True
+
+            # Check for glob-style patterns in filename
+            if '*' in pattern and path.match(pattern):
+                return True
+
+            # Check for exact match on directory name (e.g., ".git")
+            if pattern in str(rel_path):
+                # Ensure we're matching directory/segment names, not substrings
+                for part in parts:
+                    if part == pattern:
+                        return True
+
+        return False
 
     async def _load_document(self, doc_config: Dict[str, Any]) -> None:
         """Load a single document."""

@@ -67,7 +67,8 @@
           "type": "document",
           "base_path": "/app/project",
           "auto_discover": true,
-          "file_pattern": "*.md"
+          "file_pattern": "**/*",
+          "exclude_patterns": [".env", ".git", "__pycache__", "node_modules", ".pytest_cache", "venv", ".venv", "dist", "build", ".eggs", "*.egg-info", ".tox"]
         }
       }
     }
