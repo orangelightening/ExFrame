@@ -4,7 +4,7 @@
   "description": "Learn how to use ExFrame - self-documenting patterns",
   "version": "1.0.0",
   "created_at": "2026-01-27T05:21:02.525897Z",
-  "updated_at": "2026-01-27T06:16:23.688643",
+  "updated_at": "2026-01-29T21:42:01.363164",
   "categories": [
     "getting_started",
     "features",
@@ -53,6 +53,8 @@
   "plugins": [
     {
       "plugin_id": "exframe_specialist",
+      "name": "ExFrame Knowledge Specialist",
+      "description": "",
       "module": "plugins.exframe.exframe_specialist",
       "class": "ExFrameSpecialistPlugin",
       "enabled": true,
@@ -68,7 +70,15 @@
           "base_path": "/app/project",
           "auto_discover": true,
           "file_pattern": "**/*",
-          "exclude_patterns": [".env", ".git", "__pycache__", "node_modules", ".pytest_cache", "venv", ".venv", "dist", "build", ".eggs", "*.egg-info", ".tox"]
+          "exclude_patterns": [
+            ".git",
+            "__pycache__",
+            "node_modules",
+            ".env",
+            "*.pyc",
+            "venv",
+            ".archive"
+          ]
         }
       }
     }
@@ -91,7 +101,8 @@
       "enabled": true,
       "config": {
         "mode": "enhance",
-        "temperature": 0.6
+        "temperature": 0.6,
+        "max_tokens": 8192
       }
     }
   ],
@@ -110,17 +121,12 @@
   "max_patterns": 10,
   "specialists": [
     {
-      "specialist_id": "generalist",
-      "name": "Knowledge",
+      "specialist_id": "exframe_specialist",
+      "name": "ExFrame Knowledge Specialist",
       "description": "",
-      "expertise_keywords": [
-        "how",
-        "what",
-        "explain",
-        "guide"
-      ],
+      "expertise_keywords": [],
       "expertise_categories": [],
-      "confidence_threshold": 0.2
+      "confidence_threshold": 0.5
     }
   ],
   "ui_config": {
