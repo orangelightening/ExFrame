@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for EEFrame - Expertise Framework
+# Multi-stage Dockerfile for ExFrame - Expertise Framework
 
 # Stage 1: Builder - Install dependencies
 FROM python:3.11-slim AS builder
@@ -23,8 +23,8 @@ RUN pip install --no-cache-dir --user torch --index-url https://download.pytorch
 FROM python:3.11-slim
 
 # Set labels
-LABEL maintainer="EEFrame"
-LABEL description="Expertise Framework - Domain-agnostic AI assistant"
+LABEL maintainer="ExFrame Contributors"
+LABEL description="ExFrame - Domain-agnostic AI-powered knowledge management system"
 LABEL version="1.0.0"
 
 # Set environment variables

@@ -1,7 +1,7 @@
-# EEFrame - Expertise Framework
+# ExFrame - Expertise Framework
 #
 # This Docker Compose file sets up:
-# - EEFrame App: The main expertise framework web application
+# - ExFrame App: The main AI-powered knowledge management system
 # - Prometheus: Metrics collection and storage
 # - Grafana: Visualization dashboards
 # - Loki: Log aggregation
@@ -79,7 +79,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.48.0
-    container_name: omv-copilot-prometheus
+    container_name: exframe-prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -98,7 +98,7 @@ services:
 
   grafana:
     image: grafana/grafana:10.2.2
-    container_name: omv-copilot-grafana
+    container_name: exframe-grafana
     ports:
       - "3001:3000"
     environment:
@@ -119,7 +119,7 @@ services:
 
   loki:
     image: grafana/loki:2.9.2
-    container_name: omv-copilot-loki
+    container_name: exframe-loki
     ports:
       - "3100:3100"
     volumes:
@@ -132,7 +132,7 @@ services:
 
   promtail:
     image: grafana/promtail:2.9.2
-    container_name: omv-copilot-promtail
+    container_name: exframe-promtail
     volumes:
       - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log:ro  # Mount host logs for collection
@@ -145,11 +145,11 @@ services:
       - loki
 
   # Optional: node_exporter for system metrics
-  # Run this on your OMV server or the host running OMV Co-Pilot
-  # Uncomment if you want to monitor the Co-Pilot host itself
+  # Run this on your host system to monitor the ExFrame host itself
+  # Uncomment if you want to monitor the host running ExFrame
   # node_exporter:
   #   image: prom/node-exporter:v1.7.0
-  #   container_name: omv-copilot-node-exporter
+  #   container_name: exframe-node-exporter
   #   ports:
   #     - "9100:9100"
   #   volumes:
@@ -165,7 +165,7 @@ services:
   #     - monitoring
 
 volumes:
-  # EEFrame application volumes
+  # ExFrame application volumes
   eeframe_data:
     driver: local
     name: eeframe_data

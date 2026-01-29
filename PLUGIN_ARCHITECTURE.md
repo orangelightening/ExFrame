@@ -1,10 +1,10 @@
-# EEFrame Plugin Architecture
+# ExFrame Plugin Architecture
 
 **Version 1.0.0**
 
 ## Core Philosophy
 
-EEFrame is built on a simple principle:
+ExFrame is built on a simple principle:
 
 > **Data and composition are configuration. All transformation logic is pluggable.**
 
