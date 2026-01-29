@@ -1268,8 +1268,8 @@
                             <div class="glass rounded-xl p-5 border border-gray-700 hover:border-emerald-500 transition-all">
                                 <div class="flex items-start justify-between mb-3">
                                     <div>
-                                        <h3 class="font-semibold text-lg text-emerald-400" x-text="domain.domain_name"></h3>
-                                        <p class="text-xs text-gray-500 font-mono mt-1" x-text="'ID: ' + domain.domain_id"></p>
+                                        <h3 class="font-semibold text-lg text-emerald-400" x-text="domain.domain_id"></h3>
+                                        <p class="text-xs text-gray-500 mt-1" x-text="domain.domain_name"></p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="w-2 h-2 rounded-full" :class="domain.is_loaded ? 'bg-emerald-400' : 'bg-gray-500'" :title="domain.is_loaded ? 'Loaded' : 'Not Loaded'"></span>
