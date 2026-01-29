@@ -263,10 +263,17 @@ class DocumentResearchStrategy(ResearchStrategy):
             limit: Maximum number of results (only applies to chunked mode)
 
         Returns:
-            List of search results
+            List of search results with metadata about search scope
         """
         if not self._initialized:
             await self.initialize()
+
+        # Track search metadata for citation prompt
+        self._search_metadata = {
+            'total_files': len(self._full_documents) if not self.use_chunking else len(self._chunks),
+            'query': query,
+            'use_chunking': self.use_chunking
+        }
 
         if not self.use_chunking:
             # Full Context Mode: Return all complete documents
@@ -278,10 +285,12 @@ class DocumentResearchStrategy(ResearchStrategy):
                     relevance_score=1.0,  # All docs are equally relevant in full context mode
                     metadata={
                         'path': doc['path'],
-                        'full_document': True
+                        'full_document': True,
+                        'total_files': len(self._full_documents)  # For citation prompt
                     }
                 ))
             print(f"  [DocumentResearchStrategy] Returning {len(results)} full documents")
+            self._search_metadata['matches'] = len(results)
             return results
         else:
             # Chunked Mode: Keyword search
@@ -317,12 +326,29 @@ class DocumentResearchStrategy(ResearchStrategy):
                     metadata={
                         'chunk_id': chunk['chunk_id'],
                         'chunk_text': chunk['text'],
-                        'full_document': False
+                        'full_document': False,
+                        'total_files': len(self._chunks),  # For citation prompt
+                        'total_chunks_searched': len(self._chunks)
                     }
                 ))
 
             print(f"  [DocumentResearchStrategy] Found {len(results)} chunks for query: {query}")
+            self._search_metadata['matches'] = len(results)
+            self._search_metadata['total_chunks'] = len(self._chunks)
             return results
+
+    def get_search_metadata(self) -> Dict[str, Any]:
+        """
+        Get metadata about the last search operation.
+
+        Returns:
+            Dictionary with search metadata (total files, matches, query)
+        """
+        return getattr(self, '_search_metadata', {
+            'total_files': 0,
+            'matches': 0,
+            'query': ''
+        })
 
     async def cleanup(self) -> None:
         """Clean up resources."""

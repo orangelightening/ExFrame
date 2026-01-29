@@ -173,6 +173,10 @@ class LLMEnricher(EnrichmentPlugin):
         query = response_data.get("query", "")
         specialist_id = response_data.get("specialist_id", "")
 
+        # Attach response_data to context for access in prompt builders
+        # This allows prompt builders to access search_metadata
+        context.response_data = response_data
+
         # Check if this is a Type 3 (document store) domain
         # Type 3 domains use exframe_specialist which should have combined_results
         is_type3_domain = (
@@ -181,21 +185,30 @@ class LLMEnricher(EnrichmentPlugin):
             response_data.get("search_strategy") == "research_primary"
         )
 
-        # Check if we have web search results (research_results from web search)
+        # Check if we have web search results (research_results from Type 4 web search)
         research_results = response_data.get("research_results", [])
-        has_web_search = len(research_results) > 0
+        # Differentiate Type 4 web search from Type 3 document search
+        # Type 4 web search has results with "web_search" source or URLs
+        # Type 3 document search has "Research Docs" source and no URLs
+        has_web_search = (
+            len(research_results) > 0 and
+            not is_type3_domain and  # Not Type 3
+            (response_data.get("search_strategy") != "research_primary") and
+            (research_results[0].get("source") == "web_search" or research_results[0].get("url") if research_results else False)
+        )
 
         # Build prompt based on mode and available patterns
         if has_web_search:
             # Use web search results as context
             print(f"  [LLMEnricher] Using web search results ({len(research_results)} results)")
             prompt = self._build_web_search_prompt(query, research_results, patterns, context)
-        elif patterns and self.mode != self.MODE_REPLACE and not is_type3_domain:
+        elif is_type3_domain and patterns:
+            # Use document-context prompt for Type 3 document search results
+            print(f"  [LLMEnricher] Using Type 3 document context prompt ({len(patterns)} documents)")
+            prompt = self._build_document_context_prompt(query, patterns, context)
+        elif patterns and self.mode != self.MODE_REPLACE:
             # Use pattern-based enhancement for local patterns
             prompt = self._build_enhancement_prompt(query, patterns, specialist_id, context)
-        elif is_type3_domain:
-            # Use document-context prompt for Type 3 document search results
-            prompt = self._build_document_context_prompt(query, patterns, context)
         else:
             # Use direct prompt when no patterns or in replace mode
             prompt = self._build_direct_prompt(query, context)
@@ -203,6 +216,11 @@ class LLMEnricher(EnrichmentPlugin):
         # Call LLM API
         try:
             response = await self._call_llm(prompt)
+
+            # Post-response analysis: Detect contradictions for Type 3 domains
+            if is_type3_domain and patterns:
+                await self._detect_and_log_contradictions(query, patterns, context)
+
             return response
         except Exception as e:
             # Return error message if LLM fails
@@ -304,8 +322,19 @@ Your response:"""
 
         Unlike the enhancement prompt, this doesn't ask the LLM to list patterns.
         The LLM should use the documents as context to answer naturally.
+
+        Includes citation requirements for Type 3 (Document Store Search) domains.
         """
         domain_id = context.domain_id
+
+        # Get search metadata if available (passed from specialist via engine)
+        response_data = getattr(context, 'response_data', {})
+        search_metadata = response_data.get('search_metadata', {})
+
+        # Extract search scope for citation context
+        total_files = search_metadata.get('total_files', 0)
+        matches = search_metadata.get('matches', len(patterns))
+        files_checked = f"{total_files} files" if total_files > 0 else "project files"
 
         # Format documents as context (not as patterns to be listed)
         # Use the document content directly to provide context
@@ -328,20 +357,38 @@ Your response:"""
 ---
 """
 
+        # Build citation requirements for Type 3 domains
+        citation_requirements = """
+**IMPORTANT CITATION REQUIREMENTS:**
+- When answering questions about this codebase, ALWAYS cite specific files when making factual claims
+- Use the format: "According to [filename]: [fact]"
+- For code behavior: reference the actual file/function names
+- If information spans multiple files, cite all relevant sources
+- If uncertain about information, acknowledge which files you checked and what you couldn't find
+"""
+
+        # Add search context if available
+        search_context = f"\n**Search Context:** I searched through {files_checked} and found {matches} relevant document(s)." if total_files > 0 else ""
+
         prompt = f"""You are a helpful AI assistant with access to documentation.
 
 A user asked: "{query}"
+{search_context}
 
 Here are the relevant documents from our knowledge base:
 
 {context_text}
 
+{citation_requirements}
+
 Using the information from these documents, provide a clear, comprehensive answer to the user's question:
 1. Draw directly from the document content above
 2. Organize the information in a natural, conversational way
 3. Include specific details from the documents when relevant
-4. Use markdown formatting for readability (headers, bullet points, etc.)
-5. Do NOT include a "Sources" or "References" section at the end - just provide the answer naturally
+4. **Cite your sources using the format: "According to [filename]: [fact]"**
+5. If you mention the search scope, reference the number of files searched and found
+6. Use markdown formatting for readability (headers, bullet points, etc.)
+7. Do NOT include a "Sources" or "References" section at the end - just provide the answer naturally with inline citations
 
 Your response:"""
 
@@ -535,6 +582,204 @@ Your response:"""
                 return f"[LLM Request Error ({error_type}): {error_details}. API: {self.base_url}, Model: {self.model}]"
             except Exception as e:
                 return f"[LLM Error: {str(e)}]"
+
+    async def _detect_and_log_contradictions(
+        self,
+        query: str,
+        patterns: List,
+        context: EnrichmentContext
+    ) -> None:
+        """Analyze documents for contradictions and log findings.
+
+        This runs as a post-response analysis for Type 3 domains to identify:
+        - Direct contradictions between documents
+        - Ambiguous or conflicting information
+        - Outdated content that conflicts with other docs
+
+        Results are logged with severity levels:
+        - high: flag_for_immediate_review - Could cause incorrect answers
+        - medium: schedule_cleanup - Creates ambiguity but answers still valid
+        - low: log_only - Minor inconsistency in terminology
+        """
+        import json
+        from pathlib import Path
+        from datetime import datetime
+
+        # Skip if no patterns to analyze
+        if not patterns:
+            return
+
+        # Build contradiction detection prompt
+        # Limit to top 20 documents to avoid token limits
+        docs_to_analyze = patterns[:20]
+
+        doc_summary = ""
+        for i, doc in enumerate(docs_to_analyze, 1):
+            title = doc.get("title", doc.get("name", "Unknown"))
+            content = doc.get("content", doc.get("solution", ""))[:500]  # First 500 chars
+            doc_summary += f"\n--- Document {i}: {title} ---\n{content}...\n"
+
+        contradiction_prompt = f"""You are a documentation quality analyst. Analyze these documents for contradictions, ambiguities, or inconsistencies.
+
+Query: "{query}"
+
+Documents:
+{doc_summary}
+
+Identify and categorize any issues found. Respond ONLY in valid JSON format with this structure:
+{{
+  "contradictions_found": true,
+  "issues": [
+    {{
+      "type": "direct_contradiction|ambiguity|outdated_info|terminology_mismatch",
+      "severity": "high|medium|low",
+      "action": "flag_for_immediate_review|schedule_cleanup|log_only",
+      "impact": "Brief description of impact",
+      "files": ["file1.md", "file2.md"],
+      "description": "Clear explanation of the contradiction",
+      "suggestion": "How to fix it (optional)"
+    }}
+  ]
+}}
+
+Severity guidelines:
+- high: Direct contradictions that could cause incorrect answers - action: flag_for_immediate_review
+- medium: Ambiguous information where answers are still valid but unclear - action: schedule_cleanup
+- low: Minor terminology inconsistencies that don't affect accuracy - action: log_only
+
+If no contradictions found, respond with:
+{{"contradictions_found": false, "issues": []}}
+
+Your JSON response:"""
+
+        try:
+            # Call LLM for contradiction analysis
+            analysis = await self._call_llm(contradiction_prompt)
+
+            # Parse JSON response
+            try:
+                # Extract JSON from response (handle potential markdown code blocks)
+                import re
+                json_match = re.search(r'\{[\s\S]*\}', analysis)
+                if json_match:
+                    analysis_json = json.loads(json_match.group())
+                else:
+                    analysis_json = json.loads(analysis)
+
+                # Only log if contradictions were found
+                if not analysis_json.get("contradictions_found", False):
+                    return
+
+                issues = analysis_json.get("issues", [])
+                if not issues:
+                    return
+
+                # Log the contradictions
+                await self._log_contradictions(query, issues, context)
+
+                # Log summary to console
+                severity_counts = {"high": 0, "medium": 0, "low": 0}
+                for issue in issues:
+                    sev = issue.get("severity", "low")
+                    if sev in severity_counts:
+                        severity_counts[sev] += 1
+
+                total = sum(severity_counts.values())
+                print(f"  [ContradictionDetector] Found {total} issue(s): high={severity_counts['high']}, medium={severity_counts['medium']}, low={severity_counts['low']}")
+
+            except json.JSONDecodeError as e:
+                # Failed to parse JSON - log the raw response for debugging
+                print(f"  [ContradictionDetector] Failed to parse analysis JSON: {e}")
+                print(f"  [ContradictionDetector] Raw response: {analysis[:500]}")
+
+        except Exception as e:
+            # Don't fail the main response if contradiction detection fails
+            print(f"  [ContradictionDetector] Analysis failed: {e}")
+
+    async def _log_contradictions(
+        self,
+        query: str,
+        issues: List[Dict[str, Any]],
+        context: EnrichmentContext
+    ) -> None:
+        """Log contradictions to both plain text and JSON files."""
+        import json
+        from pathlib import Path
+        from datetime import datetime
+
+        # Create logs directory
+        logs_dir = Path(__file__).parent.parent.parent / "logs" / "contradictions"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.utcnow().isoformat() + "Z"
+        domain_id = context.domain_id
+
+        # Prepare log entry
+        log_entry = {
+            "timestamp": timestamp,
+            "domain": domain_id,
+            "query": query,
+            "issues": issues,
+            "summary": {
+                "total_issues": len(issues),
+                "by_severity": {
+                    "high": sum(1 for i in issues if i.get("severity") == "high"),
+                    "medium": sum(1 for i in issues if i.get("severity") == "medium"),
+                    "low": sum(1 for i in issues if i.get("severity") == "low")
+                }
+            }
+        }
+
+        # Write to JSON log (structured for analysis)
+        json_log_path = logs_dir / "contradictions.json"
+        try:
+            # Read existing log or create new list
+            if json_log_path.exists():
+                with open(json_log_path, 'r') as f:
+                    log_history = json.load(f)
+            else:
+                log_history = []
+
+            # Append new entry (keep last 1000 entries)
+            log_history.append(log_entry)
+            if len(log_history) > 1000:
+                log_history = log_history[-1000:]
+
+            with open(json_log_path, 'w') as f:
+                json.dump(log_history, f, indent=2)
+
+        except Exception as e:
+            print(f"  [ContradictionDetector] Failed to write JSON log: {e}")
+
+        # Write to plain text log (human-readable)
+        text_log_path = logs_dir / "contradictions.log"
+        try:
+            with open(text_log_path, 'a') as f:
+                f.write(f"\n{'='*80}\n")
+                f.write(f"TIMESTAMP: {timestamp}\n")
+                f.write(f"DOMAIN: {domain_id}\n")
+                f.write(f"QUERY: {query}\n")
+                f.write(f"FOUND: {len(issues)} issue(s)\n")
+                f.write(f"{'='*80}\n")
+
+                for i, issue in enumerate(issues, 1):
+                    severity = issue.get("severity", "unknown").upper()
+                    action = issue.get("action", "unknown")
+                    impact = issue.get("impact", "")
+                    files = issue.get("files", [])
+                    description = issue.get("description", "")
+
+                    f.write(f"\n[Issue {i}] - Severity: {severity}\n")
+                    f.write(f"  Action: {action}\n")
+                    f.write(f"  Impact: {impact}\n")
+                    f.write(f"  Files: {', '.join(files)}\n")
+                    f.write(f"  Description: {description}\n")
+
+                    if issue.get("suggestion"):
+                        f.write(f"  Suggestion: {issue['suggestion']}\n")
+
+        except Exception as e:
+            print(f"  [ContradictionDetector] Failed to write text log: {e}")
 
     def get_supported_formats(self) -> List[str]:
         """Works with all formats - generates markdown text."""

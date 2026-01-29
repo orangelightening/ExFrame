@@ -277,6 +277,8 @@ class GenericAssistantEngine:
                 enricher_input['local_results'] = response_data['local_results']
             if 'document_results' in response_data:
                 enricher_input['document_results'] = response_data['document_results']
+            if 'search_metadata' in response_data:
+                enricher_input['search_metadata'] = response_data['search_metadata']
 
         # Initialize enriched_data to avoid undefined variable
         enriched_data = {}

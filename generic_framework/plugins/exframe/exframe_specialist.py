@@ -147,6 +147,7 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
 
         # Stage 1: Research Strategy (PRIMARY - search local documentation files)
         research_results = []
+        search_metadata = {}  # Track search metadata for citation prompt
         if self.research_strategy:
             try:
                 # Initialize research strategy if needed
@@ -155,6 +156,10 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
 
                 # Search using research strategy
                 search_results = await self.research_strategy.search(query, limit=5)
+
+                # Get search metadata for citation prompt
+                if hasattr(self.research_strategy, 'get_search_metadata'):
+                    search_metadata = self.research_strategy.get_search_metadata()
 
                 # Convert SearchResult objects to document results format
                 for result in search_results:
@@ -168,7 +173,8 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
                         "metadata": {
                             "file": result.source,
                             "path": result.metadata.get("path", ""),
-                            "relevance": result.relevance_score
+                            "relevance": result.relevance_score,
+                            "total_files": result.metadata.get("total_files", 0)
                         }
                     })
 
@@ -265,7 +271,8 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
             "confidence": confidence,
             "query": query,
             "search_strategy": "research_primary",  # Indicate strategy used
-            "_source_list": source_list  # File list to append after LLM response
+            "_source_list": source_list,  # File list to append after LLM response
+            "search_metadata": search_metadata  # Total files searched, matches, for citation prompt
         }
 
     def _form_source_list(self, document_results: List, local_results: List) -> str:
