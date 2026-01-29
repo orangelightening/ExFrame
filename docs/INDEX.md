@@ -4,6 +4,22 @@
 **Source:** Codebase scan
 **Purpose:** Fast navigation of all system files
 
+## Historical Nomenclature Note
+
+**EEFrame → ExFrame Migration (January 2026):**
+
+The project underwent a naming standardization in January 2026 to unify all references under the name "ExFrame". Historical references to "EEFrame" and "omv-copilot" may still exist in some contexts:
+
+- **Directory name**: `eeframe/` - Kept for git history, Docker volumes, and practical deployment reasons
+- **Service/Container names**: `eeframe-app`, `eeframe-*` volumes - Kept for data preservation and deployment continuity
+- **All user-facing content**: Standardized to "ExFrame" (README, documentation, package name)
+- **Internal code paths**: `generic_framework/` - Internal implementation detail, not exposed to users
+
+**Rationale**: The directory and service names are internal plumbing that don't affect end users. Changing them would break git history, Docker volumes, and existing deployments. All documentation and user-facing references now consistently use "ExFrame."
+
+**Package name**: `exframe` (pip install name, pyproject.toml)
+**License**: Apache License 2.0
+
 ## Core Framework
 
 generic_framework/api/app.py...FastAPI app with 45 routes: query endpoints, domain CRUD, admin operations
