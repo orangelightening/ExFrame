@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to EEFrame will be documented in this file.
+All notable changes to ExFrame will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -207,7 +207,7 @@ This release completes the pluggable transformation architecture by adding Route
 
 ### Major Release - Plugin Architecture Foundation
 
-This release establishes EEFrame as a domain-agnostic, plugin-based knowledge management system. The core philosophy: **data and composition are configuration, all transformation logic is pluggable.**
+This release establishes ExFrame as a domain-agnostic, plugin-based knowledge management system. The core philosophy: **data and composition are configuration, all transformation logic is pluggable.**
 
 ### Added
 

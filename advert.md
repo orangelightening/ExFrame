@@ -1,7 +1,7 @@
 # ExFrame - Self-Healing AI Knowledge System
 
-**Version:** 1.5.1  
-**License:** MIT  
+*Version: Managed by git tags*
+**License:** Apache-2.0
 **Repository:** https://github.com/orangelightening/ExFrame
 
 ---
@@ -398,7 +398,7 @@ curl http://localhost:3000/api/domains
 ✅ **Plugin System** - Extendable without code changes
 ✅ **Claude Code Native** - Built for AI-assisted development
 ✅ **Docker-Ready** - Deploy anywhere in one command
-✅ **Open Source** - MIT license, fully customizable
+✅ **Open Source** - Apache 2.0 license, fully customizable
 ✅ **Monitoring Included** - Complete observability stack
 ✅ **Constellation Architecture** - Distributed knowledge network with Claude Code partners
 ✅ **Collaborative Intelligence** - Multiple ExFrame systems working together
@@ -433,7 +433,7 @@ curl http://localhost:3000/api/domains
 - [GITHUB_LAUNCH_GUIDE.md](GITHUB_LAUNCH_GUIDE.md:1) - Deployment guide
 
 ### Contributing
-- MIT license - Permissive for contributions
+- Apache 2.0 license - Permissive for contributions
 - Plugin system - Easy to extend
 - Well-documented codebase
 - Active development community
@@ -465,7 +465,7 @@ curl http://localhost:3000/api/domains
 
 ## License
 
-ExFrame is released under the **MIT License**, allowing:
+ExFrame is released under the **Apache License 2.0**, allowing:
 - ✅ Commercial use
 - ✅ Modification and distribution
 - ✅ Private use

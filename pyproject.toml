@@ -1,20 +1,19 @@
 [project]
-name = "omv-copilot"
-version = "2.0.0"
-description = "OMV Co-Pilot: Intelligent OpenMediaVault Server Management Assistant"
+name = "exframe"
+# Version is managed by git tags - use git describe for version info
+description = "Domain-agnostic AI-powered knowledge management system with configurable domain types"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "ExFrame Contributors"}
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: System :: Systems Administration",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 
 dependencies = [
@@ -45,7 +44,8 @@ dev = [
 ]
 
 [project.scripts]
-omv-copilot = "omv_copilot.cli.main:main"
+# CLI scripts can be added here when implemented
+# exframe = "exframe.cli.main:main"
 
 [build-system]
 requires = ["hatchling"]

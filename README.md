@@ -2,7 +2,7 @@
 
 **Domain-Agnostic AI-Powered Knowledge Management System**
 
-Version 1.5.0 - Pure Semantic Search Implementation
+*Version: Managed by git tags - run `git describe --tags` for current version*
 
 ---
 
