@@ -229,12 +229,15 @@ class GenericAssistantEngine:
                 # Return the out_of_scope response directly without enrichment
                 logger.info(f"[Engine] Query rejected by specialist: {response_data.get('out_of_scope_reason', 'Out of scope')}")
                 return {
+                    'query': query,
                     'response': response_data.get('response', 'This question is outside the documentation scope.'),
-                    'specialist_id': specialist_id,
+                    'specialist': specialist_id,
                     'confidence': response_data.get('confidence', 0.0),
                     'out_of_scope': True,
                     'out_of_scope_reason': response_data.get('out_of_scope_reason'),
                     'patterns_used': [],
+                    'timestamp': datetime.utcnow().isoformat() + 'Z',
+                    'domain': self.domain.domain_id,
                     'trace': trace
                 }
 
