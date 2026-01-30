@@ -205,7 +205,33 @@ class LLMEnricher(EnrichmentPlugin):
         elif is_type3_domain and patterns:
             # Use document-context prompt for Type 3 document search results
             print(f"  [LLMEnricher] Using Type 3 document context prompt ({len(patterns)} documents)")
+
+            # PRE-LLM RELEVANCE CHECK: Don't answer if no relevant documents found
+            max_relevance = max((p.get('confidence', p.get('relevance', 0)) for p in patterns[:20]), default=0)
+
+            # Check total_files from search metadata to understand search scope
+            search_metadata = response_data.get('search_metadata', {})
+            total_files = search_metadata.get('total_files', 0)
+            matches = search_metadata.get('matches', len(patterns))
+
+            # If relevance is very low AND we searched many files with few matches, reject
+            if max_relevance < 0.3 and total_files > 10 and matches < 3:
+                no_info_msg = f"I don't have information about '{query}' in the ExFrame documentation. I searched through {total_files} files but found no relevant content. I can only answer questions about ExFrame's architecture, configuration, plugin system, and usage."
+                print(f"  [LLMEnricher] No relevant docs found (max_relevance={max_relevance:.2f}, files={total_files}, matches={matches})")
+                return no_info_msg
+
             prompt = self._build_document_context_prompt(query, patterns, context)
+        elif patterns and self.mode != self.MODE_REPLACE:
+            # Use pattern-based enhancement for local patterns
+            prompt = self._build_enhancement_prompt(query, patterns, specialist_id, context)
+        else:
+            # No patterns available - for Type 3, this means document search found nothing
+            if is_type3_domain:
+                no_info_msg = f"I don't have information about '{query}' in the ExFrame documentation. I can only answer questions about ExFrame's architecture, configuration, plugin system, and usage."
+                print(f"  [LLMEnricher] No patterns found for Type 3 query")
+                return no_info_msg
+            # Use direct prompt when no patterns or in replace mode
+            prompt = self._build_direct_prompt(query, context)
         elif patterns and self.mode != self.MODE_REPLACE:
             # Use pattern-based enhancement for local patterns
             prompt = self._build_enhancement_prompt(query, patterns, specialist_id, context)
