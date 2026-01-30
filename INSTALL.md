@@ -1,7 +1,7 @@
 # ExFrame Installation Guide
 
-**Version:** 1.5.0
-**Last Updated:** 2026-01-21
+**Version:** 1.6.0
+**Last Updated:** 2026-01-27
 
 ---
 
