@@ -276,20 +276,48 @@ class DocumentResearchStrategy(ResearchStrategy):
         }
 
         if not self.use_chunking:
-            # Full Context Mode: Return all complete documents
+            # Full Context Mode: Return only documents that match the query
+            query_lower = query.lower()
+
+            # Remove stop words (common words that shouldn't count as matches)
+            stop_words = {
+                'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+                'should', 'may', 'might', 'must', 'shall', 'can', 'what', 'which',
+                'who', 'when', 'where', 'why', 'how', 'this', 'that', 'these', 'those',
+                'and', 'or', 'but', 'if', 'then', 'so', 'because', 'as', 'at', 'by',
+                'for', 'from', 'in', 'into', 'of', 'on', 'to', 'with', 'about'
+            }
+            query_terms = [w for w in query_lower.split() if w not in stop_words]
+
+            # If no meaningful terms after removing stop words, use full query
+            if not query_terms:
+                query_terms = query_lower.split()
+
             results = []
             for doc in self._full_documents:
-                results.append(SearchResult(
-                    content=doc['content'],
-                    source=doc['filename'],
-                    relevance_score=1.0,  # All docs are equally relevant in full context mode
-                    metadata={
-                        'path': doc['path'],
-                        'full_document': True,
-                        'total_files': len(self._full_documents)  # For citation prompt
-                    }
-                ))
-            print(f"  [DocumentResearchStrategy] Returning {len(results)} full documents")
+                # Check if document content contains any query terms
+                content_lower = doc['content'].lower()
+                matches = sum(1 for term in query_terms if term in content_lower)
+
+                if matches > 0:
+                    # Calculate relevance based on match count and density
+                    # Relevance = (matches / query_terms) * (1 + matches/length_factor)
+                    relevance = min(matches / len(query_terms), 1.0)
+
+                    results.append(SearchResult(
+                        content=doc['content'],
+                        source=doc['filename'],
+                        relevance_score=relevance,
+                        metadata={
+                            'path': doc['path'],
+                            'full_document': True,
+                            'total_files': len(self._full_documents),  # For citation prompt
+                            'matches': matches
+                        }
+                    ))
+
+            print(f"  [DocumentResearchStrategy] Returning {len(results)} matching documents out of {len(self._full_documents)} total")
             self._search_metadata['matches'] = len(results)
             return results
         else:

@@ -314,13 +314,17 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
         # Convert research_results to pattern format so they're passed to enricher
         research_patterns = []
         for r in research_results:
+            # Get relevance score from SearchResult (not from metadata)
+            # SearchResult has relevance_score attribute, metadata contains matches info
+            relevance = getattr(r, 'relevance_score', r["metadata"].get("relevance", 0.0))
+
             research_patterns.append({
                 "id": f"research_{r.get('id', '')}",  # Prefix to avoid KB lookup
                 "name": r.get("title", r.get("id", "Unknown")),
                 "description": r.get("description", ""),
                 "solution": r.get("content", ""),
                 "pattern_type": "knowledge",
-                "confidence": r["metadata"].get("relevance", 0.8),
+                "confidence": relevance,  # Use actual relevance score from search
                 "status": "certified",
                 "tags": ["document_search", "research_docs"],
                 "_source": "research_strategy"
