@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for ExFrame - Expertise Framework
 
 # Stage 1: Builder - Install dependencies
-FROM python:3.11-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Set working directory
 WORKDIR /build
@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir --user torch --index-url https://download.pytorch
     pip install --no-cache-dir --user -r requirements.txt
 
 # Stage 2: Runtime - Final minimal image
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Set labels
 LABEL maintainer="ExFrame Contributors"

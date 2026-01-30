@@ -9,7 +9,8 @@ work correctly with sample data.
 import sys
 from pathlib import Path
 
-# Add framework to path
+# Add framework to path for local development testing
+# Note: Production deployment uses Docker where PYTHONPATH is set correctly
 sys.path.insert(0, str(Path(__file__).parent / "generic_framework"))
 
 from plugins.formatters.markdown_formatter import MarkdownFormatter, ConciseMarkdownFormatter
