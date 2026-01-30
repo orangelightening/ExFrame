@@ -523,8 +523,7 @@ This is the **self-healing** mechanism in action:
 **First Query:**
 ```
 Query: "How do I install ExFrame?"
-Found: 3 issues
-  [HIGH] Package name mismatch (eeframe vs exframe)
+Found: 2 issues
   [MEDIUM] Docker service name confusion
   [LOW] Installation path inconsistency
 ```
@@ -533,9 +532,9 @@ Found: 3 issues
 ```json
 {
   "name": "ExFrame Installation Naming",
-  "problem": "Confusion about package names and service names",
-  "solution": "The package name is 'exframe' for pip installs. Service names
-  like 'eeframe-app' are internal Docker infrastructure for data preservation.
+  "problem": "Confusion about Docker service names",
+  "solution": "Service names like 'eeframe-app' are internal Docker infrastructure
+  for data preservation. ExFrame is installed and run entirely via Docker Compose.
   This is intentional and documented in docs/INDEX.md under Historical Nomenclature."
 }
 ```
@@ -1430,23 +1429,6 @@ services:
 ---
 
 ## Development
-
-### Running Locally (Without Docker)
-
-```bash
-# Setup virtual environment
-python3.11 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Set environment variables
-export OPENAI_API_KEY=your_key
-export PYTHONPATH=generic_framework:$PYTHONPATH
-
-# Run the application
-cd generic_framework
-python -m uvicorn api.app:app --reload --host 0.0.0.0 --port 3000
-```
 
 ### Code Formatting
 
