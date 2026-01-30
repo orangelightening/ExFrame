@@ -38,9 +38,28 @@ generic_framework/plugins/generalist/generalist_plugin.py...GeneralistPlugin: ke
 
 ## Enrichers
 
-generic_framework/plugins/enrichers/llm_enricher.py...LLMEnricher: synthesizes responses, supports web search context
+generic_framework/plugins/enrichers/llm_enricher.py...LLMEnricher: synthesizes responses, supports web search context, contradiction detection
 generic_framework/plugins/enrichers/reply_formation.py...ReplyFormationEnricher: displays web sources with 🌐 emoji and URLs
 generic_framework/plugins/enrichers/llm_fallback_enricher.py...LLMFallbackEnricher: provides LLM response when patterns are weak
+
+## Self-Healing Features
+
+**Contradiction Detection System** (Type 3 domains)
+- **Location**: `generic_framework/plugins/enrichers/llm_enricher.py` (_detect_and_log_contradictions)
+- **Log Location**: `/app/logs/contradictions/contradictions.json` and `contradictions.log`
+- **How it works**: Post-response analysis that searches for contradictions across all discovered documents
+- **Severity levels**: high (immediate review), medium (cleanup), low (log only)
+- **Feedback loop**: Save explanations as patterns → detector learns context → finds new contradictions
+- **Nomenclature awareness**: Reads INDEX.md first to understand historical naming (EEFrame → ExFrame)
+
+**Self-Healing Documentation Workflow**:
+```
+1. Query → Contradiction detector analyzes all documents
+2. Detector finds issues → Logs with severity and suggestions
+3. AI explains the contradiction → User saves explanation as pattern
+4. Next query → Detector reads the pattern, understands context
+5. Detector finds NEW contradictions (previously addressed ones are gone)
+```
 
 ## API Endpoints
 
@@ -65,7 +84,11 @@ generic_framework/frontend/index.html...Alpine.js SPA: domain dropdown, query in
 ## Documentation
 
 docs/INDEX.md...This file: master index of all code files with one-line summaries
-docs/README.md...Quick start guide
+README.md...Main documentation: overview, installation, self-healing features, domain types, API reference
+INSTALL.md...Installation guide for Docker deployment
+PLUGIN_ARCHITECTURE.md...Plugin development guide
+RELEASE_NOTES.md...Version release notes
+CHANGELOG.md...Complete version history
 
 ## Archive
 

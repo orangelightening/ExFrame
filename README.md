@@ -362,7 +362,151 @@ For more details, see [rag-search-design.md](rag-search-design.md).
 
 ---
 
-## Installation on New Linux Machine
+## Self-Healing Features
+
+ExFrame includes a **built-in contradiction detection system** that automatically identifies documentation inconsistencies and provides a feedback loop for continuous improvement.
+
+### How It Works
+
+For **Type 3 (Document Store Search)** domains, the system performs post-response analysis:
+
+1. **Query Processing** → User asks a question
+2. **Document Search** → System searches through all discovered documents (566+ files in ExFrame domain)
+3. **Response Generation** → AI generates answer using document context
+4. **Contradiction Detection** → System analyzes all documents for inconsistencies
+5. **Logging** → Issues logged with severity levels (high/medium/low)
+6. **Feedback Loop** → Save explanations as patterns → detector learns context
+
+### Contradiction Detector Features
+
+**Automatic Analysis:**
+- Scans all discovered documents after each query
+- Identifies direct contradictions, ambiguities, outdated info, terminology mismatches
+- Categorizes by severity and suggests fixes
+
+**Severity Levels:**
+| Severity | Action | Description |
+|----------|--------|-------------|
+| **HIGH** | flag_for_immediate_review | Direct contradictions that could cause incorrect answers |
+| **MEDIUM** | schedule_cleanup | Ambiguous information where answers are still valid but unclear |
+| **LOW** | log_only | Minor terminology inconsistencies that don't affect accuracy |
+
+**Smart Context Detection:**
+- Reads `docs/INDEX.md` first to understand historical naming (EEFrame → ExFrame)
+- Recognizes that internal infrastructure names (`eeframe-app`, `eeframe-*` volumes) are intentional
+- Distinguishes between user-facing names (ExFrame) and internal plumbing
+
+**Log Location:**
+```
+/app/logs/contradictions/
+├── contradictions.json    # Structured log for analysis
+└── contradictions.log     # Human-readable format
+```
+
+### The Feedback Loop
+
+This is the **self-healing** mechanism in action:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              SELF-HEALING DOCUMENTATION WORKFLOW             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. QUERY ──────────────────────────────────────┐           │
+│     User: "What is ExFrame?"                    │           │
+│                                                  │           │
+│  2. SEARCH ──────────────────────────────────┐  │           │
+│     Find relevant documents (566 files)      │  │           │
+│                                             │  │           │
+│  3. RESPOND ──────────────────────────────┐ │  │           │
+│     AI generates answer                   │ │  │           │
+│                                          │ │  │           │
+│  4. DETECT ───────────────────────────┐ │ │  │           │
+│     Find contradictions               │ │ │  │           │
+│     Output: 3 issues found           │ │ │  │           │
+│                                       │ │ │  │           │
+│  5. EXPLAIN ───────────────────────┐ │ │ │  │           │
+│     AI: "The naming is intentional │ │ │ │  │           │
+│     because of historical reasons" │ │ │ │  │           │
+│                                    │ │ │ │  │           │
+│  6. SAVE PATTERN ───────────────┐ │ │ │ │  │           │
+│     Store explanation in         │ │ │ │ │  │           │
+│     domain as pattern            │ │ │ │ │  │           │
+│                                  │ │ │ │ │  │           │
+│  7. REPEAT ──────────────────────┼─┼─┼─┼─┼─────────────┘
+│     Next query on same topic ────┘ │ │ │ │
+│     Detector reads the pattern ─────┘ │ │
+│     Already knows the answer ──────────┘ │
+│     Finds NEW contradictions ────────────┘
+│     (previously addressed ones are gone) │
+│                                             │
+│  Each iteration improves the documentation!│
+└─────────────────────────────────────────────┘
+```
+
+**Example:**
+
+**First Query:**
+```
+Query: "How do I install ExFrame?"
+Found: 3 issues
+  [HIGH] Package name mismatch (eeframe vs exframe)
+  [MEDIUM] Docker service name confusion
+  [LOW] Installation path inconsistency
+```
+
+**Save Explanation as Pattern:**
+```json
+{
+  "name": "ExFrame Installation Naming",
+  "problem": "Confusion about package names and service names",
+  "solution": "The package name is 'exframe' for pip installs. Service names
+  like 'eeframe-app' are internal Docker infrastructure for data preservation.
+  This is intentional and documented in docs/INDEX.md under Historical Nomenclature."
+}
+```
+
+**Second Query:**
+```
+Query: "How do I install ExFrame?"
+Found: 1 issue
+  [LOW] Python version alignment (>=3.11 vs 3.11-slim)
+```
+
+The HIGH and MEDIUM issues are **gone** because the pattern now provides context!
+
+### Using the Feedback Loop
+
+**For Documentation Maintenance:**
+
+1. **Run queries** on your Type 3 domains regularly
+2. **Review contradiction logs** at `/app/logs/contradictions/`
+3. **Have AI explain** the contradictions
+4. **Save explanations** as patterns in the domain
+5. **Watch the system learn** - contradictions decrease over time
+
+**For Domain Owners:**
+
+- The contradiction detector runs **automatically** after every Type 3 query
+- No configuration needed - just query your domain normally
+- Logs are persistent and searchable
+- Patterns are immediately available for future queries
+
+### Technical Details
+
+**Implementation:** `generic_framework/plugins/enrichers/llm_enricher.py`
+- Method: `_detect_and_log_contradictions()`
+- Triggered: After Type 3 query response generation
+- Scope: Analyzes top 20 documents per query
+- Format: JSON + plain text logs
+
+**Nomenclature Detection:**
+- Searches for INDEX.md or nomenclature docs first
+- Extracts historical naming context
+- Adds to prompt with instructions that historical refs are intentional
+- Prevents false positives on EEFrame/ExFrame differences
+
+---
 
 **Complete step-by-step guide for deploying ExFrame from GitHub to a fresh Linux system.**
 
