@@ -6,6 +6,10 @@
 # - Grafana: Visualization dashboards
 # - Loki: Log aggregation
 # - Promtail: Log shipping agent
+#
+# NAMING NOTE: Service and volume names use 'eeframe-*' prefix for historical
+# reasons (git history, data preservation). All user-facing content uses 'ExFrame'.
+# See docs/INDEX.md for full nomenclature history.
 
 version: "3.8"
 
