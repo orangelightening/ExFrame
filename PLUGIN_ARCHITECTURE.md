@@ -342,6 +342,198 @@ class ResearchSpecialistPlugin(SpecialistPlugin):
 - LLM synthesizes from both web and local sources
 - User controls when to search the web
 
+### 1.2. ExFrameSpecialistPlugin (Type 3 Domains)
+
+**Purpose**: Document research with local pattern retrieval and scope boundaries.
+
+**Interface**: Same 3 methods as SpecialistPlugin, with 3-stage search and scope checking.
+
+```python
+# plugins/exframe/exframe_specialist.py
+from core.specialist_plugin import SpecialistPlugin
+from knowledge.json_kb import JSONKnowledgeBase
+from typing import Dict, Any, Optional, List
+
+class ExFrameSpecialistPlugin(SpecialistPlugin):
+    """
+    ExFrame specialist with document research and scope boundaries.
+
+    Implements 3-stage search:
+    1. Document research (auto-discovered files)
+    2. Document store (external knowledge)
+    3. Local pattern search (cached knowledge)
+
+    Also implements scope boundaries to reject out-of-scope queries.
+    """
+
+    name = "ExFrame Knowledge Specialist"
+    specialist_id = "exframe_specialist"
+
+    def __init__(self, knowledge_base: JSONKnowledgeBase, config: Dict = None):
+        self.domain = knowledge_base
+        self.config = config or {}
+
+        # Document store configuration
+        self.document_store_enabled = self.config.get("document_store_enabled", True)
+        self.local_patterns_enabled = self.config.get("local_patterns_enabled", True)
+
+        # Scope boundaries
+        self.scope_enabled = self.config.get("scope", {}).get("enabled", False)
+        self.scope_min_confidence = self.config.get("scope", {}).get("min_confidence", 0.0)
+        self.scope_in_list = self.config.get("scope", {}).get("in_scope", [])
+        self.scope_out_list = self.config.get("scope", {}).get("out_of_scope", [])
+        self.scope_response = self.config.get("scope", {}).get("out_of_scope_response",
+            "This question is outside the documentation scope.")
+
+        # Initialize research strategy
+        research_config = self.config.get("research_strategy")
+        if research_config:
+            from core.research import create_research_strategy
+            self.research_strategy = create_research_strategy(research_config)
+
+    def can_handle(self, query: str) -> float:
+        """ExFrame specialist handles all queries (scope check happens later)."""
+        return 1.0
+
+    def _is_out_of_scope(self, query: str) -> tuple:
+        """Check if query is outside scope boundaries."""
+        if not self.scope_enabled:
+            return False, None
+
+        query_lower = query.lower()
+
+        # Check explicit out_of_scope keywords
+        for out_item in self.scope_out_list:
+            if out_item.lower() in query_lower:
+                return True, f"Query contains out-of-scope topic: {out_item}"
+
+        # Check for framework names
+        out_of_scope_indicators = [
+            "django", "flask ", "flask.", "rails", "laravel",
+            "react ", "react.", "vue", "angular",
+            "kubernetes", "k8s", "terraform"
+        ]
+
+        for indicator in out_of_scope_indicators:
+            if indicator in query_lower:
+                in_scope_check = any(item.lower() in query_lower for item in self.scope_in_list)
+                if not in_scope_check:
+                    return True, f"Query appears to be about {indicator}"
+
+        return False, None
+
+    async def process_query(
+        self,
+        query: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        3-stage search with scope checking.
+
+        Stage 1: Check scope boundaries (reject if out of scope)
+        Stage 2: Research docs (local markdown files)
+        Stage 3: Document store (external knowledge)
+        Stage 4: Local patterns (fallback)
+        """
+        # Stage 1: Scope check
+        if self.scope_enabled:
+            is_out_of_scope, reason = self._is_out_of_scope(query)
+            if is_out_of_scope:
+                return {
+                    "response": self.scope_response,
+                    "patterns_used": [],
+                    "documents_used": [],
+                    "out_of_scope": True,
+                    "out_of_scope_reason": reason,
+                    "confidence": 0.0
+                }
+
+        # Stage 2: Research docs
+        research_results = []
+        if self.research_strategy:
+            await self.research_strategy.initialize()
+            search_results = await self.research_strategy.search(query, limit=5)
+            research_results = [self._convert_result(r) for r in search_results]
+
+        # Stage 3: Document store
+        document_results = []
+        if self.document_store_enabled and self.document_store:
+            document_results = await self.document_store.search(query, limit=5)
+
+        # Stage 4: Local patterns (fallback)
+        local_results = []
+        if not research_results and not document_results:
+            if self.local_patterns_enabled:
+                local_results = await self.domain.search(query, limit=5)
+
+        return {
+            "response": "",  # LLM provides main response
+            "patterns_used": research_results + local_results,
+            "documents_used": [d.get("id") for d in document_results],
+            "research_results": research_results,
+            "document_results": document_results,
+            "local_results": local_results,
+            "confidence": 0.9 if research_results else 0.6,
+            "out_of_scope": False
+        }
+
+    def format_response(self, response_data: Dict[str, Any]) -> str:
+        """Return empty string - LLM will format the response."""
+        return ""
+```
+
+**Configuration Example:**
+```json
+{
+  "plugin_id": "exframe_specialist",
+  "module": "plugins.exframe.exframe_specialist",
+  "class": "ExFrameSpecialistPlugin",
+  "enabled": true,
+  "config": {
+    "document_store_enabled": true,
+    "local_patterns_enabled": true,
+    "document_store_config": {
+      "type": "exframe_instance",
+      "remote_url": ""
+    },
+    "research_strategy": {
+      "type": "document",
+      "base_path": "/app/project",
+      "auto_discover": true,
+      "file_pattern": "**/*",
+      "exclude_patterns": [".git", "__pycache__", "node_modules"]
+    },
+    "scope": {
+      "enabled": true,
+      "min_confidence": 0.0,
+      "in_scope": [
+        "ExFrame architecture and design",
+        "Plugin system (Router, Specialist, Enricher, Formatter)",
+        "Domain types 1-5 and their configurations"
+      ],
+      "out_of_scope": [
+        "General Python questions (syntax, language features)",
+        "Other frameworks (Django, Flask, FastAPI internals)",
+        "Infrastructure best practices (Docker, Kubernetes, networking)"
+      ],
+      "out_of_scope_response": "This question is outside ExFrame's documentation scope."
+    }
+  }
+}
+```
+
+**3-Stage Search Flow:**
+1. **Research Docs**: Auto-discovers files recursively, searches markdown/docs
+2. **Document Store**: External knowledge sources (if configured)
+3. **Local Patterns**: Cached patterns as fallback
+
+**Scope Boundary Features:**
+- **Per-domain configuration**: Each domain sets its own boundaries (not type-specific)
+- **Explicit keyword blocking**: Direct match against `out_of_scope` list
+- **Framework detection**: Django, Flask, React, Kubernetes, etc.
+- **Routing**: Reject (not route to generalist) - domain-specific behavior
+- **Pre-query check**: Rejects before any searching occurs
+
 ### 2. Knowledge Base Plugins
 
 **Purpose**: Store and retrieve patterns.

@@ -81,9 +81,37 @@ query → specialist → response_data → enrichers → final_response
 **Type Configurations:**
 - **Type 1 (Creative)**: High temperature (0.8), creative keywords
 - **Type 2 (Knowledge)**: Pattern-based retrieval, similarity threshold
-- **Type 3 (Document Store)**: ExFrame specialist, document research
+- **Type 3 (Document Store)**: ExFrame specialist, document research, **scope boundaries**
 - **Type 4 (Analytical)**: Research specialist, **web search enabled (default)**
 - **Type 5 (Hybrid)**: LLM fallback, confirmation required
+
+### 4. Scope Boundaries
+
+**Purpose:** Per-domain rejection of out-of-scope queries
+
+**Implementation:** `plugins/exframe/exframe_specialist.py`
+
+**Flow:**
+```
+Query → Specialist checks scope → Out of scope? → Reject with message
+                                      ↓ No
+                                  Process normally
+```
+
+**Configuration:** `plugins[0].config.scope` in `domain.json`
+```json
+{
+  "scope": {
+    "enabled": true,
+    "min_confidence": 0.0,
+    "in_scope": ["Allowed topics"],
+    "out_of_scope": ["Blocked topics"],
+    "out_of_scope_response": "Rejection message"
+  }
+}
+```
+
+**Key Principle:** Per-domain, not domain-type specific. Each domain configures its own boundaries.
 
 ---
 

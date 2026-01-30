@@ -232,12 +232,6 @@ class LLMEnricher(EnrichmentPlugin):
                 return no_info_msg
             # Use direct prompt when no patterns or in replace mode
             prompt = self._build_direct_prompt(query, context)
-        elif patterns and self.mode != self.MODE_REPLACE:
-            # Use pattern-based enhancement for local patterns
-            prompt = self._build_enhancement_prompt(query, patterns, specialist_id, context)
-        else:
-            # Use direct prompt when no patterns or in replace mode
-            prompt = self._build_direct_prompt(query, context)
 
         # Call LLM API
         try:

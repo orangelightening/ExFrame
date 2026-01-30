@@ -52,6 +52,14 @@ generic_framework/plugins/enrichers/llm_fallback_enricher.py...LLMFallbackEnrich
 - **Feedback loop**: Save explanations as patterns → detector learns context → finds new contradictions
 - **Nomenclature awareness**: Reads INDEX.md first to understand historical naming (EEFrame → ExFrame)
 
+**Scope Boundaries System** (Per-domain configuration)
+- **Location**: `generic_framework/plugins/exframe/exframe_specialist.py` (_is_out_of_scope)
+- **Configuration**: `plugins[0].config.scope` in domain.json
+- **How it works**: Pre-query check that rejects out-of-scope questions
+- **Scope checks**: Explicit keywords, framework detection, relevance threshold
+- **Per-domain**: Each domain configures its own boundaries (not type-specific)
+- **Routing**: Reject (not route to generalist) - domain-specific behavior
+
 **Self-Healing Documentation Workflow**:
 ```
 1. Query → Contradiction detector analyzes all documents

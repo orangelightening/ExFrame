@@ -262,6 +262,32 @@ Each domain has:
 }
 ```
 
+**Plugin Config (Scope Boundaries):**
+```json
+{
+  "plugins": [{
+    "config": {
+      "scope": {
+        "enabled": true,
+        "min_confidence": 0.0,
+        "in_scope": ["Allowed topics"],
+        "out_of_scope": ["Blocked topics"],
+        "out_of_scope_response": "Rejection message"
+      }
+    }
+  }]
+}
+```
+
+**Scope Fields:**
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | boolean | false | Enable scope checking |
+| `min_confidence` | float | 0.0 | Min confidence for in-scope |
+| `in_scope` | array | [] | Allowed topics |
+| `out_of_scope` | array | [] | Blocked topics |
+| `out_of_scope_response` | string | Default | Rejection message |
+
 ### Type 4: Analytical Engine
 
 ```json

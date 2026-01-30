@@ -94,6 +94,7 @@ ExFrame supports **5 domain types**, each optimized for different use cases. The
 - Medium similarity threshold (0.3)
 - Shows sources (default: true)
 - Auto-discovers documents recursively
+- **Scope boundaries** (per-domain, not type-specific)
 
 **Plugin:**
 ```json
@@ -110,9 +111,17 @@ ExFrame supports **5 domain types**, each optimized for different use cases. The
     },
     "research_strategy": {
       "type": "document",
-      "documents": [
-        {"type": "file", "path": "README.md"}
-      ]
+      "base_path": "/app/project",
+      "auto_discover": true,
+      "file_pattern": "**/*",
+      "exclude_patterns": [".git", "__pycache__", "node_modules"]
+    },
+    "scope": {
+      "enabled": true,
+      "min_confidence": 0.0,
+      "in_scope": ["Allowed topics"],
+      "out_of_scope": ["Blocked topics"],
+      "out_of_scope_response": "This question is outside the documentation scope."
     }
   }
 }
@@ -124,10 +133,18 @@ ExFrame supports **5 domain types**, each optimized for different use cases. The
 
 **Example:** `exframe`
 
-**Key Feature:** 3-stage search strategy
-1. Document research (external docs)
-2. Local pattern search (cached knowledge)
-3. Combined results with sources
+**Key Features:**
+1. **3-stage search strategy**
+   - Document research (external docs, auto-discovered files)
+   - Local pattern search (cached knowledge)
+   - Combined results with sources
+
+2. **Scope boundaries**
+   - Reject out-of-scope queries before processing
+   - Per-domain configuration (not type-specific)
+   - Explicit keyword blocking
+   - Framework detection (Django, Flask, etc.)
+   - Relevance threshold checking
 
 ---
 

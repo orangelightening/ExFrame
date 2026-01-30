@@ -362,6 +362,80 @@ For more details, see [rag-search-design.md](rag-search-design.md).
 
 ---
 
+## Scope Boundaries
+
+ExFrame supports **per-domain scope boundaries** to prevent domains from answering questions outside their expertise. This is particularly useful for specialized domains like ExFrame that should only answer questions about their specific topic.
+
+### How It Works
+
+**Scope Configuration** (in `domain.json`):
+```json
+{
+  "plugins": [{
+    "config": {
+      "scope": {
+        "enabled": true,
+        "min_confidence": 0.0,
+        "in_scope": [
+          "ExFrame architecture and design",
+          "Plugin system (Router, Specialist, Enricher, Formatter)",
+          "Domain types 1-5 and their configurations"
+        ],
+        "out_of_scope": [
+          "General Python questions (syntax, language features)",
+          "Other frameworks (Django, Flask, FastAPI internals)",
+          "Infrastructure best practices (Docker, Kubernetes, networking)"
+        ],
+        "out_of_scope_response": "This question is outside ExFrame's documentation scope..."
+      }
+    }
+  }]
+}
+```
+
+**Query Flow:**
+```
+User Query
+    ↓
+Specialist checks scope boundaries
+    ↓
+Query contains out-of-scope keywords?
+    ├─ YES → Reject with out_of_scope_response
+    └─ NO  → Process normally
+```
+
+**Scope Checking:**
+- **Explicit keywords**: Direct match against `out_of_scope` list
+- **Framework detection**: Django, Flask, React, Kubernetes, etc.
+- **Relevance threshold**: Reject if max_relevance < 0.3 AND many files searched with few matches
+- **Routing**: Reject (not route to generalist) - domain-specific behavior
+
+### Configuration
+
+**Location:** `plugins[0].config.scope` in `domain.json`
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | boolean | false | Enable scope checking |
+| `min_confidence` | float | 0.0 | Minimum confidence for in-scope queries |
+| `in_scope` | array | [] | Allowed topics |
+| `out_of_scope` | array | [] | Blocked topics |
+| `out_of_scope_response` | string | Default message | Rejection message |
+
+**Scope Flexibility:** Per-domain, not domain-type specific. Each domain configures its own boundaries.
+
+### Example: ExFrame Domain
+
+The ExFrame domain uses scope boundaries to:
+- Reject questions about Django, Flask, React, etc.
+- Reject general Python syntax questions
+- Focus only on ExFrame architecture, configuration, and usage
+- Provide helpful rejection messages guiding users to appropriate resources
+
+**Result:** "Gliznozzle" and "axelrod" queries are properly rejected as out-of-scope.
+
+---
+
 ## Self-Healing Features
 
 ExFrame includes a **built-in contradiction detection system** that automatically identifies documentation inconsistencies and provides a feedback loop for continuous improvement.
