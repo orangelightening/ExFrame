@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 """
-Test script for Enrichment Plugin system.
+DEVELOPMENT TEST SCRIPT - Enrichment Plugin System
+
+This is a development test script that runs against the internal source code
+structure (generic_framework/). It is NOT an example of how users would import
+the package after installation.
+
+IMPORTANT FOR USERS:
+- Production deployment: Use Docker, no import setup needed
+- After pip install: Would use 'import exframe' (not yet implemented)
+- These tests: Use internal 'generic_framework' path for development only
 
 Verifies that enrichment plugins work correctly.
 """
