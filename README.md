@@ -2,7 +2,7 @@
 
 **Domain-Agnostic AI-Powered Knowledge Management System**
 
-*Version: Managed by git tags - run `git describe --tags` for current version*
+*Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
 
 ---
 
