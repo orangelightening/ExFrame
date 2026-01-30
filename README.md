@@ -580,6 +580,101 @@ The HIGH and MEDIUM issues are **gone** because the pattern now provides context
 - Adds to prompt with instructions that historical refs are intentional
 - Prevents false positives on EEFrame/ExFrame differences
 
+### Managing Contradiction Logs
+
+**Log Location:** `/app/logs/contradictions/`
+
+```bash
+/app/logs/contradictions/
+├── contradictions.json    # Structured log (JSON format)
+└── contradictions.log     # Human-readable format
+```
+
+#### Viewing Logs
+
+**View all recent contradictions:**
+```bash
+# Human-readable format (recommended)
+docker exec eeframe-app cat /app/logs/contradictions/contradictions.log
+
+# JSON format (for analysis)
+docker exec eeframe-app cat /app/logs/contradictions/contradictions.json | jq '.'
+```
+
+**Follow logs in real-time:**
+```bash
+# Watch for new contradictions as queries are processed
+docker exec eeframe-app tail -f /app/logs/contradictions/contradictions.log
+```
+
+**Show last 20 entries:**
+```bash
+docker exec eeframe-app tail -n 20 /app/logs/contradictions/contradictions.log
+```
+
+**Filter by severity:**
+```bash
+# Show only HIGH severity issues
+docker exec eeframe-app grep "\[HIGH\]" /app/logs/contradictions/contradictions.log
+
+# Show only MEDIUM severity issues
+docker exec eeframe-app grep "\[MEDIUM\]" /app/logs/contradictions/contradictions.log
+
+# Show LOW severity issues
+docker exec eeframe-app grep "\[LOW\]" /app/logs/contradictions/contradictions.log
+```
+
+**Search for specific topics:**
+```bash
+# Search for contradictions about "naming"
+docker exec eeframe-app grep -i "naming" /app/logs/contradictions/contradictions.log
+
+# Search for contradictions about "docker"
+docker exec eeframe-app grep -i "docker" /app/logs/contradictions/contradictions.log
+```
+
+**Count issues by severity:**
+```bash
+# Count HIGH issues
+docker exec eeframe-app grep -c "\[HIGH\]" /app/logs/contradictions/contradictions.log
+
+# Count MEDIUM issues
+docker exec eeframe-app grep -c "\[MEDIUM\]" /app/logs/contradictions/contradictions.log
+
+# Count LOW issues
+docker exec eeframe-app grep -c "\[LOW\]" /app/logs/contradictions/contradictions.log
+```
+
+#### Clearing Logs
+
+**Clear all logs:**
+```bash
+docker exec eeframe-app sh -c "echo '' > /app/logs/contradictions/contradictions.log"
+docker exec eeframe-app sh -c "echo '[]' > /app/logs/contradictions/contradictions.json"
+```
+
+**Archive before clearing:**
+```bash
+# Create archive with timestamp
+docker exec eeframe-app sh -c "cp /app/logs/contradictions/contradictions.log /app/logs/contradictions/contradictions_$(date +%Y%m%d_%H%M%S).log"
+
+# Then clear
+docker exec eeframe-app sh -c "echo '' > /app/logs/contradictions/contradictions.log"
+```
+
+#### Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+| `cat /app/logs/contradictions/contradictions.log` | View all log entries |
+| `tail -f /app/logs/contradictions/contradictions.log` | Follow logs in real-time |
+| `tail -n 20 /app/logs/contradictions/contradictions.log` | Show last 20 entries |
+| `grep "\[HIGH\]" /app/logs/contradictions/contradictions.log` | Filter HIGH severity |
+| `grep -c "\[HIGH\]" /app/logs/contradictions/contradictions.log` | Count HIGH issues |
+| `echo '' > /app/logs/contradictions/contradictions.log` | Clear log file |
+
+**Pro Tip:** Regularly review HIGH and MEDIUM severity issues to keep documentation accurate. Save explanations as patterns to teach the system and reduce future contradictions.
+
 ---
 
 **Complete step-by-step guide for deploying ExFrame from GitHub to a fresh Linux system.**
