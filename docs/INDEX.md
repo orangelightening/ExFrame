@@ -92,6 +92,7 @@ generic_framework/frontend/index.html...Alpine.js SPA: domain dropdown, query in
 ## Documentation
 
 docs/INDEX.md...This file: master index of all code files with one-line summaries
+roles.md...Roles and responsibilities: System Owner, Claude Code, Domain Expert, etc.
 README.md...Main documentation: overview, installation, self-healing features, domain types, API reference
 INSTALL.md...Installation guide for Docker deployment
 PLUGIN_ARCHITECTURE.md...Plugin development guide
