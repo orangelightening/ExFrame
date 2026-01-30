@@ -65,6 +65,17 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
         self.reply_capture_enabled = config.get("reply_capture_enabled", True)
         self.session_tracking = config.get("session_tracking", True)
 
+        # Scope boundary configuration
+        self.scope_enabled = config.get("scope", {}).get("enabled", False)
+        self.scope_min_confidence = config.get("scope", {}).get("min_confidence", 0.0)
+        self.scope_in_list = config.get("scope", {}).get("in_scope", [])
+        self.scope_out_list = config.get("scope", {}).get("out_of_scope", [])
+        self.scope_response = config.get("scope", {}).get("out_of_scope_response",
+            "This question is outside the documentation scope for this domain.")
+
+        if self.scope_enabled:
+            logger.info(f"[EXFRAME_SPEC] Scope boundaries enabled (min_confidence={self.scope_min_confidence})")
+
         # Initialize document store
         self.document_store: Optional[DocumentStorePlugin] = None
         doc_store_config = config.get("document_store_config", {})
@@ -104,7 +115,49 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
         self.sessions: Dict[str, Dict] = {}
 
         logger.info(f"[EXFRAME_SPEC] Initialized with config: {config}")
-    
+
+    def _is_out_of_scope(self, query: str) -> tuple:
+        """Check if query is outside the domain's scope boundaries.
+
+        Args:
+            query: User's query string
+
+        Returns:
+            Tuple of (is_out_of_scope, reason)
+            - is_out_of_scope: True if query should be rejected
+            - reason: String explaining why (or None if in scope)
+        """
+        if not self.scope_enabled:
+            return False, None
+
+        query_lower = query.lower()
+
+        # Check explicit out_of_scope keywords
+        for out_item in self.scope_out_list:
+            # Check for multi-word phrases
+            out_lower = out_item.lower()
+            if out_lower in query_lower:
+                logger.info(f"[EXFRAME_SPEC] Query rejected - out of scope: '{out_item}'")
+                return True, f"Query contains out-of-scope topic: {out_item}"
+
+        # Check for framework names that suggest out-of-scope questions
+        out_of_scope_indicators = [
+            "django", "flask ", "flask.", "rails", "laravel", "express.js",
+            "react ", "react.", "vue", "angular", "svelte",
+            "kubernetes", "k8s", "terraform", "ansible",
+            "how do i in python", "python syntax", "python code for"
+        ]
+
+        for indicator in out_of_scope_indicators:
+            if indicator in query_lower:
+                # Only trigger if NOT also mentioning ExFrame/scope topics
+                in_scope_check = any(item.lower() in query_lower for item in self.scope_in_list)
+                if not in_scope_check:
+                    logger.info(f"[EXFRAME_SPEC] Query rejected - detected out-of-scope indicator: '{indicator}'")
+                    return True, f"Query appears to be about {indicator}, not ExFrame"
+
+        return False, None
+
     def can_handle(self, query: str) -> float:
         """Check if this specialist can handle the query.
         
@@ -144,6 +197,24 @@ class ExFrameSpecialistPlugin(SpecialistPlugin):
         session_id = None
         if context and isinstance(context, dict):
             session_id = context.get("session_id")
+
+        # Check scope boundaries FIRST (before any searching)
+        if self.scope_enabled:
+            is_out_of_scope, reason = self._is_out_of_scope(query)
+            if is_out_of_scope:
+                logger.info(f"[EXFRAME_SPEC] Query rejected: {reason}")
+                return {
+                    "response": self.scope_response,
+                    "patterns_used": [],
+                    "documents_used": [],
+                    "document_results": [],
+                    "local_results": [],
+                    "session_id": session_id,
+                    "confidence": 0.0,
+                    "query": query,
+                    "out_of_scope": True,
+                    "out_of_scope_reason": reason
+                }
 
         # Stage 1: Research Strategy (PRIMARY - search local documentation files)
         research_results = []

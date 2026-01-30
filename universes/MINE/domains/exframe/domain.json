@@ -79,6 +79,32 @@
             "venv",
             ".archive"
           ]
+        },
+        "scope": {
+          "enabled": true,
+          "min_confidence": 0.0,
+          "in_scope": [
+            "ExFrame architecture and design",
+            "Plugin system (Router, Specialist, Enricher, Formatter)",
+            "Domain types 1-5 and their configurations",
+            "Configuration and setup",
+            "API endpoints and usage",
+            "Universe and domain management",
+            "Pattern-based knowledge",
+            "Semantic search",
+            "Self-healing features",
+            "Citation requirements",
+            "Docker deployment"
+          ],
+          "out_of_scope": [
+            "General Python questions (syntax, language features)",
+            "Other frameworks (Django, Flask, FastAPI internals)",
+            "Infrastructure best practices (Docker, Kubernetes, networking)",
+            "Business logic for specific domains (cooking, DIY, gardening)",
+            "General software development questions",
+            "AI/ML theory unrelated to ExFrame"
+          ],
+          "out_of_scope_response": "This question is outside ExFrame's documentation scope. I can only answer questions about ExFrame's architecture, configuration, plugin system, and usage. For general Python questions or other topics, please use a different domain or resource."
         }
       }
     }

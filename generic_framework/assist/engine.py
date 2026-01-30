@@ -224,6 +224,20 @@ class GenericAssistantEngine:
             if response_data and response_data.get('can_extend_with_web_search'):
                 can_extend_with_web_search = True
 
+            # Check if query was rejected due to scope boundaries
+            if response_data and response_data.get('out_of_scope'):
+                # Return the out_of_scope response directly without enrichment
+                logger.info(f"[Engine] Query rejected by specialist: {response_data.get('out_of_scope_reason', 'Out of scope')}")
+                return {
+                    'response': response_data.get('response', 'This question is outside the documentation scope.'),
+                    'specialist_id': specialist_id,
+                    'confidence': response_data.get('confidence', 0.0),
+                    'out_of_scope': True,
+                    'out_of_scope_reason': response_data.get('out_of_scope_reason'),
+                    'patterns_used': [],
+                    'trace': trace
+                }
+
             # Extract patterns from specialist response for consistency
             patterns = response_data.get('patterns_used', [])
             if isinstance(patterns[0], str) if patterns else False:

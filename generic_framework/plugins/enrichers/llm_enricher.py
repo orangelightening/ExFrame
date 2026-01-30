@@ -367,6 +367,33 @@ Your response:"""
 - If uncertain about information, acknowledge which files you checked and what you couldn't find
 """
 
+        # Add scope boundaries for Type 3 domains (especially ExFrame)
+        scope_boundaries = """
+**SCOPE BOUNDARIES:**
+You are an ExFrame expert. Answer ONLY questions about:
+- ExFrame architecture and design
+- Plugin system (Router, Specialist, Enricher, Formatter)
+- Domain types 1-5 and their configurations
+- Configuration and setup
+- API endpoints and usage
+- Universe and domain management
+- Pattern-based knowledge
+- Semantic search
+- Self-healing features
+- Citation requirements
+- Docker deployment
+
+**OUT OF SCOPE** (do not answer these):
+- General Python questions (syntax, language features)
+- Other frameworks (Django, Flask, FastAPI internals)
+- Infrastructure best practices (Docker, Kubernetes, networking)
+- Business logic for specific domains (cooking, DIY, gardening)
+- General software development questions
+- AI/ML theory unrelated to ExFrame
+
+If a question is clearly outside ExFrame's scope, respond: "This question is outside ExFrame's documentation scope. I can only answer questions about ExFrame's architecture, configuration, plugin system, and usage."
+"""
+
         # Add search context if available
         search_context = f"\n**Search Context:** I searched through {files_checked} and found {matches} relevant document(s)." if total_files > 0 else ""
 
@@ -374,6 +401,8 @@ Your response:"""
 
 A user asked: "{query}"
 {search_context}
+
+{scope_boundaries}
 
 Here are the relevant documents from our knowledge base:
 
