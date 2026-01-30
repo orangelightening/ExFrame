@@ -27,7 +27,22 @@ ExFrame is a unified, domain-agnostic AI-powered knowledge management system wit
 > **Universes are first-class entities. Patterns are data. All transformation logic is pluggable.**
 
 - ✅ **Universes** are complete, portable knowledge environments
-- ✅ **Patterns** are data (JSON files in universe directories)
+- ✅ **Domains** are organizers within universes (each domain contains patterns for a specific topic)
+- ✅ **Patterns** are data (JSON files in domain directories)
+- ✅ **Routers** determine query handling strategies
+- ✅ **Specialists** are plugins (transformation logic)
+- ✅ **Enrichers** enhance responses (LLM, related patterns, code generation)
+- ✅ **Formatters** control output format (Markdown, JSON, HTML, Slack)
+
+### Architecture Terminology
+
+| Term | Definition |
+|------|------------|
+| **Universe** | A complete, portable knowledge environment containing multiple domains. Universes can be created, switched, merged, and exported. |
+| **Domain** | A knowledge organizer within a universe, focused on a specific topic (e.g., cooking, python, diy). Each domain has its own patterns, plugins, and configuration. |
+| **Pattern** | A unit of knowledge stored as JSON with fields like problem, solution, description, and metadata. |
+| **Specialist** | A plugin that processes queries for specific domains, emerging as an "AI persona" from accumulated patterns. |
+| **Universe → Domain → Pattern** | The containment hierarchy: Universes contain Domains, Domains contain Patterns. |
 - ✅ **Domains** are orchestrators (configuration within universes)
 - ✅ **Routers** determine query handling strategies
 - ✅ **Specialists** are plugins (transformation logic)
@@ -423,20 +438,22 @@ docker compose logs eeframe-app | tail -20
 
 The `.env` file configures your LLM provider. **All domains use this global configuration by default.**
 
+**How it works:** ExFrame uses OpenAI-compatible APIs for all LLM providers. No additional dependencies needed - the `openai` and `anthropic` packages work with any provider that offers an OpenAI-compatible endpoint.
+
 #### Quick Setup - Common Providers
 
-**For GLM (z.ai) - RECOMMENDED for ExFrame:**
-```bash
-LLM_MODEL=glm-4.7
-OPENAI_API_KEY=your-glm-key-here
-OPENAI_BASE_URL=https://api.z.ai/api/anthropic
-```
-
-**For OpenAI GPT:**
+**For OpenAI GPT (default):**
 ```bash
 LLM_MODEL=gpt-4o-mini
 OPENAI_API_KEY=sk-your-openai-api-key-here
 OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+**For Zhipu GLM:**
+```bash
+LLM_MODEL=glm-4.7
+OPENAI_API_KEY=your-zhipu-api-key
+OPENAI_BASE_URL=https://api.z.ai/api/anthropic
 ```
 
 **For Anthropic Claude:**

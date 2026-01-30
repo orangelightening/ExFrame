@@ -8,16 +8,30 @@
 
 ## What is ExFrame?
 
-ExFrame is a **domain-agnostic AI-powered knowledge management system** with configurable domain types. Unlike traditional knowledge bases, ExFrame features:
+ExFrame is a **domain-agnostic AI-powered knowledge management system** with a **universe-based architecture** and **plugin-based pipeline**. Unlike traditional knowledge bases, ExFrame features:
 
-- **Self-Learning AI** - Automatically improves its own knowledge base
-- **Self-Documenting** - AI generates and refines documentation
-- **Self-Repairing** - System detects and fixes its own issues
 - **Universe-Based Architecture** - Complete isolation and portability of knowledge environments
 - **Plugin Pipeline** - Router → Specialist → Enricher → Formatter - all swappable
+- **Domain Types** - 5 pre-configured archetypes for different use cases
 - **Pure Semantic Search** - AI-powered search using SentenceTransformers embeddings
-- **Emergent Persona Theory** - AI personas emerge from accumulated knowledge patterns
-- **Constellation Architecture** - Groups of ExFrame systems consuming expertise and talking to each other
+- **Pattern-Based Knowledge** - Structured knowledge representation with relationships
+
+### Advanced Features
+
+**Self-Healing Capabilities** (Type 5 Hybrid Assistant)
+- **Self-Learning** - Automatically learns from user queries and interactions
+- **Self-Documenting** - AI generates and refines documentation
+- **Self-Repairing** - System detects and fixes its own issues
+
+**Emergent Persona Theory**
+- AI personas emerge from accumulated knowledge patterns
+- Specialist plugins become more coherent as patterns increase
+- Knowledge and persona evolve together
+
+**Constellation Architecture**
+- Groups of ExFrame systems consuming expertise and talking to each other
+- Each instance paired with Claude Code CLI AI as manager and partner
+- Distributed knowledge network with collective learning
 
 ---
 
