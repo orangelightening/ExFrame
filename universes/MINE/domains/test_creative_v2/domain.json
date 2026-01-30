@@ -1,0 +1,64 @@
+{
+  "domain_id": "test_creative_v2",
+  "domain_name": "Creative Domain v2",
+  "description": "Type 1 Creative Generator test",
+  "version": "1.0.0",
+  "categories": [
+    "test"
+  ],
+  "tags": [
+    "creative",
+    "test"
+  ],
+  "storage_path": "/app/data/patterns/test_creative_v2",
+  "pattern_format": "json",
+  "plugins": [
+    {
+      "plugin_id": "creative_writer",
+      "name": "Creative Writer",
+      "description": "Expert in creative writing",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "Creative Writer",
+        "description": "Expert in creative writing",
+        "keywords": [
+          "write",
+          "create",
+          "poem",
+          "story"
+        ],
+        "categories": [
+          "creative"
+        ],
+        "threshold": 0.3
+      }
+    }
+  ],
+  "specialists": [
+    {
+      "specialist_id": "creative_writer",
+      "name": "Creative Writer",
+      "description": "Expert in creative writing",
+      "expertise_keywords": [
+        "write",
+        "create",
+        "poem",
+        "story"
+      ],
+      "expertise_categories": [
+        "creative"
+      ],
+      "confidence_threshold": 0.3
+    }
+  ],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true
+  },
+  "created_at": "2026-01-26T02:44:11.663301",
+  "updated_at": "2026-01-26T02:44:11.663310"
+}

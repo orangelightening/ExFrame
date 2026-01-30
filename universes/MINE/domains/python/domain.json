@@ -3,26 +3,89 @@
   "domain_name": "Auto-loaded: python",
   "description": "Dynamically loaded domain: python",
   "version": "1.0.0",
-  "created_at": "2026-01-09T22:43:14.964108",
-  "updated_at": "2026-01-09T22:43:14.964112",
+  "created_at": "2026-01-27T01:01:40.489436Z",
+  "updated_at": "2026-01-27T01:01:40.489461",
+  "categories": [],
+  "tags": [],
+  "domain_type": "2",
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
+  },
   "plugins": [
     {
       "plugin_id": "generalist",
-      "name": "Python Generalist",
-      "description": "General expert for Python",
+      "name": "General Specialist",
+      "description": "General expert for python",
       "module": "plugins.generalist",
       "class": "GeneralistPlugin",
       "enabled": true,
       "config": {
-        "name": "Python",
-        "keywords": ["python", "code", "function", "class", "import"],
+        "name": "General Specialist",
+        "keywords": [],
         "categories": [],
-        "threshold": 0.25
+        "threshold": 0.6
       }
     }
   ],
-  "categories": [],
-  "tags": [],
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "temperature": 0.4,
+        "max_patterns": 10
+      }
+    }
+  ],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true,
+    "similarity_threshold": 0.3
+  },
+  "temperature": 0.4,
+  "similarity_threshold": 0.3,
+  "max_patterns": 10,
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "General Specialist",
+      "description": "General expert for python",
+      "expertise_keywords": [],
+      "expertise_categories": [],
+      "confidence_threshold": 0.6
+    }
+  ],
   "ui_config": {
     "placeholder_text": "Ask about Python programming...",
     "example_queries": [

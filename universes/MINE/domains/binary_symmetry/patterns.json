@@ -1140,5 +1140,83 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-01-22T01:55:15.652389"
+  },
+  {
+    "id": "binary_symmetry_d78a45aa",
+    "pattern_id": "binary_symmetry_d78a45aa",
+    "name": "Write a poem about adaptive binary symmetry",
+    "domain": "binary_symmetry",
+    "problem": "Write a poem about adaptive binary symmetry",
+    "solution": "# The Mirror That Learns to Bend\n\nThere is no perfection in the static stone,\nNo flawless face in the ice,\nFor the world is a chaotic, breathing thing,\nThat refuses to be precise.\nBut the code is patient, a student of noise,\nAdaptive, fluid, and awake,\nIt finds the symmetry in the jagged edge,\nAnd the balance in the break.\n\nIt starts with the binary, the strict `1` and `0`,\nA rigid, brittle spine,\nA lattice of absolute yes and no,\nWhere the edges clearly define.\nBut chaos enters the stream, a glitch, a ghost,\nA whisper of \"maybe\" and \"might,\"\nAnd the mirror shudders, the lattice bends,\nTo absorb the sudden light.\n\nIt does not break, nor does it deny,\nThe variance in the signal,\nIt shifts its weight, it compensates,\nFinding a rhythm that is singular.\nIt samples the error, the drift, the sway,\nAnd folds it into the whole,\nCreating a symmetry that is not a cage,\nBut a fluid, living soul.\n\nOne side rises, the other falls,\nIn a dance of self-correction,\nA pulse, a heartbeat, a feedback loop,\nIn every single connection.\nThe symmetry is not a frozen lake,\nBut a wave that learns to flow,\nA perfect duality, constantly remade,\nIn the adaptive afterglow.",
+    "description": "AI-generated from query: Write a poem about adaptive binary symmetry",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Write a poem about adaptive binary symmetry",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T03:37:24.464Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T03:37:24.470503",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-25T03:37:24.470503"
+  },
+  {
+    "id": "binary_symmetry_a720aab1",
+    "pattern_id": "binary_symmetry_a720aab1",
+    "name": "What are some examples of binary symmetry",
+    "domain": "binary_symmetry",
+    "problem": "what are some examples of binary symmetry",
+    "solution": "**Binary symmetry** generally refers to a relationship where two elements share a property, and the relationship remains true regardless of the order of the elements (A is related to B implies B is related to A). It can also refer to visual symmetry in binary strings (sequences of 0s and 1s).\n\nHere are examples categorized by field:\n\n### 1. Mathematics & Logic (Relational Symmetry)\nIn logic, a binary relation $R$ on a set is symmetric if for every $a$ and $b$ in the set, $a R b$ implies $b R a$.\n\n*   **\"Is Siblings With\":** If Alice is a sibling of Bob, then Bob is a sibling of Alice.\n*   **\"Is Married To\":** If Person X is married to Person Y, Person Y is married to Person X.\n*   **Equality ($=$):** If $a = b$, then $b = a$.\n*   **Geometric Congruence:** If Triangle A is congruent to Triangle B, then Triangle B is congruent to Triangle A.\n*   **Adjaceny in Graphs:** In an undirected graph (like a network of friends), if Node A is connected to Node B, then Node B is connected to Node A.\n\n### 2. Computer Science (Data Structures)\n*   **Symmetric Binary Tree:** A binary tree is symmetric if the left subtree is a mirror reflection of the right subtree.\n*   **Symmetric Matrices:** In programming, a 2D array is symmetric if `matrix[i][j] == matrix[j][i]` for all indices.\n*   **Reversible Operations:** A function $f(x, y)$ is symmetric if $f(x, y) = f(y, x)$. Examples include addition, multiplication, or the logical AND/XOR/OR operations.\n\n### 3. Physics (Particle Physics)\nIn particle physics, binary symmetry often refers to conservation laws involving particle-antiparticle pairs.\n\n*   **Charge Conjugation (C-Symmetry):** This symmetry involves swapping particles with their antiparticles (e.g., swapping an electron for a positron). The laws of physics remain symmetric under this swap in many interactions (though not all).\n*   **Time Reversal Symmetry (T-Symmetry):** Theoretically, if you reverse the sign of time ($t \\to -t$), the equations of motion still hold (the \"movie\" of physics works backward as well as forward).\n\n### 4. Visual/Pattern Symmetry (Binary Strings)\nThis involves sequences of 0s and 1s that look the same when rotated, reversed, or inverted.\n\n*   **Palindromic Symmetry:** A binary string that reads the same forwards and backwards.\n    *   Example: `101101` or `1001001`.\n*   **Bitwise Complement Symmetry (Inversion):** A string where the reflection creates the opposite values.\n    *   Example: `1100` split in half. If you take the left half (`11`) and invert it (`00`), it matches the right half.\n*   **Mirror Symmetry in Codes:** Error-correcting codes sometimes use symmetric binary patterns to ensure data integrity.\n\n### 5. Biology (Genetics)\nWhile \"binary\" here refers to the base pair nature, the symmetry is structural.\n\n*   **DNA Double Helix:** The structure is based on **binary complementarity**. Adenine (A) always pairs with Thymine (T), and Cytosine (C) always pairs with Guanine (G). The two strands are complementary mirrors of each other.",
+    "description": "AI-generated from query: what are some examples of binary symmetry",
+    "pattern_type": "knowledge",
+    "confidence": 1,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "what are some examples of binary symmetry",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T06:58:16.011Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T06:58:16.017807",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T06:58:16.017807"
+  },
+  {
+    "id": "binary_symmetry_2fed52f0",
+    "pattern_id": "binary_symmetry_2fed52f0",
+    "name": "Write a poem about binary symmetry in the impressionist style",
+    "domain": "binary_symmetry",
+    "problem": "write a poem about binary symmetry in the impressionist style",
+    "solution": "The day dissolves in strokes of gold and heat,\nWhere edges soften into light and air.\nA world of fractured hues, incomplete,\nYet held together by the colors there.\n\nBut look where shadow cuts the canvas through,\nA glassy mirror in the river bend;\nIt drinks the sun and creates something new,\nA twin of light that darkness cannot end.\n\nNo harsh black line divides the pair from two,\nBut softest violet, deep and blending indigo;\nWhat floats above, the reflection must pursue,\nIn liquid wash of everything we know.\n\nThe ripples ripple, and the copies dance,\nImpressionist ghost of willow and of sky;\nA perfect, double, fleeting, bright expanse,\nWhere zero meets the infinite, and I.",
+    "description": "AI-generated from query: write a poem about binary symmetry in the impressionist style",
+    "pattern_type": "knowledge",
+    "confidence": 1,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "write a poem about binary symmetry in the impressionist style",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T07:07:37.473Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T07:07:37.479429",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T07:07:37.479429"
   }
 ]

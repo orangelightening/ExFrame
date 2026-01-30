@@ -1,0 +1,14 @@
+{
+  "domain_id": "test_93",
+  "domain_name": "Test 93 Bug",
+  "description": "Test domain to reproduce the .93 similarity bug",
+  "categories": [],
+  "tags": ["test", "debug"],
+  "specialists": [],
+  "research_strategy": {
+    "type": "none"
+  },
+  "created_at": "2026-01-23T00:00:00Z",
+  "created_by": "system",
+  "version": "1.0.0"
+}

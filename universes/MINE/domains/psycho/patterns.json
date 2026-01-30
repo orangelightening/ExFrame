@@ -21,7 +21,7 @@
       "certified"
     ],
     "created_at": "2026-01-21T03:30:47.002961",
-    "times_accessed": 19,
+    "times_accessed": 27,
     "updated_at": "2026-01-21T03:31:13.011224",
     "confidence_score": 0.65
   },
@@ -47,7 +47,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T03:36:36.594322",
-    "times_accessed": 17,
+    "times_accessed": 23,
     "updated_at": "2026-01-21T03:36:36.594322"
   },
   {
@@ -72,7 +72,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T03:38:34.476013",
-    "times_accessed": 14,
+    "times_accessed": 20,
     "updated_at": "2026-01-21T03:38:34.476013"
   },
   {
@@ -97,7 +97,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T03:43:05.683687",
-    "times_accessed": 13,
+    "times_accessed": 21,
     "updated_at": "2026-01-21T03:43:05.683687"
   },
   {
@@ -122,7 +122,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T03:44:49.746876",
-    "times_accessed": 11,
+    "times_accessed": 15,
     "updated_at": "2026-01-21T03:44:49.746876"
   },
   {
@@ -147,7 +147,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T03:45:59.174427",
-    "times_accessed": 9,
+    "times_accessed": 15,
     "updated_at": "2026-01-21T03:45:59.174427"
   },
   {
@@ -172,7 +172,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T07:30:19.100603",
-    "times_accessed": 6,
+    "times_accessed": 12,
     "updated_at": "2026-01-21T07:30:19.100603"
   },
   {
@@ -197,8 +197,112 @@
       "llm_generated"
     ],
     "created_at": "2026-01-22T01:44:17.994325",
-    "times_accessed": 0,
+    "times_accessed": 6,
     "code": null,
     "updated_at": "2026-01-22T01:44:17.994325"
+  },
+  {
+    "id": "psycho_367acb5c",
+    "pattern_id": "psycho_367acb5c",
+    "name": "Was Lucy the psychiatrist in Peanuts and if so write a poem about her practice",
+    "domain": "psycho",
+    "problem": "Was Lucy the psychiatrist in Peanuts and if so write a poem about her practice",
+    "solution": "Hello! That is a delightful question that bridges the gap between pop culture and the actual practice of psychology.\n\nTo answer your first question directly: **No, Lucy was not a psychiatrist.** In the comic strip *Peanuts*, Lucy famously operated a psychiatric booth (often labeled \"The Doctor Is In\" for 5 cents), but she was a child offering her own brand of common-sense advice, crabbiness, and unsolicited opinions. She was not a medical doctor, nor did she have clinical training.\n\nHowever, her booth is one of the most enduring images of \"therapy\" in popular culture. It represents the idea that sometimes, people just need someone to listen to them\u2014or in Lucy's case, someone to tell them exactly what she thinks is wrong with them.\n\nIn the spirit of your request, here is a poem about Lucy Van Pelt and her unique practice:\n\n***\n\n**The Doctor Is In**\n\nA makeshift stand of wood and paint,\nA sign hung out with faint restraint,\n\"For 5 Cents\" scrawled in chalky hand,\nThe cheapest help in all the land.\n\nNo medical degree on wall,\nNo textbook, lecture, or hall,\nJust Lucy in her blue dress,\nDispensing firmness, not success.\n\nPoor Charlie Brown, with heavy head,\nWould seek her out and dread\nWhat crabbiness she\u2019d unleash,\nUpon his sandy, beach-ball beach.\n\n\"Snap out of it!\" she\u2019d often cry,\nOr point a finger to the sky,\nShe\u2019d analyze his stupid kite,\nOr tell him simply, \"You\u2019re not right.\"\n\nShe\u2019d pull the football right away,\nAnd watch his hopefulness decay,\nA lesson in despair and grief,\n(For just a nickel, brief and sweet).\n\nBut though she lacked the PhD,\nOr empathy for you and me,\nShe taught us all, in distinct ways,\nThat friends will listen (for small pay).\n\nSo sit upon the crate and rest,\nConfess your worries to the vest,\nThe Doctor\u2019s In, the price is cheap,\nJust don't expect her to be\u2026 sweet.",
+    "description": "AI-generated from query: Was Lucy the psychiatrist in Peanuts and if so write a poem about her practice",
+    "pattern_type": "knowledge",
+    "confidence": 0.65,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Was Lucy the psychiatrist in Peanuts and if so write a poem about her practice",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T03:42:04.666Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T03:42:04.672201",
+    "times_accessed": 6,
+    "code": null,
+    "updated_at": "2026-01-25T03:42:04.672201"
+  },
+  {
+    "id": "psycho_b4c10607",
+    "pattern_id": "psycho_b4c10607",
+    "name": "What is a psycho\n",
+    "domain": "psycho",
+    "problem": "What is a psycho\n",
+    "solution": "Hello! It looks like there might be a typo or an incomplete sentence in your question (\"What is a psycho\"), but I can certainly help clarify what this term means.\n\nDepending on what you intended to ask, you are likely looking for a definition of the word \"psycho,\" an explanation of the field of psychology, or the difference between a psychologist and a psychiatrist.\n\nHere is a breakdown of how this term is used and understood:\n\n### 1. The Slang Term: \"Psycho\"\nIn everyday language, \"psycho\" is often used as a slang shortening of \"psychopath.\" It is frequently used in movies or casual conversation to describe someone who is acting erratically, violently, or cruelly.\n\n*   **Clinical Reality:** In the field of psychology and psychiatry, **\"psycho\" is not a diagnostic term.** Mental health professionals do not use this word to describe patients.\n*   **Psychopathy:** When people say \"psycho,\" they are often referring to traits associated with **Antisocial Personality Disorder (ASPD)**. This is a complex mental health condition characterized by a disregard for the rights of others, a lack of empathy, and often manipulative or reckless behavior.\n\n### 2. The Clinical Distinction: \"Psychotic\"\nIt is also common for people to confuse the slang \"psycho\" with the clinical term **\"psychotic.\"**\n*   **Psychosis** is a symptom (not a specific illness in itself) where a person loses contact with reality. This might involve hallucinations (seeing or hearing things that aren't there) or delusions (believing things that are not true).\n*   **Important Note:** People suffering from psychosis (such as during a schizophrenic episode) are statistically much more likely to be victims of violence than perpetrators. The \"slasher movie\" stereotype of a \"psycho\" killer is a myth that stigmatizes mental illness.\n\n### 3. The Roots: Psychology and Psychiatry\nIf your question was meant to be \"What is psychology?\" or \"What is a psychiatrist?\", here is the difference:\n\n*   **Psychology:** This is the scientific study of the mind and behavior. A **Psychologist** typically holds a doctoral degree (Ph.D. or Psy.D.) and provides therapy (psychotherapy) and psychological testing, but they generally cannot prescribe medication (with some exceptions depending on the state/country).\n*   **Psychiatry:** This is a branch of medicine focused on the diagnosis, prevention, and treatment of mental disorders. A **Psychiatrist** is a medical doctor (M.D.) who can prescribe medication and often focuses on the biological aspects of mental health.\n\n### Summary\nIf you are asking because someone called you a \"psycho,\" or if you are worried about your own thoughts or behaviors, it is helpful to remember that **insight is a sign of health**. As we discussed in the context of \"insanity,\" people who are genuinely disconnected from reality rarely worry about whether they are \"crazy.\"\n\nIf you are looking for a specific definition or have more context to your question, please feel free to provide more details",
+    "description": "AI-generated from query: What is a psycho\n",
+    "pattern_type": "knowledge",
+    "confidence": 0.65,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "What is a psycho\n",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T21:40:59.957Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T21:40:59.963542",
+    "times_accessed": 4,
+    "code": null,
+    "updated_at": "2026-01-25T21:40:59.963542"
+  },
+  {
+    "id": "psycho_cd02f099",
+    "pattern_id": "psycho_cd02f099",
+    "name": "What is wrong with the term psycho",
+    "domain": "psycho",
+    "problem": "what is wrong with the term psycho",
+    "solution": "The term \"psycho\" is widely considered problematic and offensive in modern psychology and general conversation. While it is often used casually in movies or slang to describe someone acting erratically or violently, using the term as a label for a person is harmful for several reasons.\n\nHere is a breakdown of what is wrong with the term, why it is misused, and what you should use instead.\n\n### 1. It is Clinically Inaccurate and Outdated\nFrom a medical and psychological standpoint, **\"psycho\" is not a diagnosis.** It is a slur derived from the word \"psychotic\" or \"psychopath.\"\n\n*   **Psychosis:** This is a symptom (not an identity) involving a disconnection from reality (such as hallucinations or delusions). It is associated with conditions like schizophrenia or bipolar disorder. People *experience* psychosis; they are not \"psychos.\"\n*   **Psychopathy:** This refers to a specific construct often associated with Antisocial Personality Disorder (ASPD), characterized by a lack of empathy and manipulative behavior.\n\nUsing \"psycho\" reduces complex medical conditions to a single, pejorative word. As noted in clinical psychology (referenced in insights regarding terms like \"insane\"), the field has moved toward precise language to describe specific disorders rather than using broad, stigmatizing labels.\n\n### 2. It Perpetuates Stigma and Fear\nThe term is almost exclusively used to depict people as violent, dangerous, or \"crazy.\" This creates a damaging stigma:\n*   **It discourages help-seeking:** If someone believes that struggling with their mental health makes them a \"psycho,\" they are much less likely to seek professional help for fear of being judged.\n*   **It creates a \"Monster\" narrative:** The word dehumanizes the person, suggesting they are morally bad rather than someone suffering from a health condition. This is similar to how the legal/lay term \"insane\" is misused; in reality, most people with mental health conditions are not violent, and violence is not a defining symptom of most psychological disorders.\n\n### 3. It is Often Used to Control or Shame\nIn interpersonal relationships, calling someone a \"psycho\" is often a tactic of invalidation or abuse.\n*   **Invalidation:** It is frequently used to dismiss someone else's emotional reactions (e.g., \"You're upset? You're being a psycho\"). This is a form of gaslighting that makes the person question their own reality.\n*   **Loss of Insight:** As discussed in psychological contexts, having \"insight\" (awareness of one's own mental state) is a sign of health. Labeling someone as \"psycho\" attacks their credibility and insight, suggesting their thoughts or feelings are inherently wrong.\n\n### 4. Better Alternatives\nIf you are trying to describe behavior, mental states, or clinical issues, it is always better to be specific and respectful.\n\n*   **If describing a mental health condition:** Use the specific clinical term (e.g., \"they have a diagnosis of bipolar disorder,\" \"they are experiencing psychosis\").\n*   **If describing erratic behavior:** Focus on the action, not the person. Instead of \"That guy is a psycho,\" try \"That behavior was unpredictable\" or \"I felt threatened by that action.\"\n*   **If describing yourself:** It is common to worry about your own thoughts (e.g., \"Is it crazy to think this?\"). However, labeling yourself with a slur is unhelpful. Acknowledging that you are struggling, feeling overwhelmed, or having intrusive thoughts is the healthy, insightful way to process those emotions.\n\n**Summary**\n\"Psycho\" is a slur that conflates mental illness with violence and \"badness.\" It lacks clinical precision, harms people living with actual mental health conditions, and serves to dehumanize rather than understand.",
+    "description": "AI-generated from query: what is wrong with the term psycho",
+    "pattern_type": "knowledge",
+    "confidence": 0.65,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "what is wrong with the term psycho",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-28T05:53:56.414Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-28T05:53:56.425550",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-28T05:53:56.425550"
+  },
+  {
+    "id": "psycho_5acc3c71",
+    "pattern_id": "psycho_5acc3c71",
+    "name": "Is there a dog psychiatrist",
+    "domain": "psycho",
+    "problem": "Is there a dog psychiatrist",
+    "solution": "Hello! This is a very common question, and the short answer is **yes, there is such a thing as a dog psychiatrist**, though the professional titles are a little different than they are for humans.\n\nWhile we don't typically call them \"dog psychiatrists,\" there are two distinct types of professionals who treat the mental health of pets: **Veterinary Behaviorists** (who are essentially the psychiatrists of the animal world) and **Certified Applied Animal Behaviorists**.\n\nHere is a breakdown of who they are and how they can help your furry friend.\n\n### 1. The \"Psychiatrists\": Veterinary Behaviorists (Dip ACVB)\nIf you are looking for the equivalent of a human psychiatrist for a dog, this is it. A **Veterinary Behaviorist** is a licensed veterinarian who has completed additional years of specialized residency training in behavioral medicine and passed a rigorous board examination.\n\n*   **What they do:** They look at the medical root of behavioral issues. Because many psychological problems in dogs (like anxiety or aggression) can actually be caused by underlying physical pain or hormonal imbalances, these doctors are qualified to prescribe medication (like SSRIs or anti-anxiety meds) alongside behavioral modification plans.\n*   **When to see one:** If your dog has severe aggression, extreme separation anxiety, obsessive-compulsive behaviors (like tail chasing), or profound fears, a Veterinary Behaviorist is the best route.\n\n### 2. The \"Therapists\": Applied Animal Behaviorists (CAAB or ACAAB)\nThese professionals are often compared to human psychologists or therapists. They hold advanced degrees (usually a Master\u2019s or PhD) in animal behavior, biology, or zoology.\n\n*   **What they do:** They focus heavily on learning theory, environment, and modification techniques. While some are limited in prescribing medication depending on local laws (usually requiring a consult with a vet), they are experts in designing training plans to change emotional responses and behavior.\n*   **When to see one:** For behavioral issues that require expert intervention but may not require medical testing, such as leash reactivity, mild anxiety, or strange phobias.\n\n### 3. The Difference Between \"Bad Behavior\" and Mental Health Issues\nIt is important to distinguish between a dog that needs obedience training and a dog that needs a \"psychiatrist.\"\n\n*   **Obedience Training** is for teaching commands like \"sit,\" \"stay,\" and \"heel.\"\n*   **Behavioral Therapy** is for emotional distress. If your dog is trembling, destroying walls when left alone, or biting out of fear, this is not a training failure; it is a mental health crisis.\n\n### How to Find Help\nIf you believe your dog is suffering from a mental health issue, you can start by asking your general veterinarian for a referral. The **American College of Veterinary Behaviorists (ACVB)** and the **Animal Behavior Society (ABS)** both have directories where you can locate board-certified specialists in your area.\n\nJust like humans, dogs can experience complex emotional lives, and seeking professional help for them is a wonderful way to improve their quality of life",
+    "description": "AI-generated from query: Is there a dog psychiatrist",
+    "pattern_type": "knowledge",
+    "confidence": 0.65,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Is there a dog psychiatrist",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-28T05:56:49.154Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-28T05:56:49.160502",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-28T05:56:49.160502"
   }
 ]

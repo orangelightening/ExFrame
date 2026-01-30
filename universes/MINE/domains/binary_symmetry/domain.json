@@ -3,102 +3,251 @@
   "domain_name": "Binary Symmetry & Bitwise Relationships",
   "description": "Mathematical patterns in binary numbers, bitwise operations, complements, symmetries, and 8-bit transformations",
   "version": "1.0.0",
-  "created_at": "2026-01-08T00:00:00Z",
-  "updated_at": "2026-01-21T00:00:00Z",
-
-  "knowledge_base": {
-    "type": "json",
-    "module": "knowledge.json_kb",
-    "class": "JSONKnowledgeBase",
-    "description": "JSON file storage for binary patterns"
+  "created_at": "2026-01-27T00:54:04.546318Z",
+  "updated_at": "2026-01-27T00:54:04.546415",
+  "categories": [
+    "symmetry",
+    "transformation",
+    "relationship",
+    "metric",
+    "encoding",
+    "logic",
+    "detection"
+  ],
+  "tags": [
+    "binary",
+    "bitwise",
+    "xor",
+    "algorithm",
+    "math",
+    "computer_science",
+    "8-bit"
+  ],
+  "domain_type": "2",
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
   },
-
   "plugins": [
     {
       "plugin_id": "generalist",
       "name": "Binary Symmetry",
-      "description": "Expert in binary patterns, bitwise operations, and bit manipulation",
+      "description": "",
       "module": "plugins.generalist",
       "class": "GeneralistPlugin",
       "enabled": true,
       "config": {
         "name": "Binary Symmetry",
         "keywords": [
-          "xor", "and", "or", "not", "nand", "nor", "xnor",
-          "shift", "rotate", "mask", "complement", "invert", "opposite", "negative",
-          "bit", "binary", "hex", "0x", "nibble", "byte",
-          "sign", "magnitude", "two's complement", "flip", "reverse",
-          "pattern", "symmetry", "palindrome", "mirror",
-          "distribution", "popcount", "hamming", "distance",
-          "sequence", "gray", "cyclic", "periodicity",
-          "weight", "density", "balance", "same", "different",
-          "algorithm", "optimization", "trick", "swap",
-          "detection", "power", "gray", "majority", "parity",
-          "check", "test", "compute", "calculate", "determine", "find", "how",
-          "fast", "efficient", "o(1)", "constant time"
+          "xor",
+          "and",
+          "or",
+          "not",
+          "nand",
+          "nor",
+          "xnor",
+          "shift",
+          "rotate",
+          "mask",
+          "complement",
+          "invert",
+          "opposite",
+          "negative",
+          "bit",
+          "binary",
+          "hex",
+          "0x",
+          "nibble",
+          "byte",
+          "sign",
+          "magnitude",
+          "two's complement",
+          "flip",
+          "reverse",
+          "pattern",
+          "symmetry",
+          "palindrome",
+          "mirror",
+          "distribution",
+          "popcount",
+          "hamming",
+          "distance",
+          "sequence",
+          "gray",
+          "cyclic",
+          "periodicity",
+          "weight",
+          "density",
+          "balance",
+          "same",
+          "different",
+          "algorithm",
+          "optimization",
+          "trick",
+          "swap",
+          "detection",
+          "power",
+          "gray",
+          "majority",
+          "parity",
+          "check",
+          "test",
+          "compute",
+          "calculate",
+          "determine",
+          "find",
+          "how",
+          "fast",
+          "efficient",
+          "o(1)",
+          "constant time"
         ],
-        "categories": ["symmetry", "transformation", "relationship", "metric", "encoding", "logic", "detection", "pattern", "algorithm"],
-        "threshold": 0.30
+        "categories": [
+          "symmetry",
+          "transformation",
+          "relationship",
+          "metric",
+          "encoding",
+          "logic",
+          "detection",
+          "pattern",
+          "algorithm"
+        ],
+        "threshold": 0.3
       }
     }
   ],
-
-  "categories": ["symmetry", "transformation", "relationship", "metric", "encoding", "logic", "detection"],
-  "tags": ["binary", "bitwise", "xor", "algorithm", "math", "computer_science", "8-bit"],
-
   "enrichers": [
     {
-      "module": "plugins.enrichers.related_pattern_enricher",
-      "class": "RelatedPatternEnricher",
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
       "enabled": true,
       "config": {
-        "max_related": 3,
-        "min_similarity": 0.3,
-        "use_tags": true,
-        "use_category": true,
-        "use_keywords": true
+        "mode": "enhance",
+        "temperature": 0.6,
+        "max_patterns": 10
       }
-    },
-    {
-      "module": "plugins.enrichers.example_expander_enricher",
-      "class": "ExampleExpanderEnricher",
-      "enabled": true,
-      "config": {
-        "max_examples": 5,
-        "generate_variations": true,
-        "add_edge_cases": true,
-        "add_explanations": true
-      }
-    },
-    {
-      "module": "plugins.enrichers.code_generator_enricher",
-      "class": "CodeGeneratorEnricher",
-      "enabled": true,
-      "config": {
-        "languages": ["python", "javascript"],
-        "max_examples": 2,
-        "include_tests": true,
-        "include_comments": true
-      }
-    },
-    {
-      "module": "plugins.enrichers.usage_stats_enricher",
-      "class": "UsageStatsEnricher",
-      "enabled": true,
-      "config": {
-        "simulate_data": true,
-        "include_ratings": true,
-        "include_variations": true
-      }
-    },
-    {
-      "module": "plugins.enrichers.usage_stats_enricher",
-      "class": "QualityScoreEnricher",
-      "enabled": true,
-      "config": {}
     }
   ],
-
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true,
+    "similarity_threshold": 0.3
+  },
+  "temperature": 0.6,
+  "similarity_threshold": 0.3,
+  "max_patterns": 10,
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "Binary Symmetry",
+      "description": "",
+      "expertise_keywords": [
+        "xor",
+        "and",
+        "or",
+        "not",
+        "nand",
+        "nor",
+        "xnor",
+        "shift",
+        "rotate",
+        "mask",
+        "complement",
+        "invert",
+        "opposite",
+        "negative",
+        "bit",
+        "binary",
+        "hex",
+        "0x",
+        "nibble",
+        "byte",
+        "sign",
+        "magnitude",
+        "two's complement",
+        "flip",
+        "reverse",
+        "pattern",
+        "symmetry",
+        "palindrome",
+        "mirror",
+        "distribution",
+        "popcount",
+        "hamming",
+        "distance",
+        "sequence",
+        "gray",
+        "cyclic",
+        "periodicity",
+        "weight",
+        "density",
+        "balance",
+        "same",
+        "different",
+        "algorithm",
+        "optimization",
+        "trick",
+        "swap",
+        "detection",
+        "power",
+        "gray",
+        "majority",
+        "parity",
+        "check",
+        "test",
+        "compute",
+        "calculate",
+        "determine",
+        "find",
+        "how",
+        "fast",
+        "efficient",
+        "o(1)",
+        "constant time"
+      ],
+      "expertise_categories": [
+        "symmetry",
+        "transformation",
+        "relationship",
+        "metric",
+        "encoding",
+        "logic",
+        "detection",
+        "pattern",
+        "algorithm"
+      ],
+      "confidence_threshold": 0.3
+    }
+  ],
   "ui_config": {
     "placeholder_text": "Ask about binary patterns, bitwise operations, or bit manipulation... (Press Enter to submit)",
     "example_queries": [
@@ -109,10 +258,9 @@
       "How do I detect if a number is a power of two?",
       "What is Gray code and why is it useful?"
     ],
-    "icon": "🔢",
+    "icon": "\ud83d\udd22",
     "color": "#9C27B0"
   },
-
   "links": {
     "related_domains": [],
     "imports_patterns_from": [],

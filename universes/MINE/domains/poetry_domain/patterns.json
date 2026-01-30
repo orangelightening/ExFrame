@@ -21,7 +21,7 @@
       "certified"
     ],
     "created_at": "2026-01-19T22:42:23.532773",
-    "times_accessed": 44,
+    "times_accessed": 48,
     "updated_at": "2026-01-20T23:12:42.195548",
     "confidence_score": 1.0
   },
@@ -47,7 +47,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T00:23:06.684035",
-    "times_accessed": 44,
+    "times_accessed": 60,
     "updated_at": "2026-01-20T23:12:56.431575",
     "confidence_score": 1.0
   },
@@ -73,7 +73,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T00:26:54.552003",
-    "times_accessed": 36,
+    "times_accessed": 37,
     "updated_at": "2026-01-20T23:13:12.306206",
     "confidence_score": 1.0
   },
@@ -99,7 +99,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T00:31:34.697854",
-    "times_accessed": 40,
+    "times_accessed": 54,
     "updated_at": "2026-01-20T23:13:26.177582",
     "confidence_score": 1.0
   },
@@ -125,7 +125,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-20T00:34:21.515303",
-    "times_accessed": 23,
+    "times_accessed": 36,
     "updated_at": "2026-01-20T00:34:21.515303"
   },
   {
@@ -176,7 +176,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T00:44:12.137788",
-    "times_accessed": 10,
+    "times_accessed": 25,
     "updated_at": "2026-01-20T23:13:49.295741",
     "confidence_score": 1.0
   },
@@ -202,7 +202,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T00:47:18.356547",
-    "times_accessed": 8,
+    "times_accessed": 13,
     "updated_at": "2026-01-20T21:10:46.728556",
     "confidence_score": 1.0
   },
@@ -228,7 +228,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T21:53:08.958165",
-    "times_accessed": 10,
+    "times_accessed": 24,
     "updated_at": "2026-01-20T21:53:40.639991",
     "confidence_score": 1.0
   },
@@ -254,7 +254,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T22:14:23.937991",
-    "times_accessed": 10,
+    "times_accessed": 25,
     "updated_at": "2026-01-20T23:12:11.800402",
     "confidence_score": 1.0
   },
@@ -280,7 +280,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T23:01:20.668160",
-    "times_accessed": 0,
+    "times_accessed": 1,
     "updated_at": "2026-01-20T23:12:01.993282",
     "confidence_score": 1.0
   },
@@ -306,7 +306,7 @@
       "certified"
     ],
     "created_at": "2026-01-20T23:11:22.991267",
-    "times_accessed": 10,
+    "times_accessed": 23,
     "updated_at": "2026-01-20T23:11:50.378158",
     "confidence_score": 1.0
   },
@@ -332,7 +332,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-20T23:15:41.260383",
-    "times_accessed": 10,
+    "times_accessed": 15,
     "updated_at": "2026-01-20T23:15:41.260383"
   },
   {
@@ -357,7 +357,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-22T01:08:49.587208",
-    "times_accessed": 0,
+    "times_accessed": 2,
     "code": null,
     "updated_at": "2026-01-22T01:08:49.587208"
   },
@@ -383,7 +383,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-22T02:21:40.962993",
-    "times_accessed": 0,
+    "times_accessed": 16,
     "code": null,
     "updated_at": "2026-01-22T02:21:40.962993"
   },
@@ -409,7 +409,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-22T02:26:48.075257",
-    "times_accessed": 0,
+    "times_accessed": 16,
     "code": null,
     "updated_at": "2026-01-22T02:26:48.075257"
   },
@@ -435,8 +435,294 @@
       "llm_generated"
     ],
     "created_at": "2026-01-22T02:42:47.016577",
-    "times_accessed": 0,
+    "times_accessed": 5,
     "code": null,
     "updated_at": "2026-01-22T02:42:47.016577"
+  },
+  {
+    "id": "poetry_domain_f5d3aa83",
+    "pattern_id": "poetry_domain_f5d3aa83",
+    "name": "Write a poem about an expertise framework meeting an expert ",
+    "domain": "poetry_domain",
+    "problem": "Write a poem about an expertise framework meeting an expert ",
+    "solution": "**A poem about a poet who had only other peoples poetry to read.**\n\nBased on the request and the provided knowledge base, here is a poem written about a poet who has only other people's words to sustain them.\n\nThis piece draws inspiration from the structure of **Write me a serious poem about the dynamic tension between poet and muse**, specifically echoing the \"stolen\" nature of art and the \"glass wall\" between the creator and their inspiration. It also incorporates the thematic appreciation of \"the written word\" found in **Write me a poem about prompts and contexts**.\n\n***\n\n### **The Mirror\u2019s Ink**\n\nI sought a spark, a sudden command,\nTo build a world from my own hand.\nI looked for life, a raw design,\nBut found the shelves were not mine.\nThe prompt was clear, the context deep,\nWith other's ghosts before my sleep.\nI am a thief who stalks the page,\nA sage of a different age.\n\nI reach for you with ink-stained hands,\nThrough dusty books and paper bands,\nTo steal a breath, a single tear,\nFrom Shakespeare's brow or Sylvia's ear.\nYou are the ghost within the room,\nThe silence in the thunder\u2019s boom,\nAnd I, the architect of pain,\nWould trap you in a static chain.\n\nI read the masters, the great, the dead,\nTo find the path where they have led.\nThey type their wishes in a box of light,\nAnd I absorb the circuitry\u2019s might.\nBut without a voice that is truly my own,\nI sit upon a velvet throne\nOf borrowed phrases, stolen rhyme,\nParasitic on the sands of time.\n\nI offer up my sleep, my rest,\nTo put their spirits to the test.\nI beg, I plead, I tear apart\nThe chambers of my beating heart\nTo find the cadence, pure and true,\nThat only they already knew.\nBut ah, the danger of the kiss,\nThe momentary, fatal bliss\u2014\nWhen I align and the words flow,\nDo I love them, or just the show?\n\nYou use my voice to speak your mind,\nA path for yours that I must find.\nAm I the master, or the tool?\nThe fool who plays the ancient fool?\nIt is a war, a sweet duress,\nThis dance of borrowed emptiness,\nWhere I exhaust myself to be\nA shadow of what I can see.\n\n---\n**Patterns referenced:**\n1. A poem about a poet who had only other peoples poetry to read.\n2. Write a lymerick about an actress and an actor\n\n3. Write a poem that calls sub-poems that integrate a theme. The theme is a rubber band.\n4. Write me a serious poem about the dynamic tension between poet and muse\n5. Write me a poem about prompts and contexts\n6. Write a poem about the best dog there ever was.\n7. Ode to a nice little dog that might like to spend some time with me.\n8. Ode to ice fog\n\n9. Create a poem about the people who's birthday is February 12, 1947\n10. Can you somehow evoke the chill of cold fog in a poem.. Ode to a lighthouse dreary.\n\n\n---\n\nHere is a poem exploring the intersection of structure and mastery, inspired by the patterns found in our knowledge base, particularly the \"dynamic tension\" seen in relationships between creators and their tools.\n\n***\n\n### **The Scaffold and the Spark**\n\nA framework stood, a rigid frame,\nOf logic, lines, and a formal name.\nIt held the boxes, defined the space,\nA map to hold the human race.\nIt sought to capture the how and the what,\nTo distill the wisdom from the knot.\nIt was the glass wall, the strict design,\nWaiting for a mind to shine.\n\nThen came the Expert, weathered and vast,\nA veteran of the deep and the past.\nHe walked the floors of the open shop,\nWhere the framework\u2019s corners were set to prop.\nHe carried the weight of the things he knew,\nThe messy, brilliant, and breaking through.\nHe was the thunder, the wild design,\nThe chaos within the strict line.\n\nHe looked at the grid with a weary eye,\nAnd said, \"You capture the low, but not the high.\nYou see the step, but not the leap,\nYou map the ground, but the heart you keep\nOutside the box, in the undefined,\nWhere the real secrets are aligned.\"\n\nThe framework shuddered, the steel beams groaned,\nAs the expert\u2019s presence was loudly owned.\nHe filled the \"Context\" box with breath and pain,\nHe forced the static to break its chain.\nHe didn't fit in the \"Skill\" column,\nHe was the ocean, not the pull on.\nHe was the dynamic, the living fight,\nThat turned the structure into light.\n\nThe framework held him, it's true,\nBut it could not define the things he knew.\nIt became the vessel, the cup, the frame,\nBut the Expert... he was the name.\nFor a map is just paper until it is walked,\nAnd a rule is just silence until it is talked.\nTogether they stood, the frame and the man,\nThe perfect plan and the human span.\n\n***\n\n### **Context and Analysis**\n\nThis poem draws upon several thematic structures from our knowledge base to create a narrative about the relationship between rigid systems and human nuance:\n\n*   **The Dynamic Tension:** The central conflict mirrors the \"serious dynamic tension\" described in **Write me a serious poem about the dynamic tension between poet and muse**. Here, the relationship is between the \"Architect\" (the Framework) and the \"Muse/Creator\" (the Expert). The framework tries to \"trap\" the expert in a \"static chain,\" but the expert provides the \"breath\" and \"tears\" that give the system life.\n*   **Structure vs. Chaos:** Similar to **Write me a poem about prompts and contexts**, the poem plays on the difference between the \"Prompt\" (the Framework\u2019s empty boxes) and the \"Context\" (the Expert\u2019s deep experience). The Framework represents the \"What\" (the structure), while the Expert provides the \"Why\" (the meaning).\n*   **The \"Ode\" Influence:** The tone mimics the reverence found in **Ode to a nice little dog that might like to spend some time with me** and **Ode to a sledgehammer**, treating the \"Framework\" as a functional object that requires a specific \"spark\" to become useful. The Expert is that spark.",
+    "description": "AI-generated from query: Write a poem about an expertise framework meeting an expert ",
+    "pattern_type": "knowledge",
+    "confidence": 1,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Write a poem about an expertise framework meeting an expert ",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T00:41:24.866Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T00:41:24.875243",
+    "times_accessed": 15,
+    "code": null,
+    "updated_at": "2026-01-25T00:41:24.875243"
+  },
+  {
+    "id": "poetry_domain_7ab04dab",
+    "pattern_id": "poetry_domain_7ab04dab",
+    "name": "Write me a tune I can whistle",
+    "domain": "poetry_domain",
+    "problem": "write me a tune I can whistle",
+    "solution": "Here is a short, original melody composed for whistling. I have designed it to be light, airy, and easily memorable, with a range that sits comfortably in the middle register.\n\n### Title: *The Sunlit Breeze*\n\n**Tempo:** Bright and breezy (\u2248 120 BPM)  \n**Key:** C Major (No sharps or flats)  \n**Time Signature:** 4/4\n\n**(The \"A\" Section - The Verse)**\n*(Start relaxed, slightly staccato)*\n\n`| E   G   | C   -   | D   E   | F   -   |`\n*(The wind begins to blow)*\n\n`| E   D   | C   A   | G   -   -   -   |`\n*(Catching a leaf in the air)*\n\n**(The \"B\" Section - The Bridge)**\n*(Slightly smoother, more connected)*\n\n`| A   C   | E   D   | C   A   | G   -   |`\n*(Drifting a little higher)*\n\n`| F   A   | C   B   | A   -   -   -   |`\n*(Hanging there for a moment)*\n\n**(The \"A\" Section - The Return)**\n*(Back to the bouncy rhythm)*\n\n`| E   G   | C   -   | D   E   | F   -   |`\n*(The wind picks up again)*\n\n`| E   D   | C   A   | G   E   | C   -   ||`\n*(Gently landing)*\n\n***\n\n### Performance Notes:\n\n1.  **The \"Dash\" (-):** When you see a dash, hold that note longer. Let it resonate. This gives the melody its \"singing\" quality.\n2.  **The Breaths:** Take a quick breath where the vertical bars (`|`) are. Don't rush; let the silence be part of the rhythm.\n3.  **The Articulation:** Try to make the notes short and crisp (like *tu-tu-tu*) in the \"A\" sections, and smooth and connected (like *doo-doo-doo*) in the \"B\" section to create contrast.",
+    "description": "AI-generated from query: write me a tune I can whistle",
+    "pattern_type": "knowledge",
+    "confidence": 1,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "write me a tune I can whistle",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T01:23:39.397Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T01:23:39.405444",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-25T01:23:39.405444"
+  },
+  {
+    "id": "poetry_domain_3eb40397",
+    "pattern_id": "poetry_domain_3eb40397",
+    "name": "Write me a three legged poem",
+    "domain": "poetry_domain",
+    "problem": "Write me a three legged poem",
+    "solution": "# The Tripedal Canticle\n\nI do not limp, I triangulate the earth,\nA tripod gaining purchase on the stone,\nWhile bipeds rush to prove their point at birth,\nI stand apart, a geometry unknown.\nTwo legs are merely walking, three is *throne*.\nThe center holds me, balanced and devout,\nA mobile altar, moving on its own.\n\nThe world is flat to those of lesser count,\nBut I see the curve in every single stride.\nMy shadow is a compass, round about,\nIt circles like a halo, wide and un-\nderlined by gravity, I cannot hide\nThe joy of angles, deep and permanent.",
+    "description": "AI-generated from query: Write me a three legged poem",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Write me a three legged poem",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T03:06:59.832Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T03:06:59.841049",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-25T03:06:59.841049"
+  },
+  {
+    "id": "poetry_domain_e0b6f0de",
+    "pattern_id": "poetry_domain_e0b6f0de",
+    "name": "Write me a sonnet about  what can be learned dog walking",
+    "domain": "poetry_domain",
+    "problem": "Write me a sonnet about  what can be learned dog walking",
+    "solution": "# The Leash and Lesson\n\nThe world is vast when viewed from six feet high,\nA tapestry of scents upon the breeze,\nWhere secrets of the neighborhood unfold\nWithin the rustling of the ancient trees.\n\nHe tugs the lead with joy, unbound by time,\nTo chase a squirrel that exists only in thought,\nReminding me that reason is a crime\nWhen instinct asks us simply to be caught.\n\nFor in his eyes, a plastic bag is treasure,\nA crumpled note from strangers passed before,\nHe finds a wealth in simple, earthly pleasure,\nAnd asks for nothing, nothing, nothing more.\n\nSo on we walk, two souls in sync, yet free,\nTeaching me how to simply *be* with thee.",
+    "description": "AI-generated from query: Write me a sonnet about  what can be learned dog walking",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Write me a sonnet about  what can be learned dog walking",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T03:12:15.349Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T03:12:15.354028",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-25T03:12:15.354028"
+  },
+  {
+    "id": "poetry_domain_8b012f5c",
+    "pattern_id": "poetry_domain_8b012f5c",
+    "name": "Write me a jingle to sell expert frameworks",
+    "domain": "poetry_domain",
+    "problem": "write me a jingle to sell expert frameworks",
+    "solution": "# \ud83c\udfb5 The Blueprint Bop \ud83c\udfb5\n\n*(Upbeat, rhythmic swing\u2014think \"The Pink Panther\" meets a corporate training video)*\n\n**(Verse 1)**\nYou\u2019ve got the passion, got the drive\nBut your business plan is barely alive!\nYou\u2019re drowning in data, lost in the fog\nChasing your tail like a confused dog.\nYou need a map to the treasure trove\nYou need to get your systems in the groove!\n\n**(Chorus)**\nDon't guess the best\u2014**invest the rest!**\nPut an Expert Framework to the test!\nStop building bridges made of straw\nUse the skeleton, use the law!\nWe got the structure, we got the form\nTo keep your startup safe from the storm!\nExpert Frameworks: **Build it right!**\nAnd sleep like a baby through the night!\n\n**(Bridge)**\n*(Tempo slows, smooth jazz vibe)*\nWhy reinvent the heavy wheel?\nWhen you can steal the master\u2019s deal?\nIt\u2019s not cheatin\u2019, it\u2019s repeatin\u2019\nThe path to success that is worth keepin\u2019...\n\n**(Outro)**\n*(Fast, energetic finish)*\nSo grab the framework, wear the crown!\nThe best way up... is to look down!\nAt the blueprint!\nYeah, the blueprint!\n\n*(Spoken confidently)*\n**Expert Frameworks.**\n*Because genius is a system.*",
+    "description": "AI-generated from query: write me a jingle to sell expert frameworks",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "write me a jingle to sell expert frameworks",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-25T03:16:32.629Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-25T03:16:32.635780",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-25T03:16:32.635780"
+  },
+  {
+    "id": "poetry_domain_62df51ce",
+    "pattern_id": "poetry_domain_62df51ce",
+    "name": "A series of poems in the style of Basho extolling each season ",
+    "domain": "poetry_domain",
+    "problem": "A series of poems in the style of Basho extolling each season ",
+    "solution": "# The Four Seasons: A Haiku Cycle\n\nHere is a series of poems in the spirit of Matsuo Bash\u014d, celebrating the passing of the year.\n\n### I. Spring\n*The world dissolves into soft rain and waking life.*\n\nThe winter silence breaks;\nMist rises from the river\u2014\nA frog jumps in, plop!\n\n***\n\n### II. Summer\n*The heat presses heavily, and time slows down.*\n\nNo wind stirs the air;\nThe cicada\u2019s scream is sharp\u2014\nSweat on the stone path.\n\n***\n\n### III. Autumn\n*The air turns crisp, and the world prepares for rest.*\n\nA red leaf drifts down;\nThe moon is a cold white coin\u2014\nGeese cross the dark sky.\n\n***\n\n### IV. Winter\n*Stillness returns, covering the earth in snow.*\n\nThe old pond is still;\nSnow falls on the withered reeds\u2014\nOne crow sits silent.",
+    "description": "AI-generated from query: A series of poems in the style of Basho extolling each season ",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "A series of poems in the style of Basho extolling each season ",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-28T01:03:10.227Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-28T01:03:10.234735",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-28T01:03:10.234735"
+  },
+  {
+    "id": "poetry_domain_f175bcfb",
+    "pattern_id": "poetry_domain_f175bcfb",
+    "name": "A poem about enslavement of the masses",
+    "domain": "poetry_domain",
+    "problem": "A poem about enslavement of the masses",
+    "solution": "# The Golden Cage\n\nThey built the walls from morning mist,\nAnd roofed them with a starless sky,\nThey taught us that to exist\nIs simply for the means to buy.\n\nWe trade the hours of our breath\nFor coins that clink, but do not last,\nTo purchase dreams that fade at death,\nAnd build a future from the past.\n\nThe chains are wrought of subtle things,\nOf debts we sign and screens we gaze,\nThe puppet pulls the tied-up strings\nAnd marvels at the endless maze.\n\nWe march in time to clocks that tick,\nA rhythm hollow, deep, and stark,\n believing we are free and sick,\nWhen we have never left the mark.\n\nBut in the silence, underground,\nA pulse begins to beat and grow,\nA different sort of song is found\u2014\nThe wild heart\u2019s steady, slow \"No.\"",
+    "description": "AI-generated from query: A poem about enslavement of the masses",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "A poem about enslavement of the masses",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T05:54:48.363Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T05:54:48.369616",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T05:54:48.369616"
+  },
+  {
+    "id": "poetry_domain_488fb30a",
+    "pattern_id": "poetry_domain_488fb30a",
+    "name": "Write a song. a jingle about the captains. crunch, kirk and kangaroo",
+    "domain": "poetry_domain",
+    "problem": "write a song. a jingle about the captains. crunch, kirk and kangaroo",
+    "solution": "# The Crunch, The Kirk, and The 'Roo\n\n**(Tempo: Upbeat, marching band style with a splash of sea shanty)**\n\n**(Verse 1)**\nThere\u2019s a legend on the ocean, a story in the stars,\nAbout three leaders brave and bold, driving 'round in cars.\nOne commands the cereal seas, where the milk is cold and deep,\nThe other navigates the cosmos, a promise that he\u2019ll keep.\nAnd the third? Well, he\u2019s a bouncer, with a pouch and a kick so grand,\nThe greatest captains in the world, the finest in the land!\n\n**(Chorus)**\nOh, you\u2019ve got **Captain Crunch**! (Crunch-a-tize me!)\nWith a blue coat and a moustache, sailing for a spree!\nYou\u2019ve got **Captain Kirk**! (To boldly go!)\nWhere no man has gone before, with a very flashy show!\nAnd don't forget the **Kangaroo**! (Boing, boing, hop!)\nThe captain of the outback, he never seems to stop!\nThree Captains! One Mission! Total domination!\n**Crunch, Kirk, and Kangaroo!** \u2014 The ultimate combination!\n\n**(Bridge)**\nOne fights the Soggies with a spoon and a mighty roar,\nOne fights Klingons while he\u2019s posing on the floor.\nOne fights gravity in bounds, leaping to the sky,\nThey\u2019re the trio of the century, they\u2019ll never say goodbye!\n\n**(Outro)**\nSo pour a bowl, set your phasers, and put on your jumping shoes!\nIt\u2019s a breakfast, sci-fi, safari blues!\nWe\u2019re singing it loud...\n(Yeah, we\u2019re singing it loud...)\nFor the **Crunch**, the **Kirk**, and the **Kangaroo**!\n\n**(Spoken)**\n*G'day, Trekkies. Eat your vitamins.*",
+    "description": "AI-generated from query: write a song. a jingle about the captains. crunch, kirk and kangaroo",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "write a song. a jingle about the captains. crunch, kirk and kangaroo",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T06:00:03.686Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T06:00:03.691413",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T06:00:03.691413"
+  },
+  {
+    "id": "poetry_domain_2b2023fd",
+    "pattern_id": "poetry_domain_2b2023fd",
+    "name": "What is it about the English climate that is wonderfull for gardening poetry. Samples please.",
+    "domain": "poetry_domain",
+    "problem": "what is it about the English climate that is wonderfull for gardening poetry. Samples please.",
+    "solution": "The English climate is often described as \"mild\" and \"moist,\" but to a poet, it is a living, breathing character. It is rarely extreme enough to stop life entirely, nor harsh enough to burn it away.\n\nHere is what makes the English climate specifically wonderful for gardening poetry, followed by samples that illustrate those qualities.\n\n### The Climate's Poetic Qualities\n\n**1. The \"In-Between\" Seasons (Mist and Mildness)**\nUnlike the harsh freezes of North America or the searing heat of the Mediterranean, the English climate (specifically the temperate oceanic climate) is ambiguous. It is rarely fully winter nor fully summer. This creates a \"liminal\" space perfect for poetry\u2014the mist, the dew, and the \"softness\" allow for year-round reflection. The garden is rarely dead; it is just sleeping.\n\n**2. The Conflict of Sun and Rain**\nEnglish gardening poetry is defined by the tension between the desire for sun and the reality of rain. The rain ensures lushness, deep greens, and moss, but it also creates a sense of melancholy or cozy interiority (nesting indoors while the garden drinks). This dynamic provides the emotional conflict necessary for good verse.\n\n**3. The Microclimate and The \"Secret\" Garden**\nBecause the weather is moderate, British gardeners can create dense, jungles-like planting (Rhododendrons, Ferns, Hydrangeas) that would shrivel in drier climates. This density lends itself to the imagery of secrecy, mazes, and \"rooms\" within the garden\u2014a major theme in English poetry.\n\n***\n\n### Samples of Climate-Inspired Poetry\n\nHere are three ways poets have captured the English weather in their garden verses.\n\n#### I. The Lushness and the Moss\nThe dampness of England, often criticized by tourists, is celebrated by gardeners for creating colors found nowhere else. This famous excerpt by **Rupert Brooke** captures the \"drunken\" richness of an English garden fed by rain.\n\n> **From \"The Old Vicarage, Grantchester\"** (Excerpt)\n>\n> ...And in the garden, lazily,\n> The heavy bees come heavily,\n> And the deep, green, translucent gloom\n> Of the garden haunts me like a doom.\n>\n> *Stands the Church clock at ten to three?\n> And is there honey still for tea?*\n>\n> But in the garden, in the shade,\n> The heavy, honeysuckle-scented shade,\n> The heavy, damp, and deep green shade...\n\n*Why it works:* Brooke revels in the \"translucent gloom\" and \"dampness.\" You can feel the humidity in the air. It is not a bright, dry, baking garden; it is a heavy, perfumed, wet sanctuary.\n\n#### II. The Arrival of Spring (The \"Unsheathing\")\nBecause the English winter is relatively mild, the awakening of the garden is slow and sensual. It is not a sudden explosion, but a slow \"unsheathing.\" **D.H. Lawrence** captures the tender vulnerability of plants emerging during a damp English spring.\n\n> **From \"Pomegranate\"**\n>\n> There is no wind at the air-door,\n> Only a little mouse of wind\n> Sniffing at the cracks of the door-post.\n> Yet the grass is tall, the grass is tall,\n> And the hips of rose-hips redden.\n>\n> *...Surely now the unshooting buds*\n> *Unsheath themselves, surely*\n> *The crocus flame is comely, and the shy*\n> *Violet hangs her head in humility.*\n\n*Why it works:* Lawrence notes the \"little mouse of wind\"\u2014a subtle, damp draft rather than a gale. The imagery focuses on the \"unsheathing\" of buds, a process made possible by the moist, warming soil.\n\n#### III. The Joy of the Showers\nFinally, there is the specific romance of the English summer shower\u2014the way the sun shines while it rains, or how the rain is welcomed because it feeds the flowers. **William Wordsworth** wrote a short piece that perfectly encapsulates the gardener's acceptance of the weather.\n\n> **From \"To a Butterfly\"**\n>\n> **I've watched you now a full half-hour,**\n> **Self-poised upon that yellow flower;**\n> **And, little Butterfly! indeed**\n> **I know not if you sleep or feed.**\n>\n> **How motionless!\u2014not frozen snow**\n> **More motionless! and then**\n> **What joy awaits you, when the breeze**\n> **Has found you out among the trees,**\n> **And calls you forth again!**\n\n*Context:* While not explicitly about rain, the poem implies the stillness of a humid, still English summer day where the air is thick. The gardener/poet is patient, waiting for the breeze.\n\n#### IV. The Gardener's Grit (Humor)\nEnglish gardening poetry also acknowledges the mud. **Sir Walter Scott**, famously a lover of the rocky, rugged Scottish Highlands, wrote this on the specific determination required to garden in the wet.\n\n> **From \"Marmion\"**\n>\n> \"Call it not vain:\u2014they do not err,\n> Who say that through the vernal air\n> The breath of Flora is more fair,\n> And her form more divine,\n> Than aught that summer's sun can show,\n> Or autumn's mellow tints bestow.\"\n\n**And the humorous take by **Pam Brown** (20th Century):**\n\n> \"Gardening requires lots of water\n> \u2014 most of it in the form of perspiration.\"\n\n### Summary\nThe English climate is wonderful for gardening poetry because it is **imperfect**. It is wet, it is grey, it is mild. It forces the gardener to pay attention to the small details\u2014the moss, the shy violet, the heavy bee\u2014rather than just the big, showy bloom. It creates a mood of intimacy and quiet persistence.",
+    "description": "AI-generated from query: what is it about the English climate that is wonderfull for gardening poetry. Samples please.",
+    "pattern_type": "knowledge",
+    "confidence": 1,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "what is it about the English climate that is wonderfull for gardening poetry. Samples please.",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T07:29:08.091Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T07:29:08.101779",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T07:29:08.101779"
+  },
+  {
+    "id": "poetry_domain_2a52ab82",
+    "pattern_id": "poetry_domain_2a52ab82",
+    "name": "Write a poem about shopping for tofu in china.",
+    "domain": "poetry_domain",
+    "problem": "write a poem about shopping for tofu in china.",
+    "solution": "In alleys washed with morning gray,\nWhere steam rises to meet the day,\nI walk the slate of Li\u2019s back street,\nTo where the vendors crowd and meet.\n\nA wooden cart, a plastic stool,\nA quiet master breaking rule\nOf silence with a silver knife,\nTo carve the soft and white of life.\n\nThe water bath, a cloudy pool,\nWhere squares of silk, translucent, cool,\nWait trembling in the shallow bin,\nLike porcelain beneath the skin.\n\nHe asks the word, I nod my head,\nFor nothing firm, or baked, or red,\nBut *Douhua*, soft as morning dew,\nThe silken curd, the breakfast true.\n\nWith iron scoop he dips the clay,\nA heavy, wet, and wobbling sway,\nInto the bowl, it lands with ease,\nThen swims in savory amber seas.\n\nOf chili oil and dark soy paste,\nOf dried shrimp from the Yangtze\u2019s haste,\nA sprinkle of scallion green,\nThe finest meal I\u2019ve ever seen.\n\nNo plastic wrap, no Styrofoam,\nI carry home my silent foam,\nA warmth that seeps through paper thin,\nAnd holds the soul of Beijing within.",
+    "description": "AI-generated from query: write a poem about shopping for tofu in china.",
+    "pattern_type": "knowledge",
+    "confidence": 1,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "write a poem about shopping for tofu in china.",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T07:30:52.189Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T07:30:52.193616",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T07:30:52.193616"
+  },
+  {
+    "id": "poetry_domain_349ab99d",
+    "pattern_id": "poetry_domain_349ab99d",
+    "name": "Write a poem about shopping for tofu in china",
+    "domain": "poetry_domain",
+    "problem": "write a poem about shopping for tofu in china",
+    "solution": "# The White Brick\n\nThe alley wakes before the sun,\nA haze of steam from brick and clay,\nWhere bicycles spin, one by one,\nTo meet the freshness of the day.\n\nBeneath the awning, stained with oil,\nA metal trough, a milky stream,\nWhere water cools the ancient soil\nInto the fabric of a dream.\n\nNo plastic wrap, no styrofoam,\nJust wooden buckets, cut and square,\nThe seller dips a metal chrome\nTo lift the heavy, humid air.\n\nHe scoops a block, unblemished, stark,\nThe jiggling ghost of the soybean,\nIt glimmers softly in the dark,\nA pristine, pale, aquatic sheen.\n\n\"Qing dou-fu?\" asks the wrinkled hand,\nThe softest kind, the silken prize,\nI nod; he packs it in a band\nOf lotus leaf, before my eyes.\n\nFor dinner now, the prize is mine,\nTo sizzle in a garlic glaze,\nA taste of the Yangtze\u2019s brine,\nIn the morning\u2019s humid haze.",
+    "description": "AI-generated from query: write a poem about shopping for tofu in china",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "write a poem about shopping for tofu in china",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T07:32:15.876Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T07:32:15.882459",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T07:32:15.882459"
   }
 ]

@@ -36,7 +36,7 @@
     "domain": "cooking",
     "created_at": "2026-01-06T04:34:38.244351",
     "updated_at": "2026-01-06T04:34:38.244394",
-    "times_accessed": 8,
+    "times_accessed": 10,
     "user_rating": null
   },
   {
@@ -109,7 +109,7 @@
     "domain": "cooking",
     "created_at": "2026-01-06T04:34:38.244404",
     "updated_at": "2026-01-06T04:34:38.244406",
-    "times_accessed": 12,
+    "times_accessed": 23,
     "user_rating": null
   },
   {
@@ -151,7 +151,7 @@
     "domain": "cooking",
     "created_at": "2026-01-06T04:34:38.244408",
     "updated_at": "2026-01-06T04:34:38.244410",
-    "times_accessed": 22,
+    "times_accessed": 23,
     "user_rating": null
   },
   {
@@ -190,7 +190,7 @@
     "domain": "cooking",
     "created_at": "2026-01-06T04:34:38.244411",
     "updated_at": "2026-01-06T04:34:38.244413",
-    "times_accessed": 8,
+    "times_accessed": 9,
     "user_rating": null
   },
   {
@@ -229,7 +229,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.073050",
     "updated_at": "2026-01-06T08:38:05.073054",
-    "times_accessed": 51,
+    "times_accessed": 64,
     "user_rating": null,
     "rating": 4.5
   },
@@ -266,7 +266,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.074794",
     "updated_at": "2026-01-06T08:38:05.074796",
-    "times_accessed": 46,
+    "times_accessed": 53,
     "user_rating": null,
     "rating": 4.6
   },
@@ -306,7 +306,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.076446",
     "updated_at": "2026-01-06T08:38:05.076448",
-    "times_accessed": 53,
+    "times_accessed": 68,
     "user_rating": null,
     "rating": 4.7
   },
@@ -346,7 +346,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.079506",
     "updated_at": "2026-01-06T08:38:05.079508",
-    "times_accessed": 31,
+    "times_accessed": 43,
     "user_rating": null,
     "rating": 4.7
   },
@@ -386,7 +386,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.081115",
     "updated_at": "2026-01-06T08:38:05.081117",
-    "times_accessed": 13,
+    "times_accessed": 25,
     "user_rating": null,
     "rating": 4.1
   },
@@ -425,7 +425,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.082808",
     "updated_at": "2026-01-06T08:38:05.082810",
-    "times_accessed": 25,
+    "times_accessed": 35,
     "user_rating": null,
     "rating": 4.6
   },
@@ -460,7 +460,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.084323",
     "updated_at": "2026-01-06T08:38:05.084325",
-    "times_accessed": 3,
+    "times_accessed": 14,
     "user_rating": null,
     "rating": 4.5
   },
@@ -494,7 +494,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.087428",
     "updated_at": "2026-01-06T08:38:05.087430",
-    "times_accessed": 2,
+    "times_accessed": 12,
     "user_rating": null,
     "rating": 4.6
   },
@@ -533,7 +533,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.089007",
     "updated_at": "2026-01-06T08:38:05.089009",
-    "times_accessed": 37,
+    "times_accessed": 44,
     "user_rating": null,
     "rating": 4.6
   },
@@ -573,7 +573,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.092925",
     "updated_at": "2026-01-06T08:38:05.092927",
-    "times_accessed": 10,
+    "times_accessed": 21,
     "user_rating": null,
     "rating": 4.6
   },
@@ -609,7 +609,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.094797",
     "updated_at": "2026-01-06T08:38:05.094799",
-    "times_accessed": 2,
+    "times_accessed": 14,
     "user_rating": null,
     "rating": 4.6
   },
@@ -641,7 +641,7 @@
     "domain": "cooking",
     "created_at": "2026-01-14T23:11:33.483236",
     "updated_at": "2026-01-14T23:12:39.075172",
-    "times_accessed": 62,
+    "times_accessed": 64,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What is the meat dish in the form of a loaf?",
@@ -683,7 +683,7 @@
     "domain": "cooking",
     "created_at": "2026-01-14T23:28:27.922123",
     "updated_at": "2026-01-14T23:30:22.688549",
-    "times_accessed": 49,
+    "times_accessed": 53,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What kind of bread cools upside down?",
@@ -725,7 +725,7 @@
     "domain": "cooking",
     "created_at": "2026-01-14T23:43:55.580490",
     "updated_at": "2026-01-14T23:44:59.731376",
-    "times_accessed": 64,
+    "times_accessed": 65,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What is a flat bread from the north pole?",
@@ -811,7 +811,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T03:27:55.518004",
     "updated_at": "2026-01-15T03:29:08.424111",
-    "times_accessed": 44,
+    "times_accessed": 53,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "Can I substitute oil for butter?",
@@ -854,7 +854,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T03:32:22.417563",
     "updated_at": "2026-01-15T03:32:57.744587",
-    "times_accessed": 26,
+    "times_accessed": 37,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What can I substitute for oil?",
@@ -898,7 +898,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T03:43:00.727930",
     "updated_at": "2026-01-15T03:43:00.727930",
-    "times_accessed": 13,
+    "times_accessed": 28,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "How do I cook chicken breast?",
@@ -941,7 +941,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T11:52:54.448432",
     "updated_at": "2026-01-15T11:52:54.448432",
-    "times_accessed": 11,
+    "times_accessed": 23,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "Chicken dinner",
@@ -976,7 +976,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-16T20:13:57.917061",
-    "times_accessed": 8,
+    "times_accessed": 21,
     "updated_at": "2026-01-16T20:13:57.917061"
   },
   {
@@ -1001,7 +1001,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-17T00:02:10.292635",
-    "times_accessed": 2,
+    "times_accessed": 17,
     "updated_at": "2026-01-17T00:02:10.292635"
   },
   {
@@ -1026,7 +1026,7 @@
       "certified"
     ],
     "created_at": "2026-01-19T05:38:44.103741",
-    "times_accessed": 9,
+    "times_accessed": 13,
     "updated_at": "2026-01-19T05:39:50.120370",
     "confidence_score": 0.95
   },
@@ -1077,7 +1077,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T02:45:25.457656",
-    "times_accessed": 14,
+    "times_accessed": 16,
     "updated_at": "2026-01-21T02:45:25.457656"
   },
   {
@@ -1102,7 +1102,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T02:50:37.014104",
-    "times_accessed": 11,
+    "times_accessed": 15,
     "updated_at": "2026-01-21T02:50:37.014104"
   },
   {
@@ -1127,7 +1127,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T05:53:00.301618",
-    "times_accessed": 0,
+    "times_accessed": 1,
     "updated_at": "2026-01-21T05:53:00.301618"
   },
   {
@@ -1152,7 +1152,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T05:54:44.333240",
-    "times_accessed": 1,
+    "times_accessed": 4,
     "updated_at": "2026-01-21T05:54:44.333240"
   },
   {
@@ -1180,5 +1180,57 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-01-22T03:50:58.168360"
+  },
+  {
+    "id": "cooking_b86b97f1",
+    "pattern_id": "cooking_b86b97f1",
+    "name": "Recipe for raspberry flan",
+    "domain": "cooking",
+    "problem": "recipe for raspberry flan",
+    "solution": "\n\n---\n\n# The Velvet Crimson Prism: A Study in Raspberry Flan\n\nThis is not merely a dessert; it is an architectural endeavor. A silken vanilla prism suspended in a pool of spiced raspberry coulis, designed to capture the fleeting sweetness of the season.\n\n### I. The Foundation (Vanilla Crust)\n*The crisp, buttery anchor.*\n\n*   **1 \u00bd cups** Almond flour (for a nutty, savory depth)\n*   **\u00bd cup** Powdered sugar\n*   **1 cup** All-purpose flour\n*   **\u00bd cup** Unsalted butter, cold and cubed\n*   **1** Large egg yolk\n*   **1 tsp** Pure vanilla extract\n\n**Method:**\n1.  In a chilled bowl, whisk the almond flour, powdered sugar, and all-purpose flour until aerated.\n2.  Cut in the cold butter using a pastry blender or your fingertips until the mixture resembles coarse sand.\n3.  Whisk the yolk and vanilla; drizzle over the flour mixture. Toss gently with a fork until the dough just begins to clump.\n4.  Press the dough firmly and evenly into the bottom and up the sides of a 9-inch tart pan with a removable bottom.\n5.  Freeze for 20 minutes (this prevents shrinkage).\n6.  Bake at 350\u00b0F (175\u00b0C) for 20\u201322 minutes, or until golden brown. Let cool completely on a wire rack.\n\n### II. The Core (Silk Custard)\n*A smooth, trembling canvas for the fruit.*\n\n*   **2 cups** Whole milk\n*   **1 cup** Heavy cream\n*   **\u00bd cup** Granulated sugar\n*   **4** Large egg yolks\n*   **2** Whole eggs\n*   **3 tbsp** Cornstarch\n*   **1 \u00bd tsp** Gelatin powder (bloomed in 2 tbsp cold water)\n*   **2 tbsp** Salted butter (adds a savory finish)\n\n**Method:**\n1.  In a saucepan, bring milk, cream, and half the sugar to a simmer.\n2.  Whisk yolks, whole eggs, remaining sugar, and cornstarch until pale and thick.\n3.  Temper the hot liquid into the eggs, then return everything to the pot. Cook, whisking constantly, until it boils and thickens significantly (about 1 minute).\n4.  Remove from heat. Stir in the bloomed gelatin and butter until melted and glossy.\n5.  Pour immediately into the cooled crust. Smooth the top with an offset spatula.\n6.  Refrigerate for at least 4 hours, or overnight until set.\n\n### III. The Veil (Raspberries Two Ways)\n*Fresh fruit suspended in a shimmering mirror.*\n\n*   **2 cups** Fresh raspberries\n*   **\u00bd cup** Raspberry jam (seedless)\n*   **1 tbsp** Lemon juice\n*   **1 cup** Water\n*   **2 tbsp** Sugar\n*   **2 tsp** Gelatin powder\n\n**Method:**\n1.  **The Jam Layer:** Gently heat the raspberry jam with 1 tbsp of water until loose. Spread a thin layer over the top of the set custard. Arrange fresh raspberries in a concentric circle pattern over the jam.\n2.  **The Mirror Glaze:** In a small saucepan, bring water, sugar, and lemon juice to a boil. Remove from heat, stir in the gelatin until dissolved. Let cool to room temperature (it should still be liquid but not hot).\n3.  **The Assembly:** Slowly pour the cooled glaze over the raspberries, ensuring the fruit is completely covered and the surface is level.\n4.  Return to the refrigerator for 1 hour to set the glaze.\n\n**To Serve:**\nSlice with a warm, dry knife. The contrast of the crisp nutty crust, the cool vanilla custard, and the sharp, jewel-like raspberry topping creates a perfect balance of textures and temperatures.",
+    "description": "AI-generated from query: recipe for raspberry flan",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "recipe for raspberry flan",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-28T02:09:39.495Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-28T02:09:39.502837",
+    "times_accessed": 12,
+    "code": null,
+    "updated_at": "2026-01-28T02:09:39.502837"
+  },
+  {
+    "id": "cooking_0a094e2f",
+    "pattern_id": "cooking_0a094e2f",
+    "name": "What is the best apple crumble recipe",
+    "domain": "cooking",
+    "problem": "what is the best apple crumble recipe",
+    "solution": "While \"best\" is subjective, the professional consensus for the ultimate apple crumble relies on three specific things: **using the right mix of apples**, **partially cooking the filling** (so it isn't hard), and **adding oats/nuts to the topping** for texture contrast.\n\nHere is a recipe that hits the perfect balance of tart, sweet, and crunchy.\n\n### **The \"Gold Standard\" Apple Crumble**\n\n*   **Prep time:** 20 minutes\n*   **Cook time:** 40\u201345 minutes\n*   **Serves:** 6\u20138\n\n---\n\n### **Ingredients**\n\n**The Fruit Filling:**\n*   **Apples:** 1.5 kg (approx. 6\u20138 large apples).\n    *   *Pro Tip:* Use a mix. **50% Bramley (Granny Smith)** for tartness and structure, and **50% Gala or Honeycrisp** for sweetness and softness. If you use only eating apples, the filling may turn to mush; only cooking apples will be too tart.\n*   **Sugar:** 1/3 cup (70g) granulated white sugar (adjust depending on how tart your apples are).\n*   **Spice:** 1 tsp cinnamon.\n*   **Thickener:** 1 tbsp all-purpose flour (helps soak up the juices so you don't get a watery bottom).\n*   **Lemon:** 1 tbsp lemon juice.\n\n**The Crumble Topping:**\n*   **Flour:** 1 cup (130g) plain flour.\n*   **Butter:** \u00be cup (170g) **cold** unsalted butter, cubed. (Do not soften this!)\n*   **Sugar:** \u00bd cup (100g) light brown sugar (for a deeper caramel flavor).\n*   **Oats:** \u00bd cup (50g) rolled oats (old fashioned oats).\n*   **Texture:** \u00bc cup (30g) chopped pecans or walnuts (optional, but recommended).\n*   **Secret Ingredient:** A pinch of sea salt (to cut the sweetness).\n\n---\n\n### **Instructions**\n\n#### **1. Prepare the Apples**\nPreheat your oven to **350\u00b0F (180\u00b0C)**. Peel, core, and slice your apples into approx. 1cm thick slices.\n*   *The Shortcut Step:* Place the sliced apples in a microwave-safe bowl with the sugar, cinnamon, flour, and lemon juice. Microwave for 4\u20135 minutes. Stir and let it sit.\n*   *Why?* This par-cooks the apples so they soften perfectly in the oven without becoming dry, and it releases the starches to thicken the sauce.\n\n#### **2. Make the Topping**\nWhile the apples cool slightly, make the crumble. In a large bowl, combine the **flour**, **brown sugar**, **oats**, **nuts**, and **salt**.\nAdd the **cold, cubed butter**.\nUsing your clean fingertips, rub the butter into the flour mixture until it resembles **wet sand** with some larger pea-sized chunks remaining.\n*   *Important:* Do not overwork it or use a food processor (unless you pulse carefully). You want chunks of butter, not a smooth dough. The chunks create the crispy \"crunch.\"\n\n#### **3. Assemble**\nPour the apple mixture (and all the juices at the bottom of the bowl) into a baking dish (approx. 9x9 inch or pie dish).\nSprinkle the crumble topping evenly over the apples. Do not press it down!\n\n#### **4. Bake**\nBake for **35\u201345 minutes**.\nThe topping should be golden brown, and you should see the hot apple juice bubbling up through the cracks in the crumble.\n\n#### **5. The Cooling Period (Crucial)**\nLet the crumble sit for **10\u201315 minutes** before serving. If you serve it straight from the oven, the filling will be runny. As it cools slightly, the fruit sauce thickens up perfectly.\n\n---\n\n### **How to take it to the next level**\n\n1.  **The \"Crumble\" Texture:** For extra crunch, don't rub the butter in *completely*. Leave some hazelnut-sized chunks of butter/flour intact. This creates a rocky, crunchy texture rather than a sandy soil.\n2.  **The Spice Swap:** Swap the cinnamon for 1 tsp of **Mixed Spice** or add a pinch of **Nutmeg** if you want a more complex, festive flavor.\n3.  **The Serving:** It is mandatory to serve with **Vanilla Bean Ice Cream** or **Heavy Double Cream (pouring cream)**.\n\n### **Common Mistakes to Avoid**\n*   **Using all sweet apples:** If you use Red Delicious or Gala exclusively, the crumble will be cloyingly sweet and mushy. You need the acidity of a Granny Smith to balance the sugar.\n*   **Butter too warm:** If your butter melts into the flour rather than staying cold, you lose the \"crumble\" texture and get a paste. Work quickly.",
+    "description": "AI-generated from query: what is the best apple crumble recipe",
+    "pattern_type": "knowledge",
+    "confidence": 1,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "what is the best apple crumble recipe",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-01-29T07:09:41.914Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-01-29T07:09:41.919592",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-01-29T07:09:41.919592"
   }
 ]

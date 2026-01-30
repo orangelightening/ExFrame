@@ -1,0 +1,82 @@
+{
+  "domain_id": "test_type1_new",
+  "domain_name": "Creative Test",
+  "description": "Type 1 Creative Generator",
+  "version": "1.0.0",
+  "created_at": "2026-01-26T23:08:06.748154Z",
+  "updated_at": "2026-01-26T23:08:06.748161Z",
+  "categories": [
+    "test"
+  ],
+  "tags": [
+    "creative"
+  ],
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
+  },
+  "plugins": [
+    {
+      "plugin_id": "creative",
+      "name": "Creative",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "Creative",
+        "keywords": [
+          "poem",
+          "story",
+          "write"
+        ],
+        "threshold": 0.1
+      }
+    }
+  ],
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "temperature": 0.9,
+        "creative_mode": true,
+        "max_patterns": 5
+      }
+    }
+  ],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true,
+    "similarity_threshold": 0.2
+  }
+}

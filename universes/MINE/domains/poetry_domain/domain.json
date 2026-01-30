@@ -3,18 +3,56 @@
   "domain_name": "Poetry & Literary Arts",
   "description": "Knowledge about poetry forms, techniques, and literary analysis",
   "version": "1.0.0",
-  "created_at": "2026-01-19T00:00:00Z",
-  "updated_at": "2026-01-20T23:07:49.547384",
+  "created_at": "2026-01-27T00:42:49.469332Z",
+  "updated_at": "2026-01-27T01:01:43.734589",
+  "categories": [
+    "reference"
+  ],
+  "tags": [
+    "tag1"
+  ],
+  "domain_type": "1",
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
+  },
   "plugins": [
     {
       "plugin_id": "generalist",
-      "name": "Poetry Generalist",
-      "description": "General expert in poetry and literary arts",
+      "name": "Poetry",
+      "description": "",
       "module": "plugins.generalist",
       "class": "GeneralistPlugin",
       "enabled": true,
       "config": {
         "name": "Poetry",
+        "description": "",
         "keywords": [
           "poem",
           "poetry",
@@ -48,24 +86,11 @@
           "analysis",
           "literary_device"
         ],
-        "threshold": 0.1,
-        "description": "Use only assigned names when referring to other works. Limit off topic discussions to 100 words.  within the main reply."
+        "threshold": 0.1
       }
     }
   ],
-  "enrichers": [
-    {
-      "module": "plugins.enrichers.llm_enricher",
-      "class": "LLMEnricher",
-      "enabled": true,
-      "config": {
-        "mode": "enhance",
-        "model": "glm-4.7",
-        "max_patterns": 10,
-        "temperature": 0.8
-      }
-    }
-  ],
+  "enrichers": [],
   "knowledge_base": {
     "type": "json",
     "storage_path": "patterns.json",
@@ -73,40 +98,60 @@
     "auto_save": true,
     "similarity_threshold": 0.2
   },
-  "pattern_schema": {
-    "required_fields": [
-      "id",
-      "name",
-      "pattern_type",
-      "problem",
-      "solution"
-    ],
-    "optional_fields": [
-      "description",
-      "steps",
-      "conditions",
-      "related_patterns",
-      "prerequisites",
-      "alternatives",
-      "confidence",
-      "sources",
-      "tags",
-      "examples",
-      "domain",
-      "created_at",
-      "updated_at",
-      "times_accessed",
-      "user_rating",
-      "origin",
-      "origin_query",
-      "llm_generated",
-      "status"
-    ]
-  },
-  "categories": [
-    "reference"
+  "temperature": 0.85,
+  "creative_keywords": "poem, verse, rhyme, stanza, haiku, sonnet",
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "Poetry",
+      "description": "",
+      "expertise_keywords": [
+        "poem",
+        "poetry",
+        "verse",
+        "stanza",
+        "rhyme",
+        "meter",
+        "rhythm",
+        "metaphor",
+        "simile",
+        "alliteration",
+        "imagery",
+        "sonnet",
+        "haiku",
+        "limerick",
+        "ballad",
+        "ode",
+        "elegy",
+        "free verse",
+        "form",
+        "structure",
+        "write",
+        "create",
+        "make",
+        "generate",
+        "compose"
+      ],
+      "expertise_categories": [
+        "poetic_form",
+        "technique",
+        "analysis",
+        "literary_device"
+      ],
+      "confidence_threshold": 0.1
+    }
   ],
-  "tags": [
-    "tag1"
-  ]
+  "storage_path": "/app/data/patterns/poetry_domain",
+  "pattern_format": "json",
+  "llm_min_confidence": 0.3,
+  "similarity_threshold": 0.3,
+  "max_patterns": 10,
+  "document_store_type": "exframe_instance",
+  "show_sources": true,
+  "max_research_steps": 10,
+  "research_timeout": 300,
+  "report_format": "structured",
+  "enable_web_search": false,
+  "require_confirmation": true,
+  "research_on_fallback": false
 }
