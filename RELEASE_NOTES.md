@@ -1,5 +1,147 @@
 # ExFrame Release Notes
 
+## Version 1.6.0 - "Domain Type System"
+
+**Release Date:** January 27, 2026
+**Status:** Production Ready ✅
+
+---
+
+## Overview
+
+ExFrame v1.6.0 introduces a complete **domain type system** with 5 pre-configured archetypes for different use cases, making it easy to create optimized knowledge domains without manual configuration.
+
+---
+
+## What's New
+
+### 🎯 Domain Type System
+
+**New Feature:** 5 domain archetypes with type-specific configurations
+
+- **Type 1: Creative Generator** - Poems, stories, creative content (high temp 0.7-0.9)
+- **Type 2: Knowledge Retrieval** - How-to guides, FAQs, docs (medium temp 0.3-0.5)
+- **Type 3: Document Store Search** - External docs, API docs, live data (document-first)
+- **Type 4: Analytical Engine** - Research, analysis, reports (multi-step with progress)
+- **Type 5: Hybrid Assistant** - General purpose with LLM fallback (user choice)
+
+### 🎨 User Interface Improvements
+
+- **Domain Creator UI** - Type selector with colored settings panels for each type
+- **Temperature control** - Slider + number input with visual badge on query screen
+- **Domain type indicator** - Shows current type (1-5) on dashboard
+
+### 🔧 Backend Enhancements
+
+- **DomainConfigGenerator** - Factory class creates optimized configs for each type
+- **Type-specific configurations** - Each type has optimized plugins, enrichers, and settings
+- **Automatic config generation** - Single source of truth for domain types
+
+### 🐛 Bug Fixes
+
+- **Create Pattern button** - Added missing modal for pattern creation
+- **Markdown rendering** - Pattern fields now render markdown instead of raw text
+- **Temperature display** - Fixed slider/number input visual mismatch
+- **Domain save refresh** - Temperature badge updates immediately after saving
+
+---
+
+## Installation
+
+### New Installation
+
+```bash
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+docker compose up -d
+```
+
+### Upgrading from v1.5.0
+
+```bash
+git pull
+docker compose down
+docker compose build --no-cache eeframe-app
+docker compose up -d
+```
+
+**Note:** Existing domains will be automatically migrated to appropriate types.
+
+---
+
+## Breaking Changes
+
+**None** - This release is fully backward compatible with v1.5.0.
+
+---
+
+## API Changes
+
+### New Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/admin/domains/{domain_id}` | PUT | Update domain with type-specific config |
+
+### Updated Endpoints
+
+| Endpoint | Change |
+|----------|--------|
+| Domain create/update | Now supports `domain_type` field (1-5) |
+| `/api/query` | Temperature passes through to LLM API correctly |
+
+---
+
+## Configuration
+
+### Domain Type Selection
+
+When creating a domain via UI or API, select the appropriate type:
+
+```bash
+curl -X POST http://localhost:3000/api/domains \
+  -H "Content-Type: application/json" \
+  -d '{
+    "domain_id": "my_knowledge_base",
+    "domain_name": "My Knowledge Base",
+    "domain_type": "2",
+    "description": "Technical documentation and FAQs"
+  }'
+```
+
+### Type-Specific Settings
+
+Each domain type automatically configures:
+- **Plugins** - Research specialist, generalist, or creative specialists
+- **Enrichers** - LLM synthesis, web search, or code generation
+- **Temperature** - Optimized for the use case
+- **Search strategies** - Pattern-based, document-first, or web-enhanced
+
+---
+
+## Known Limitations
+
+1. **Type switching** - Changing domain type requires manual verification of plugins
+2. **Custom configurations** - Advanced users may want to fine-tune type defaults
+
+**Planned Enhancements:** Type upgrade/downgrade wizard with config preview.
+
+---
+
+## Support
+
+- **Issues:** https://github.com/orangelightening/ExFrame/issues
+- **Documentation:** See [README.md](README.md)
+- **Installation:** See [INSTALL.md](INSTALL.md)
+
+---
+
+## Full Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for complete version history.
+
+---
+
 ## Version 1.5.0 - "Semantic Search"
 
 **Release Date:** January 21, 2026

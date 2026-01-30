@@ -611,17 +611,19 @@ Your response:"""
 
         # First, check if there's a naming/nomenclature note in the documentation
         # This provides context about historical naming (EEFrame → ExFrame)
+        # IMPORTANT: Search ALL patterns for nomenclature docs, not just first 20
         nomenclature_context = ""
         for doc in patterns:
             title = doc.get("title", doc.get("name", ""))
             # Check for INDEX.md or similar naming documentation
-            if "INDEX" in title.upper() or "nomenclature" in title.lower():
+            if "INDEX" in title.upper() or "nomenclature" in title.lower() or "naming" in title.lower():
                 content = doc.get("content", doc.get("solution", ""))
                 # Extract the nomenclature section if present
-                if "Historical Nomenclature" in content or "EEFrame → ExFrame" in content:
-                    # Get a substantial excerpt (up to 1500 chars)
-                    nomenclature_context = content[:1500]
+                if "Historical Nomenclature" in content or "EEFrame → ExFrame" in content or "nomenclature" in content.lower():
+                    # Get a substantial excerpt (up to 2000 chars to include full context)
+                    nomenclature_context = content[:2000]
                     nomenclature_context = f"\n*** NAMING CONTEXT (from {title}) ***\n{nomenclature_context}\n***\n"
+                    print(f"  [LLMEnricher] Found nomenclature context in: {title}")
                     break
 
         # Build contradiction detection prompt
@@ -643,7 +645,22 @@ Query: "{query}"
 Documents:
 {doc_summary}
 
-*** IMPORTANT: If there is a nomenclature section above, historical naming references (EEFrame, omv-copilot, etc.) are INTENTIONAL and should NOT be flagged as contradictions. Only flag issues that represent actual conflicts or unclear documentation. ***
+*** IMPORTANT INSTRUCTIONS: If there is a nomenclature section above, read it carefully: ***
+
+1. HISTORICAL NAMES (EEFrame, omv-copilot, eeframe-app, eeframe-*) are INTENTIONAL and should NOT be flagged.
+
+2. Service/container names (e.g., 'eeframe-app' in docker-compose.yml) are INTERNAL infrastructure plumbing for:
+   - Docker volumes and data preservation
+   - Git history continuity
+   - Deployment stability
+   These DO NOT affect end users and should NOT be compared to package names.
+
+3. Package names (e.g., 'exframe' in pyproject.toml) are for USER-FACING installs (pip install).
+   This is the correct public name and should NOT be changed to match internal service names.
+
+4. DO NOT flag differences between internal infrastructure names (service names, container names, volume names) and public-facing names (package name, documentation) as contradictions.
+
+5. Only flag issues that represent ACTUAL conflicts or unclear documentation that would confuse users.
 
 Identify and categorize any issues found. Respond ONLY in valid JSON format with this structure:
 {{

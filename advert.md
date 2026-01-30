@@ -1,4 +1,4 @@
-# ExFrame - Self-Healing AI Knowledge System
+# ExFrame - Expertise Framework
 
 *Version: Managed by git tags*
 **License:** Apache-2.0
@@ -8,7 +8,7 @@
 
 ## What is ExFrame?
 
-ExFrame is a **domain-agnostic AI-powered knowledge management system** that transforms how organizations capture, organize, and retrieve expertise. Unlike traditional knowledge bases, ExFrame features:
+ExFrame is a **domain-agnostic AI-powered knowledge management system** with configurable domain types. Unlike traditional knowledge bases, ExFrame features:
 
 - **Self-Learning AI** - Automatically improves its own knowledge base
 - **Self-Documenting** - AI generates and refines documentation

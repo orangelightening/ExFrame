@@ -8,7 +8,7 @@
 
 ## Overview
 
-ExFrame is a unified, domain-agnostic framework for building AI-powered knowledge assistants with a **universe-based architecture** and **plugin-based pipeline**. It provides:
+ExFrame is a unified, domain-agnostic AI-powered knowledge management system with a **universe-based architecture** and **plugin-based pipeline**. It provides:
 
 - **Universe Architecture**: Complete isolation and portability of knowledge configurations
 - **Plugin Pipeline**: Router → Specialist → Enricher → Formatter - all swappable
