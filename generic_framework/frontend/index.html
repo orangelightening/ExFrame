@@ -159,6 +159,10 @@
                                             <input type="checkbox" x-model="enableTrace" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-500">
                                             <span>Enable Trace</span>
                                     </label>
+                                    <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer ml-4">
+                                            <input type="checkbox" x-model="enableVerbose" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-purple-500 focus:ring-purple-500">
+                                            <span>Enable Verbose (data snapshots)</span>
+                                    </label>
                                     <div class="text-sm text-gray-400">
                                         <span x-show="loading">Processing...</span>
                                         <span x-show="!loading && lastQuery">Last: <span class="text-emerald-400" x-text="truncate(lastQuery, 40)"></span></span>
@@ -318,6 +322,16 @@
                                     <div class="text-gray-300" x-text="formatTimestamp(displayTrace.logged_at)"></div>
                                 </div>
                             </div>
+                            <!-- Query ID (new state machine) -->
+                            <template x-if="displayTrace.query_id">
+                                <div class="mt-3 pt-3 border-t border-gray-700">
+                                    <span class="text-gray-400 text-xs">Query ID:</span>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <code class="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400 font-mono" x-text="displayTrace.query_id"></code>
+                                        <button @click="copyQueryId(displayTrace.query_id)" class="text-xs text-gray-400 hover:text-white">Copy</button>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
 
                         <!-- Trace Steps -->
@@ -391,20 +405,65 @@
                                 <svg class="w-4 h-4 transition-transform" :class="showRawTrace ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
-                                <span>Show State Changes</span>
+                                <span>Show State Machine Log</span>
                             </button>
 
                             <div x-show="showRawTrace" x-transition class="mt-4">
-                                <h3 class="text-sm font-semibold text-gray-300 mb-3">State Change Log</h3>
+                                <!-- State Machine Summary -->
+                                <template x-if="displayTrace.state_machine && displayTrace.state_machine.summary">
+                                    <div class="mb-4 p-4 rounded-lg bg-gray-900/50 border border-emerald-500/30">
+                                        <h3 class="text-sm font-semibold text-emerald-400 mb-3">State Machine Summary</h3>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                            <div>
+                                                <div class="text-gray-500">Total Events</div>
+                                                <div class="text-gray-200 font-mono" x-text="displayTrace.state_machine.summary.total_events"></div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Duration</div>
+                                                <div class="text-gray-200 font-mono" x-text="(displayTrace.state_machine.summary.total_duration_ms / 1000).toFixed(2) + 's'"></div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">States</div>
+                                                <div class="text-gray-200 font-mono" x-text="displayTrace.state_machine.summary.unique_states.length"></div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Errors</div>
+                                                <div class="font-mono" :class="displayTrace.state_machine.summary.has_error ? 'text-red-400' : 'text-emerald-400'" x-text="displayTrace.state_machine.summary.has_error ? 'Yes' : 'No'"></div>
+                                            </div>
+                                        </div>
+                                        <template x-if="displayTrace.state_machine.summary.components_used.length > 0">
+                                            <div class="mt-3 pt-3 border-t border-gray-700">
+                                                <div class="text-gray-500 text-xs mb-1">Components Used</div>
+                                                <div class="flex flex-wrap gap-1">
+                                                    <template x-for="component in displayTrace.state_machine.summary.components_used">
+                                                        <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-xs" x-text="component"></span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <h3 class="text-sm font-semibold text-gray-300 mb-3">State Transitions</h3>
                                 <div class="space-y-2 font-mono text-xs">
                                     <template x-for="change in getStateChanges(displayTrace)" :key="change.step">
                                         <div class="p-3 rounded bg-gray-900/50 border border-gray-700">
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400" x-text="'Step ' + change.step"></span>
-                                                <span class="text-gray-400" x-text="change.action.replace('_', ' ')"></span>
+                                            <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                                <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400" x-text="'#' + change.step"></span>
+                                                <template x-if="change.from_state">
+                                                    <span class="text-gray-500" x-text="change.from_state"></span>
+                                                    <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                                    </svg>
+                                                </template>
+                                                <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold" x-text="change.to_state || change.action"></span>
                                                 <span class="text-gray-600" x-text="formatTimestamp(change.timestamp)"></span>
+                                                <template x-if="change.duration_ms !== null && change.duration_ms !== undefined">
+                                                    <span class="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400" x-text="change.duration_ms + 'ms'"></span>
+                                                </template>
                                             </div>
                                             <div class="space-y-0.5 text-gray-400">
+                                                <div class="text-gray-500 italic" x-text="'Trigger: ' + change.trigger"></div>
                                                 <template x-for="detail in change.details">
                                                     <div class="whitespace-pre-wrap" x-text="detail"></div>
                                                 </template>
@@ -412,9 +471,6 @@
                                         </div>
                                     </template>
                                 </div>
-
-                                <h3 class="text-sm font-semibold text-gray-300 mt-6 mb-3">Raw Trace Data</h3>
-                                <pre class="p-4 rounded-lg bg-gray-900/50 border border-gray-700 text-xs overflow-x-auto text-gray-300" x-text="JSON.stringify(displayTrace, null, 2)"></pre>
                             </div>
                         </div>
                     </div>
@@ -2472,7 +2528,9 @@
                 categories: [],
                 queriesProcessed: 0,
                 enableTrace: false,
-                trace: null,
+                enableVerbose: false,  // Verbose mode with data snapshots
+                trace: null,  // Old trace format (deprecated)
+                currentResponse: null,  // Full response (includes state_machine)
                 selectedTrace: null,
                 processingTime: 0,
                 showTraceViewer: false,
@@ -2641,8 +2699,19 @@
                 exampleQueries: {},  // Populated from recent traces per domain
 
                 // Computed property for the trace to display
+                // Returns the full response object (contains both old trace and new state_machine)
                 get displayTrace() {
-                    return this.selectedTrace || this.trace;
+                    // If a historical trace is selected, return it (old format)
+                    if (this.selectedTrace) {
+                        return this.selectedTrace;
+                    }
+                    // Return the current query response (contains trace and state_machine)
+                    // Build a synthetic object that has both old trace fields and new state_machine
+                    if (this.currentResponse) {
+                        return this.currentResponse;
+                    }
+                    // Fallback to old trace for backward compatibility
+                    return this.trace;
                 },
 
                 get renderedResponse() {
@@ -2952,8 +3021,10 @@
                     this.specialist = '';
                     this.confidence = 0;
                     this.trace = null;
+                    this.currentResponse = null;
                     this.selectedTrace = null;
                     this.lastQuery = '';
+                    this.enableVerbose = false;  // Reset verbose for new query (user must re-enable)
 
                     // If on patterns view, load patterns with health data
                     if (this.currentView === 'patterns') {
@@ -3214,7 +3285,8 @@
                             body: JSON.stringify({
                                 query: this.query,
                                 domain: this.currentDomain,
-                                include_trace: this.enableTrace
+                                include_trace: this.enableTrace,
+                                verbose: this.enableVerbose
                             })
                         });
 
@@ -3253,7 +3325,8 @@
                         this.confidence = data.confidence;
                         this.lastQuery = data.query;
                         this.processingTime = data.processing_time_ms || 0;
-                        this.trace = data.trace || null;
+                        this.trace = data.trace || null;  // Old trace format (deprecated)
+                        this.currentResponse = data;  // Full response (includes state_machine)
                         this.llm_used = data.llm_used || false;
                         this.ai_generated = data.ai_generated || false;
                         this.direct_prompt = data.direct_prompt || false;
@@ -3460,6 +3533,13 @@
                     return new Date(ts).toLocaleTimeString();
                 },
 
+                copyQueryId(queryId) {
+                    navigator.clipboard.writeText(queryId).then(() => {
+                        // Could add a toast notification here
+                        console.log('Copied query ID:', queryId);
+                    });
+                },
+
                 getScoreColor(score) {
                     if (score >= 0.8) return 'text-emerald-400';
                     if (score >= 0.5) return 'text-yellow-400';
@@ -3473,7 +3553,25 @@
                 },
 
                 getStateChanges(trace) {
-                    if (!trace || !trace.steps) return [];
+                    // New: Use state machine trace if available
+                    if (!trace) return [];
+
+                    // Check for new state machine format
+                    if (trace.state_machine && trace.state_machine.events) {
+                        return trace.state_machine.events.map((event, index) => ({
+                            step: index + 1,
+                            action: event.to_state.toLowerCase().replace(/_/g, ' '),
+                            timestamp: event.timestamp,
+                            from_state: event.from_state,
+                            to_state: event.to_state,
+                            trigger: event.trigger,
+                            duration_ms: event.duration_ms,
+                            details: this.formatStateEvent(event)
+                        }));
+                    }
+
+                    // Fallback: Old trace format (deprecated)
+                    if (!trace.steps) return [];
                     const changes = [];
                     trace.steps.forEach(step => {
                         const change = {
@@ -3502,6 +3600,59 @@
                         changes.push(change);
                     });
                     return changes;
+                },
+
+                formatStateEvent(event) {
+                    const details = [];
+                    const data = event.data || {};
+
+                    // Add basic info
+                    if (event.from_state) {
+                        details.push(`Transition: ${event.from_state} → ${event.to_state}`);
+                    } else {
+                        details.push(`Initial state: ${event.to_state}`);
+                    }
+
+                    // Add trigger
+                    details.push(`Trigger: ${event.trigger}`);
+
+                    // Add duration if available
+                    if (event.duration_ms !== null && event.duration_ms !== undefined) {
+                        details.push(`Duration: ${event.duration_ms}ms`);
+                    }
+
+                    // Add key data fields
+                    for (const [key, value] of Object.entries(data)) {
+                        if (key === 'domain') continue; // Skip domain, already shown elsewhere
+                        if (key === 'query') {
+                            details.push(`Query: "${value}"`);
+                        } else if (key === 'specialist' || key === 'specialist_name') {
+                            details.push(`Specialist: ${value}`);
+                        } else if (key === 'patterns_found') {
+                            details.push(`Patterns found: ${value}`);
+                        } else if (key === 'confidence') {
+                            details.push(`Confidence: ${(value * 100).toFixed(1)}%`);
+                        } else if (key === 'llm_used') {
+                            details.push(`LLM used: ${value ? 'Yes' : 'No'}`);
+                        } else if (key === 'response_size') {
+                            details.push(`Response size: ${value} chars`);
+                        } else if (key === 'input_size' || key === 'output_size') {
+                            details.push(`${key === 'input_size' ? 'Input' : 'Output'} size: ${value} bytes`);
+                        } else if (key === 'changes') {
+                            // Show what changed
+                            if (value.added && Object.keys(value.added).length > 0) {
+                                details.push(`Added: ${Object.keys(value.added).join(', ')}`);
+                            }
+                            if (value.modified && Object.keys(value.modified).length > 0) {
+                                details.push(`Modified: ${Object.keys(value.modified).join(', ')}`);
+                            }
+                            if (value.removed && Object.keys(value.removed).length > 0) {
+                                details.push(`Removed: ${Object.keys(value.removed).join(', ')}`);
+                            }
+                        }
+                    }
+
+                    return details;
                 },
 
                 // ==================== DOMAIN CRUD FUNCTIONS ====================

@@ -1287,3 +1287,367 @@ This level of detail (Option B) is achievable because:
 
 ---
 
+## 8. Verbose Mode
+
+### Overview
+
+**Verbose Mode** is an optional debugging feature that captures complete data snapshots at each state transition. It provides full visibility into the data flowing through the query pipeline, including:
+
+- **Incoming data snapshots** - What data enters each state
+- **Outgoing data snapshots** - What data leaves each state
+- **Memory context** - Internal state at transition points
+- **Error diagnostics** - Full stack traces when errors occur
+
+### Use Cases
+
+| Scenario | When to Use Verbose |
+|----------|-------------------|
+| **Development** | Implementing new enrichers/formatters |
+| **Debugging** | Investigating unexpected behavior |
+| **Performance Analysis** | Identifying data bottlenecks |
+| **Error Investigation** | Understanding root cause of failures |
+| **Security Auditing** | Tracking sensitive data flow |
+| **Compliance** | Full data provenance requirements |
+
+### User Interface
+
+Verbose mode is controlled via a checkbox on the query screen:
+
+```
+┌─────────────────────────────────────────┐
+│ Query Input                              │
+├─────────────────────────────────────────┤
+│ [ ] Enable Trace                        │
+│ [ ] Enable Verbose (data snapshots)     │ ← NEW
+│                                          │
+│ [Submit Query]                          │
+└─────────────────────────────────────────┘
+```
+
+### Automatic Activation on Error
+
+**Critical Design Decision**: When an error occurs during query processing, verbose mode is **automatically enabled** for that query, regardless of the user's checkbox setting.
+
+**Rationale**:
+- Errors are rare but valuable learning opportunities
+- Cannot predict when errors will occur
+- Capturing error context retrospectively is impossible
+- Win-win: System gets diagnostic data, user gets fixes
+
+**Implementation**:
+```python
+def error(self, trigger: str, error_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Transition to ERROR state with automatic verbose capture."""
+    # Force enable verbose mode for this error
+    self._verbose_enabled = True
+
+    # Capture full context including:
+    # - Current memory state
+    # - All recent events
+    # - Error stack trace
+    # - Complete data snapshots
+
+    error_snapshot = {
+        "error_trigger": trigger,
+        "error_data": error_data,
+        "stack_trace": traceback.format_exc(),
+        "state_at_error": {
+            "current_state": self.current_state.value if self.current_state else None,
+            "recent_events": self.events[-5:],  # Last 5 events
+            "memory_usage": self._get_memory_snapshot(),
+            "active_components": self._get_components_used()
+        },
+        "verbose_data": {
+            "input_snapshot": self._last_data_in,
+            "output_snapshot": self._last_data_out
+        }
+    }
+
+    return self.transition(QueryState.ERROR, trigger, error_snapshot)
+```
+
+### Verbose Data Schema
+
+When verbose mode is enabled, each state transition includes additional fields:
+
+```json
+{
+  "query_id": "q_abc123",
+  "from_state": "ENRICHMENT_PIPELINE",
+  "to_state": "LLM_PROCESSING",
+  "trigger": "llm_call_start",
+  "timestamp": "2026-01-31T20:00:00.000Z",
+  "duration_ms": 150,
+  "data": {
+    "enricher": "LLMEnricher",
+    "confidence": 0.65
+  },
+  "verbose": {
+    "enabled": true,
+    "trigger_reason": "user_enabled",  // or "auto_error", "auto_admin"
+    "snapshots": {
+      "input": {
+        "full_data": {  // Complete incoming data structure
+          "query": "What is ExFrame?",
+          "patterns": [...],
+          "context": {...},
+          "specialist_id": "exframe_specialist"
+        },
+        "size_bytes": 2048,
+        "keys": ["query", "patterns", "context", "specialist_id"]
+      },
+      "output": {
+        "full_data": {  // Complete outgoing data structure
+          "query": "What is ExFrame?",
+          "patterns": [...],
+          "context": {...},
+          "llm_request": {...}
+        },
+        "size_bytes": 4096,
+        "keys": ["query", "patterns", "context", "llm_request"]
+      },
+      "delta": {
+        "keys_added": ["llm_request"],
+        "keys_removed": [],
+        "keys_modified": ["context"]
+      }
+    },
+    "system_context": {
+      "memory_usage_mb": 256,
+      "cpu_usage_percent": 45,
+      "timestamp": "2026-01-31T20:00:00.000Z",
+      "thread_id": "asyncio-001"
+    }
+  }
+}
+```
+
+### Verbose Trigger Reasons
+
+| Reason | Description | Example |
+|--------|-------------|---------|
+| `user_enabled` | User checked the verbose box | Development/debugging |
+| `auto_error` | Error occurred, auto-enabled | Any ERROR state transition |
+| `auto_admin` | Admin override via API | Remote diagnostics |
+| `auto_threshold` | Duration/memory exceeded | Performance investigation |
+
+### Issue Tracking Integration
+
+Verbose events can be logged to external issue tracking systems:
+
+**Integration Points**:
+
+1. **Sentry Integration** (Error tracking)
+```json
+{
+  "verbose": {
+    "trigger_reason": "auto_error",
+    "sentry_event_id": "abc123def456",
+    "issue_url": "https://sentry.io/issues/12345"
+  }
+}
+```
+
+2. **GitHub Issues Integration**
+```json
+{
+  "verbose": {
+    "trigger_reason": "auto_error",
+    "github_issue": {
+      "repo": "exframe/exframe",
+      "issue_number": 42,
+      "url": "https://github.com/exframe/exframe/issues/42"
+    }
+  }
+}
+```
+
+3. **Custom Issue Tracker**
+```json
+{
+  "verbose": {
+    "trigger_reason": "auto_error",
+    "issue_tracker": {
+      "system": "jira",
+      "ticket": "EXF-1234",
+      "url": "https://jira.example.com/browse/EXF-1234"
+    }
+  }
+}
+```
+
+### Implementation Pattern
+
+**State Machine Constructor**:
+```python
+class QueryStateMachine:
+    def __init__(self, query_id: Optional[str] = None, domain: Optional[str] = None,
+                 verbose: bool = False):
+        self.query_id = query_id or self._generate_id()
+        self.domain = domain
+        self._verbose_enabled = verbose
+        self._auto_verbose_triggered = False
+        self._last_data_in = None
+        self._last_data_out = None
+```
+
+**Transition with Verbose Capture**:
+```python
+def transition(self, to_state: QueryState, trigger: str,
+               data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    now = datetime.utcnow()
+
+    # Capture input snapshot if verbose enabled
+    input_snapshot = None
+    if self._verbose_enabled and data:
+        input_snapshot = self._capture_snapshot(data, "input")
+
+    # ... existing transition logic ...
+
+    # Capture output snapshot if verbose enabled
+    output_snapshot = None
+    if self._verbose_enabled and event_data:
+        output_snapshot = self._capture_snapshot(event_data, "output")
+
+    # Add verbose data if enabled
+    if self._verbose_enabled:
+        event["verbose"] = {
+            "enabled": True,
+            "trigger_reason": self._get_verbose_trigger_reason(),
+            "snapshots": {
+                "input": input_snapshot,
+                "output": output_snapshot
+            }
+        }
+
+    return event
+```
+
+### Snapshot Capture Helper
+
+```python
+def _capture_snapshot(self, data: Any, label: str) -> Dict[str, Any]:
+    """Capture a detailed snapshot of data for verbose logging."""
+    return {
+        "full_data": data,
+        "type": type(data).__name__,
+        "size_bytes": len(str(data)),
+        "keys": list(data.keys()) if isinstance(data, dict) else [],
+        "length": len(data) if isinstance(data, (list, str, dict)) else None,
+        "preview": str(data)[:500]  # First 500 chars
+    }
+```
+
+### Performance Considerations
+
+| Mode | Log Size per Query | Performance Impact |
+|------|-------------------|-------------------|
+| **Normal** | ~2-5 KB | Negligible |
+| **Verbose** | ~50-200 KB | Minimal (async logging) |
+| **Error + Verbose** | ~100-500 KB | Slight (acceptable) |
+
+### Privacy & Security Considerations
+
+1. **Sensitive Data**: Verbose logs may contain:
+   - User query text (PII potential)
+   - LLM API keys (should be redacted)
+   - Internal system state
+   - File paths and configuration
+
+2. **Data Retention**:
+   - Normal logs: 30 days
+   - Verbose logs: 7 days (compressed)
+   - Error logs: 90 days (archived separately)
+
+3. **Access Control**:
+   - Verbose logs require admin privileges
+   - Automatic redaction of sensitive fields
+   - Audit log of who accessed verbose logs
+
+---
+
+## 9. Implementation Plan Updates
+
+### Phase 2.5: Verbose Mode Implementation (NEW)
+
+**Priority:** MEDIUM
+**Estimated Effort:** 1-2 days
+**Dependencies:** Phase 1 (State Machine Core) complete
+
+#### Tasks
+
+1. **UI Enhancement** (4 hours)
+   - Add "Enable Verbose" checkbox below "Enable Trace"
+   - Label: "Enable Verbose (data snapshots)"
+   - Tooltip: "Capture full data snapshots for debugging (rarely needed)"
+
+2. **State Machine Enhancement** (6 hours)
+   - Add `verbose` parameter to `QueryStateMachine.__init__`
+   - Add `_capture_snapshot()` helper method
+   - Modify `transition()` to capture snapshots when verbose enabled
+   - Implement auto-verbose on error (`_verbose_enabled = True`)
+   - Add `_get_verbose_trigger_reason()` method
+
+3. **API Integration** (2 hours)
+   - Add `verbose` parameter to `/api/query` endpoint
+   - Pass verbose flag through to state machine
+
+4. **Issue Tracking Integration** (Optional, 4-8 hours)
+   - Define integration interface (Sentry, GitHub, custom)
+   - Add webhook configuration for error notifications
+   - Implement `log_to_issue_tracker()` method
+
+#### Testing
+
+```python
+# Test verbose mode
+sm = QueryStateMachine(verbose=True)
+sm.transition(QueryState.QUERY_RECEIVED, "api_request", {"query": "test"})
+# Event should include verbose.snapshots
+
+# Test auto-verbose on error
+sm_normal = QueryStateMachine(verbose=False)
+sm_normal.error("test_error", {"error": "something failed"})
+# Should auto-enable verbose and capture full context
+```
+
+---
+
+## 10. Scoping & Boundaries
+
+### Current Scope (This Implementation)
+
+✅ **State Machine Core** - 23 states, full lifecycle
+✅ **Change Tracking** - Enrichers, formatters (Option B)
+✅ **Trace Consumer API** - 3 endpoints for querying state log
+✅ **Verbose Mode** - Data snapshots for debugging (DESIGN)
+❌ **Issue Tracking Integration** - Future enhancement
+❌ **Real-time Streaming** - Future enhancement
+❌ **Domain Lifecycle States** - Future enhancement
+❌ **Universe Management States** - Future enhancement
+
+### Future Extensions
+
+1. **Phase 5: Issue Tracking Integration**
+   - Sentry webhook integration
+   - GitHub Issues API integration
+   - Custom issue tracker support
+   - Automatic issue creation on error
+
+2. **Phase 6: Real-time State Streaming**
+   - WebSocket endpoint for live state updates
+   - Browser-based state visualization
+   - Real-time debugging dashboard
+
+3. **Phase 7: Domain Lifecycle**
+   - Domain loading states
+   - Pattern reindexing states
+   - Configuration reload states
+
+4. **Phase 8: Universe Management**
+   - Universe merge states
+   - Universe export/import states
+   - Multi-universe query routing states
+
+---
+

@@ -83,18 +83,28 @@ class QueryStateMachine:
         sm.complete({"status": "success"})
     """
 
-    def __init__(self, query_id: Optional[str] = None, domain: Optional[str] = None):
+    def __init__(self, query_id: Optional[str] = None, domain: Optional[str] = None, verbose: bool = False):
         """Initialize state machine.
 
         Args:
             query_id: Unique identifier for this query (auto-generated if None)
             domain: Domain ID for this query
+            verbose: Enable verbose mode (capture full data snapshots)
         """
         self.query_id = query_id or self._generate_id()
         self.domain = domain
         self.current_state: Optional[QueryState] = None
         self.state_entered_at: Optional[datetime] = None
         self.events: List[Dict[str, Any]] = []
+
+        # Verbose mode settings
+        self._verbose_enabled = verbose
+        self._auto_verbose_triggered = False
+        self._verbose_trigger_reason = "user_enabled" if verbose else None
+
+        # Data tracking for verbose snapshots
+        self._last_data_in = None
+        self._last_data_out = None
 
         # Log file path
         self.log_path = Path("/app/logs/traces/state_machine.jsonl")
@@ -104,6 +114,50 @@ class QueryStateMachine:
     def _generate_id() -> str:
         """Generate unique query ID using UUID."""
         return f"q_{uuid.uuid4().hex[:12]}"
+
+    def _capture_snapshot(self, data: Any, label: str) -> Optional[Dict[str, Any]]:
+        """Capture a detailed snapshot of data for verbose logging.
+
+        Args:
+            data: The data to capture
+            label: "input" or "output" describing the snapshot
+
+        Returns:
+            Snapshot dictionary with full_data, type, size, keys, preview
+        """
+        if data is None:
+            return None
+
+        snapshot = {
+            "type": type(data).__name__,
+            "size_bytes": len(str(data)),
+            "preview": str(data)[:500]  # First 500 chars
+        }
+
+        # Add type-specific information
+        if isinstance(data, dict):
+            snapshot["keys"] = list(data.keys())
+            snapshot["count"] = len(data)
+        elif isinstance(data, list):
+            snapshot["count"] = len(data)
+            snapshot["preview_count"] = min(len(data), 5)
+        elif isinstance(data, str):
+            snapshot["length"] = len(data)
+        elif isinstance(data, (bool, int, float, type(None))):
+            snapshot["value"] = data
+
+        return snapshot
+
+    def _get_verbose_trigger_reason(self) -> str:
+        """Get the reason why verbose mode is enabled."""
+        return self._verbose_trigger_reason or "user_enabled"
+
+    def _enable_auto_verbose(self) -> None:
+        """Enable verbose mode automatically (e.g., on error)."""
+        if not self._verbose_enabled:
+            self._verbose_enabled = True
+            self._auto_verbose_triggered = True
+            self._verbose_trigger_reason = "auto_error"
 
     def transition(self, to_state: QueryState, trigger: str,
                    data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -141,6 +195,43 @@ class QueryStateMachine:
             "data": event_data,
             "duration_ms": duration_ms
         }
+
+        # Add verbose data if enabled
+        if self._verbose_enabled:
+            # Capture input snapshot
+            input_snapshot = None
+            if data:
+                input_snapshot = self._capture_snapshot(data, "input")
+                self._last_data_in = data
+
+            # Capture output snapshot (event data after processing)
+            output_snapshot = self._capture_snapshot(event_data, "output")
+            self._last_data_out = event_data
+
+            # Build verbose section
+            verbose_data = {
+                "enabled": True,
+                "trigger_reason": self._get_verbose_trigger_reason(),
+                "snapshots": {}
+            }
+
+            if input_snapshot:
+                verbose_data["snapshots"]["input"] = input_snapshot
+            if output_snapshot:
+                verbose_data["snapshots"]["output"] = output_snapshot
+
+            # Add delta (what changed)
+            if input_snapshot and output_snapshot:
+                delta = {"keys_added": [], "keys_removed": [], "keys_modified": []}
+                if isinstance(data, dict) and isinstance(event_data, dict):
+                    in_keys = set(data.keys()) if 'keys' in input_snapshot else set()
+                    out_keys = set(event_data.keys())
+                    delta["keys_added"] = list(out_keys - in_keys)
+                    delta["keys_removed"] = list(in_keys - out_keys)
+                    delta["keys_modified"] = list(in_keys & out_keys)
+                verbose_data["snapshots"]["delta"] = delta
+
+            event["verbose"] = verbose_data
 
         # Store in memory for trace retrieval
         self.events.append(event)
@@ -449,7 +540,11 @@ class QueryStateMachine:
         }
 
     def error(self, trigger: str, error_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Transition to ERROR state.
+        """Transition to ERROR state with automatic verbose capture.
+
+        When an error occurs, verbose mode is automatically enabled to capture
+        full diagnostic context. This ensures we have complete information
+        for debugging even when verbose mode wasn't explicitly enabled.
 
         Args:
             trigger: What caused the error
@@ -458,7 +553,27 @@ class QueryStateMachine:
         Returns:
             The event dictionary that was logged
         """
-        return self.transition(QueryState.ERROR, trigger, error_data)
+        # Automatically enable verbose mode for errors
+        self._enable_auto_verbose()
+
+        # Augment error data with full context
+        enhanced_error_data = {
+            **error_data,
+            "error_context": {
+                "current_state": self.current_state.value if self.current_state else None,
+                "recent_events": self.events[-5:] if self.events else [],  # Last 5 events
+                "auto_verbose_enabled": True,
+                "verbose_events_count": len(self.events)
+            }
+        }
+
+        # If verbose data already exists from last transition, preserve it
+        if self._last_data_in:
+            enhanced_error_data["error_context"]["last_input"] = self._capture_snapshot(self._last_data_in, "last_input")
+        if self._last_data_out:
+            enhanced_error_data["error_context"]["last_output"] = self._capture_snapshot(self._last_data_out, "last_output")
+
+        return self.transition(QueryState.ERROR, trigger, enhanced_error_data)
 
     def complete(self, final_data: Dict[str, Any]) -> Dict[str, Any]:
         """Transition to COMPLETE state.
@@ -478,6 +593,70 @@ class QueryStateMachine:
             List of all state transition events in chronological order
         """
         return self.events.copy()
+
+    def get_full_trace(self) -> Dict[str, Any]:
+        """Get complete state machine trace with summary statistics.
+
+        Returns:
+            Dictionary with 'summary' and 'events' keys
+        """
+        if not self.events:
+            return {
+                "query_id": self.query_id,
+                "summary": {
+                    "total_events": 0,
+                    "error": True
+                },
+                "events": []
+            }
+
+        first_event = self.events[0]
+        last_event = self.events[-1]
+
+        # Calculate total duration
+        total_duration_ms = None
+        if len(self.events) >= 2 and first_event.get('timestamp') and last_event.get('timestamp'):
+            first_time = datetime.fromisoformat(first_event['timestamp'].replace('Z', ''))
+            last_time = datetime.fromisoformat(last_event['timestamp'].replace('Z', ''))
+            total_duration_ms = int((last_time - first_time).total_seconds() * 1000)
+
+        # Extract unique states
+        unique_states = list(set(e['to_state'] for e in self.events))
+
+        # Check for errors
+        has_error = any(e['to_state'] == 'ERROR' for e in self.events)
+
+        # Extract components used
+        components_used = []
+        for event in self.events:
+            if 'component' in event.get('data', {}):
+                components_used.append(event['data']['component'])
+            elif 'enricher' in event.get('data', {}):
+                components_used.append(event['data']['enricher'])
+            elif 'formatter' in event.get('data', {}):
+                components_used.append(event['data']['formatter'])
+
+        # Count state transitions
+        state_counts = {}
+        for event in self.events:
+            to_state = event['to_state']
+            state_counts[to_state] = state_counts.get(to_state, 0) + 1
+
+        return {
+            "query_id": self.query_id,
+            "summary": {
+                "total_events": len(self.events),
+                "unique_states": unique_states,
+                "total_duration_ms": total_duration_ms,
+                "has_error": has_error,
+                "components_used": components_used,
+                "domain": self.domain,
+                "first_state": first_event.get('to_state'),
+                "final_state": last_event.get('to_state'),
+                "state_counts": state_counts
+            },
+            "events": self.events.copy()
+        }
 
     def _write_event(self, event: Dict[str, Any]) -> None:
         """Write event to log file.

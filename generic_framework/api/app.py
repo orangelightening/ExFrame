@@ -55,6 +55,7 @@ class QueryRequest(BaseModel):
     domain: Optional[str] = "llm_consciousness"
     context: Optional[Dict[str, Any]] = None
     include_trace: Optional[bool] = False
+    verbose: Optional[bool] = False  # Enable verbose mode with data snapshots
     format: Optional[str] = None  # Output format: json, markdown, compact, table, etc.
 
 
@@ -62,6 +63,7 @@ class ConfirmLLMRequest(BaseModel):
     query: str
     domain: Optional[str] = "llm_consciousness"
     include_trace: Optional[bool] = False
+    verbose: Optional[bool] = False  # Enable verbose mode with data snapshots
     format: Optional[str] = None
 
 
@@ -149,6 +151,10 @@ class QueryResponse(BaseModel):
     timestamp: str
     domain: str
     processing_time_ms: Optional[int] = None
+    # State machine trace (new format)
+    query_id: Optional[str] = None
+    state_machine: Optional[Dict[str, Any]] = None
+    # Old trace format (deprecated, use state_machine instead)
     trace: Optional[Dict[str, Any]] = None
     llm_used: Optional[bool] = None
     llm_fallback: Optional[str] = None
@@ -1182,6 +1188,7 @@ async def extend_web_search(request: ConfirmLLMRequest) -> Response:
         domain_id=request.domain,
         context={"web_search_confirmed": True},  # Pass web_search_confirmed flag
         include_trace=request.include_trace,
+        verbose=request.verbose,
         format_type=request.format
     )
 
@@ -1191,6 +1198,7 @@ async def _process_query_impl(
     domain_id: Optional[str],
     context: Optional[Dict[str, Any]],
     include_trace: Optional[bool],
+    verbose: Optional[bool],
     format_type: Optional[str]
 ) -> Response:
     """
@@ -1216,7 +1224,8 @@ async def _process_query_impl(
             query,
             context,
             include_trace=include_trace,
-            llm_confirmed=llm_confirmed
+            llm_confirmed=llm_confirmed,
+            verbose=verbose or False  # Pass verbose flag to engine
         )
 
         # If format is specified, use formatter and return formatted response

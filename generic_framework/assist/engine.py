@@ -104,7 +104,8 @@ class GenericAssistantEngine:
         query: str,
         context: Optional[Dict[str, Any]] = None,
         include_trace: bool = False,
-        llm_confirmed: bool = False
+        llm_confirmed: bool = False,
+        verbose: bool = False
     ) -> Dict[str, Any]:
         """
         Process a user query.
@@ -114,6 +115,7 @@ class GenericAssistantEngine:
             context: Optional additional context (may include llm_confirmed)
             include_trace: Whether to include detailed processing trace
             llm_confirmed: Whether user has confirmed LLM fallback usage
+            verbose: Enable verbose mode with full data snapshots (for debugging)
 
         Returns:
             Response dictionary with answer, sources, and metadata
@@ -136,7 +138,7 @@ class GenericAssistantEngine:
         start_time = datetime.utcnow()
 
         # Initialize state machine for query lifecycle logging
-        state_machine = QueryStateMachine(domain=self.domain.domain_id)
+        state_machine = QueryStateMachine(domain=self.domain.domain_id, verbose=verbose)
 
         trace = {
             'query': actual_query,
@@ -550,14 +552,30 @@ class GenericAssistantEngine:
                 # This puts human validation at the center of knowledge creation
                 # Pattern creation happens through /api/patterns endpoint when user clicks accept
 
-        # Add trace if requested
-        if include_trace and trace:
-            trace['end_time'] = end_time.isoformat()
-            trace['total_time_ms'] = result['processing_time_ms']
-            result['trace'] = trace
-            self.trace_log.append(trace)
+        # Add state machine trace if requested
+        if include_trace:
+            try:
+                # Get state machine trace from memory (not file)
+                state_machine_trace = state_machine.get_full_trace()
+                # Add the query_id to result for reference
+                result['query_id'] = state_machine.query_id
+                result['state_machine'] = state_machine_trace
+                logger.info(f"[StateMachine] Added trace for query {state_machine.query_id} with {state_machine_trace.get('summary', {}).get('total_events', 0)} events")
+            except Exception as e:
+                logger.error(f"[StateMachine] Failed to add state machine trace: {e}")
+                import traceback
+                traceback.print_exc()
 
-        # Log trace to file
+            # Also keep old trace format for backward compatibility (deprecated)
+            # This will be removed in a future version
+            if trace:
+                trace['end_time'] = end_time.isoformat()
+                trace['total_time_ms'] = result['processing_time_ms']
+                trace['deprecated'] = 'Use state_machine instead'
+                result['trace'] = trace
+                self.trace_log.append(trace)
+
+        # Log old-style trace to file for backward compatibility
         if trace and self.enable_tracing:
             trace['confidence'] = confidence
             trace['processing_method'] = processing_method
@@ -936,6 +954,9 @@ class GenericAssistantEngine:
                         "processing_time_ms": result['processing_time_ms'],
                         "llm_used": True
                     })
+                    # Add state machine trace to result
+                    result['query_id'] = state_machine.query_id
+                    result['state_machine'] = state_machine.get_full_trace()
 
                 return result
 
@@ -1366,3 +1387,86 @@ Return ONLY the JSON, no other text:"""
             if trace.get('start_time') == query_id or trace.get('query') == query_id:
                 return trace
         return None
+
+    @staticmethod
+    def get_state_machine_trace(query_id: str) -> Optional[Dict[str, Any]]:
+        """Get state machine trace for a specific query_id.
+
+        Reads from /app/logs/traces/state_machine.jsonl and returns
+        all state transitions for the given query with summary statistics.
+
+        Args:
+            query_id: The query ID (e.g., "q_338b253ab48c")
+
+        Returns:
+            Dictionary with 'summary' and 'events' keys, or None if not found
+        """
+        state_machine_log_path = TRACE_DIR / "state_machine.jsonl"
+        events = []
+
+        if not state_machine_log_path.exists():
+            return None
+
+        try:
+            with open(state_machine_log_path, 'r') as f:
+                for line in f:
+                    try:
+                        event = json.loads(line.strip())
+                        if event.get('query_id') == query_id:
+                            events.append(event)
+                    except json.JSONDecodeError:
+                        continue
+        except Exception:
+            return None
+
+        if not events:
+            return None
+
+        # Calculate summary statistics
+        first_event = events[0]
+        last_event = events[-1]
+
+        # Calculate total duration
+        total_duration_ms = None
+        if len(events) >= 2:
+            first_time = datetime.fromisoformat(first_event['timestamp'].replace('Z', ''))
+            last_time = datetime.fromisoformat(last_event['timestamp'].replace('Z', ''))
+            total_duration_ms = int((last_time - first_time).total_seconds() * 1000)
+
+        # Extract unique states
+        unique_states = list(set(e['to_state'] for e in events))
+
+        # Check for errors
+        has_error = any(e['to_state'] == 'ERROR' for e in events)
+
+        # Extract components used
+        components_used = []
+        for event in events:
+            if 'component' in event.get('data', {}):
+                components_used.append(event['data']['component'])
+            elif 'enricher' in event.get('data', {}):
+                components_used.append(event['data']['enricher'])
+            elif 'formatter' in event.get('data', {}):
+                components_used.append(event['data']['formatter'])
+
+        # Count state transitions
+        state_counts = {}
+        for event in events:
+            to_state = event['to_state']
+            state_counts[to_state] = state_counts.get(to_state, 0) + 1
+
+        return {
+            "query_id": query_id,
+            "summary": {
+                "total_events": len(events),
+                "unique_states": unique_states,
+                "total_duration_ms": total_duration_ms,
+                "has_error": has_error,
+                "components_used": components_used,
+                "domain": events[0].get('data', {}).get('domain'),
+                "first_state": first_event.get('to_state'),
+                "final_state": last_event.get('to_state'),
+                "state_counts": state_counts
+            },
+            "events": events
+        }
