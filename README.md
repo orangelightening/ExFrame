@@ -4,9 +4,9 @@
 
 *Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
 
----
+> **Docker-Only Application**: ExFrame runs as a containerized application via Docker Compose. It is NOT a pip-installable Python library. See [Quick Start](#quick-start) for installation.
 
-## Overview
+---
 
 ExFrame is a unified, domain-agnostic AI-powered knowledge management system with a **universe-based architecture** and **plugin-based pipeline**. It provides:
 
