@@ -5,10 +5,13 @@ Add Apache 2.0 license headers to Python source files.
 
 import os
 from pathlib import Path
+from datetime import datetime
 
-# Apache 2.0 license header for Python files
-LICENSE_HEADER = '''#
-# Copyright 2026 ExFrame Contributors
+def get_license_header():
+    """Generate license header with current year."""
+    year = datetime.now().year
+    return f'''#
+# Copyright {year} ExFrame Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +32,7 @@ def has_license_header(file_path: Path) -> bool:
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             first_lines = ''.join([f.readline() for _ in range(15)])
-            return 'Licensed under the Apache License' in first_lines or 'Copyright 2025' in first_lines
+            return 'Licensed under the Apache License' in first_lines
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
         return False
@@ -46,6 +49,9 @@ def add_license_header(file_path: Path) -> bool:
             print(f"  Skipping {file_path.relative_to(file_path.parents[2])} (already licensed)")
             return False
 
+        # Get license header
+        license_header = get_license_header()
+
         # Check if file starts with shebang
         shebang = None
         if content.startswith('#!'):
@@ -61,7 +67,7 @@ def add_license_header(file_path: Path) -> bool:
             content = lines[1] if len(lines) > 1 else ''
 
         # Add empty line after header for docstrings that follow
-        new_content = LICENSE_HEADER + '\n' + content
+        new_content = license_header + '\n' + content
 
         # Re-add shebang and encoding if they existed
         if encoding:

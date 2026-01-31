@@ -1,10 +1,9 @@
 [project]
 name = "exframe"
 version = "1.6.0"
-# IMPORTANT: This is a Docker application, NOT a pip-installable Python library.
-# The 'name' field identifies the project for dependency management only.
-# Installation: Use Docker Compose (see INSTALL.md)
-# Development: Run test scripts directly with Python (no pip install needed)
+# DEPLOYMENT: Docker Compose for production (see INSTALL.md)
+# DEVELOPMENT: Editable install with 'pip install -e .' for local testing
+# Note: This is not published to PyPI - use Docker or install from source
 # Run 'git describe --tags' to see full version including build metadata.
 description = "Domain-agnostic AI-powered knowledge management system with configurable domain types"
 readme = "README.md"

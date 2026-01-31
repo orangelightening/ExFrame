@@ -4,7 +4,7 @@
 
 *Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
 
-> **Docker-Only Application**: ExFrame runs as a containerized application via Docker Compose. It is NOT a pip-installable Python library. See [Quick Start](#quick-start) for installation.
+> **Deployment**: Docker Compose for production (recommended). Development installs available via `pip install -e .`. See [Quick Start](#quick-start).
 
 ---
 

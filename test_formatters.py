@@ -5,10 +5,12 @@ DEVELOPMENT TEST SCRIPT - Formatter Plugin System
 This is a development test script that runs against the internal source code
 structure (generic_framework/).
 
-IMPORTANT FOR USERS:
-- Production deployment: Use Docker, no import setup needed
-- Development: These tests use internal 'generic_framework' path
-- This is NOT a pip-installable Python library
+DEPLOYMENT OPTIONS:
+- Production: Use Docker Compose (recommended, see INSTALL.md)
+- Development: Editable install with 'pip install -e .' or run tests directly
+
+These tests use the internal 'generic_framework' path for direct execution
+without requiring pip installation.
 
 Verifies that all three default formatters (Markdown, JSON, Compact)
 work correctly with sample data.
