@@ -1345,6 +1345,244 @@ async def get_trace_detail(query_id: str) -> Dict[str, Any]:
     return trace
 
 
+# ==================== STATE MACHINE TRACE ENDPOINTS ====================
+
+STATE_MACHINE_LOG_PATH = Path("/app/logs/traces/state_machine.jsonl")
+
+
+@app.get("/api/state-traces")
+async def get_state_traces(
+    limit: int = 50,
+    domain: Optional[str] = None,
+    state: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get recent state machine trace events from the state machine log.
+
+    Args:
+        limit: Maximum number of events to return (default: 50)
+        domain: Filter by domain ID
+        state: Filter by specific state (e.g., "COMPLETE", "ERROR")
+
+    Returns:
+        List of state transition events with metadata
+
+    Example:
+        curl "http://localhost:3000/api/state-traces?limit=10&domain=exframe"
+        curl "http://localhost:3000/api/state-traces?state=ERROR"
+    """
+    events = []
+    try:
+        if STATE_MACHINE_LOG_PATH.exists():
+            with open(STATE_MACHINE_LOG_PATH, 'r') as f:
+                lines = f.readlines()[-limit:]  # Get last N lines
+                for line in reversed(lines):  # Most recent first
+                    try:
+                        event = json.loads(line.strip())
+                        # Apply filters
+                        if domain and event.get('data', {}).get('domain') != domain:
+                            continue
+                        if state and event.get('to_state') != state:
+                            continue
+                        events.append(event)
+                        if len(events) >= limit:
+                            break
+                    except json.JSONDecodeError:
+                        continue
+    except Exception as e:
+        logger.error(f"Error reading state machine log: {e}")
+
+    return {
+        "count": len(events),
+        "limit": limit,
+        "filters": {"domain": domain, "state": state},
+        "events": events
+    }
+
+
+@app.get("/api/state-traces/query/{query_id}")
+async def get_state_trace_for_query(query_id: str) -> Dict[str, Any]:
+    """
+    Get complete state machine trace for a specific query.
+
+    Returns all state transitions for the given query_id in chronological order,
+    along with summary statistics.
+
+    Args:
+        query_id: The query ID (e.g., "q_338b253ab48c")
+
+    Returns:
+        Complete state trace with summary
+
+    Example:
+        curl "http://localhost:3000/api/state-traces/query/q_338b253ab48c"
+    """
+    events = []
+    try:
+        if STATE_MACHINE_LOG_PATH.exists():
+            with open(STATE_MACHINE_LOG_PATH, 'r') as f:
+                for line in f:
+                    try:
+                        event = json.loads(line.strip())
+                        if event.get('query_id') == query_id:
+                            events.append(event)
+                    except json.JSONDecodeError:
+                        continue
+    except Exception as e:
+        logger.error(f"Error reading state machine log: {e}")
+
+    if not events:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Query '{query_id}' not found in state machine logs"
+        )
+
+    # Calculate summary statistics
+    first_event = events[0]
+    last_event = events[-1]
+
+    # Calculate total duration
+    total_duration_ms = None
+    if len(events) >= 2:
+        first_time = datetime.fromisoformat(first_event['timestamp'].replace('Z', ''))
+        last_time = datetime.fromisoformat(last_event['timestamp'].replace('Z', ''))
+        total_duration_ms = int((last_time - first_time).total_seconds() * 1000)
+
+    # Extract unique states
+    unique_states = list(set(e['to_state'] for e in events))
+
+    # Check for errors
+    has_error = any(e['to_state'] == 'ERROR' for e in events)
+
+    # Extract components used
+    components_used = []
+    for event in events:
+        if 'component' in event.get('data', {}):
+            components_used.append(event['data']['component'])
+        elif 'enricher' in event.get('data', {}):
+            components_used.append(event['data']['enricher'])
+        elif 'formatter' in event.get('data', {}):
+            components_used.append(event['data']['formatter'])
+
+    # Count state transitions
+    state_counts = {}
+    for event in events:
+        to_state = event['to_state']
+        state_counts[to_state] = state_counts.get(to_state, 0) + 1
+
+    return {
+        "query_id": query_id,
+        "summary": {
+            "total_events": len(events),
+            "unique_states": unique_states,
+            "total_duration_ms": total_duration_ms,
+            "has_error": has_error,
+            "components_used": components_used,
+            "domain": events[0].get('data', {}).get('domain'),
+            "first_state": first_event.get('to_state'),
+            "final_state": last_event.get('to_state'),
+            "state_counts": state_counts
+        },
+        "events": events
+    }
+
+
+@app.get("/api/state-traces/summary")
+async def get_state_traces_summary(
+    limit: int = 100
+) -> Dict[str, Any]:
+    """
+    Get summary statistics from recent state machine traces.
+
+    Aggregates data from the last N events to provide insights like:
+    - Average processing time
+    - Error rate
+    - LLM usage rate
+    - Most common states
+
+    Args:
+        limit: Number of recent events to analyze (default: 100)
+
+    Returns:
+        Summary statistics
+
+    Example:
+        curl "http://localhost:3000/api/state-traces/summary?limit=100"
+    """
+    events = []
+    try:
+        if STATE_MACHINE_LOG_PATH.exists():
+            with open(STATE_MACHINE_LOG_PATH, 'r') as f:
+                lines = f.readlines()[-limit:]
+                for line in lines:
+                    try:
+                        event = json.loads(line.strip())
+                        events.append(event)
+                    except json.JSONDecodeError:
+                        continue
+    except Exception as e:
+        logger.error(f"Error reading state machine log: {e}")
+
+    if not events:
+        return {
+            "analyzed_events": 0,
+            "message": "No events found in state machine log"
+        }
+
+    # Group events by query_id
+    queries = {}
+    for event in events:
+        query_id = event.get('query_id')
+        if query_id not in queries:
+            queries[query_id] = []
+        queries[query_id].append(event)
+
+    # Calculate statistics
+    query_count = len(queries)
+    error_count = sum(1 for e in events if e['to_state'] == 'ERROR')
+    complete_count = sum(1 for e in events if e['to_state'] == 'COMPLETE')
+    llm_used_count = sum(
+        1 for e in events
+        if e.get('data', {}).get('llm_used') or 'llm_' in str(e.get('trigger', ''))
+    )
+
+    # Calculate average duration from COMPLETE events
+    durations = []
+    for event in events:
+        if event['to_state'] == 'COMPLETE' and event.get('duration_ms'):
+            durations.append(event['duration_ms'])
+
+    avg_duration_ms = sum(durations) / len(durations) if durations else 0
+
+    # State frequency
+    state_freq = {}
+    for event in events:
+        state = event['to_state']
+        state_freq[state] = state_freq.get(state, 0) + 1
+
+    # Domain distribution
+    domains = {}
+    for event in events:
+        domain = event.get('data', {}).get('domain')
+        if domain:
+            domains[domain] = domains.get(domain, 0) + 1
+
+    return {
+        "analyzed_events": len(events),
+        "unique_queries": query_count,
+        "statistics": {
+            "error_count": error_count,
+            "error_rate": error_count / query_count if query_count > 0 else 0,
+            "complete_count": complete_count,
+            "llm_used_count": llm_used_count,
+            "llm_usage_rate": llm_used_count / query_count if query_count > 0 else 0,
+            "avg_duration_ms": int(avg_duration_ms)
+        },
+        "state_frequency": state_freq,
+        "domain_distribution": domains
+    }
+
+
 # ==================== DOMAIN CRUD ENDPOINTS ====================
 
 # Domain registry storage
