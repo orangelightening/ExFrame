@@ -53,6 +53,7 @@ logger.setLevel(logging.INFO)
 from core.domain import Domain
 from core.knowledge_base import KnowledgeBaseConfig
 from knowledge.json_kb import JSONKnowledgeBase
+from state.state_machine import QueryState, QueryStateMachine
 
 
 class GenericAssistantEngine:
@@ -133,6 +134,10 @@ class GenericAssistantEngine:
             logger.info(f"Direct prompt detected: '{actual_query}' (bypassing pattern search and specialist)")
 
         start_time = datetime.utcnow()
+
+        # Initialize state machine for query lifecycle logging
+        state_machine = QueryStateMachine(domain=self.domain.domain_id)
+
         trace = {
             'query': actual_query,
             'original_query': query,  # Keep original for reference
@@ -140,12 +145,30 @@ class GenericAssistantEngine:
             'steps': []
         } if self.enable_tracing else None
 
+        # STATE: QUERY_RECEIVED
+        state_machine.transition(
+            QueryState.QUERY_RECEIVED,
+            "api_request",
+            {"query": actual_query, "original_query": query, "include_trace": include_trace}
+        )
+
         # Handle direct prompt - skip to LLM directly
         if direct_prompt:
-            return await self._process_direct_prompt(actual_query, query, start_time, trace)
+            state_machine.transition(QueryState.DIRECT_PROMPT_CHECK, "direct_prompt_detected", {"query": actual_query})
+            result = await self._process_direct_prompt(actual_query, query, start_time, trace, state_machine)
+            if result.get('error'):
+                state_machine.error("direct_prompt_failed", {"error": result.get('response')})
+            else:
+                state_machine.transition(QueryState.DIRECT_LLM, "direct_llm_complete", {"response_length": len(result.get('response', ''))})
+            state_machine.complete({"query_id": state_machine.query_id})
+            return result
 
         # Step 1: Select appropriate specialist
         step1_time = datetime.utcnow()
+
+        # STATE: ROUTING_SELECTION
+        state_machine.transition(QueryState.ROUTING_SELECTION, "specialist_selection_start", {"specialists_available": len(self.domain.list_specialists())})
+
         specialist = self.domain.get_specialist_for_query(query)
 
         # Collect specialist scoring info
@@ -160,6 +183,16 @@ class GenericAssistantEngine:
                     'score': score
                 })
 
+        state_machine.transition(
+            QueryState.ROUTING_SELECTION,
+            "specialist_selected",
+            {
+                "selected_specialist": specialist.specialist_id if specialist else None,
+                "specialist_name": specialist.name if specialist else None,
+                "specialist_scores": specialist_scores
+            }
+        )
+
         if trace:
             trace['steps'].append({
                 'step': 1,
@@ -172,8 +205,12 @@ class GenericAssistantEngine:
         # Step 2: Search knowledge base for relevant patterns (only if no specialist)
         # Specialists do their own search to maintain control over search strategy
         step2_time = datetime.utcnow()
+
+        # STATE: SEARCHING
+        state_machine.transition(QueryState.SEARCHING, "search_start", {"has_specialist": specialist is not None})
+
         patterns = []
-        
+
         if specialist:
             # Specialist will do its own search - don't pre-search
             if trace:
@@ -186,7 +223,17 @@ class GenericAssistantEngine:
         else:
             # No specialist - do general knowledge base search
             patterns = await self.knowledge_base.search(query, limit=10)
-            
+
+            # STATE: CONTEXT_READY (for non-specialist queries)
+            state_machine.transition(
+                QueryState.CONTEXT_READY,
+                "knowledge_search_complete",
+                {
+                    "patterns_found": len(patterns),
+                    "search_method": "general_knowledge_base"
+                }
+            )
+
             if trace:
                 trace['steps'].append({
                     'step': 2,
@@ -213,6 +260,13 @@ class GenericAssistantEngine:
         response_data = None  # Initialize for access later
 
         if specialist:
+            # STATE: SINGLE_SPECIALIST_PROCESSING
+            state_machine.transition(
+                QueryState.SINGLE_SPECIALIST_PROCESSING,
+                "specialist_processing_start",
+                {"specialist": specialist.specialist_id, "specialist_name": specialist.name}
+            )
+
             # Specialist does its own search - don't pass pre-found patterns
             specialist_context = context or {}
             response_data = await specialist.process_query(query, specialist_context)
@@ -224,9 +278,28 @@ class GenericAssistantEngine:
             if response_data and response_data.get('can_extend_with_web_search'):
                 can_extend_with_web_search = True
 
+            # STATE: CONTEXT_READY (after specialist search)
+            context_size = len(str(response_data)) if response_data else 0
+            patterns_found = len(response_data.get('patterns', [])) if response_data else 0
+
+            state_machine.transition(
+                QueryState.CONTEXT_READY,
+                "specialist_search_complete",
+                {
+                    "specialist": specialist.specialist_id,
+                    "patterns_found": patterns_found,
+                    "context_size": context_size,
+                    "has_research_results": 'research_results' in (response_data or {})
+                }
+            )
+
+            # STATE: OUT_OF_SCOPE_CHECK
+            state_machine.transition(QueryState.OUT_OF_SCOPE_CHECK, "checking_scope", {})
+
             # Check if query was rejected due to scope boundaries
             if response_data and response_data.get('out_of_scope'):
-                # Return the out_of_scope response directly without enrichment
+                state_machine.transition(QueryState.LOG_AND_EXIT, "out_of_scope_rejection", {"reason": response_data.get('out_of_scope_reason')})
+                state_machine.complete({"status": "out_of_scope"})
                 logger.info(f"[Engine] Query rejected by specialist: {response_data.get('out_of_scope_reason', 'Out of scope')}")
                 return {
                     'query': query,
@@ -254,11 +327,17 @@ class GenericAssistantEngine:
                     except:
                         pass
         else:
-            # General query processing
+            # General query processing (no specialist)
+            state_machine.transition(
+                QueryState.SINGLE_SPECIALIST_PROCESSING,
+                "general_processing_start",
+                {"patterns_found": len(patterns)}
+            )
             response_data = await self._general_processing(query, patterns, context)
             response = self._format_general_response(response_data)
             specialist_id = None
             processing_method = 'general'
+            state_machine.transition(QueryState.CONTEXT_READY, "general_processing_complete", {})
 
         if trace:
             trace['steps'].append({
@@ -300,6 +379,13 @@ class GenericAssistantEngine:
         # Initialize enriched_data to avoid undefined variable
         enriched_data = {}
 
+        # STATE: ENRICHMENT_PIPELINE
+        state_machine.transition(
+            QueryState.ENRICHMENT_PIPELINE,
+            "enrichment_start",
+            {"input_size": len(str(enricher_input)), "confidence": confidence}
+        )
+
         # Call domain enrichers with EnrichmentContext
         try:
             # Import and create EnrichmentContext with llm_confirmed flag
@@ -311,10 +397,25 @@ class GenericAssistantEngine:
                 knowledge_base=self.knowledge_base,
                 llm_confirmed=llm_confirmed
             )
+
+            # Store enricher input for change tracking
+            enricher_before = enricher_input.copy()
+
             enriched_data = await self.domain.enrich(enricher_input, enrichment_context)
+
+            # Log enrichment changes
+            state_machine.log_enricher_changes(
+                "DomainEnrichers",
+                enricher_before,
+                enriched_data,
+                int((datetime.utcnow() - enrich_time).total_seconds() * 1000)
+            )
 
             # Update response and result with enriched data
             if enriched_data.get('llm_used'):
+                # STATE: LLM_PROCESSING
+                state_machine.transition(QueryState.LLM_PROCESSING, "llm_fallback_or_enhancement", {})
+
                 # LLM was used as fallback or enhancement
                 if 'llm_fallback' in enriched_data:
                     # LLM fallback response
@@ -333,6 +434,9 @@ class GenericAssistantEngine:
                 else:
                     pass  # llm_used=True but no response key found
 
+                # STATE: LLM_POST_PROCESSING
+                state_machine.transition(QueryState.LLM_POST_PROCESSING, "llm_response_received", {"result_key": result_key})
+
                 # Add LLM metadata to result
                 enricher_input['llm_used'] = True
                 if result_key:
@@ -342,7 +446,11 @@ class GenericAssistantEngine:
                 if 'response' in enriched_data:
                     response = enriched_data['response']
 
+            # STATE: ENRICHMENT_COMPLETE
+            state_machine.transition(QueryState.ENRICHMENT_COMPLETE, "enrichment_complete", {"llm_used": enriched_data.get('llm_used', False)})
+
         except Exception as e:
+            state_machine.error("enrichment_failed", {"error": str(e)})
             print(f"Warning: Enrichment failed: {e}")
             import traceback
             traceback.print_exc()
@@ -465,6 +573,30 @@ class GenericAssistantEngine:
                     is_ai_generated = True
                     break
         result['ai_generated'] = is_ai_generated
+
+        # STATE: RESPONSE_CONSTRUCTION
+        state_machine.transition(
+            QueryState.RESPONSE_CONSTRUCTION,
+            "response_constructed",
+            {
+                "response_size": len(response),
+                "confidence": confidence,
+                "ai_generated": is_ai_generated,
+                "patterns_used": len(patterns)
+            }
+        )
+
+        # STATE: COMPLETE
+        state_machine.complete({
+            "query_id": state_machine.query_id,
+            "processing_time_ms": result['processing_time_ms'],
+            "llm_used": enriched_data.get('llm_used', False),
+            "confidence": confidence,
+            "patterns_found": len(patterns)
+        })
+
+        # STATE: RESPONSE_RETURNED
+        state_machine.transition(QueryState.RESPONSE_RETURNED, "query_complete", {})
 
         return result
 
@@ -636,7 +768,8 @@ class GenericAssistantEngine:
         actual_query: str,
         original_query: str,
         start_time: datetime,
-        trace: Optional[Dict[str, Any]]
+        trace: Optional[Dict[str, Any]],
+        state_machine: Optional[QueryStateMachine] = None
     ) -> Dict[str, Any]:
         """
         Process a direct prompt (// prefix) - bypass pattern search and specialist.
@@ -653,6 +786,8 @@ class GenericAssistantEngine:
         model = os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL") or "glm-4.7"
 
         if not api_key:
+            if state_machine:
+                state_machine.error("direct_prompt_no_api_key", {"error": "No API key configured"})
             return {
                 'query': actual_query,
                 'original_query': original_query,
@@ -713,6 +848,12 @@ class GenericAssistantEngine:
         else:
             endpoint = f"{base_url.rstrip('/')}/chat/completions"
 
+        if state_machine:
+            state_machine.transition(QueryState.DIRECT_LLM, "direct_llm_call_start", {
+                "model": model_name if is_anthropic else model,
+                "endpoint": endpoint
+            })
+
         try:
             timeout = httpx.Timeout(60.0)
             async with httpx.AsyncClient(timeout=timeout) as client:
@@ -721,6 +862,8 @@ class GenericAssistantEngine:
                 if response.status_code != 200:
                     error_text = response.text
                     logger.error(f"Direct prompt LLM error: {error_text}")
+                    if state_machine:
+                        state_machine.error("direct_prompt_llm_error", {"status_code": response.status_code, "error": error_text})
                     return {
                         'query': actual_query,
                         'original_query': original_query,
@@ -739,6 +882,12 @@ class GenericAssistantEngine:
 
                 data = response.json()
                 llm_response = data['content'][0]['text'] if is_anthropic else data['choices'][0]['message']['content']
+
+                if state_machine:
+                    state_machine.transition(QueryState.DIRECT_LLM, "direct_llm_call_success", {
+                        "model": model_name if is_anthropic else model,
+                        "response_size": len(llm_response)
+                    })
 
                 if trace:
                     trace['steps'].append({
@@ -781,10 +930,19 @@ class GenericAssistantEngine:
                     'timestamp': end_time.isoformat()
                 })
 
+                if state_machine:
+                    state_machine.complete({
+                        "query_id": state_machine.query_id,
+                        "processing_time_ms": result['processing_time_ms'],
+                        "llm_used": True
+                    })
+
                 return result
 
         except httpx.RequestError as e:
             logger.error(f"Direct prompt request error: {e}")
+            if state_machine:
+                state_machine.error("direct_prompt_network_error", {"error": str(e)})
             return {
                 'query': actual_query,
                 'original_query': original_query,
@@ -804,6 +962,8 @@ class GenericAssistantEngine:
             logger.error(f"Direct prompt unexpected error: {e}")
             import traceback
             traceback.print_exc()
+            if state_machine:
+                state_machine.error("direct_prompt_unexpected_error", {"error": str(e)})
             return {
                 'query': actual_query,
                 'original_query': original_query,
