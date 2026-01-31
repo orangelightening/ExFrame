@@ -1,8 +1,8 @@
 [project]
 name = "exframe"
 version = "1.6.0"
-# PRODUCTION: Docker Compose (see INSTALL.md)
-# LOCAL DEVELOPMENT: Clone repository + 'pip install -e .' (editable install)
+# PRODUCTION: Docker Compose with Python 3.12 (see INSTALL.md)
+# LOCAL DEVELOPMENT: Clone + 'pip install -e .' (supports Python 3.11-3.13)
 # Note: Not published to PyPI - install from source only
 # Run 'git describe --tags' to see full version including build metadata.
 description = "Domain-agnostic AI-powered knowledge management system with configurable domain types"
