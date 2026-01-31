@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for ExFrame - Expertise Framework
 # Uses Python 3.12-slim (stable, tested for production)
-# Package supports Python 3.11-3.13 for local development
+# Package supports Python >=3.11 (tested with 3.11, 3.12, 3.13)
 
 # Stage 1: Builder - Install dependencies
 FROM python:3.12-slim AS builder
