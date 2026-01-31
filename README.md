@@ -4,7 +4,7 @@
 
 *Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
 
-> **Deployment**: Docker Compose for production (recommended). Development installs available via `pip install -e .`. See [Quick Start](#quick-start).
+> **Deployment**: Docker Compose (production/production). Local development: `pip install -e .` from source. See [Quick Start](#quick-start).
 
 ---
 

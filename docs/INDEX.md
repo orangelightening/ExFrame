@@ -18,7 +18,7 @@ The project underwent a naming standardization in January 2026 to unify all refe
 **Rationale**: The directory and service names are internal plumbing that don't affect end users. Changing them would break git history, Docker volumes, and existing deployments. All documentation and user-facing references now consistently use "ExFrame."
 
 **Production deployment**: Docker Compose (recommended)
-**Development install**: `pip install -e .` (editable mode)
+**Local development setup**: Clone + `pip install -e .` (editable install from source)
 **Project identifier**: `exframe` (pyproject.toml package name)
 **License**: Apache License 2.0
 

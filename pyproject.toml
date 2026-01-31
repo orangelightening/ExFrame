@@ -1,9 +1,9 @@
 [project]
 name = "exframe"
 version = "1.6.0"
-# DEPLOYMENT: Docker Compose for production (see INSTALL.md)
-# DEVELOPMENT: Editable install with 'pip install -e .' for local testing
-# Note: This is not published to PyPI - use Docker or install from source
+# PRODUCTION: Docker Compose (see INSTALL.md)
+# LOCAL DEVELOPMENT: Clone repository + 'pip install -e .' (editable install)
+# Note: Not published to PyPI - install from source only
 # Run 'git describe --tags' to see full version including build metadata.
 description = "Domain-agnostic AI-powered knowledge management system with configurable domain types"
 readme = "README.md"
