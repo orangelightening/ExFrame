@@ -3621,33 +3621,74 @@
                         details.push(`Duration: ${event.duration_ms}ms`);
                     }
 
-                    // Add key data fields
-                    for (const [key, value] of Object.entries(data)) {
-                        if (key === 'domain') continue; // Skip domain, already shown elsewhere
-                        if (key === 'query') {
-                            details.push(`Query: "${value}"`);
-                        } else if (key === 'specialist' || key === 'specialist_name') {
-                            details.push(`Specialist: ${value}`);
-                        } else if (key === 'patterns_found') {
-                            details.push(`Patterns found: ${value}`);
-                        } else if (key === 'confidence') {
-                            details.push(`Confidence: ${(value * 100).toFixed(1)}%`);
-                        } else if (key === 'llm_used') {
-                            details.push(`LLM used: ${value ? 'Yes' : 'No'}`);
-                        } else if (key === 'response_size') {
-                            details.push(`Response size: ${value} chars`);
-                        } else if (key === 'input_size' || key === 'output_size') {
-                            details.push(`${key === 'input_size' ? 'Input' : 'Output'} size: ${value} bytes`);
-                        } else if (key === 'changes') {
-                            // Show what changed
-                            if (value.added && Object.keys(value.added).length > 0) {
-                                details.push(`Added: ${Object.keys(value.added).join(', ')}`);
+                    // Add verbose snapshots if available
+                    if (event.verbose && event.verbose.enabled && event.verbose.snapshots) {
+                        const snapshots = event.verbose.snapshots;
+                        details.push(`--- Verbose (${event.verbose.trigger_reason}) ---`);
+
+                        if (snapshots.input) {
+                            details.push(`Input: ${snapshots.input.type} (${snapshots.input.size_bytes} bytes)`);
+                            if (snapshots.input.keys) {
+                                details.push(`  Keys: ${snapshots.input.keys.join(', ')}`);
                             }
-                            if (value.modified && Object.keys(value.modified).length > 0) {
-                                details.push(`Modified: ${Object.keys(value.modified).join(', ')}`);
+                            if (snapshots.input.preview) {
+                                details.push(`  Preview: ${snapshots.input.preview.substring(0, 100)}${snapshots.input.preview.length >= 100 ? '...' : ''}`);
                             }
-                            if (value.removed && Object.keys(value.removed).length > 0) {
-                                details.push(`Removed: ${Object.keys(value.removed).join(', ')}`);
+                        }
+
+                        if (snapshots.output) {
+                            details.push(`Output: ${snapshots.output.type} (${snapshots.output.size_bytes} bytes)`);
+                            if (snapshots.output.keys) {
+                                details.push(`  Keys: ${snapshots.output.keys.join(', ')}`);
+                            }
+                            if (snapshots.output.preview) {
+                                details.push(`  Preview: ${snapshots.output.preview.substring(0, 100)}${snapshots.output.preview.length >= 100 ? '...' : ''}`);
+                            }
+                        }
+
+                        if (snapshots.delta) {
+                            const delta = snapshots.delta;
+                            if (delta.keys_added && delta.keys_added.length > 0) {
+                                details.push(`  Delta +: ${delta.keys_added.join(', ')}`);
+                            }
+                            if (delta.keys_removed && delta.keys_removed.length > 0) {
+                                details.push(`  Delta -: ${delta.keys_removed.join(', ')}`);
+                            }
+                            if (delta.keys_modified && delta.keys_modified.length > 0) {
+                                details.push(`  Delta ~: ${delta.keys_modified.join(', ')}`);
+                            }
+                        }
+                    }
+
+                    // Add key data fields (only if not showing verbose details)
+                    if (!event.verbose || !event.verbose.enabled) {
+                        for (const [key, value] of Object.entries(data)) {
+                            if (key === 'domain') continue; // Skip domain, already shown elsewhere
+                            if (key === 'query') {
+                                details.push(`Query: "${value}"`);
+                            } else if (key === 'specialist' || key === 'specialist_name') {
+                                details.push(`Specialist: ${value}`);
+                            } else if (key === 'patterns_found') {
+                                details.push(`Patterns found: ${value}`);
+                            } else if (key === 'confidence') {
+                                details.push(`Confidence: ${(value * 100).toFixed(1)}%`);
+                            } else if (key === 'llm_used') {
+                                details.push(`LLM used: ${value ? 'Yes' : 'No'}`);
+                            } else if (key === 'response_size') {
+                                details.push(`Response size: ${value} chars`);
+                            } else if (key === 'input_size' || key === 'output_size') {
+                                details.push(`${key === 'input_size' ? 'Input' : 'Output'} size: ${value} bytes`);
+                            } else if (key === 'changes') {
+                                // Show what changed
+                                if (value.added && Object.keys(value.added).length > 0) {
+                                    details.push(`Added: ${Object.keys(value.added).join(', ')}`);
+                                }
+                                if (value.modified && Object.keys(value.modified).length > 0) {
+                                    details.push(`Modified: ${Object.keys(value.modified).join(', ')}`);
+                                }
+                                if (value.removed && Object.keys(value.removed).length > 0) {
+                                    details.push(`Removed: ${Object.keys(value.removed).join(', ')}`);
+                                }
                             }
                         }
                     }
