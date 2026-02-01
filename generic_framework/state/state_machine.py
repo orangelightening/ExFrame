@@ -36,7 +36,9 @@ class QueryState(Enum):
     QUERY_RECEIVED = "QUERY_RECEIVED"
     DIRECT_PROMPT_CHECK = "DIRECT_PROMPT_CHECK"
     DIRECT_LLM = "DIRECT_LLM"
+    DIRECT_LLM_COMPLETE = "DIRECT_LLM_COMPLETE"  # Direct LLM call completed
     ROUTING_SELECTION = "ROUTING_SELECTION"
+    SPECIALIST_SELECTED = "SPECIALIST_SELECTED"  # Specialist has been selected
 
     # Specialist Processing
     SINGLE_SPECIALIST_PROCESSING = "SINGLE_SPECIALIST_PROCESSING"
@@ -50,6 +52,7 @@ class QueryState(Enum):
 
     # Enrichment
     ENRICHMENT_PIPELINE = "ENRICHMENT_PIPELINE"
+    ENRICHERS_EXECUTED = "ENRICHERS_EXECUTED"  # Enrichers have completed execution
     LLM_CONFIRMATION_CHECK = "LLM_CONFIRMATION_CHECK"
     AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION"
     LLM_PROCESSING = "LLM_PROCESSING"
@@ -363,7 +366,7 @@ class QueryStateMachine:
             "changes": changes
         }
 
-        return self.transition(QueryState.ENRICHMENT_PIPELINE, f"{enricher_name}_executed", event_data)
+        return self.transition(QueryState.ENRICHERS_EXECUTED, f"{enricher_name}_executed", event_data)
 
     def log_formatter_changes(
         self,

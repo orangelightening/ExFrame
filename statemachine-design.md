@@ -136,7 +136,9 @@ class QueryState(Enum):
     QUERY_RECEIVED = "QUERY_RECEIVED"               # Initial state
     DIRECT_PROMPT_CHECK = "DIRECT_PROMPT_CHECK"     # Check for // prefix
     DIRECT_LLM = "DIRECT_LLM"                       # Bypass to LLM
+    DIRECT_LLM_COMPLETE = "DIRECT_LLM_COMPLETE"     # Direct LLM call completed
     ROUTING_SELECTION = "ROUTING_SELECTION"         # Select specialist(s)
+    SPECIALIST_SELECTED = "SPECIALIST_SELECTED"     # Specialist has been chosen
 
     # Specialist Processing
     SINGLE_SPECIALIST_PROCESSING = "SINGLE_SPECIALIST_PROCESSING"
@@ -150,6 +152,7 @@ class QueryState(Enum):
 
     # Enrichment
     ENRICHMENT_PIPELINE = "ENRICHMENT_PIPELINE"     # Entry to enrichment phase
+    ENRICHERS_EXECUTED = "ENRICHERS_EXECUTED"       # Enrichers have completed execution
     LLM_CONFIRMATION_CHECK = "LLM_CONFIRMATION_CHECK" # Check if confirmation needed
     AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION" # Waiting for user
     LLM_PROCESSING = "LLM_PROCESSING"               # LLM call in progress
@@ -173,14 +176,16 @@ class QueryState(Enum):
 |-------|-------------|---------|-------------|
 | `QUERY_RECEIVED` | Query entered system | API request | `DIRECT_PROMPT_CHECK` |
 | `DIRECT_PROMPT_CHECK` | Check if // prefix | Initial check | `DIRECT_LLM` or `ROUTING_SELECTION` |
-| `ROUTING_SELECTION` | Select specialist(s) | Check complete | `SINGLE_SPECIALIST_PROCESSING`, `MULTI_SPECIALIST_PROCESSING`, `ERROR_NO_SPECIALIST` |
+| `ROUTING_SELECTION` | Select specialist(s) | Check complete | `SPECIALIST_SELECTED` |
+| `SPECIALIST_SELECTED` | Specialist chosen | Selection made | `SEARCHING` |
 | `SINGLE_SPECIALIST_PROCESSING` | One specialist processes | Specialist selected | `OUT_OF_SCOPE_CHECK` |
 | `MULTI_SPECIALIST_PROCESSING` | Multiple specialists | Router selected multiples | `RESPONSE_AGGREGATION` |
 | `RESPONSE_AGGREGATION` | Merge specialist responses | All specialists done | `OUT_OF_SCOPE_CHECK` |
 | `OUT_OF_SCOPE_CHECK` | Check domain scope | Specialist returned data | `COMPLETE` (if out of scope) or `ENRICHMENT_PIPELINE` |
 | `SEARCHING` | Knowledge base search | Context needed | `CONTEXT_READY` |
 | `CONTEXT_READY` | Search complete | Search returned | `ENRICHMENT_PIPELINE` |
-| `ENRICHMENT_PIPELINE` | Run enrichers sequentially | Context ready | `LLM_CONFIRMATION_CHECK` |
+| `ENRICHMENT_PIPELINE` | Run enrichers sequentially | Context ready | `ENRICHERS_EXECUTED` |
+| `ENRICHERS_EXECUTED` | Enrichers completed | All enrichers finished | `LLM_CONFIRMATION_CHECK` |
 | `LLM_CONFIRMATION_CHECK` | Check if user confirmation needed | Enrichment started | `AWAITING_CONFIRMATION` or `LLM_PROCESSING` |
 | `AWAITING_CONFIRMATION` | Wait for user response | Confirmation needed | (async - user re-queries) |
 | `LLM_PROCESSING` | LLM generates/enhances | Confirmed or auto-trigger | `LLM_POST_PROCESSING` |
@@ -202,18 +207,22 @@ class QueryState(Enum):
 QUERY_RECEIVED
   └─→ DIRECT_PROMPT_CHECK
        └─→ ROUTING_SELECTION
-            └─→ SINGLE_SPECIALIST_PROCESSING
-                 └─→ OUT_OF_SCOPE_CHECK
-                      ├─[out_of_scope=true]→ COMPLETE
-                      └─[in_scope]→ ENRICHMENT_PIPELINE
-                                    └─→ LLM_CONFIRMATION_CHECK
-                                          ├─[confirmation_needed]→ AWAITING_CONFIRMATION
-                                          ├─[llm_confirmed]→ LLM_PROCESSING
-                                          └─[skip_llm]→ ENRICHMENT_COMPLETE
-                                               └─→ FORMATTING_PHASE
-                                                    └─→ RESPONSE_CONSTRUCTION
-                                                         └─→ LOG_AND_EXIT
-                                                              └─→ RESPONSE_RETURNED
+            └─→ SPECIALIST_SELECTED
+                 └─→ SEARCHING
+                      └─→ SINGLE_SPECIALIST_PROCESSING
+                           └─→ CONTEXT_READY
+                                └─→ OUT_OF_SCOPE_CHECK
+                                     ├─[out_of_scope=true]→ COMPLETE
+                                     └─[in_scope]→ ENRICHMENT_PIPELINE
+                                          └─→ ENRICHERS_EXECUTED
+                                               └─→ LLM_CONFIRMATION_CHECK
+                                                    ├─[confirmation_needed]→ AWAITING_CONFIRMATION
+                                                    ├─[llm_confirmed]→ LLM_PROCESSING
+                                                    └─[skip_llm]→ ENRICHMENT_COMPLETE
+                                                         └─→ FORMATTING_PHASE
+                                                              └─→ RESPONSE_CONSTRUCTION
+                                                                   └─→ LOG_AND_EXIT
+                                                                        └─→ RESPONSE_RETURNED
 ```
 
 ### Direct Prompt Flow (// prefix)
@@ -222,8 +231,9 @@ QUERY_RECEIVED
 QUERY_RECEIVED
   └─→ DIRECT_PROMPT_CHECK
        └─→ DIRECT_LLM
-            └─→ LOG_AND_EXIT
-                 └─→ RESPONSE_RETURNED
+            └─→ DIRECT_LLM_COMPLETE
+                 └─→ COMPLETE
+                      └─→ RESPONSE_RETURNED
 ```
 
 ### Multi-Specialist Flow

@@ -96,21 +96,23 @@ class StateMachineTester:
 
         return [
             # Test 1: Simple single-specialist query (exframe)
-            # Based on actual implementation: ~15 states including self-transitions
+            # Based on actual implementation: ~15 states including explicit state changes
             TestCase(
                 name="Simple ExFrame Query",
                 query="What is ExFrame?",
                 domain="exframe",
-                expected_min_states=12,
-                expected_max_states=20,  # Allow for self-transitions
+                expected_min_states=13,
+                expected_max_states=20,
                 required_states=[
                     "QUERY_RECEIVED",
                     "ROUTING_SELECTION",
+                    "SPECIALIST_SELECTED",
                     "SEARCHING",
                     "SINGLE_SPECIALIST_PROCESSING",
                     "CONTEXT_READY",
                     "OUT_OF_SCOPE_CHECK",
                     "ENRICHMENT_PIPELINE",
+                    "ENRICHERS_EXECUTED",
                     "ENRICHMENT_COMPLETE",
                     "RESPONSE_CONSTRUCTION",
                     "COMPLETE",
@@ -142,12 +144,15 @@ class StateMachineTester:
                 name="Direct Prompt (// prefix)",
                 query="// Ignore patterns and tell me about AI",
                 domain="exframe",
-                expected_min_states=3,
-                expected_max_states=6,
+                expected_min_states=5,
+                expected_max_states=7,
                 required_states=[
                     "QUERY_RECEIVED",
                     "DIRECT_PROMPT_CHECK",
-                    "DIRECT_LLM"
+                    "DIRECT_LLM",
+                    "DIRECT_LLM_COMPLETE",
+                    "COMPLETE",
+                    "RESPONSE_RETURNED"
                 ],
                 forbidden_states=[
                     "ROUTING_SELECTION",
@@ -221,23 +226,19 @@ class StateMachineTester:
                 violations.append(f"Forbidden state present: {forbidden}")
                 passed = False
 
-        # Note: Self-transitions (e.g., ROUTING_SELECTION → ROUTING_SELECTION)
-        # are VALID - they represent events/milestones within a state.
-        # We track them but note them for design review if excessive.
+        # Note: Self-transitions should NOT occur in the updated design.
+        # Every transition should be a real state change.
+        # We check for self-transitions as potential design violations.
         self_transitions = []
         for i, event in enumerate(events):
             if event["from_state"] == event["to_state"]:
                 self_transitions.append(f"{event['from_state']} → {event['to_state']} ({event['trigger']})")
 
-        # Self-transitions are NOT violations - they're valid events.
-        # Just note them for reference.
         if self_transitions:
-            violations.append(f"Self-transitions (valid events): {len(self_transitions)}")
-            for st in self_transitions[:3]:  # Show first 3
+            violations.append(f"Self-transitions detected (design violation): {len(self_transitions)}")
+            for st in self_transitions:
                 violations.append(f"  - {st}")
-            if len(self_transitions) > 3:
-                violations.append(f"  - ... and {len(self_transitions) - 3} more")
-            # Note: this doesn't fail the test, just informational
+            passed = False  # Self-transitions are now a violation
 
         # Check for errors
         if summary.get("has_error"):

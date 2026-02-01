@@ -160,9 +160,15 @@ class GenericAssistantEngine:
             result = await self._process_direct_prompt(actual_query, query, start_time, trace, state_machine)
             if result.get('error'):
                 state_machine.error("direct_prompt_failed", {"error": result.get('response')})
-            else:
-                state_machine.transition(QueryState.DIRECT_LLM, "direct_llm_complete", {"response_length": len(result.get('response', ''))})
-            state_machine.complete({"query_id": state_machine.query_id})
+            # Note: _process_direct_prompt already handles COMPLETE and DIRECT_LLM_COMPLETE transitions
+
+            # STATE: RESPONSE_RETURNED
+            state_machine.transition(QueryState.RESPONSE_RETURNED, "query_complete", {})
+
+            # Add state machine trace to result
+            result['query_id'] = state_machine.query_id
+            result['state_machine'] = state_machine.get_full_trace()
+
             return result
 
         # Step 1: Select appropriate specialist
@@ -186,7 +192,7 @@ class GenericAssistantEngine:
                 })
 
         state_machine.transition(
-            QueryState.ROUTING_SELECTION,
+            QueryState.SPECIALIST_SELECTED,
             "specialist_selected",
             {
                 "selected_specialist": specialist.specialist_id if specialist else None,
@@ -933,7 +939,7 @@ class GenericAssistantEngine:
                 llm_response = data['content'][0]['text'] if is_anthropic else data['choices'][0]['message']['content']
 
                 if state_machine:
-                    state_machine.transition(QueryState.DIRECT_LLM, "direct_llm_call_success", {
+                    state_machine.transition(QueryState.DIRECT_LLM_COMPLETE, "direct_llm_call_success", {
                         "model": model_name if is_anthropic else model,
                         "response_size": len(llm_response)
                     })
