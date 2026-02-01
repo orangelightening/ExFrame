@@ -62,6 +62,10 @@ services:
       - ./generic_framework/api:/app/api:rw
       - ./generic_framework/diagnostics:/app/diagnostics:rw
       - ./generic_framework/frontend:/app/frontend:ro
+      - ./generic_framework/state:/app/generic_framework/state:rw
+
+      # Mount tests directory for state machine test suite
+      - ./tests:/app/tests:ro
 
       # Mount built frontend (bind mount for live updates)
       # - ./frontend/dist:/app/frontend/dist:ro  # TEMPORARILY DISABLED TO RESTORE NICE UI
