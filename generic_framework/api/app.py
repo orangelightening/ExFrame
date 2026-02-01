@@ -1109,6 +1109,7 @@ async def process_query(request: QueryRequest) -> Response:
         domain_id=request.domain,
         context=request.context,
         include_trace=request.include_trace,
+        verbose=request.verbose,
         format_type=request.format
     )
 
@@ -1144,6 +1145,7 @@ async def process_query_get(
         domain_id=domain,
         context=None,
         include_trace=include_trace,
+        verbose=False,
         format_type=format
     )
 
@@ -1166,6 +1168,7 @@ async def confirm_llm_fallback(request: ConfirmLLMRequest) -> Response:
         domain_id=request.domain,
         context={"llm_confirmed": True},  # Pass llm_confirmed flag
         include_trace=request.include_trace,
+        verbose=request.verbose,
         format_type=request.format
     )
 

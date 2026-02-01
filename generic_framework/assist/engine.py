@@ -303,7 +303,7 @@ class GenericAssistantEngine:
                 state_machine.transition(QueryState.LOG_AND_EXIT, "out_of_scope_rejection", {"reason": response_data.get('out_of_scope_reason')})
                 state_machine.complete({"status": "out_of_scope"})
                 logger.info(f"[Engine] Query rejected by specialist: {response_data.get('out_of_scope_reason', 'Out of scope')}")
-                return {
+                result = {
                     'query': query,
                     'response': response_data.get('response', 'This question is outside the documentation scope.'),
                     'specialist': specialist_id,
@@ -315,6 +315,9 @@ class GenericAssistantEngine:
                     'domain': self.domain.domain_id,
                     'trace': trace
                 }
+                result['query_id'] = state_machine.query_id
+                result['state_machine'] = state_machine.get_full_trace()
+                return result
 
             # Extract patterns from specialist response for consistency
             patterns = response_data.get('patterns_used', [])
@@ -615,6 +618,10 @@ class GenericAssistantEngine:
 
         # STATE: RESPONSE_RETURNED
         state_machine.transition(QueryState.RESPONSE_RETURNED, "query_complete", {})
+
+        # Add state machine trace to result
+        result['query_id'] = state_machine.query_id
+        result['state_machine'] = state_machine.get_full_trace()
 
         return result
 
