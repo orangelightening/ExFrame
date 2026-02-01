@@ -388,7 +388,11 @@ class GenericAssistantEngine:
         state_machine.transition(
             QueryState.ENRICHMENT_PIPELINE,
             "enrichment_start",
-            {"input_size": len(str(enricher_input)), "confidence": confidence}
+            {
+                "input_size": len(str(enricher_input)),
+                "confidence": confidence,
+                "current_response": response  # Capture current response before enrichment
+            }
         )
 
         # Call domain enrichers with EnrichmentContext
@@ -419,7 +423,19 @@ class GenericAssistantEngine:
             # Update response and result with enriched data
             if enriched_data.get('llm_used'):
                 # STATE: LLM_PROCESSING
-                state_machine.transition(QueryState.LLM_PROCESSING, "llm_fallback_or_enhancement", {})
+                llm_response_content = None
+                if 'llm_fallback' in enriched_data:
+                    llm_response_content = enriched_data['llm_fallback']
+                elif 'llm_enhancement' in enriched_data:
+                    llm_response_content = enriched_data['llm_enhancement']
+                elif 'llm_response' in enriched_data:
+                    llm_response_content = enriched_data['llm_response']
+
+                state_machine.transition(
+                    QueryState.LLM_PROCESSING,
+                    "llm_fallback_or_enhancement",
+                    {"llm_response": llm_response_content, "llm_type": "fallback" if 'llm_fallback' in enriched_data else "enhancement" if 'llm_enhancement' in enriched_data else "response"}
+                )
 
                 # LLM was used as fallback or enhancement
                 if 'llm_fallback' in enriched_data:
@@ -452,7 +468,14 @@ class GenericAssistantEngine:
                     response = enriched_data['response']
 
             # STATE: ENRICHMENT_COMPLETE
-            state_machine.transition(QueryState.ENRICHMENT_COMPLETE, "enrichment_complete", {"llm_used": enriched_data.get('llm_used', False)})
+            state_machine.transition(
+                QueryState.ENRICHMENT_COMPLETE,
+                "enrichment_complete",
+                {
+                    "llm_used": enriched_data.get('llm_used', False),
+                    "enriched_response": response  # Capture response after enrichment
+                }
+            )
 
         except Exception as e:
             state_machine.error("enrichment_failed", {"error": str(e)})
@@ -603,7 +626,8 @@ class GenericAssistantEngine:
                 "response_size": len(response),
                 "confidence": confidence,
                 "ai_generated": is_ai_generated,
-                "patterns_used": len(patterns)
+                "patterns_used": len(patterns),
+                "final_response": response  # Capture final response
             }
         )
 

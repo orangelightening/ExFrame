@@ -138,11 +138,20 @@ class QueryStateMachine:
         if isinstance(data, dict):
             snapshot["keys"] = list(data.keys())
             snapshot["count"] = len(data)
+            # For verbose mode, capture full content of specific keys
+            if self._verbose_enabled:
+                if 'response' in data:
+                    snapshot["full_response"] = data['response']
+                if 'query' in data:
+                    snapshot["query"] = data['query']
+                if 'patterns' in data:
+                    snapshot["patterns_count"] = len(data['patterns'])
         elif isinstance(data, list):
             snapshot["count"] = len(data)
             snapshot["preview_count"] = min(len(data), 5)
         elif isinstance(data, str):
             snapshot["length"] = len(data)
+            snapshot["full_content"] = data  # Capture full string content
         elif isinstance(data, (bool, int, float, type(None))):
             snapshot["value"] = data
 

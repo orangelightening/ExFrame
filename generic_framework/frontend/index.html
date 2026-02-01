@@ -3626,23 +3626,33 @@
                         const snapshots = event.verbose.snapshots;
                         details.push(`--- Verbose (${event.verbose.trigger_reason}) ---`);
 
+                        // Show input snapshot metadata
                         if (snapshots.input) {
                             details.push(`Input: ${snapshots.input.type} (${snapshots.input.size_bytes} bytes)`);
                             if (snapshots.input.keys) {
                                 details.push(`  Keys: ${snapshots.input.keys.join(', ')}`);
                             }
-                            if (snapshots.input.preview) {
-                                details.push(`  Preview: ${snapshots.input.preview.substring(0, 100)}${snapshots.input.preview.length >= 100 ? '...' : ''}`);
+                            // Show full content if available
+                            if (snapshots.input.full_response) {
+                                details.push(`  Response: "${snapshots.input.full_response.substring(0, 200)}${snapshots.input.full_response.length >= 200 ? '...' : ''}"`);
+                            }
+                            if (snapshots.input.full_content) {
+                                details.push(`  Content: "${snapshots.input.full_content.substring(0, 200)}${snapshots.input.full_content.length >= 200 ? '...' : ''}"`);
                             }
                         }
 
+                        // Show output snapshot metadata
                         if (snapshots.output) {
                             details.push(`Output: ${snapshots.output.type} (${snapshots.output.size_bytes} bytes)`);
                             if (snapshots.output.keys) {
                                 details.push(`  Keys: ${snapshots.output.keys.join(', ')}`);
                             }
-                            if (snapshots.output.preview) {
-                                details.push(`  Preview: ${snapshots.output.preview.substring(0, 100)}${snapshots.output.preview.length >= 100 ? '...' : ''}`);
+                            // Show full content if available
+                            if (snapshots.output.full_response) {
+                                details.push(`  Response: "${snapshots.output.full_response.substring(0, 200)}${snapshots.output.full_response.length >= 200 ? '...' : ''}"`);
+                            }
+                            if (snapshots.output.full_content) {
+                                details.push(`  Content: "${snapshots.output.full_content.substring(0, 200)}${snapshots.output.full_content.length >= 200 ? '...' : ''}"`);
                             }
                         }
 
@@ -3658,6 +3668,20 @@
                                 details.push(`  Delta ~: ${delta.keys_modified.join(', ')}`);
                             }
                         }
+                    }
+
+                    // Add actual response content from data (if verbose or response exists)
+                    if (data.current_response) {
+                        details.push(`Current Response: "${data.current_response.substring(0, 200)}${data.current_response.length >= 200 ? '...' : ''}"`);
+                    }
+                    if (data.enriched_response) {
+                        details.push(`Enriched Response: "${data.enriched_response.substring(0, 200)}${data.enriched_response.length >= 200 ? '...' : ''}"`);
+                    }
+                    if (data.final_response) {
+                        details.push(`Final Response: "${data.final_response.substring(0, 200)}${data.final_response.length >= 200 ? '...' : ''}"`);
+                    }
+                    if (data.llm_response) {
+                        details.push(`LLM Response: "${data.llm_response.substring(0, 200)}${data.llm_response.length >= 200 ? '...' : ''}"`);
                     }
 
                     // Add key data fields (only if not showing verbose details)
