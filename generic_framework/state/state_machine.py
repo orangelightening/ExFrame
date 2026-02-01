@@ -492,6 +492,8 @@ class QueryStateMachine:
     def _describe_value(self, value: Any) -> Dict[str, Any]:
         """Describe a single value for logging.
 
+        In verbose mode, captures the full value instead of a preview.
+
         Args:
             value: The value to describe
 
@@ -506,22 +508,38 @@ class QueryStateMachine:
                 "all_keys": list(value.keys())
             }
         elif isinstance(value, list):
-            return {
+            result = {
                 "type": "list",
                 "count": len(value),
-                "preview": [str(v)[:50] for v in value[:3]]  # First 3 items
             }
+            if self._verbose_enabled:
+                # Full content in verbose mode
+                result["full_list"] = value
+            else:
+                # Preview in non-verbose mode
+                result["preview"] = [str(v)[:50] for v in value[:3]]
+            return result
         elif isinstance(value, str):
-            return {
+            result = {
                 "type": "str",
                 "length": len(value),
-                "preview": value[:100]
             }
+            if self._verbose_enabled:
+                # Full content in verbose mode
+                result["full_content"] = value
+            else:
+                # Preview in non-verbose mode
+                result["preview"] = value[:100]
+            return result
         else:
-            return {
+            result = {
                 "type": type(value).__name__,
-                "preview": str(value)[:100]
             }
+            if self._verbose_enabled:
+                result["value"] = value
+            else:
+                result["preview"] = str(value)[:100]
+            return result
 
     def _compare_values(self, before: Any, after: Any) -> Dict[str, Any]:
         """Compare two values and describe the difference.

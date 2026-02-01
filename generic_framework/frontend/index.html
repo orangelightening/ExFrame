@@ -3639,6 +3639,28 @@
                                 } else if (key === 'full_content') {
                                     // Show FULL content, no truncation
                                     details.push(`  ${key}: "${value}"`);
+                                } else if (key === 'changes') {
+                                    // Special handling for changes dict - show full content
+                                    details.push(`  ${key}:`);
+                                    for (const [changeType, changeDict] of Object.entries(value)) {
+                                        if (typeof changeDict === 'object' && changeDict !== null) {
+                                            details.push(`    ${changeType}:`);
+                                            for (const [changeKey, changeValue] of Object.entries(changeDict)) {
+                                                if (typeof changeValue === 'object' && changeValue !== null) {
+                                                    // Check for full_content first
+                                                    if (changeValue.full_content !== undefined) {
+                                                        details.push(`      ${changeKey}: "${changeValue.full_content}"`);
+                                                    } else if (changeValue.preview !== undefined) {
+                                                        details.push(`      ${changeKey}: "${changeValue.preview}"`);
+                                                    } else {
+                                                        details.push(`      ${changeKey}: ${JSON.stringify(changeValue)}`);
+                                                    }
+                                                } else {
+                                                    details.push(`      ${changeKey}: ${changeValue}`);
+                                                }
+                                            }
+                                        }
+                                    }
                                 } else if (typeof value === 'string') {
                                     // Show full string content
                                     details.push(`  ${key}: "${value}"`);
@@ -3663,6 +3685,28 @@
                                 } else if (key === 'full_content') {
                                     // Show FULL content, no truncation
                                     details.push(`  ${key}: "${value}"`);
+                                } else if (key === 'changes') {
+                                    // Special handling for changes dict - show full content
+                                    details.push(`  ${key}:`);
+                                    for (const [changeType, changeDict] of Object.entries(value)) {
+                                        if (typeof changeDict === 'object' && changeDict !== null) {
+                                            details.push(`    ${changeType}:`);
+                                            for (const [changeKey, changeValue] of Object.entries(changeDict)) {
+                                                if (typeof changeValue === 'object' && changeValue !== null) {
+                                                    // Check for full_content first
+                                                    if (changeValue.full_content !== undefined) {
+                                                        details.push(`      ${changeKey}: "${changeValue.full_content}"`);
+                                                    } else if (changeValue.preview !== undefined) {
+                                                        details.push(`      ${changeKey}: "${changeValue.preview}"`);
+                                                    } else {
+                                                        details.push(`      ${changeKey}: ${JSON.stringify(changeValue)}`);
+                                                    }
+                                                } else {
+                                                    details.push(`      ${changeKey}: ${changeValue}`);
+                                                }
+                                            }
+                                        }
+                                    }
                                 } else if (typeof value === 'string') {
                                     // Show full string content
                                     details.push(`  ${key}: "${value}"`);
