@@ -118,12 +118,15 @@ class QueryStateMachine:
     def _capture_snapshot(self, data: Any, label: str) -> Optional[Dict[str, Any]]:
         """Capture a detailed snapshot of data for verbose logging.
 
+        In verbose mode, captures ALL data for post-processing and debugging.
+        No truncation - dump everything.
+
         Args:
             data: The data to capture
             label: "input" or "output" describing the snapshot
 
         Returns:
-            Snapshot dictionary with full_data, type, size, keys, preview
+            Snapshot dictionary with full data content
         """
         if data is None:
             return None
@@ -131,29 +134,39 @@ class QueryStateMachine:
         snapshot = {
             "type": type(data).__name__,
             "size_bytes": len(str(data)),
-            "preview": str(data)[:500]  # First 500 chars
         }
 
-        # Add type-specific information
-        if isinstance(data, dict):
-            snapshot["keys"] = list(data.keys())
-            snapshot["count"] = len(data)
-            # For verbose mode, capture full content of specific keys
-            if self._verbose_enabled:
-                if 'response' in data:
-                    snapshot["full_response"] = data['response']
-                if 'query' in data:
-                    snapshot["query"] = data['query']
-                if 'patterns' in data:
-                    snapshot["patterns_count"] = len(data['patterns'])
-        elif isinstance(data, list):
-            snapshot["count"] = len(data)
-            snapshot["preview_count"] = min(len(data), 5)
-        elif isinstance(data, str):
-            snapshot["length"] = len(data)
-            snapshot["full_content"] = data  # Capture full string content
-        elif isinstance(data, (bool, int, float, type(None))):
-            snapshot["value"] = data
+        # For verbose mode, capture EVERYTHING
+        if self._verbose_enabled:
+            if isinstance(data, dict):
+                snapshot["keys"] = list(data.keys())
+                snapshot["count"] = len(data)
+                # Capture ALL values from the dict, not just specific keys
+                for key, value in data.items():
+                    # Capture the full value, no truncation
+                    snapshot[key] = value
+            elif isinstance(data, list):
+                snapshot["count"] = len(data)
+                snapshot["full_list"] = data  # Capture full list
+            elif isinstance(data, str):
+                snapshot["length"] = len(data)
+                snapshot["full_content"] = data  # Capture full string, no truncation
+            elif isinstance(data, (bool, int, float, type(None))):
+                snapshot["value"] = data
+            else:
+                # For any other type, capture the string representation
+                snapshot["full_content"] = str(data)
+        else:
+            # Non-verbose mode: minimal metadata
+            if isinstance(data, dict):
+                snapshot["keys"] = list(data.keys())
+                snapshot["count"] = len(data)
+            elif isinstance(data, list):
+                snapshot["count"] = len(data)
+            elif isinstance(data, str):
+                snapshot["length"] = len(data)
+            elif isinstance(data, (bool, int, float, type(None))):
+                snapshot["value"] = data
 
         return snapshot
 
