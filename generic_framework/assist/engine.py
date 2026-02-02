@@ -451,9 +451,26 @@ class GenericAssistantEngine:
                     response = enriched_data['llm_fallback']
                     result_key = 'llm_fallback'
                 elif 'llm_enhancement' in enriched_data:
-                    response = enriched_data.get('response', response)
-                    if enriched_data.get('llm_enhancement'):
-                        response += f"\n\n---\n\n{enriched_data['llm_enhancement']}"
+                    # For Type 4 (Analytical Engine), put LLM enhancement FIRST (internet), then local data
+                    # For other types, put local data FIRST, then LLM enhancement
+                    original_response = enriched_data.get('response', '')
+                    llm_enhancement = enriched_data.get('llm_enhancement', '')
+
+                    # Get domain type from _domain_config
+                    domain_type = getattr(self.domain, '_domain_config', {}).get('domain_type', '')
+
+                    if domain_type == '4':
+                        # Type 4: Internet (LLM) first, then local data
+                        if original_response and original_response.strip():
+                            response = f"{llm_enhancement}\n\n---\n\nLocal Sources:\n\n{original_response}"
+                        else:
+                            response = llm_enhancement
+                    else:
+                        # Other types: Local data first, then internet (LLM)
+                        if llm_enhancement:
+                            response = f"{original_response}\n\n---\n\n{llm_enhancement}"
+                        else:
+                            response = original_response
                     result_key = 'llm_enhancement'
                 elif 'llm_response' in enriched_data:
                     response = enriched_data['llm_response']
