@@ -147,23 +147,24 @@ class GenericAssistantEngine:
             'steps': []
         } if self.enable_tracing else None
 
-        # STATE: QUERY_RECEIVED
+        # STATE: QUERY_RECEIVED (includes direct prompt check)
         state_machine.transition(
             QueryState.QUERY_RECEIVED,
             "api_request",
-            {"query": actual_query, "original_query": query, "include_trace": include_trace}
+            {
+                "query": actual_query,
+                "original_query": query,
+                "include_trace": include_trace,
+                "direct_prompt": direct_prompt
+            }
         )
 
         # Handle direct prompt - skip to LLM directly
         if direct_prompt:
-            state_machine.transition(QueryState.DIRECT_PROMPT_CHECK, "direct_prompt_detected", {"query": actual_query})
             result = await self._process_direct_prompt(actual_query, query, start_time, trace, state_machine)
             if result.get('error'):
                 state_machine.error("direct_prompt_failed", {"error": result.get('response')})
-            # Note: _process_direct_prompt already handles COMPLETE and DIRECT_LLM_COMPLETE transitions
-
-            # STATE: RESPONSE_RETURNED
-            state_machine.transition(QueryState.RESPONSE_RETURNED, "query_complete", {})
+            # Note: _process_direct_prompt already handles COMPLETE and DIRECT_LLM transitions
 
             # Add state machine trace to result
             result['query_id'] = state_machine.query_id
@@ -174,12 +175,8 @@ class GenericAssistantEngine:
         # Step 1: Select appropriate specialist
         step1_time = datetime.utcnow()
 
-        # STATE: ROUTING_SELECTION
-        state_machine.transition(QueryState.ROUTING_SELECTION, "specialist_selection_start", {"specialists_available": len(self.domain.list_specialists())})
-
+        # Collect specialist scoring info first
         specialist = self.domain.get_specialist_for_query(query)
-
-        # Collect specialist scoring info
         specialist_scores = []
         for spec_id in self.domain.list_specialists():
             spec = self.domain.get_specialist(spec_id)
@@ -191,10 +188,12 @@ class GenericAssistantEngine:
                     'score': score
                 })
 
+        # STATE: ROUTING_SELECTION (includes selection results)
         state_machine.transition(
-            QueryState.SPECIALIST_SELECTED,
-            "specialist_selected",
+            QueryState.ROUTING_SELECTION,
+            "specialist_selection_complete",
             {
+                "specialists_available": len(self.domain.list_specialists()),
                 "selected_specialist": specialist.specialist_id if specialist else None,
                 "specialist_name": specialist.name if specialist else None,
                 "specialist_scores": specialist_scores
@@ -214,9 +213,6 @@ class GenericAssistantEngine:
         # Specialists do their own search to maintain control over search strategy
         step2_time = datetime.utcnow()
 
-        # STATE: SEARCHING
-        state_machine.transition(QueryState.SEARCHING, "search_start", {"has_specialist": specialist is not None})
-
         patterns = []
 
         if specialist:
@@ -232,16 +228,6 @@ class GenericAssistantEngine:
             # No specialist - do general knowledge base search
             patterns = await self.knowledge_base.search(query, limit=10)
 
-            # STATE: CONTEXT_READY (for non-specialist queries)
-            state_machine.transition(
-                QueryState.CONTEXT_READY,
-                "knowledge_search_complete",
-                {
-                    "patterns_found": len(patterns),
-                    "search_method": "general_knowledge_base"
-                }
-            )
-
             if trace:
                 trace['steps'].append({
                     'step': 2,
@@ -253,7 +239,7 @@ class GenericAssistantEngine:
                             'id': p.get('id'),
                             'name': p.get('name'),
                             'type': p.get('pattern_type'),
-                            'relevance': p.get('_semantic_score', p.get('confidence', 0)),  # Use semantic score if available
+                            'relevance': p.get('_semantic_score', p.get('confidence', 0)),
                             'relevance_source': p.get('_relevance_source', 'unknown')
                         }
                         for p in patterns
@@ -268,13 +254,6 @@ class GenericAssistantEngine:
         response_data = None  # Initialize for access later
 
         if specialist:
-            # STATE: SINGLE_SPECIALIST_PROCESSING
-            state_machine.transition(
-                QueryState.SINGLE_SPECIALIST_PROCESSING,
-                "specialist_processing_start",
-                {"specialist": specialist.specialist_id, "specialist_name": specialist.name}
-            )
-
             # Specialist does its own search - don't pass pre-found patterns
             specialist_context = context or {}
             response_data = await specialist.process_query(query, specialist_context)
@@ -286,28 +265,12 @@ class GenericAssistantEngine:
             if response_data and response_data.get('can_extend_with_web_search'):
                 can_extend_with_web_search = True
 
-            # STATE: CONTEXT_READY (after specialist search)
-            context_size = len(str(response_data)) if response_data else 0
-            patterns_found = len(response_data.get('patterns', [])) if response_data else 0
-
-            state_machine.transition(
-                QueryState.CONTEXT_READY,
-                "specialist_search_complete",
-                {
-                    "specialist": specialist.specialist_id,
-                    "patterns_found": patterns_found,
-                    "context_size": context_size,
-                    "has_research_results": 'research_results' in (response_data or {})
-                }
-            )
-
-            # STATE: OUT_OF_SCOPE_CHECK
-            state_machine.transition(QueryState.OUT_OF_SCOPE_CHECK, "checking_scope", {})
-
             # Check if query was rejected due to scope boundaries
             if response_data and response_data.get('out_of_scope'):
-                state_machine.transition(QueryState.LOG_AND_EXIT, "out_of_scope_rejection", {"reason": response_data.get('out_of_scope_reason')})
-                state_machine.complete({"status": "out_of_scope"})
+                state_machine.transition(QueryState.LOG_AND_EXIT, "out_of_scope_rejection", {
+                    "reason": response_data.get('out_of_scope_reason'),
+                    "specialist": specialist.specialist_id
+                })
                 logger.info(f"[Engine] Query rejected by specialist: {response_data.get('out_of_scope_reason', 'Out of scope')}")
                 result = {
                     'query': query,
@@ -325,6 +288,60 @@ class GenericAssistantEngine:
                 result['state_machine'] = state_machine.get_full_trace()
                 return result
 
+            # STATE: SPECIALIST_PROCESSING (after specialist generates response)
+            patterns_found = len(response_data.get('patterns_used', []))
+            documents_found = len(response_data.get('documents_used', []))
+
+            # Build state data with metadata only (not full content)
+            state_data = {
+                "specialist": specialist.specialist_id,
+                "specialist_name": specialist.name,
+                "patterns_found": patterns_found,
+                "documents_found": documents_found,
+                "response": response
+            }
+
+            # Include research results metadata only (titles, not full content)
+            if 'research_results' in response_data:
+                state_data['research_results'] = [
+                    {
+                        "id": r.get("id", ""),
+                        "title": r.get("title", ""),
+                        "source": r.get("source", ""),
+                        "relevance": r.get("metadata", {}).get("relevance", 0.0)
+                    }
+                    for r in response_data['research_results']
+                ]
+                state_data['research_results_count'] = len(response_data['research_results'])
+
+            # Include document results metadata only
+            if 'document_results' in response_data:
+                state_data['document_results'] = [
+                    {
+                        "id": d.get("id", ""),
+                        "title": d.get("title", ""),
+                        "relevance": d.get("relevance", 0.0)
+                    }
+                    for d in response_data['document_results']
+                ]
+
+            # Include local results metadata only
+            if 'local_results' in response_data:
+                state_data['local_results'] = [
+                    {
+                        "id": p.get("id", ""),
+                        "name": p.get("name", ""),
+                        "relevance": p.get("relevance", p.get("_semantic_score", 0.0))
+                    }
+                    for p in response_data['local_results']
+                ]
+
+            state_machine.transition(
+                QueryState.SPECIALIST_PROCESSING,
+                "specialist_processing_complete",
+                state_data
+            )
+
             # Extract patterns from specialist response for consistency
             patterns = response_data.get('patterns_used', [])
             if isinstance(patterns[0], str) if patterns else False:
@@ -339,16 +356,20 @@ class GenericAssistantEngine:
                         pass
         else:
             # General query processing (no specialist)
-            state_machine.transition(
-                QueryState.SINGLE_SPECIALIST_PROCESSING,
-                "general_processing_start",
-                {"patterns_found": len(patterns)}
-            )
             response_data = await self._general_processing(query, patterns, context)
             response = self._format_general_response(response_data)
             specialist_id = None
             processing_method = 'general'
-            state_machine.transition(QueryState.CONTEXT_READY, "general_processing_complete", {})
+
+            # STATE: SPECIALIST_PROCESSING (after general processing generates response)
+            state_machine.transition(
+                QueryState.SPECIALIST_PROCESSING,
+                "general_processing_complete",
+                {
+                    "patterns_found": len(patterns),
+                    "response": response  # Capture the response from general processing
+                }
+            )
 
         if trace:
             trace['steps'].append({
@@ -371,7 +392,7 @@ class GenericAssistantEngine:
             'query': query,
             'patterns': patterns,
             'response': response,
-            'confidence': confidence,  # Include calculated confidence
+            'confidence': confidence,
             'specialist_id': specialist_id,
             'processing_method': processing_method
         }
@@ -390,20 +411,8 @@ class GenericAssistantEngine:
         # Initialize enriched_data to avoid undefined variable
         enriched_data = {}
 
-        # STATE: ENRICHMENT_PIPELINE
-        state_machine.transition(
-            QueryState.ENRICHMENT_PIPELINE,
-            "enrichment_start",
-            {
-                "input_size": len(str(enricher_input)),
-                "confidence": confidence,
-                "current_response": response  # Capture current response before enrichment
-            }
-        )
-
         # Call domain enrichers with EnrichmentContext
         try:
-            # Import and create EnrichmentContext with llm_confirmed flag
             from core.enrichment_plugin import EnrichmentContext
             enrichment_context = EnrichmentContext(
                 domain_id=self.domain.domain_id,
@@ -416,9 +425,10 @@ class GenericAssistantEngine:
             # Store enricher input for change tracking
             enricher_before = enricher_input.copy()
 
+            # STATE: ENRICHERS_EXECUTED (actual work: LLM calls, enrichment)
             enriched_data = await self.domain.enrich(enricher_input, enrichment_context)
 
-            # Log enrichment changes
+            # Log enrichment changes (transitions to ENRICHERS_EXECUTED)
             state_machine.log_enricher_changes(
                 "DomainEnrichers",
                 enricher_before,
@@ -428,7 +438,6 @@ class GenericAssistantEngine:
 
             # Update response and result with enriched data
             if enriched_data.get('llm_used'):
-                # STATE: LLM_PROCESSING
                 llm_response_content = None
                 if 'llm_fallback' in enriched_data:
                     llm_response_content = enriched_data['llm_fallback']
@@ -437,32 +446,20 @@ class GenericAssistantEngine:
                 elif 'llm_response' in enriched_data:
                     llm_response_content = enriched_data['llm_response']
 
-                state_machine.transition(
-                    QueryState.LLM_PROCESSING,
-                    "llm_fallback_or_enhancement",
-                    {"llm_response": llm_response_content, "llm_type": "fallback" if 'llm_fallback' in enriched_data else "enhancement" if 'llm_enhancement' in enriched_data else "response"}
-                )
-
                 # LLM was used as fallback or enhancement
                 if 'llm_fallback' in enriched_data:
-                    # LLM fallback response
                     response = enriched_data['llm_fallback']
                     result_key = 'llm_fallback'
                 elif 'llm_enhancement' in enriched_data:
-                    # LLM enhancement to existing response
                     response = enriched_data.get('response', response)
                     if enriched_data.get('llm_enhancement'):
                         response += f"\n\n---\n\n{enriched_data['llm_enhancement']}"
                     result_key = 'llm_enhancement'
                 elif 'llm_response' in enriched_data:
-                    # LLM replaced response
                     response = enriched_data['llm_response']
                     result_key = 'llm_response'
                 else:
                     pass  # llm_used=True but no response key found
-
-                # STATE: LLM_POST_PROCESSING
-                state_machine.transition(QueryState.LLM_POST_PROCESSING, "llm_response_received", {"result_key": result_key})
 
                 # Add LLM metadata to result
                 enricher_input['llm_used'] = True
@@ -472,16 +469,6 @@ class GenericAssistantEngine:
                 # No LLM used, but check if enricher modified response
                 if 'response' in enriched_data:
                     response = enriched_data['response']
-
-            # STATE: ENRICHMENT_COMPLETE
-            state_machine.transition(
-                QueryState.ENRICHMENT_COMPLETE,
-                "enrichment_complete",
-                {
-                    "llm_used": enriched_data.get('llm_used', False),
-                    "enriched_response": response  # Capture response after enrichment
-                }
-            )
 
         except Exception as e:
             state_machine.error("enrichment_failed", {"error": str(e)})
@@ -624,30 +611,16 @@ class GenericAssistantEngine:
                     break
         result['ai_generated'] = is_ai_generated
 
-        # STATE: RESPONSE_CONSTRUCTION
-        state_machine.transition(
-            QueryState.RESPONSE_CONSTRUCTION,
-            "response_constructed",
-            {
-                "response_size": len(response),
-                "confidence": confidence,
-                "ai_generated": is_ai_generated,
-                "patterns_used": len(patterns),
-                "final_response": response  # Capture final response
-            }
-        )
-
-        # STATE: COMPLETE
+        # STATE: COMPLETE (includes response return, removed RESPONSE_CONSTRUCTION and RESPONSE_RETURNED)
         state_machine.complete({
             "query_id": state_machine.query_id,
             "processing_time_ms": result['processing_time_ms'],
             "llm_used": enriched_data.get('llm_used', False),
             "confidence": confidence,
-            "patterns_found": len(patterns)
+            "patterns_found": len(patterns),
+            "response_size": len(response),
+            "ai_generated": is_ai_generated
         })
-
-        # STATE: RESPONSE_RETURNED
-        state_machine.transition(QueryState.RESPONSE_RETURNED, "query_complete", {})
 
         # Add state machine trace to result
         result['query_id'] = state_machine.query_id
@@ -937,12 +910,6 @@ class GenericAssistantEngine:
 
                 data = response.json()
                 llm_response = data['content'][0]['text'] if is_anthropic else data['choices'][0]['message']['content']
-
-                if state_machine:
-                    state_machine.transition(QueryState.DIRECT_LLM_COMPLETE, "direct_llm_call_success", {
-                        "model": model_name if is_anthropic else model,
-                        "response_size": len(llm_response)
-                    })
 
                 if trace:
                     trace['steps'].append({

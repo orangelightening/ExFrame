@@ -30,44 +30,25 @@ from typing import Any, Dict, List, Optional, Union
 
 
 class QueryState(Enum):
-    """All possible states in the query lifecycle."""
+    """Consolidated query lifecycle states.
 
-    # Entry and Routing
-    QUERY_RECEIVED = "QUERY_RECEIVED"
-    DIRECT_PROMPT_CHECK = "DIRECT_PROMPT_CHECK"
-    DIRECT_LLM = "DIRECT_LLM"
-    DIRECT_LLM_COMPLETE = "DIRECT_LLM_COMPLETE"  # Direct LLM call completed
-    ROUTING_SELECTION = "ROUTING_SELECTION"
-    SPECIALIST_SELECTED = "SPECIALIST_SELECTED"  # Specialist has been selected
+    Design principle: Each state represents substantive work, not just logging markers.
+    Reduced from 16 to 6 core states for minimal overhead while maintaining observability.
+    """
 
-    # Specialist Processing
-    SINGLE_SPECIALIST_PROCESSING = "SINGLE_SPECIALIST_PROCESSING"
-    MULTI_SPECIALIST_PROCESSING = "MULTI_SPECIALIST_PROCESSING"
-    RESPONSE_AGGREGATION = "RESPONSE_AGGREGATION"
+    # Entry States
+    QUERY_RECEIVED = "QUERY_RECEIVED"  # Query received, direct prompt check included
+    DIRECT_LLM = "DIRECT_LLM"          # Direct LLM bypass (// prefix)
 
-    # Content Processing
-    OUT_OF_SCOPE_CHECK = "OUT_OF_SCOPE_CHECK"
-    SEARCHING = "SEARCHING"
-    CONTEXT_READY = "CONTEXT_READY"
-
-    # Enrichment
-    ENRICHMENT_PIPELINE = "ENRICHMENT_PIPELINE"
-    ENRICHERS_EXECUTED = "ENRICHERS_EXECUTED"  # Enrichers have completed execution
-    LLM_CONFIRMATION_CHECK = "LLM_CONFIRMATION_CHECK"
-    AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION"
-    LLM_PROCESSING = "LLM_PROCESSING"
-    LLM_POST_PROCESSING = "LLM_POST_PROCESSING"
-    ENRICHMENT_COMPLETE = "ENRICHMENT_COMPLETE"
-
-    # Output
-    FORMATTING_PHASE = "FORMATTING_PHASE"
-    RESPONSE_CONSTRUCTION = "RESPONSE_CONSTRUCTION"
+    # Processing States (where real work happens)
+    ROUTING_SELECTION = "ROUTING_SELECTION"  # Specialist scoring and selection
+    SPECIALIST_PROCESSING = "SPECIALIST_PROCESSING"  # Specialist search + response generation
+    ENRICHERS_EXECUTED = "ENRICHERS_EXECUTED"  # Enrichers executed (LLM calls)
 
     # Terminal States
-    LOG_AND_EXIT = "LOG_AND_EXIT"
-    COMPLETE = "COMPLETE"
-    ERROR = "ERROR"
-    RESPONSE_RETURNED = "RESPONSE_RETURNED"
+    COMPLETE = "COMPLETE"     # Query complete, includes response return
+    ERROR = "ERROR"           # Error occurred
+    LOG_AND_EXIT = "LOG_AND_EXIT"  # Early exit (e.g., out of scope)
 
     def __str__(self) -> str:
         return self.value

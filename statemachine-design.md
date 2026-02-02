@@ -1,34 +1,29 @@
 # ExFrame State Machine Design Document
 
-**Version:** 1.0
+**Version:** 2.0 (Consolidated)
 **Date:** 2026-01-31
-**Status:** Design Phase
+**Status:** Implemented
 **Author:** ExFrame Architecture Team
 
 ---
 
 ## Executive Summary
 
-This document defines a state machine logging system for ExFrame that provides complete observability of the query-response lifecycle while remaining extensible to other system components.
+This document defines a consolidated state machine logging system for ExFrame that provides complete observability of the query-response lifecycle with minimal overhead.
 
-**Core Principle:** One structured log, multiple consumers.
+**Core Design Principle:** Each state represents substantive work, not just logging markers.
 
-- **State Machine Logger** → Single JSONL log file
-- **Trace System** → Consumer of state log
-- **Debugging Tools** → Query state log
-- **AI Bug Finder** → Analyze state log for patterns
+**Consolidation:** Reduced from 16 states to 6 core states by eliminating pure marker states that only logged metadata without doing actual work.
 
 ---
 
 ## Table of Contents
 
 1. [State Machine Overview](#state-machine-overview)
-2. [Complete State Definitions](#complete-state-definitions)
+2. [State Definitions](#state-definitions)
 3. [State Transitions](#state-transitions)
 4. [Data Schema](#data-schema)
-5. [Implementation Plan](#implementation-plan)
-6. [Extensibility Considerations](#extensibility-considerations)
-7. [Scoping & Boundaries](#scoping--boundaries)
+5. [Implementation Status](#implementation-status)
 
 ---
 
@@ -38,164 +33,93 @@ This document defines a state machine logging system for ExFrame that provides c
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         ExFrame Query Lifecycle                      │
+│                    Consolidated Query Lifecycle                      │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌──────────────┐                                                   │
 │  │ QUERY_RECEIVED│  Entry: API/WebSocket/Direct                      │
-│  └───────┬───────┘                                                   │
-│          │                                                           │
-│          ▼                                                           │
-│  ┌──────────────────────────────────────────────┐                   │
-│  │     DIRECT PROMPT CHECK (// prefix?)        │                   │
-│  └──────┬────────────────────────────────────────┘                   │
-│         │                                                          │
+│  └──────┬───────┘  Includes direct prompt check                      │
+│         │                                                           │
 │    ┌────┴────┐                                                       │
 │    │         │                                                       │
-│  [Direct]   [Normal]                                                 │
+│ [Direct]   [Normal]                                                 │
+│ [// prefix]                                                          │
 │    │         │                                                       │
 │    ▼         ▼                                                       │
-│  ┌──────────────┐  ┌──────────────────┐                          │
-│  │ DIRECT_LLM   │  │ ROUTING_SELECTION │                          │
-│  └──────┬───────┘  └──────┬─────────────┘                          │
-│         │                │                                           │
-│         │         ┌──────┴─────────┐                                │
-│         │         │                  │                               │
-│         │    ┌────┴─────┐      ┌─────┴──────┐                           │
-│         │    │           │      │            │                        │
-│         │    │  Single   │      │  Multiple  │                        │
-│         │    │ Specialist│      │ Specialists│                       │
-│         │    └─────┬─────┘      └─────┬──────┘                           │
-│         │          │                  │                               │
-│         ▼          ▼                  ▼                               │
-│  ┌────────────────────┐  ┌─────────────────────┐                    │
-│  │SPECIALIST_PROCESSING│  │MULTI_SPECIALIST_    │                    │
-│  │                     │  │PROCESSING           │                    │
-│  └──────┬──────────────┘  └──────┬──────────────┘                    │
-│         │                        │                                    │
-│         ▼                        │                                    │
-│  ┌────────────────────┐          │                                    │
-│  │ OUT_OF_SCOPE_CHECK │          │                                    │
-│  └──────┬──────────────┘          │                                    │
-│         │                        │                                    │
-│    ┌────┴────┐                    │                                    │
-│    │         │                    │                                    │
-│ [In Scope] [Out of Scope]         │                                    │
-│    │         │                    │                                    │
-│    │    ┌────┴────────────────────┴─────┐                           │
-│    │    │                             │                           │
-│    ▼    ▼                             ▼                           │
-│  ┌────────────────┐         ┌────────────────┐                        │
-│  │ENRICHMENT_     │         │RESPONSE_       │                        │
-│  │PIPELINE        │         │AGGREGATION     │                        │
-│  └──────┬─────────┘         └──────┬─────────┘                        │
-│         │                        │                                    │
-│         ▼                        │                                    │
-│  ┌────────────────────────────────┴─────────┐                       │
-│  │            FORMATTING_PHASE              │                       │
-│  └──────────────────────┬──────────────────┘                       │
-│                         │                                           │
-│                         ▼                                           │
-│  ┌─────────────────────────────────────────────┐                    │
-│  │          RESPONSE_CONSTRUCTION              │                    │
-│  └──────────────────────┬──────────────────────┘                    │
-│                         │                                           │
-│                         ▼                                           │
-│  ┌─────────────────────────────────────────────┐                    │
-│  │               LOG_AND_EXIT                  │                    │
-│  └──────────────────────┬──────────────────────┘                    │
-│                         │                                           │
-│                         ▼                                           │
-│              RESPONSE_RETURNED                                            │
+│  ┌──────────┐  ┌──────────────────┐                                │
+│  │ DIRECT_  │  │ ROUTING_         │                                │
+│  │   LLM    │  │ SELECTION        │  Specialist scoring + selection  │
+│  └────┬─────┘  └──────┬───────────┘                                │
+│       │              │                                               │
+│       │              ▼                                               │
+│       │       ┌──────────────────┐                                 │
+│       │       │ SPECIALIST_      │  Search + pattern aggregation +   │
+│       │       │ PROCESSING       │  response generation              │
+│       │       └──────┬───────────┘                                 │
+│       │              │                                               │
+│       │              ▼                                               │
+│       │       ┌──────────────────┐                                 │
+│       │       │ ENRICHERS_       │  LLM fallback/enhancement +       │
+│       │       │ EXECUTED         │  enrichment                      │
+│       │       └──────┬───────────┘                                 │
+│       │              │                                               │
+│       └──────┬───────┘                                               │
+│              │                                                       │
+│              ▼                                                       │
+│       ┌──────────────┐                                              │
+│       │   COMPLETE   │  Response return included                     │
+│       └──────────────┘                                              │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Error States (parallel to main flow)
+### Error Handling
 
 ```
-ERROR_NO_SPECIALIST    → LOG_AND_EXIT
-ERROR_NO_LLM_KEY       → LOG_AND_EXIT
-ERROR_LLM_API         → LOG_AND_EXIT (continue without LLM)
-ERROR_PATTERN_SEARCH  → ENRICHMENT_PIPELINE (continue)
-ERROR_ENRICHER_FAILED → Next enricher (fail-safe)
-ERROR_DOMAIN_LOAD     → Immediate failure
+[any state] ──[error]──> ERROR ──> LOG_AND_EXIT (for out-of-scope rejection)
 ```
 
 ---
 
-## Complete State Definitions
+## State Definitions
 
-### Primary States
+### Consolidated QueryState Enum
 
 ```python
 class QueryState(Enum):
-    """All possible states in the query lifecycle."""
+    """Consolidated query lifecycle states.
 
-    # Entry and Routing
-    QUERY_RECEIVED = "QUERY_RECEIVED"               # Initial state
-    DIRECT_PROMPT_CHECK = "DIRECT_PROMPT_CHECK"     # Check for // prefix
-    DIRECT_LLM = "DIRECT_LLM"                       # Bypass to LLM
-    DIRECT_LLM_COMPLETE = "DIRECT_LLM_COMPLETE"     # Direct LLM call completed
-    ROUTING_SELECTION = "ROUTING_SELECTION"         # Select specialist(s)
-    SPECIALIST_SELECTED = "SPECIALIST_SELECTED"     # Specialist has been chosen
+    Design principle: Each state represents substantive work, not just logging markers.
+    Reduced from 16 to 6 core states for minimal overhead while maintaining observability.
+    """
 
-    # Specialist Processing
-    SINGLE_SPECIALIST_PROCESSING = "SINGLE_SPECIALIST_PROCESSING"
-    MULTI_SPECIALIST_PROCESSING = "MULTI_SPECIALIST_PROCESSING"
-    RESPONSE_AGGREGATION = "RESPONSE_AGGREGATION"   # Merge multi-specialist results
+    # Entry States
+    QUERY_RECEIVED = "QUERY_RECEIVED"  # Query received, direct prompt check included
+    DIRECT_LLM = "DIRECT_LLM"          # Direct LLM bypass (// prefix)
 
-    # Content Processing
-    OUT_OF_SCOPE_CHECK = "OUT_OF_SCOPE_CHECK"       # Check if query is in domain scope
-    SEARCHING = "SEARCHING"                         # Knowledge base search
-    CONTEXT_READY = "CONTEXT_READY"                 # Search complete, context prepared
-
-    # Enrichment
-    ENRICHMENT_PIPELINE = "ENRICHMENT_PIPELINE"     # Entry to enrichment phase
-    ENRICHERS_EXECUTED = "ENRICHERS_EXECUTED"       # Enrichers have completed execution
-    LLM_CONFIRMATION_CHECK = "LLM_CONFIRMATION_CHECK" # Check if confirmation needed
-    AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION" # Waiting for user
-    LLM_PROCESSING = "LLM_PROCESSING"               # LLM call in progress
-    LLM_POST_PROCESSING = "LLM_POST_PROCESSING"     # Clean contradictions
-    ENRICHMENT_COMPLETE = "ENRICHMENT_COMPLETE"     # All enrichers done
-
-    # Output
-    FORMATTING_PHASE = "FORMATTING_PHASE"           # Apply formatter
-    RESPONSE_CONSTRUCTION = "RESPONSE_CONSTRUCTION" # Build final response
+    # Processing States (where real work happens)
+    ROUTING_SELECTION = "ROUTING_SELECTION"  # Specialist scoring and selection
+    SPECIALIST_PROCESSING = "SPECIALIST_PROCESSING"  # Specialist search + response generation
+    ENRICHERS_EXECUTED = "ENRICHERS_EXECUTED"  # Enrichers executed (LLM calls)
 
     # Terminal States
-    COMPLETE = "COMPLETE"                           # Success
-    ERROR = "ERROR"                                 # Error occurred
-    LOG_AND_EXIT = "LOG_AND_EXIT"                   # Logging and cleanup
-    RESPONSE_RETURNED = "RESPONSE_RETURNED"         # Final state
+    COMPLETE = "COMPLETE"     # Query complete, includes response return
+    ERROR = "ERROR"           # Error occurred
+    LOG_AND_EXIT = "LOG_AND_EXIT"  # Early exit (e.g., out of scope)
 ```
 
 ### State Descriptions
 
-| State | Description | Trigger | Next States |
-|-------|-------------|---------|-------------|
-| `QUERY_RECEIVED` | Query entered system | API request | `DIRECT_PROMPT_CHECK` |
-| `DIRECT_PROMPT_CHECK` | Check if // prefix | Initial check | `DIRECT_LLM` or `ROUTING_SELECTION` |
-| `ROUTING_SELECTION` | Select specialist(s) | Check complete | `SPECIALIST_SELECTED` |
-| `SPECIALIST_SELECTED` | Specialist chosen | Selection made | `SEARCHING` |
-| `SINGLE_SPECIALIST_PROCESSING` | One specialist processes | Specialist selected | `OUT_OF_SCOPE_CHECK` |
-| `MULTI_SPECIALIST_PROCESSING` | Multiple specialists | Router selected multiples | `RESPONSE_AGGREGATION` |
-| `RESPONSE_AGGREGATION` | Merge specialist responses | All specialists done | `OUT_OF_SCOPE_CHECK` |
-| `OUT_OF_SCOPE_CHECK` | Check domain scope | Specialist returned data | `COMPLETE` (if out of scope) or `ENRICHMENT_PIPELINE` |
-| `SEARCHING` | Knowledge base search | Context needed | `CONTEXT_READY` |
-| `CONTEXT_READY` | Search complete | Search returned | `ENRICHMENT_PIPELINE` |
-| `ENRICHMENT_PIPELINE` | Run enrichers sequentially | Context ready | `ENRICHERS_EXECUTED` |
-| `ENRICHERS_EXECUTED` | Enrichers completed | All enrichers finished | `LLM_CONFIRMATION_CHECK` |
-| `LLM_CONFIRMATION_CHECK` | Check if user confirmation needed | Enrichment started | `AWAITING_CONFIRMATION` or `LLM_PROCESSING` |
-| `AWAITING_CONFIRMATION` | Wait for user response | Confirmation needed | (async - user re-queries) |
-| `LLM_PROCESSING` | LLM generates/enhances | Confirmed or auto-trigger | `LLM_POST_PROCESSING` |
-| `LLM_POST_PROCESSING` | Clean up LLM response | LLM returned | `ENRICHMENT_COMPLETE` |
-| `ENRICHMENT_COMPLETE` | All enrichers done | Last enricher finished | `FORMATTING_PHASE` |
-| `FORMATTING_PHASE` | Apply formatter | Enrichment complete | `RESPONSE_CONSTRUCTION` |
-| `RESPONSE_CONSTRUCTION` | Build final response | Format complete | `LOG_AND_EXIT` |
-| `LOG_AND_EXIT` | Log and cleanup | Response ready | `RESPONSE_RETURNED` |
-| `COMPLETE` | Success (terminal) | Process succeeded | (end) |
-| `ERROR` | Error (terminal) | Error occurred | `LOG_AND_EXIT` |
+| State | Description | What Work Is Done |
+|-------|-------------|-------------------|
+| `QUERY_RECEIVED` | Query entered system | Parse query, check for // prefix, log metadata |
+| `DIRECT_LLM` | Direct LLM bypass | Bypass specialist/search, call LLM directly |
+| `ROUTING_SELECTION` | Select specialist | Score all specialists against query, select winner |
+| `SPECIALIST_PROCESSING` | Specialist processes query | Pattern search, aggregation, response generation |
+| `ENRICHERS_EXECUTED` | Enrichers executed | LLM fallback/enhancement, quality scoring |
+| `COMPLETE` | Query complete | Final summary, response returned to client |
+| `ERROR` | Error occurred | Log error details |
+| `LOG_AND_EXIT` | Early exit | Handle out-of-scope rejection |
 
 ---
 
@@ -204,55 +128,36 @@ class QueryState(Enum):
 ### Normal Query Flow (Single Specialist)
 
 ```
-QUERY_RECEIVED
-  └─→ DIRECT_PROMPT_CHECK
-       └─→ ROUTING_SELECTION
-            └─→ SPECIALIST_SELECTED
-                 └─→ SEARCHING
-                      └─→ SINGLE_SPECIALIST_PROCESSING
-                           └─→ CONTEXT_READY
-                                └─→ OUT_OF_SCOPE_CHECK
-                                     ├─[out_of_scope=true]→ COMPLETE
-                                     └─[in_scope]→ ENRICHMENT_PIPELINE
-                                          └─→ ENRICHERS_EXECUTED
-                                               └─→ LLM_CONFIRMATION_CHECK
-                                                    ├─[confirmation_needed]→ AWAITING_CONFIRMATION
-                                                    ├─[llm_confirmed]→ LLM_PROCESSING
-                                                    └─[skip_llm]→ ENRICHMENT_COMPLETE
-                                                         └─→ FORMATTING_PHASE
-                                                              └─→ RESPONSE_CONSTRUCTION
-                                                                   └─→ LOG_AND_EXIT
-                                                                        └─→ RESPONSE_RETURNED
+QUERY_RECEIVED (includes direct prompt check)
+  └─→ ROUTING_SELECTION (specialist scoring + selection)
+       └─→ SPECIALIST_PROCESSING (search + response generation)
+            └─→ ENRICHERS_EXECUTED (LLM/enrichment)
+                 └─→ COMPLETE (response returned)
 ```
+
+**Total states: 5** (down from 15)
 
 ### Direct Prompt Flow (// prefix)
 
 ```
-QUERY_RECEIVED
-  └─→ DIRECT_PROMPT_CHECK
-       └─→ DIRECT_LLM
-            └─→ DIRECT_LLM_COMPLETE
-                 └─→ COMPLETE
-                      └─→ RESPONSE_RETURNED
+QUERY_RECEIVED (direct_prompt=true)
+  └─→ DIRECT_LLM
+       └─→ COMPLETE
 ```
 
-### Multi-Specialist Flow
+**Total states: 3** (down from 6)
+
+### Out of Scope Rejection
 
 ```
-QUERY_RECEIVED
-  └─→ ROUTING_SELECTION
-       └─→ MULTI_SPECIALIST_PROCESSING
-            └─→ RESPONSE_AGGREGATION
-                 └─→ OUT_OF_SCOPE_CHECK
-                      └─→ ENRICHMENT_PIPELINE
-                           └─→ [same as above]
+SPECIALIST_PROCESSING
+  └─→ LOG_AND_EXIT (out_of_scope=true)
 ```
 
 ### Error Transitions
 
 ```
 [any state] ──[error]──> ERROR
-                   └─→ LOG_AND_EXIT
 ```
 
 ---
@@ -265,1399 +170,106 @@ QUERY_RECEIVED
 {
   "query_id": "q_a1b2c3d4e5f6",
   "from_state": "ROUTING_SELECTION",
-  "to_state": "SINGLE_SPECIALIST_PROCESSING",
+  "to_state": "SPECIALIST_PROCESSING",
   "trigger": "specialist_selected",
   "timestamp": "2026-01-31T01:23:45.123456Z",
   "data": {
     "specialist_id": "exframe_specialist",
     "specialist_name": "ExFrame Knowledge Specialist",
-    "confidence": 0.85,
-    "specialists_available": 3
+    "specialist_scores": [...]
   },
   "duration_ms": 15,
   "metadata": {
     "domain": "exframe",
-    "trace_enabled": true,
-    "session_id": "sess_123"
+    "verbose": false
   }
 }
 ```
 
 ### Data Dictionary by State
 
-| State | Required Fields in `data` | Optional Fields |
-|-------|-------------------------|-----------------|
-| `QUERY_RECEIVED` | `query`, `domain`, `timestamp` | `context`, `llm_confirmed`, `format_type`, `session_id` |
-| `ROUTING_SELECTION` | `routing_strategy` | `specialist_scores`, `all_specialists`, `selected_specialist` |
-| `SINGLE_SPECIALIST_PROCESSING` | `specialist_id` | `confidence`, `search_strategy`, `patterns_found` |
-| `OUT_OF_SCOPE_CHECK` | `out_of_scope` | `out_of_scope_reason` |
-| `LLM_CONFIRMATION_CHECK` | `confirmation_required` | `partial_response` |
-| `LLM_PROCESSING` | `llm_mode` | `model`, `prompt_tokens`, `research_strategy_used` |
-| `ENRICHMENT_COMPLETE` | `enrichers_executed`, `llm_used` | `enrichment_summary` |
-| `FORMATTING_PHASE` | `formatter`, `format_type` | `output_size` |
-| `ERROR` | `error_type`, `error_message` | `exception_type`, `stack_trace` |
-
-### Log File Format
-
-**File:** `/app/logs/traces/state_machine.jsonl`
-
-**Format:** JSONL (one JSON object per line)
-
-**Rotation:** Daily files: `state_machine-YYYY-MM-DD.jsonl`
-
-**Example:**
-```
-{"query_id":"q_abc123","from_state":null,"to_state":"QUERY_RECEIVED","trigger":"api_request","timestamp":"2026-01-31T01:00:00Z","data":{"query":"What is ExFrame?","domain":"exframe"},"duration_ms":null}
-{"query_id":"q_abc123","from_state":"QUERY_RECEIVED","to_state":"ROUTING_SELECTION","trigger":"direct_prompt_check","timestamp":"2026-01-31T01:00:01Z","data":{"is_direct_prompt":false},"duration_ms":1}
-```
+| State | Data Fields |
+|-------|-------------|
+| `QUERY_RECEIVED` | `query`, `original_query`, `include_trace`, `direct_prompt` |
+| `ROUTING_SELECTION` | `specialists_available`, `selected_specialist`, `specialist_name`, `specialist_scores` |
+| `SPECIALIST_PROCESSING` | `specialist`, `specialist_name` (or `patterns_found` for general) |
+| `ENRICHERS_EXECUTED` | `enricher`, `input_size`, `output_size`, `duration_ms`, `changes` |
+| `COMPLETE` | `query_id`, `processing_time_ms`, `llm_used`, `confidence`, `patterns_found`, `response_size`, `ai_generated` |
+| `DIRECT_LLM` | `model`, `endpoint` |
+| `ERROR` | `error_type`, `error_message` |
+| `LOG_AND_EXIT` | `reason`, `specialist` |
 
 ---
 
-## Implementation Plan
-
-### Phase 1: Core State Machine (2 days)
-
-**File:** `generic_framework/state/state_machine.py`
-
-```python
-from datetime import datetime
-from enum import Enum
-from pathlib import Path
-from typing import Optional, Dict, Any
-import json
-import uuid
-
-class QueryState(Enum):
-    """Query lifecycle states."""
-    QUERY_RECEIVED = "QUERY_RECEIVED"
-    DIRECT_PROMPT_CHECK = "DIRECT_PROMPT_CHECK"
-    DIRECT_LLM = "DIRECT_LLM"
-    ROUTING_SELECTION = "ROUTING_SELECTION"
-    SINGLE_SPECIALIST_PROCESSING = "SINGLE_SPECIALIST_PROCESSING"
-    MULTI_SPECIALIST_PROCESSING = "MULTI_SPECIALIST_PROCESSING"
-    RESPONSE_AGGREGATION = "RESPONSE_AGGREGATION"
-    OUT_OF_SCOPE_CHECK = "OUT_OF_SCOPE_CHECK"
-    ENRICHMENT_PIPELINE = "ENRICHMENT_PIPELINE"
-    LLM_CONFIRMATION_CHECK = "LLM_CONFIRMATION_CHECK"
-    AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION"
-    LLM_PROCESSING = "LLM_PROCESSING"
-    LLM_POST_PROCESSING = "LLM_POST_PROCESSING"
-    ENRICHMENT_COMPLETE = "ENRICHMENT_COMPLETE"
-    FORMATTING_PHASE = "FORMATTING_PHASE"
-    RESPONSE_CONSTRUCTION = "RESPONSE_CONSTRUCTION"
-    LOG_AND_EXIT = "LOG_AND_EXIT"
-    COMPLETE = "COMPLETE"
-    ERROR = "ERROR"
-
-class QueryStateMachine:
-    """State machine logger for query pipeline observability."""
-
-    def __init__(self, query_id: Optional[str] = None):
-        self.query_id = query_id or f"q_{uuid.uuid4().hex[:12]}"
-        self.current_state: Optional[QueryState] = None
-        self.state_entered_at: Optional[datetime] = None
-        self.events: list = []
-        self.log_path = Path("/app/logs/traces/state_machine.jsonl")
-        self.log_path.parent.mkdir(parents=True, exist_ok=True)
-
-    def transition(self, to_state: QueryState, trigger: str,
-                   data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Log state transition."""
-        now = datetime.utcnow()
-
-        duration_ms = None
-        if self.state_entered_at:
-            duration_ms = int((now - self.state_entered_at).total_seconds() * 1000)
-
-        event = {
-            "query_id": self.query_id,
-            "from_state": self.current_state.value if self.current_state else None,
-            "to_state": to_state.value,
-            "trigger": trigger,
-            "timestamp": now.isoformat() + "Z",
-            "data": data or {},
-            "duration_ms": duration_ms
-        }
-
-        self.events.append(event)
-        self._write_event(event)
-
-        self.current_state = to_state
-        self.state_entered_at = now
-
-        return event
-
-    def _write_event(self, event: Dict[str, Any]) -> None:
-        """Async-safe event writing."""
-        try:
-            with open(self.log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(event) + '\n')
-        except Exception as e:
-            # Log but don't fail the query
-            print(f"[StateMachine] Failed to write event: {e}")
-
-    def error(self, trigger: str, error_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Transition to ERROR state."""
-        return self.transition(QueryState.ERROR, trigger, error_data)
-
-    def complete(self, final_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Transition to COMPLETE state."""
-        return self.transition(QueryState.COMPLETE, "query_complete", final_data)
-```
-
-### Phase 2: Integration into GenericAssistantEngine (3 days)
-
-**File:** `generic_framework/assist/engine.py`
-
-**Integration points:**
-- Line 135: Initialize `QueryStateMachine` in `process_query()`
-- Line 147-171: Wrap routing logic with state transitions
-- Line 173-207: Wrap knowledge base search
-- Line 208-272: Wrap specialist processing
-- Line 274-350: Wrap enrichment pipeline
-- Line 369-406: Wrap formatting
-
-**Changes to `process_query()`:**
-
-```python
-async def process_query(self, query: str, context: Dict = None) -> Dict:
-    """Process query with state machine logging."""
-
-    # Initialize state machine
-    sm = QueryStateMachine()
-
-    try:
-        # STATE: QUERY_RECEIVED
-        sm.transition(QueryState.QUERY_RECEIVED, "api_request", {
-            "query": query,
-            "domain": self.domain_id,
-            "context": context
-        })
-
-        # STATE: DIRECT_PROMPT_CHECK
-        is_direct = query.strip().startswith('//')
-        sm.transition(QueryState.DIRECT_PROMPT_CHECK, "direct_prompt_check", {
-            "is_direct_prompt": is_direct
-        })
-
-        if is_direct:
-            # Direct to LLM, skip routing
-            sm.transition(QueryState.DIRECT_LLM, "direct_llm_bypass", {
-                "original_query": query
-            })
-            response = await self._direct_llm_call(query)
-            sm.complete({"response_size": len(str(response))})
-            return response
-
-        # STATE: ROUTING_SELECTION
-        sm.transition(QueryState.ROUTING_SELECTION, "routing_start", {
-            "routing_strategy": self.domain.routing_strategy
-        })
-
-        specialist = await self.domain.get_specialist_for_query(query)
-
-        if not specialist:
-            sm.error("no_specialist", {"error": "No specialist available"})
-            return {"error": "No specialist available"}
-
-        # STATE: SPECIALIST_PROCESSING
-        sm.transition(QueryState.SINGLE_SPECIALIST_PROCESSING, "specialist_selected", {
-            "specialist_id": specialist.specialist_id,
-            "specialist_name": specialist.name
-        })
-
-        response_data = await specialist.process_query(query, context)
-
-        # Check out_of_scope
-        sm.transition(QueryState.OUT_OF_SCOPE_CHECK, "specialist_complete", {
-            "out_of_scope": response_data.get("out_of_scope", False),
-            "out_of_scope_reason": response_data.get("out_of_scope_reason")
-        })
-
-        if response_data.get("out_of_scope"):
-            sm.complete({"response": response_data.get("response")})
-            return response_data
-
-        # STATE: ENRICHMENT_PIPELINE
-        sm.transition(QueryState.ENRICHMENT_PIPELINE, "enrichment_start", {
-            "enrichers_configured": len(self.domain.enrichers)
-        })
-
-        enriched_data = await self.domain.enrich(query, response_data, context)
-
-        # STATE: FORMATTING_PHASE
-        sm.transition(QueryState.FORMATTING_PHASE, "formatting_start", {
-            "format_type": context.get("format") if context else "markdown"
-        })
-
-        formatted = await self.domain.format_response(enriched_data, context)
-
-        # STATE: RESPONSE_CONSTRUCTION
-        sm.transition(QueryState.RESPONSE_CONSTRUCTION, "response_ready", {
-            "response_size": len(str(formatted))
-        })
-
-        # STATE: LOG_AND_EXIT
-        sm.transition(QueryState.LOG_AND_EXIT, "logging_complete", {
-            "query_logged": True
-        })
-
-        # STATE: COMPLETE
-        sm.complete({"status": "success"})
-
-        return formatted
-
-    except Exception as e:
-        sm.error("exception", {
-            "error": str(e),
-            "exception_type": type(e).__name__,
-            "traceback": traceback.format_exc()
-        })
-        raise
-```
-
-### Phase 3: Trace Consumer Endpoint (1 day)
-
-**File:** `generic_framework/api/app.py`
-
-```python
-@app.get("/api/query/{query_id}/trace")
-async def get_query_trace(query_id: str):
-    """Get state machine trace for a query."""
-
-    trace_file = Path("logs/traces/state_machine.jsonl")
-
-    if not trace_file.exists():
-        raise HTTPException(404, "Trace not found")
-
-    events = []
-    with open(trace_file) as f:
-        for line in f:
-            try:
-                event = json.loads(line)
-                if event['query_id'] == query_id:
-                    events.append(event)
-            except json.JSONDecodeError:
-                continue
-
-    if not events:
-        raise HTTPException(404, f"Query {query_id} not found")
-
-    # Calculate total duration
-    if len(events) >= 2:
-        total_duration = (
-            datetime.fromisoformat(events[-1]['timestamp'].replace('Z', ''))
-            - datetime.fromisoformat(events[0]['timestamp'].replace('Z', ''))
-        ).total_seconds() * 1000
-    else:
-        total_duration = 0
-
-    return {
-        "query_id": query_id,
-        "events": events,
-        "total_duration_ms": total_duration,
-        "final_state": events[-1]['to_state'],
-        "error_occurred": any(e['to_state'] == 'ERROR' for e in events)
-    }
-```
-
-### Phase 4: AI Bug Finder (2 days)
-
-**File:** `generic_framework/diagnostics/state_analyzer.py`
-
-```python
-class StateMachineAnalyzer:
-    """Analyze state machine logs for bug patterns."""
-
-    def __init__(self):
-        self.log_path = Path("/app/logs/traces/state_machine.jsonl")
-        self.bugs_path = Path("/app/logs/diagnostics/bugs.json")
-
-    async def analyze_recent_queries(self, limit: int = 100) -> List[Dict]:
-        """Analyze recent queries for bug patterns."""
-
-        # Load recent events
-        events = self._load_recent_events(limit)
-
-        # Group by query_id
-        by_query = {}
-        for event in events:
-            qid = event['query_id']
-            if qid not in by_query:
-                by_query[qid] = []
-            by_query[qid].append(event)
-
-        bugs = []
-
-        for query_id, query_events in by_query.items():
-            bug_patterns = self._detect_bug_patterns(query_events)
-            if bug_patterns:
-                bugs.append({
-                    "query_id": query_id,
-                    "patterns": bug_patterns,
-                    "severity": self._calculate_severity(bug_patterns)
-                })
-
-        # Save bugs
-        self._save_bugs(bugs)
-
-        return bugs
-
-    def _detect_bug_patterns(self, events: List[Dict]) -> List[str]:
-        """Detect bug patterns in query events."""
-        patterns = []
-
-        # Pattern 1: LLM call with empty context
-        for i, event in enumerate(events):
-            if event['to_state'] == 'LLM_PROCESSING':
-                context_size = events[i-1]['data'].get('context_size', 0)
-                if context_size == 0:
-                    patterns.append("LLM_CALLED_WITH_EMPTY_CONTEXT")
-
-        # Pattern 2: Out of scope false with no patterns
-        out_of_scope_event = next((e for e in events
-                                     if e['to_state'] == 'OUT_OF_SCOPE_CHECK'), None)
-        if out_of_scope_event and not out_of_scope_event['data'].get('out_of_scope'):
-            specialist_event = next((e for e in events
-                                        if e['to_state'] == 'SINGLE_SPECIALIST_PROCESSING'), None)
-            if specialist_event and specialist_event['data'].get('patterns_found', 0) == 0:
-                patterns.append("EMPTY_RESULT_NOT_MARKED_OUT_OF_SCOPE")
-
-        # Pattern 3: LLM confirmation loop (same query re-enters)
-        confirmation_events = [e for e in events if e['to_state'] == 'AWAITING_CONFIRMATION']
-        if len(confirmation_events) > 1:
-            patterns.append("CONFIRMATION_LOOP_DETECTED")
-
-        return patterns
-
-    def _calculate_severity(self, patterns: List[str]) -> str:
-        """Calculate bug severity."""
-        if 'LLM_CALLED_WITH_EMPTY_CONTEXT' in patterns:
-            return 'HIGH'
-        elif 'CONFIRMATION_LOOP_DETECTED' in patterns:
-            return 'MEDIUM'
-        else:
-            return 'LOW'
-```
+## Implementation Status
+
+### Consolidation Summary
+
+| Before (16 states) | After (6 states) | Action |
+|-------------------|------------------|--------|
+| `QUERY_RECEIVED` | `QUERY_RECEIVED` | ✅ Keep (merged direct_prompt_check) |
+| `DIRECT_PROMPT_CHECK` | - | ❌ Eliminated (merged into QUERY_RECEIVED) |
+| `DIRECT_LLM` | `DIRECT_LLM` | ✅ Keep |
+| `DIRECT_LLM_COMPLETE` | - | ❌ Eliminated (go straight to COMPLETE) |
+| `ROUTING_SELECTION` | `ROUTING_SELECTION` | ✅ Keep (merged SPECIALIST_SELECTED) |
+| `SPECIALIST_SELECTED` | - | ❌ Eliminated (merged into ROUTING_SELECTION) |
+| `SEARCHING` | - | ❌ Eliminated (marker only) |
+| `SINGLE_SPECIALIST_PROCESSING` | `SPECIALIST_PROCESSING` | ✅ Keep (renamed) |
+| `MULTI_SPECIALIST_PROCESSING` | - | ❌ Eliminated (not used) |
+| `RESPONSE_AGGREGATION` | - | ❌ Eliminated (not used) |
+| `CONTEXT_READY` | - | ❌ Eliminated (marker only) |
+| `OUT_OF_SCOPE_CHECK` | - | ❌ Eliminated (inline check) |
+| `ENRICHMENT_PIPELINE` | - | ❌ Eliminated (marker only) |
+| `ENRICHERS_EXECUTED` | `ENRICHERS_EXECUTED` | ✅ Keep |
+| `LLM_CONFIRMATION_CHECK` | - | ❌ Eliminated (inline in enrichers) |
+| `AWAITING_CONFIRMATION` | - | ❌ Eliminated (not used) |
+| `LLM_PROCESSING` | - | ❌ Eliminated (logging only) |
+| `LLM_POST_PROCESSING` | - | ❌ Eliminated (marker only) |
+| `ENRICHMENT_COMPLETE` | - | ❌ Eliminated (marker only) |
+| `FORMATTING_PHASE` | - | ❌ Eliminated (not used) |
+| `RESPONSE_CONSTRUCTION` | - | ❌ Eliminated (logging only) |
+| `LOG_AND_EXIT` | `LOG_AND_EXIT` | ✅ Keep |
+| `COMPLETE` | `COMPLETE` | ✅ Keep (merged RESPONSE_RETURNED) |
+| `ERROR` | `ERROR` | ✅ Keep |
+| `RESPONSE_RETURNED` | - | ❌ Eliminated (merged into COMPLETE) |
+
+### Files Modified
+
+1. `generic_framework/state/state_machine.py` - Updated QueryState enum
+2. `generic_framework/assist/engine.py` - Updated all state transitions
+3. `statemachine-design.md` - This document (consolidated)
+4. `tests/test_statemachine.py` - Updated test expectations (TODO)
+
+### Expected Results
+
+- **Simple query:** 5 states (down from 15)
+- **Direct prompt:** 3 states (down from 6)
+- **Overhead:** ~67% reduction in state transitions
+- **Observability:** Maintained - all substantive work still tracked
 
 ---
 
-## Extensibility Considerations
+## Design Rationale
 
-### Query-Response Focus (Primary)
+### Why These 6 States?
 
-The initial implementation focuses on the query-response lifecycle because:
-1. It's the most critical path to observe
-2. It has the most complex state transitions
-3. Bug detection here has the highest impact
-4. It's self-contained with clear boundaries
+1. **QUERY_RECEIVED** - Entry point, includes direct prompt check (simple string operation)
+2. **ROUTING_SELECTION** - Specialist scoring is real work (iterates all specialists)
+3. **SPECIALIST_PROCESSING** - Specialist does pattern search + response generation
+4. **ENRICHERS_EXECUTED** - LLM call happens here (substantive work)
+5. **COMPLETE** - Terminal state, includes response return
+6. **ERROR/LOG_AND_EXIT** - Error handling
 
-### Extension Points to Other Systems
+### What Was Eliminated?
 
-#### 1. Domain Lifecycle (Secondary Priority)
+- **Marker states** - States that only logged metadata without doing work
+- **Duplicate states** - States that were essentially the same as their predecessor
+- **Unused states** - States defined but never reached in actual flow
+- **Simple check states** - States that only did a simple dict/string check
 
-**Additional States:**
-- `DOMAIN_LOADING` - Domain being loaded
-- `DOMAIN_ACTIVE` - Domain ready for queries
-- `DOMAIN_ERROR` - Domain failed to load
-- `DOMAIN_UNLOADING` - Domain being unloaded
+### Benefits
 
-**Integration Point:** `generic_framework/core/universe.py`
-
-#### 2. Universe Management (Tertiary Priority)
-
-**Additional States:**
-- `UNIVERSE_CREATE` - Universe being created
-- `UNIVERSE_SWITCH` - Switching universes
-- `UNIVERSE_EXPORT` - Exporting universe
-- `UNIVERSE_IMPORT` - Importing universe
-
-**Integration Point:** `generic_framework/core/universe.py`
-
-#### 3. Pattern CRUD (Tertiary Priority)
-
-**Additional States:**
-- `PATTERN_CREATE` - Pattern creation
-- `PATTERN_UPDATE` - Pattern update
-- `PATTERN_VALIDATE` - Pattern validation
-- `PATTERN_DELETE` - Pattern deletion
-
-**Integration Point:** API endpoints in `generic_framework/api/app.py`
-
-### Unified State Machine Design
-
-To keep this extensible, design a base `StateMachine` class:
-
-```python
-class StateMachine:
-    """Base state machine for all ExFrame systems."""
-
-    def __init__(self, system_name: str):
-        self.system_name = system_name
-        self.state_type = f"{system_name}_state"
-        self.log_path = Path(f"/app/logs/traces/{system_name}_state_machine.jsonl")
-
-class QueryStateMachine(StateMachine):
-    """Query-specific state machine."""
-    def __init__(self):
-        super().__init__("query")
-
-class DomainStateMachine(StateMachine):
-    """Domain-specific state machine."""
-    def __init__(self):
-        super().__init__("domain")
-```
-
----
-
-## Scoping & Boundaries
-
-### What's Included (Phase 1)
-
-**✅ Query-Response Lifecycle:**
-- API entry point → response exit
-- All routing decisions
-- All specialist processing
-- All enrichment phases
-- All formatting
-- Error handling
-- LLM fallback flows
-
-**✅ Logging Infrastructure:**
-- State machine core class
-- JSONL log file format
-- Daily log rotation
-- Async-safe writes
-
-**✅ Query Trace Endpoint:**
-- Retrieve state log for query
-- Visual trace output
-- Bug pattern detection
-
-### What's Excluded (For Now)
-
-**❌ Out of Scope (Phase 1):**
-- Domain lifecycle states (can be added later)
-- Universe management states (can be added later)
-- Pattern CRUD states (can be added later)
-- Real-time state streaming via WebSocket
-- State visualization dashboard
-- Performance metrics aggregation
-
-**❌ Explicitly Not Covered:**
-- Internal service-to-service communication
-- Background job processing
-- Health check states
-- Metrics collection
-
-### "Every Action Traceable" - Too Big?
-
-**Verdict: Yes, that's too big.**
-
-**Why?**
-1. **Overhead**: Logging every action would slow down the system
-2. **Noise**: Most actions don't need state-level logging
-3. **Maintenance Burden**: More states = more complexity
-4. **Diminishing Returns**: Debug value decreases as granularity increases
-
-**Recommended Approach:**
-- **State-level logging**: Log major phase transitions (what we're doing)
-- **Detailed logging for critical paths**: Add more detail for queries, less for other systems
-- **Metrics for performance**: Use metrics for timing, not state transitions
-- **Debug logging**: Keep existing debug logging for detailed troubleshooting
-
-**Example distinction:**
-```
-✅ State Transition: "SPECIALIST_PROCESSING → ENRICHMENT_PIPELINE"
-❌ Too Fine: "enricher_iteration_1 → enricher_iteration_2"
-✅ Metrics: "enrichment_duration_ms: 450"
-❌ Too Fine: "file_read_start → file_read_complete"
-```
-
----
-
-## Success Criteria
-
-Phase 1 is complete when:
-- [ ] `QueryStateMachine` class implemented
-- [ ] All query phases log state transitions
-- [ ] `/api/query/{id}/trace` returns state trace
-- [ ] Bug detection finds empty context LLM calls
-- [ ] Log rotation works correctly
-
-Phase 2 is complete when:
-- [ ] Domain lifecycle states tracked
-- [ ] Universe management states tracked
-- [ ] Unified `StateMachine` base class
-- [ ] Cross-system trace correlation works
-
----
-
-## Open Questions
-
-1. **Query ID format**: Use UUID v4 or ULID? (ULID is time-sorted, better for logs)
-2. **Async logging**: Use `aiofiles` or thread pool executor?
-3. **State persistence**: Keep all events in memory or query on demand?
-4. **Trace retention**: How long to keep state logs?
-5. **Performance impact**: What's acceptable overhead for state logging?
-
----
-
-## Next Steps
-
-1. ✅ Design document complete
-2. ⏳ Implement core `QueryStateMachine` class
-3. ⏳ Integrate into `GenericAssistantEngine`
-4. ⏳ Add trace endpoint
-5. ⏳ Implement AI bug finder
-6. ⏳ Test with real queries
-7. ⏳ Extend to domain lifecycle
-
----
-
-## Detailed Change Tracking (Option B)
-
-**Purpose:** Provide complete visibility into what each enricher and formatter actually does to the response data.
-
-### Enhanced Data Schema with Changes
-
-Each state transition now includes a `changes` object that captures:
-
-```json
-{
-  "query_id": "q_abc123",
-  "from_state": "ENRICHMENT_PIPELINE",
-  "to_state": "RelatedPatternEnricher",
-  "trigger": "enricher_started",
-  "timestamp": "2026-01-31T01:00:05.123456Z",
-  "data": {
-    "enricher": "RelatedPatternEnricher",
-    "input_size": 1250,
-    "output_size": 1450,
-    "duration_ms": 15,
-    "changes": {
-      "added": {
-        "related_patterns": {
-          "count": 3,
-          "ids": ["pattern_abc", "pattern_def", "pattern_123"],
-          "summary": "Added 3 related patterns"
-        }
-      },
-      "modified": {
-        "response": {
-          "before_size": 1250,
-          "after_size": 1450,
-          "size_delta": "+200"
-        }
-      },
-      "removed": []
-    }
-  },
-  "metadata": {
-    "domain": "exframe",
-    "session_id": "sess_123",
-    "trace_enabled": true
-  }
-}
-```
-
-### Complete Example: Query Through Full Pipeline
-
-#### 1. QUERY_RECEIVED
-```json
-{
-  "to_state": "QUERY_RECEIVED",
-  "data": {
-    "query": "What is the pipeline system?",
-    "domain": "exframe",
-    "user_ip": "192.168.1.100"
-  }
-}
-```
-
-#### 2. ROUTING_SELECTION
-```json
-{
-  "from_state": "QUERY_RECEIVED",
-  "to_state": "ROUTING_SELECTION",
-  "data": {
-    "routing_strategy": "ConfidenceBasedRouter",
-    "specialists_available": 3,
-    "changes": {
-      "removed": [],
-      "added": {
-        "selected_specialist": {
-          "name": "ExFrameSpecialist",
-          "confidence": 0.92
-        }
-      }
-    }
-  }
-}
-```
-
-#### 3. SINGLE_SPECIALIST_PROCESSING
-```json
-{
-  "from_state": "ROUTING_SELECTION",
-  "to_state": "SINGLE_SPECIALIST_PROCESSING",
-  "data": {
-    "specialist": "ExFrameSpecialist",
-    "search_strategy": "document",
-    "changes": {
-      "added": {
-        "search_results": {
-          "count": 2,
-          "sources": ["README.md", "PLUGIN_ARCHITECTURE.md"]
-        }
-      }
-    }
-  }
-}
-```
-
-#### 4. ENRICHMENT_PIPELINE - RelatedPatternEnricher
-```json
-{
-  "from_state": "SINGLE_SPECIALIST_PROCESSING",
-  "to_state": "RelatedPatternEnricher",
-  "data": {
-    "enricher": "RelatedPatternEnricher",
-    "input_size": 850,
-    "output_size": 1050,
-    "duration_ms": 8,
-    "changes": {
-      "added": {
-        "related_patterns": {
-          "count": 2,
-          "ids": ["exframe_domain", "exframe_patterns"],
-          "names": ["ExFrame Domain Configuration", "Pattern Management"]
-        }
-      },
-      "modified": {
-        "response": {
-          "before_size": 850,
-          "after_size": 1050,
-          "size_delta": "+200"
-        }
-      }
-    }
-  }
-}
-```
-
-#### 5. ENRICHMENT_PIPELINE - LLMEnricher (Confirmation Needed)
-```json
-{
-  "from_state": "RelatedPatternEnricher",
-  "to_state": "LLM_CONFIRMATION_CHECK",
-  "data": {
-    "enricher": "LLMEnricher",
-    "input_size": 1050,
-    "changes": {
-      "added": {
-        "llm_suggestion": {
-          "reason": "patterns_weak",
-          "confidence": 0.45,
-          "would_use_llm": true
-        }
-      },
-      "modified": {
-        "response": {
-          "before": "has_patterns",
-          "after": "awaiting_confirmation"
-        }
-      }
-    }
-  }
-}
-```
-
-#### 6. RESPONSE_RETURNED (User Confirms)
-```json
-{
-  "from_state": "AWAITING_CONFIRMATION",
-  "to_state": "LLM_PROCESSING",
-  "data": {
-    "llm_confirmed": true,
-    "changes": {
-      "added": {
-        "llm_call": {
-          "model": "claude-sonnet-4",
-          "mode": "enhance",
-          "prompt_tokens": 1450
-        }
-      },
-      "removed": {
-        "awaiting_confirmation": {
-          "reason": "user_confirmed_llm"
-        }
-      }
-    }
-  }
-}
-```
-
-#### 7. ENRICHMENT_PIPELINE - LLMEnricher (Processing)
-```json
-{
-  "from_state": "LLM_PROCESSING",
-  "to_state": "LLM_POST_PROCESSING",
-  "data": {
-    "enricher": "LLMEnricher",
-    "input_size": 1050,
-    "output_size": 2800,
-    "duration_ms": 1800,
-    "changes": {
-      "added": {
-        "llm_response": {
-          "content_preview": "Based on the documentation...",
-          "tokens_used": 1350
-        },
-        "sources_cited": {
-          "count": 5,
-          "files": ["README.md", "PLUGIN_ARCHITECTURE.md", ...]
-        }
-      },
-      "removed": {
-        "raw_answer": {
-          "reason": "cleaned_up_for_display"
-        }
-      },
-      "modified": {
-        "response": {
-          "before": "pattern_based",
-          "after": "llm_enhanced"
-        }
-      }
-    }
-  }
-}
-```
-
-#### 8. FORMATTING_PHASE - MarkdownFormatter
-```json
-{
-  "from_state": "ENRICHMENT_COMPLETE",
-  "to_state": "MarkdownFormatter",
-  "data": {
-    "formatter": "MarkdownFormatter",
-    "format_type": "markdown",
-    "input_type": "dict",
-    "output_type": "str",
-    "changes": {
-      "added": {
-        "markdown_content": {
-          "preview": "# What is the pipeline system?\n\nBased on..."
-        }
-      },
-      "removed": {
-        "response_dict": {
-          "reason": "converted_to_string"
-        }
-      },
-      "modified": {
-        "structure": {
-          "from": "nested_dict",
-          "to": "markdown_string"
-        }
-      }
-    }
-  }
-}
-```
-
-### Change Tracking Schema Definition
-
-```python
-class StateChangeTracker:
-    """Track detailed changes during state transitions."""
-
-    @staticmethod
-    def log_changes(before: Dict, after: Dict, action: str, 
-                    component: str) -> Dict[str, Any]:
-        """Capture what changed between before and after states."""
-        
-        changes = {
-            "added": {},
-            "removed": {},
-            "modified": {}
-        }
-        
-        # Find added keys
-        for key in after.keys():
-            if key not in before:
-                changes["added"][key] = _describe_value(after[key], action, component)
-        
-        # Find removed keys
-        for key in before.keys():
-            if key not in after:
-                changes["removed"][key] = _describe_value(before[key], action, component)
-        
-        # Find modified keys
-        for key in before.keys():
-            if key in after and before[key] != after[key]:
-                changes["modified"][key] = _compare_values(
-                    before[key], after[key], action, component
-                )
-        
-        return changes
-
-    @staticmethod
-    def _describe_value(value: Any, action: str, component: str) -> Dict:
-        """Describe a single value change."""
-        if isinstance(value, dict):
-            return {
-                "type": "dict",
-                "count": len(value),
-                "keys": list(value.keys())[:5],  # First 5 keys
-                "summary": f"{action} to {component}"
-            }
-        elif isinstance(value, list):
-            return {
-                "type": "list",
-                "count": len(value),
-                "summary": f"{action} {len(value)} items"
-            }
-        else:
-            return {
-                "type": type(value).__name__,
-                "preview": str(value)[:100]
-            }
-
-    @staticmethod
-    def _compare_values(before: Any, after: Any, action: str, 
-                          component: str) -> Dict:
-        """Compare two values and describe the difference."""
-        
-        if isinstance(before, dict) and isinstance(after, dict):
-            before_keys = set(before.keys())
-            after_keys = set(after.keys())
-            
-            return {
-                "type": "dict_modified",
-                "keys_added": list(after_keys - before_keys),
-                "keys_removed": list(before_keys - after_keys),
-                "keys_modified": list(before_keys & after_keys),
-                "size_delta": len(str(after)) - len(str(before))
-            }
-        
-        return {
-            "type": type(after).__name__,
-            "before": str(before)[:100],
-            "after": str(after)[:100]
-        }
-```
-
-### Integration Pattern for Enrichers
-
-Each enricher logs its changes:
-
-```python
-class RelatedPatternEnricher(EnrichmentPlugin):
-    async def enrich(self, query, response_data, context):
-        # Capture before state
-        before = response_data.copy()
-        
-        # Perform enrichment
-        related = await self._find_related(query, response_data)
-        response_data['related_patterns'] = related
-        
-        # Log detailed changes
-        state.transition(
-            QueryState.ENRICHMENT,
-            f"{self.__class__.__name__}_executed",
-            {
-                "enricher": self.__class__.__name__,
-                "input_size": len(str(before)),
-                "output_size": len(str(response_data)),
-                "changes": self._log_changes(before, response_data)
-            }
-        )
-        
-        return response_data
-    
-    def _log_changes(self, before: Dict, after: Dict) -> Dict:
-        """Log what this enricher changed."""
-        return {
-            "added": {
-                "related_patterns": {
-                    "count": len(after.get('related_patterns', [])),
-                    "ids": [p['id'] for p in after.get('related_patterns', [])]
-                }
-            },
-            "modified": {
-                "response": {
-                    "before_size": len(str(before)),
-                    "after_size": len(str(after)),
-                    "size_delta": len(str(after)) - len(str(before))
-                }
-            }
-        }
-```
-
-### Integration Pattern for Formatters
-
-```python
-class MarkdownFormatter(FormatterPlugin):
-    def format(self, response_data, format_type):
-        # Capture before state
-        before = {
-            "type": type(response_data).__name__,
-            "keys": list(response_data.keys()) if isinstance(response_data, dict) else [],
-            "size": len(str(response_data))
-        }
-        
-        # Perform formatting
-        formatted = self._to_markdown(response_data)
-        
-        # Log detailed changes
-        state.transition(QueryState.FORMATTING, "markdown_applied", {
-            "formatter": self.__class__.__name__,
-            "format_type": format_type,
-            "input": before,
-            "output": {
-                "type": "str",
-                "size": len(formatted)
-            },
-            "changes": {
-                "added": {"markdown_content": {"size": len(formatted)}},
-                "removed": {"response_dict": before},
-                "modified": {"structure": {"from": before["type"], "to": "str"}}
-            }
-        })
-        
-        return formatted
-```
-
-### Example: Complete Query Trace (With Changes)
-
-```
-Query: "What is the pipeline system?"
-Query ID: q_abc123def456
-
-=== STATE TRANSITIONS ===
-
-[1] QUERY_RECEIVED
-    Data: {query: "What is the pipeline system?", domain: "exframe"}
-
-[2] ROUTING_SELECTION
-    Changes: +selected_specialist: "ExFrameSpecialist"
-
-[3] SINGLE_SPECIALIST_PROCESSING  
-    Changes: +search_results: {count: 2, sources: ["README.md", "PLUGIN_ARCHITECTURE.md"]}
-
-[4] OUT_OF_SCOPE_CHECK
-    Data: {out_of_scope: false}
-
-[5] ENRICHMENT_PIPELINE (RelatedPatternEnricher)
-    Changes: +related_patterns: {count: 2}
-            response: 850 → 1050 bytes (+200)
-
-[6] ENRICHMENT_PIPELINE (LLMEnricher)
-    Data: {confirmation_required: true}
-    Changes: +llm_suggestion: "patterns_weak, would_use_llm"
-            response: "has_patterns" → "awaiting_confirmation"
-
-[7] AWAITING_CONFIRMATION
-    (User re-queries with llm_confirmed=true)
-
-[8] LLM_PROCESSING
-    Changes: +llm_call: {model: "claude-sonnet-4", tokens: 1450}
-            +sources_cited: {count: 5}
-            -awaiting_confirmation: "user_confirmed"
-
-[9] LLM_POST_PROCESSING
-    Data: {llm_used: true}
-    Changes: -raw_answer: "cleaned_up_for_display"
-
-[10] FORMATTING_PHASE (MarkdownFormatter)
-    Changes: +markdown_content: 2800 chars
-            -response_dict: "converted_to_string"
-
-[11] COMPLETE
-    Total duration: 4502ms
-```
-
-### Benefits of Detailed Change Tracking
-
-1. **Debugging**: See exactly what each component changed
-2. **Performance**: Identify slow enrichers/formatters
-3. **Trust**: Verify system is working as expected
-4. **Bug Detection**: Spot anomalies (e.g., enricher that removes data)
-5. **Compliance**: Audit trail of what happened to user query
-
-### Implementation Note
-
-This level of detail (Option B) is achievable because:
-- Enrichers already know what they changed
-- Formatters already know the before/after states
-- We're just capturing what they already know
-- No semantic analysis required - just structured logging
-
----
-
-## 8. Verbose Mode
-
-### Overview
-
-**Verbose Mode** is an optional debugging feature that captures complete data snapshots at each state transition. It provides full visibility into the data flowing through the query pipeline, including:
-
-- **Incoming data snapshots** - What data enters each state
-- **Outgoing data snapshots** - What data leaves each state
-- **Memory context** - Internal state at transition points
-- **Error diagnostics** - Full stack traces when errors occur
-
-### Use Cases
-
-| Scenario | When to Use Verbose |
-|----------|-------------------|
-| **Development** | Implementing new enrichers/formatters |
-| **Debugging** | Investigating unexpected behavior |
-| **Performance Analysis** | Identifying data bottlenecks |
-| **Error Investigation** | Understanding root cause of failures |
-| **Security Auditing** | Tracking sensitive data flow |
-| **Compliance** | Full data provenance requirements |
-
-### User Interface
-
-Verbose mode is controlled via a checkbox on the query screen:
-
-```
-┌─────────────────────────────────────────┐
-│ Query Input                              │
-├─────────────────────────────────────────┤
-│ [ ] Enable Trace                        │
-│ [ ] Enable Verbose (data snapshots)     │ ← NEW
-│                                          │
-│ [Submit Query]                          │
-└─────────────────────────────────────────┘
-```
-
-### Automatic Activation on Error
-
-**Critical Design Decision**: When an error occurs during query processing, verbose mode is **automatically enabled** for that query, regardless of the user's checkbox setting.
-
-**Rationale**:
-- Errors are rare but valuable learning opportunities
-- Cannot predict when errors will occur
-- Capturing error context retrospectively is impossible
-- Win-win: System gets diagnostic data, user gets fixes
-
-**Implementation**:
-```python
-def error(self, trigger: str, error_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Transition to ERROR state with automatic verbose capture."""
-    # Force enable verbose mode for this error
-    self._verbose_enabled = True
-
-    # Capture full context including:
-    # - Current memory state
-    # - All recent events
-    # - Error stack trace
-    # - Complete data snapshots
-
-    error_snapshot = {
-        "error_trigger": trigger,
-        "error_data": error_data,
-        "stack_trace": traceback.format_exc(),
-        "state_at_error": {
-            "current_state": self.current_state.value if self.current_state else None,
-            "recent_events": self.events[-5:],  # Last 5 events
-            "memory_usage": self._get_memory_snapshot(),
-            "active_components": self._get_components_used()
-        },
-        "verbose_data": {
-            "input_snapshot": self._last_data_in,
-            "output_snapshot": self._last_data_out
-        }
-    }
-
-    return self.transition(QueryState.ERROR, trigger, error_snapshot)
-```
-
-### Verbose Data Schema
-
-When verbose mode is enabled, each state transition includes additional fields:
-
-```json
-{
-  "query_id": "q_abc123",
-  "from_state": "ENRICHMENT_PIPELINE",
-  "to_state": "LLM_PROCESSING",
-  "trigger": "llm_call_start",
-  "timestamp": "2026-01-31T20:00:00.000Z",
-  "duration_ms": 150,
-  "data": {
-    "enricher": "LLMEnricher",
-    "confidence": 0.65
-  },
-  "verbose": {
-    "enabled": true,
-    "trigger_reason": "user_enabled",  // or "auto_error", "auto_admin"
-    "snapshots": {
-      "input": {
-        "full_data": {  // Complete incoming data structure
-          "query": "What is ExFrame?",
-          "patterns": [...],
-          "context": {...},
-          "specialist_id": "exframe_specialist"
-        },
-        "size_bytes": 2048,
-        "keys": ["query", "patterns", "context", "specialist_id"]
-      },
-      "output": {
-        "full_data": {  // Complete outgoing data structure
-          "query": "What is ExFrame?",
-          "patterns": [...],
-          "context": {...},
-          "llm_request": {...}
-        },
-        "size_bytes": 4096,
-        "keys": ["query", "patterns", "context", "llm_request"]
-      },
-      "delta": {
-        "keys_added": ["llm_request"],
-        "keys_removed": [],
-        "keys_modified": ["context"]
-      }
-    },
-    "system_context": {
-      "memory_usage_mb": 256,
-      "cpu_usage_percent": 45,
-      "timestamp": "2026-01-31T20:00:00.000Z",
-      "thread_id": "asyncio-001"
-    }
-  }
-}
-```
-
-### Verbose Trigger Reasons
-
-| Reason | Description | Example |
-|--------|-------------|---------|
-| `user_enabled` | User checked the verbose box | Development/debugging |
-| `auto_error` | Error occurred, auto-enabled | Any ERROR state transition |
-| `auto_admin` | Admin override via API | Remote diagnostics |
-| `auto_threshold` | Duration/memory exceeded | Performance investigation |
-
-### Issue Tracking Integration
-
-Verbose events can be logged to external issue tracking systems:
-
-**Integration Points**:
-
-1. **Sentry Integration** (Error tracking)
-```json
-{
-  "verbose": {
-    "trigger_reason": "auto_error",
-    "sentry_event_id": "abc123def456",
-    "issue_url": "https://sentry.io/issues/12345"
-  }
-}
-```
-
-2. **GitHub Issues Integration**
-```json
-{
-  "verbose": {
-    "trigger_reason": "auto_error",
-    "github_issue": {
-      "repo": "exframe/exframe",
-      "issue_number": 42,
-      "url": "https://github.com/exframe/exframe/issues/42"
-    }
-  }
-}
-```
-
-3. **Custom Issue Tracker**
-```json
-{
-  "verbose": {
-    "trigger_reason": "auto_error",
-    "issue_tracker": {
-      "system": "jira",
-      "ticket": "EXF-1234",
-      "url": "https://jira.example.com/browse/EXF-1234"
-    }
-  }
-}
-```
-
-### Implementation Pattern
-
-**State Machine Constructor**:
-```python
-class QueryStateMachine:
-    def __init__(self, query_id: Optional[str] = None, domain: Optional[str] = None,
-                 verbose: bool = False):
-        self.query_id = query_id or self._generate_id()
-        self.domain = domain
-        self._verbose_enabled = verbose
-        self._auto_verbose_triggered = False
-        self._last_data_in = None
-        self._last_data_out = None
-```
-
-**Transition with Verbose Capture**:
-```python
-def transition(self, to_state: QueryState, trigger: str,
-               data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    now = datetime.utcnow()
-
-    # Capture input snapshot if verbose enabled
-    input_snapshot = None
-    if self._verbose_enabled and data:
-        input_snapshot = self._capture_snapshot(data, "input")
-
-    # ... existing transition logic ...
-
-    # Capture output snapshot if verbose enabled
-    output_snapshot = None
-    if self._verbose_enabled and event_data:
-        output_snapshot = self._capture_snapshot(event_data, "output")
-
-    # Add verbose data if enabled
-    if self._verbose_enabled:
-        event["verbose"] = {
-            "enabled": True,
-            "trigger_reason": self._get_verbose_trigger_reason(),
-            "snapshots": {
-                "input": input_snapshot,
-                "output": output_snapshot
-            }
-        }
-
-    return event
-```
-
-### Snapshot Capture Helper
-
-```python
-def _capture_snapshot(self, data: Any, label: str) -> Dict[str, Any]:
-    """Capture a detailed snapshot of data for verbose logging."""
-    return {
-        "full_data": data,
-        "type": type(data).__name__,
-        "size_bytes": len(str(data)),
-        "keys": list(data.keys()) if isinstance(data, dict) else [],
-        "length": len(data) if isinstance(data, (list, str, dict)) else None,
-        "preview": str(data)[:500]  # First 500 chars
-    }
-```
-
-### Performance Considerations
-
-| Mode | Log Size per Query | Performance Impact |
-|------|-------------------|-------------------|
-| **Normal** | ~2-5 KB | Negligible |
-| **Verbose** | ~50-200 KB | Minimal (async logging) |
-| **Error + Verbose** | ~100-500 KB | Slight (acceptable) |
-
-### Privacy & Security Considerations
-
-1. **Sensitive Data**: Verbose logs may contain:
-   - User query text (PII potential)
-   - LLM API keys (should be redacted)
-   - Internal system state
-   - File paths and configuration
-
-2. **Data Retention**:
-   - Normal logs: 30 days
-   - Verbose logs: 7 days (compressed)
-   - Error logs: 90 days (archived separately)
-
-3. **Access Control**:
-   - Verbose logs require admin privileges
-   - Automatic redaction of sensitive fields
-   - Audit log of who accessed verbose logs
-
----
-
-## 9. Implementation Plan Updates
-
-### Phase 2.5: Verbose Mode Implementation (NEW)
-
-**Priority:** MEDIUM
-**Estimated Effort:** 1-2 days
-**Dependencies:** Phase 1 (State Machine Core) complete
-
-#### Tasks
-
-1. **UI Enhancement** (4 hours)
-   - Add "Enable Verbose" checkbox below "Enable Trace"
-   - Label: "Enable Verbose (data snapshots)"
-   - Tooltip: "Capture full data snapshots for debugging (rarely needed)"
-
-2. **State Machine Enhancement** (6 hours)
-   - Add `verbose` parameter to `QueryStateMachine.__init__`
-   - Add `_capture_snapshot()` helper method
-   - Modify `transition()` to capture snapshots when verbose enabled
-   - Implement auto-verbose on error (`_verbose_enabled = True`)
-   - Add `_get_verbose_trigger_reason()` method
-
-3. **API Integration** (2 hours)
-   - Add `verbose` parameter to `/api/query` endpoint
-   - Pass verbose flag through to state machine
-
-4. **Issue Tracking Integration** (Optional, 4-8 hours)
-   - Define integration interface (Sentry, GitHub, custom)
-   - Add webhook configuration for error notifications
-   - Implement `log_to_issue_tracker()` method
-
-#### Testing
-
-```python
-# Test verbose mode
-sm = QueryStateMachine(verbose=True)
-sm.transition(QueryState.QUERY_RECEIVED, "api_request", {"query": "test"})
-# Event should include verbose.snapshots
-
-# Test auto-verbose on error
-sm_normal = QueryStateMachine(verbose=False)
-sm_normal.error("test_error", {"error": "something failed"})
-# Should auto-enable verbose and capture full context
-```
-
----
-
-## 10. Scoping & Boundaries
-
-### Current Scope (This Implementation)
-
-✅ **State Machine Core** - 23 states, full lifecycle
-✅ **Change Tracking** - Enrichers, formatters (Option B)
-✅ **Trace Consumer API** - 3 endpoints for querying state log
-✅ **Verbose Mode** - Data snapshots for debugging (DESIGN)
-❌ **Issue Tracking Integration** - Future enhancement
-❌ **Real-time Streaming** - Future enhancement
-❌ **Domain Lifecycle States** - Future enhancement
-❌ **Universe Management States** - Future enhancement
-
-### Future Extensions
-
-1. **Phase 5: Issue Tracking Integration**
-   - Sentry webhook integration
-   - GitHub Issues API integration
-   - Custom issue tracker support
-   - Automatic issue creation on error
-
-2. **Phase 6: Real-time State Streaming**
-   - WebSocket endpoint for live state updates
-   - Browser-based state visualization
-   - Real-time debugging dashboard
-
-3. **Phase 7: Domain Lifecycle**
-   - Domain loading states
-   - Pattern reindexing states
-   - Configuration reload states
-
-4. **Phase 8: Universe Management**
-   - Universe merge states
-   - Universe export/import states
-   - Multi-universe query routing states
-
----
-
+1. **Less overhead** - Fewer state transitions = less processing
+2. **Clearer flow** - Each state represents actual work
+3. **Easier debugging** - Fewer states to trace through
+4. **Same observability** - All important operations still logged

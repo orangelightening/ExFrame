@@ -62,7 +62,7 @@ services:
       - ./generic_framework/api:/app/api:rw
       - ./generic_framework/diagnostics:/app/diagnostics:rw
       - ./generic_framework/frontend:/app/frontend:ro
-      - ./generic_framework/state:/app/generic_framework/state:rw
+      - ./generic_framework/state:/app/state:rw  # Note: mounts to /app/state, not /app/generic_framework/state
 
       # Mount tests directory for state machine test suite
       - ./tests:/app/tests:ro

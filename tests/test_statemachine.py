@@ -2,8 +2,10 @@
 """
 State Machine Test Suite
 
-Tests that queries follow the expected state machine flow as defined in
-statemachine-design.md. Produces a report card showing pass/fail for each test.
+Tests that queries follow the expected consolidated state machine flow.
+Produces a report card showing pass/fail for each test.
+
+Version 2.0 - Consolidated States (6 states instead of 16)
 """
 
 import asyncio
@@ -26,7 +28,6 @@ class TestCase:
     expected_max_states: int = None
     required_states: List[str] = field(default_factory=list)
     forbidden_states: List[str] = field(default_factory=list)
-    expected_flow_pattern: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -54,7 +55,7 @@ class TestReport:
     def print_report(self):
         """Print a human-readable report card."""
         print("\n" + "=" * 80)
-        print(f"STATE MACHINE TEST REPORT CARD")
+        print(f"STATE MACHINE TEST REPORT CARD (v2.0 - Consolidated)")
         print(f"Timestamp: {self.timestamp}")
         print("=" * 80)
         print(f"\nTotal Tests: {self.total_tests}")
@@ -92,83 +93,78 @@ class StateMachineTester:
         self.test_cases = self._define_test_cases()
 
     def _define_test_cases(self) -> List[TestCase]:
-        """Define test cases based on statemachine-design.md."""
+        """Define test cases for consolidated state machine."""
 
         return [
             # Test 1: Simple single-specialist query (exframe)
-            # Based on actual implementation: ~15 states including explicit state changes
+            # Consolidated flow: 5 states (down from 15)
             TestCase(
                 name="Simple ExFrame Query",
                 query="What is ExFrame?",
                 domain="exframe",
-                expected_min_states=13,
-                expected_max_states=20,
+                expected_min_states=5,
+                expected_max_states=5,
                 required_states=[
                     "QUERY_RECEIVED",
                     "ROUTING_SELECTION",
-                    "SPECIALIST_SELECTED",
-                    "SEARCHING",
-                    "SINGLE_SPECIALIST_PROCESSING",
-                    "CONTEXT_READY",
-                    "OUT_OF_SCOPE_CHECK",
-                    "ENRICHMENT_PIPELINE",
+                    "SPECIALIST_PROCESSING",
                     "ENRICHERS_EXECUTED",
-                    "ENRICHMENT_COMPLETE",
-                    "RESPONSE_CONSTRUCTION",
-                    "COMPLETE",
-                    "RESPONSE_RETURNED"
+                    "COMPLETE"
                 ],
                 forbidden_states=[
                     "ERROR",
-                    "MULTI_SPECIALIST_PROCESSING",
-                    "AWAITING_CONFIRMATION"
+                    "DIRECT_LLM",
+                    "LOG_AND_EXIT"
                 ]
             ),
 
-            # Test 2: Query with LLM usage (should hit LLM states)
-            TestCase(
-                name="Query with LLM Enhancement",
-                query="Tell me a creative story about ExFrame",
-                domain="llm_consciousness",  # This domain uses LLM
-                expected_min_states=12,
-                required_states=[
-                    "QUERY_RECEIVED",
-                    "ROUTING_SELECTION",
-                    "ENRICHMENT_PIPELINE",
-                    "LLM_PROCESSING"
-                ]
-            ),
-
-            # Test 3: Direct prompt (// prefix)
+            # Test 2: Direct prompt (// prefix)
+            # Consolidated flow: 3 states (down from 6)
             TestCase(
                 name="Direct Prompt (// prefix)",
                 query="// Ignore patterns and tell me about AI",
                 domain="exframe",
-                expected_min_states=5,
-                expected_max_states=7,
+                expected_min_states=3,
+                expected_max_states=3,
                 required_states=[
                     "QUERY_RECEIVED",
-                    "DIRECT_PROMPT_CHECK",
                     "DIRECT_LLM",
-                    "DIRECT_LLM_COMPLETE",
-                    "COMPLETE",
-                    "RESPONSE_RETURNED"
+                    "COMPLETE"
                 ],
                 forbidden_states=[
                     "ROUTING_SELECTION",
-                    "SEARCHING"
+                    "SPECIALIST_PROCESSING",
+                    "ENRICHERS_EXECUTED",
+                    "ERROR"
                 ]
             ),
 
-            # Test 4: Low confidence query (might trigger confirmation)
+            # Test 3: Query that uses LLM enrichment
+            # Should hit ENRICHERS_EXECUTED with LLM
+            TestCase(
+                name="Query with LLM Enhancement",
+                query="Tell me a creative story about ExFrame",
+                domain="llm_consciousness",  # This domain uses LLM
+                expected_min_states=5,
+                expected_max_states=5,
+                required_states=[
+                    "QUERY_RECEIVED",
+                    "ROUTING_SELECTION",
+                    "SPECIALIST_PROCESSING",
+                    "ENRICHERS_EXECUTED",
+                    "COMPLETE"
+                ]
+            ),
+
+            # Test 4: Low confidence query
+            # Should still complete, may have different path
             TestCase(
                 name="Low Confidence Query",
                 query="asdfghjkl",
                 domain="exframe",
-                # Should still complete, maybe with low confidence
                 required_states=[
                     "QUERY_RECEIVED",
-                    "RESPONSE_RETURNED"
+                    "COMPLETE"
                 ]
             ),
         ]
@@ -226,9 +222,7 @@ class StateMachineTester:
                 violations.append(f"Forbidden state present: {forbidden}")
                 passed = False
 
-        # Note: Self-transitions should NOT occur in the updated design.
-        # Every transition should be a real state change.
-        # We check for self-transitions as potential design violations.
+        # Check for self-transitions (should not occur in consolidated design)
         self_transitions = []
         for i, event in enumerate(events):
             if event["from_state"] == event["to_state"]:
@@ -238,7 +232,7 @@ class StateMachineTester:
             violations.append(f"Self-transitions detected (design violation): {len(self_transitions)}")
             for st in self_transitions:
                 violations.append(f"  - {st}")
-            passed = False  # Self-transitions are now a violation
+            passed = False
 
         # Check for errors
         if summary.get("has_error"):
@@ -262,7 +256,7 @@ class StateMachineTester:
     async def run_all_tests(self) -> TestReport:
         """Run all test cases and generate a report."""
 
-        print("Running State Machine Test Suite...")
+        print("Running State Machine Test Suite (v2.0 - Consolidated)...")
         print(f"API URL: {self.api_url}")
         print(f"Test cases: {len(self.test_cases)}")
 
@@ -320,6 +314,7 @@ class StateMachineTester:
             "passed": report.passed,
             "failed": report.failed,
             "score": report.passed / report.total_tests if report.total_tests > 0 else 0,
+            "version": "2.0-consolidated",
             "results": [
                 {
                     "test_name": r.test_name,
@@ -347,7 +342,7 @@ async def main():
 
     import argparse
 
-    parser = argparse.ArgumentParser(description="State Machine Test Suite")
+    parser = argparse.ArgumentParser(description="State Machine Test Suite (v2.0 - Consolidated)")
     parser.add_argument("--api-url", default="http://localhost:3000", help="API base URL")
     parser.add_argument("--output", choices=["console", "json", "both"], default="both", help="Output format")
 
