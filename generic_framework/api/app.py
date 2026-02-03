@@ -56,6 +56,7 @@ class QueryRequest(BaseModel):
     context: Optional[Dict[str, Any]] = None
     include_trace: Optional[bool] = False
     verbose: Optional[bool] = False  # Enable verbose mode with data snapshots
+    show_thinking: Optional[bool] = False  # Show step-by-step reasoning before answer
     format: Optional[str] = None  # Output format: json, markdown, compact, table, etc.
 
 
@@ -1110,6 +1111,7 @@ async def process_query(request: QueryRequest) -> Response:
         context=request.context,
         include_trace=request.include_trace,
         verbose=request.verbose,
+        show_thinking=request.show_thinking,
         format_type=request.format
     )
 
@@ -1202,7 +1204,8 @@ async def _process_query_impl(
     context: Optional[Dict[str, Any]],
     include_trace: Optional[bool],
     verbose: Optional[bool],
-    format_type: Optional[str]
+    show_thinking: Optional[bool] = False,
+    format_type: Optional[str] = None
 ) -> Response:
     """
     Internal implementation for query processing.
@@ -1228,7 +1231,8 @@ async def _process_query_impl(
             context,
             include_trace=include_trace,
             llm_confirmed=llm_confirmed,
-            verbose=verbose or False  # Pass verbose flag to engine
+            verbose=verbose or False,  # Pass verbose flag to engine
+            show_thinking=show_thinking or False  # Pass show_thinking flag to engine
         )
 
         # If format is specified, use formatter and return formatted response

@@ -1,10 +1,10 @@
 {
   "domain_id": "cooking",
   "domain_name": "Cooking & Recipes",
-  "description": "Culinary knowledge and recipes",
-  "version": "1.0.0",
+  "description": "Culinary knowledge and recipes with web search",
+  "version": "2.0.0",
   "created_at": "2026-01-28T01:25:45.476286Z",
-  "updated_at": "2026-01-28T01:25:45.476369",
+  "updated_at": "2026-02-02T00:00:00.000000",
   "categories": [
     "technique",
     "recipe",
@@ -15,7 +15,8 @@
     "baking",
     "chicken",
     "quick",
-    "healthy"
+    "healthy",
+    "web_search"
   ],
   "domain_type": "4",
   "pattern_schema": {
@@ -51,8 +52,8 @@
   "plugins": [
     {
       "plugin_id": "researcher",
-      "name": "Cooking Research",
-      "description": "Cooking specialist with web search",
+      "name": "Cooking Research Specialist",
+      "description": "Research specialist with web search for cooking questions",
       "module": "plugins.research.research_specialist",
       "class": "ResearchSpecialistPlugin",
       "enabled": true,
@@ -84,9 +85,10 @@
       "class": "LLMEnricher",
       "enabled": true,
       "config": {
-        "mode": "enhance",
-        "temperature": 0.6,
-        "max_tokens": 8192
+        "mode": "replace",
+        "min_confidence": 0.0,
+        "max_patterns": 10,
+        "temperature": 0.6
       }
     }
   ],
@@ -104,11 +106,37 @@
   "enable_web_search": true,
   "specialists": [
     {
-      "specialist_id": "generalist",
-      "name": "Cooking",
-      "description": "",
-      "expertise_keywords": [],
-      "expertise_categories": [],
+      "specialist_id": "researcher",
+      "name": "Cooking Research Specialist",
+      "description": "Research specialist with web search for cooking questions",
+      "expertise_keywords": [
+        "cook",
+        "recipe",
+        "bake",
+        "chicken",
+        "oven",
+        "temperature",
+        "how",
+        "what",
+        "make",
+        "ingredients",
+        "preparation",
+        "technique",
+        "method",
+        "prepare",
+        "time",
+        "long",
+        "web",
+        "search",
+        "internet",
+        "online"
+      ],
+      "expertise_categories": [
+        "technique",
+        "recipe",
+        "cooking_method",
+        "web_search"
+      ],
       "confidence_threshold": 0.3
     }
   ],
@@ -121,7 +149,8 @@
       "How do I bake chicken breast?",
       "What's the internal temperature for cooked chicken?",
       "How long do I cook a 4lb chicken?",
-      "What's a quick weeknight dinner?"
+      "What's a quick weeknight dinner?",
+      "Search online for latest cooking trends"
     ],
     "icon": "\ud83c\udf73",
     "color": "#FF9800"
@@ -132,7 +161,6 @@
     "suggest_on_confidence_below": 0.3
   },
   "llm_min_confidence": 0.3,
-  "document_store_type": "exframe_instance",
   "show_sources": true,
   "require_confirmation": true,
   "research_on_fallback": false

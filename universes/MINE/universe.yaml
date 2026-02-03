@@ -26,7 +26,43 @@ universe:
     cooking:
       enabled: true
       priority: 2
-      config_override: {}
+      config_override:
+        domain_type: "4"
+        plugins:
+          - plugin_id: researcher
+            name: Cooking Research Specialist
+            description: Research specialist with web search for cooking questions
+            module: plugins.research.research_specialist
+            class: ResearchSpecialistPlugin
+            enabled: true
+            config:
+              enable_web_search: true
+              max_research_steps: 10
+              research_timeout: 300
+              report_format: structured
+              search_provider: auto
+              max_results: 10
+              timeout: 10
+        enrichers:
+          - module: plugins.enrichers.reply_formation
+            class: ReplyFormationEnricher
+            enabled: true
+            config:
+              combine_strategy: document_first
+              max_results: 10
+              show_sources: true
+              show_results: true
+          - module: plugins.enrichers.llm_enricher
+            class: LLMEnricher
+            enabled: true
+            config:
+              mode: replace
+              min_confidence: 0.0
+              max_patterns: 10
+        enable_web_search: true
+        max_research_steps: 10
+        research_timeout: 300
+        report_format: structured
 
     diy:
       enabled: true

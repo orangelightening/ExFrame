@@ -159,10 +159,14 @@
                                             <input type="checkbox" x-model="enableTrace" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-500">
                                             <span>Enable Trace</span>
                                     </label>
-                                    <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer ml-4">
+                                        <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer ml-4">
                                             <input type="checkbox" x-model="enableVerbose" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-purple-500 focus:ring-purple-500">
                                             <span>Enable Verbose (data snapshots)</span>
-                                    </label>
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer ml-4" title="Show step-by-step reasoning before the answer">
+                                            <input type="checkbox" x-model="showThinking" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500">
+                                            <span>Show Thinking</span>
+                                        </label>
                                     <div class="text-sm text-gray-400">
                                         <span x-show="loading">Processing...</span>
                                         <span x-show="!loading && lastQuery">Last: <span class="text-emerald-400" x-text="truncate(lastQuery, 40)"></span></span>
@@ -2529,6 +2533,7 @@
                 queriesProcessed: 0,
                 enableTrace: false,
                 enableVerbose: false,  // Verbose mode with data snapshots
+                showThinking: false,  // Show step-by-step reasoning before answer
                 trace: null,  // Old trace format (deprecated)
                 currentResponse: null,  // Full response (includes state_machine)
                 selectedTrace: null,
@@ -3286,7 +3291,8 @@
                                 query: this.query,
                                 domain: this.currentDomain,
                                 include_trace: this.enableTrace,
-                                verbose: this.enableVerbose
+                                verbose: this.enableVerbose,
+                                show_thinking: this.showThinking
                             })
                         });
 

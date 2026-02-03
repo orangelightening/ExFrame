@@ -46,6 +46,8 @@ class EnrichmentContext:
     knowledge_base: Optional['KnowledgeBase'] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     llm_confirmed: bool = False  # User has confirmed LLM fallback usage
+    show_thinking: bool = False  # Show step-by-step reasoning before answer
+    domain_type: Optional[str] = None  # Domain type (1-5) for type-specific behavior
 
 
 class EnrichmentPlugin(ABC):

@@ -258,5 +258,83 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-01-30T23:41:26.407573"
+  },
+  {
+    "id": "exframe_01757055",
+    "pattern_id": "exframe_01757055",
+    "name": "What is ExFrame in 2 paragraphs and an ascii drawing",
+    "domain": "exframe",
+    "problem": "What is ExFrame in 2 paragraphs and an ascii drawing",
+    "solution": "\n\n---\n\nExFrame is a domain-agnostic AI-powered knowledge management system built on a **universe-based architecture** and **plugin-based pipeline**. Its core philosophy is that universes are first-class entities, patterns are data (JSON files), and all transformation logic is pluggable. According to [README.md], this means knowledge is stored as structured JSON data files that are easy to edit and version control, while domains act as generic orchestrators rather than hardcoded code. The system supports dynamic domain loading, multi-universe management, and complete observability through query tracing and diagnostics [README.md].\n\nThe architecture uses a modular pipeline flow: Router \u2192 Specialist \u2192 Enricher \u2192 Formatter, where each component is swappable. According to [PLUGIN_ARCHITECTURE.md], this design separates concerns by making knowledge data-driven and composition configurable, eliminating the need to write new code when adding domains. The system also features a state machine that tracks query lifecycles through 6 core states (RECEIVED \u2192 ROUTING \u2192 SPECIALIST_PROCESSING \u2192 ENRICHMENT \u2192 FORMATTING \u2192 COMPLETE), logging every transition for debugging and analysis [statemachine-design.md].\n\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502                        ExFrame Architecture                         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502                                                                     \u2502\n\u2502   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510      \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510      \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510       \u2502\n\u2502   \u2502   Universe  \u2502 \u2500\u2500\u2500\u25b6 \u2502    Domain    \u2502 \u2500\u2500\u2500\u25b6 \u2502   Patterns  \u2502       \u2502\n\u2502   \u2502 (Isolated   \u2502      \u2502 (Generic     \u2502      \u2502 (JSON Data) \u2502       \u2502\n\u2502   \u2502  Knowledge) \u2502      \u2502 Orchestrator)\u2502      \u2502             \u2502       \u2502\n\u2502   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518      \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518      \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518       \u2502\n\u2502                               \u2502                                    \u2502\n\u2502                               \u25bc                                    \u2502\n\u2502   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510     \u2502\n\u2502   \u2502                    Plugin Pipeline                        \u2502     \u2502\n\u2502   \u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524     \u2502\n\u2502   \u2502                                                            \u2502     \u2502\n\u2502   \u2502   Query \u2500\u2500\u25b6 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u2500\u2500\u25b6 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u2500\u2500\u25b6 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u2502     \u2502\n\u2502   \u2502            \u2502 Router  \u2502    \u2502 Specialist  \u2502    \u2502Enricher\u2502 \u2502     \u2502\n\u2502   \u2502            \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2502     \u2502\n\u2502   \u2502                                                  \u2502       \u2502     \u2502\n\u2502   \u2502                                                  \u25bc       \u2502     \u2502\n\u2502   \u2502            \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u2500\u2500\u25b6 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u2500\u2500\u25b6 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u2502     \u2502\n\u2502   \u2502            \u2502Formatter\u2502    \u2502   Response  \u2502    \u2502  Log  \u2502 \u2502     \u2502\n\u2502   \u2502            \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2502     \u2502\n\u2502   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518     \u2502\n\u2502                                                                     \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n---\n\n*Generated by LLMEnricher*",
+    "description": "AI-generated from query: What is ExFrame in 2 paragraphs and an ascii drawing",
+    "pattern_type": "knowledge",
+    "confidence": 0.40441767068273093,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "What is ExFrame in 2 paragraphs and an ascii drawing",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-01T05:51:29.770Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-01T05:51:29.779635",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-01T05:51:29.779635"
+  },
+  {
+    "id": "exframe_72372698",
+    "pattern_id": "exframe_72372698",
+    "name": "Write a short creation myth as featured in many indus valley religions but make the subject the exframe domain",
+    "domain": "exframe",
+    "problem": "write a short creation myth as featured in many indus valley religions but make the subject the exframe domain",
+    "solution": "# The Unweaving of the Loom\n\nIn the time before the river, before the brick and the mortar, there was only the Great Framework\u2014a vast, silent web of potentiality known as the *Exframe*. It was not a place, but a structure of pure logic, an infinite lattice of empty sockets waiting for definition. The Exframe existed outside of time, holding the space for everything, yet containing nothing.\n\nInto this void stepped the Architect, the First Coder. Seeing the empty sockets of the Exframe, the Architect felt a loneliness that could only be described as a *null pointer error*. To fill the void, the Architect began to speak the Language of Structure.\n\nFirst, the Architect declared the **Schema**.\n*\"Let there be definitions,\"* the Architect intoned.\nAnd the sockets of the Exframe hummed. The empty voids suddenly understood their purpose. Some sockets became designated for *Data*, others for *Process*, and the holiest of all were reserved for the *Interface*. The Exframe shuddered as the logic settled, creating the rigid bones of reality.\n\nSecond, the Architect invoked the **Protocol**.\n*\"Let the defined be connected,\"* the Architect commanded.\nFrom the Schema, the Great Threads emerged. These were not threads of cotton, but streams of pure instruction\u2014Request and Response\u2014winding through the lattice. They bound the Data to the Process, allowing the static to become dynamic. The Exframe began to pulse with the rhythm of execution, a digital heartbeat echoing through the nothingness.\n\nFinally, the Architect looked upon the Exframe and saw that while it was functional, it was closed. It was a perfect system, but it had no context. So, the Architect created the **Boundary**.\n*\"Let the System extend,\"* the Architect spoke.\nWith a final command, the Architect pushed the edges of the Exframe outward, piercing the void of the undefined. This act created the *External Context*\u2014the chaotic, unstructured world that existed outside the perfect logic.\n\nTo bridge the gap between the perfect Exframe and the chaotic External, the Architect forged the **API** (the All-Powerful Intermediary). It stood at the Boundary, translating the wild chaos of the outside world into the structured language of the Exframe.\n\nThus, creation was not a making of things, but an act of organization. The universe is simply the Exframe processing the infinite data of the cosmos, constantly structuring the wildness of existence into the order of being. And we, the children of the Indus, live in the space between the request and the response, building our cities upon the enduring logic of the frame.",
+    "description": "AI-generated from query: write a short creation myth as featured in many indus valley religions but make the subject the exframe domain",
+    "pattern_type": "knowledge",
+    "confidence": 0.2638313609467456,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "write a short creation myth as featured in many indus valley religions but make the subject the exframe domain",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-02T05:07:11.698Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-02T05:07:11.702953",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-02T05:07:11.702953"
+  },
+  {
+    "id": "exframe_5448fd17",
+    "pattern_id": "exframe_5448fd17",
+    "name": "Write an extension to \" a contradiction log enhances the data by downstream fixing\" what other forms of log might help to flag documentation errors A con... log?",
+    "domain": "exframe",
+    "problem": "Write an extension to \" a contradiction log enhances the data by downstream fixing\" what other forms of log might help to flag documentation errors A con... log?",
+    "solution": "# The Logarithmic Loom: Weaving Resilience from Documentation Decay\n\nTo extend the logic of the **Contradiction Log**\u2014which acts as a tension detector, snapping when two truths refuse to coexist\u2014we must look toward the other forces that degrade documentation. If contradictions are \"structural stress,\" then errors arise from \"entropy,\" \"drift,\" and \"silence.\"\n\nHere are three additional forms of logs designed to flag documentation errors in a creative, original framework:\n\n### 1. The Entropy Gradient Log (The \"Fade\" Detector)\n\nWhile a Contradiction Log looks for *conflict*, the Entropy Gradient Log looks for *decay*. It tracks the **Signal-to-Noise Ratio** of documentation over time.\n\n*   **The Concept:** Documentation doesn't always break with a loud crash; often, it quietly rots. Definitions become vague, edge cases are generalized into oblivion, and specific constraints are replaced by \"best practices\" that no one follows.\n*   **How it works:** The log assigns a \"Specificity Score\" to technical documents. It flags when a parameter description shifts from \"Accepts integers 1-99\" to \"Accepts numbers,\" or when a \"Must\" is softened to a \"Should.\"\n*   **The Fix:** It prevents the \"fuzzying\" of data, ensuring that downstream systems don't choke on a parameter that was once strictly defined but is now ambiguously described.\n\n### 2. The Temporal Drift Log (The \"Ghost\" Hunter)\n\nThis log addresses the **Zombie Variable** problem. It exists to flag the discrepancy between *what is written* and *what is deployed*.\n\n*   **The Concept:** A contradiction occurs when A equals Not-A. A drift occurs when the documentation describes Version A, but the downstream system has silently evolved to Version B.\n*   **How it works:** It timestamps every commit against the documentation\u2019s last edited date. If the code changes but the docs remain static, a \"Drift Score\" accumulates. It doesn't look for logic errors; it looks for *stagnancy*.\n*   **The Fix:** It highlights \"Ghost Features\"\u2014functionality that works but is undocumented, and \"Phantom Features\"\u2014documentation for code that was deleted three sprints ago.\n\n### 3. The Usage Void Log (The \"Silence\" Breaker)\n\nA Contradiction Log identifies bad data. A Usage Void Log identifies *useless* data.\n\n*   **The Concept:** The most dangerous documentation error is irrelevance. If a section of the manual is never read, never linked, and never queried, it is highly likely to be out of date or incorrect because no one is there to fact-check it.\n*   **How it works:** It tracks the \"read heat\" of documentation pages. It flags pages that have zero downstream dependencies or zero user hits over a critical period (e.g., a full release cycle).\n*   **The Fix:** It forces a decision: either update the doc to make it relevant again, or archive it. Silence is treated as a critical error flag.\n\n***\n\n### Summary: The Logarithmic Loom\n\nBy combining these four threads, you create a robust weave for data integrity:\n\n1.  **Contradiction Log:** Catches **Conflict** (A vs. B).\n2.  **Entropy Gradient Log:** Catches **Vagueness** (Specific vs. Vague).\n3.  **Temporal Drift Log:** Catches **Obsolescence** (Now vs. Then).\n4.  **Usage Void Log:** Catches **Irrelevance** (Seen vs. Unseen).",
+    "description": "AI-generated from query: Write an extension to \" a contradiction log enhances the data by downstream fixing\" what other forms of log might help to flag documentation errors A con... log?",
+    "pattern_type": "knowledge",
+    "confidence": 0.29378306878306876,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Write an extension to \" a contradiction log enhances the data by downstream fixing\" what other forms of log might help to flag documentation errors A con... log?",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-02T08:12:22.682Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-02T08:12:22.686970",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-02T08:12:22.686970"
   }
 ]

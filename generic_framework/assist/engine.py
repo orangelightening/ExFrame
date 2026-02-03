@@ -105,7 +105,8 @@ class GenericAssistantEngine:
         context: Optional[Dict[str, Any]] = None,
         include_trace: bool = False,
         llm_confirmed: bool = False,
-        verbose: bool = False
+        verbose: bool = False,
+        show_thinking: bool = False
     ) -> Dict[str, Any]:
         """
         Process a user query.
@@ -116,13 +117,15 @@ class GenericAssistantEngine:
             include_trace: Whether to include detailed processing trace
             llm_confirmed: Whether user has confirmed LLM fallback usage
             verbose: Enable verbose mode with full data snapshots (for debugging)
+            show_thinking: Show step-by-step reasoning before answer
 
         Returns:
             Response dictionary with answer, sources, and metadata
         """
-        # Extract llm_confirmed from context if provided there
+        # Extract llm_confirmed and show_thinking from context if provided there
         if context and isinstance(context, dict):
             llm_confirmed = context.get('llm_confirmed', llm_confirmed)
+            show_thinking = context.get('show_thinking', show_thinking)
 
         # Check for direct prompt bypass (// prefix)
         # Trim whitespace first to handle " // query" cases
@@ -161,7 +164,7 @@ class GenericAssistantEngine:
 
         # Handle direct prompt - skip to LLM directly
         if direct_prompt:
-            result = await self._process_direct_prompt(actual_query, query, start_time, trace, state_machine)
+            result = await self._process_direct_prompt(actual_query, query, start_time, trace, state_machine, show_thinking)
             if result.get('error'):
                 state_machine.error("direct_prompt_failed", {"error": result.get('response')})
             # Note: _process_direct_prompt already handles COMPLETE and DIRECT_LLM transitions
@@ -414,12 +417,16 @@ class GenericAssistantEngine:
         # Call domain enrichers with EnrichmentContext
         try:
             from core.enrichment_plugin import EnrichmentContext
+            # Get domain type from domain config
+            domain_type = getattr(self.domain, '_domain_config', {}).get('domain_type', None)
             enrichment_context = EnrichmentContext(
                 domain_id=self.domain.domain_id,
                 specialist_id=specialist_id,
                 query=query,
                 knowledge_base=self.knowledge_base,
-                llm_confirmed=llm_confirmed
+                llm_confirmed=llm_confirmed,
+                show_thinking=show_thinking,
+                domain_type=domain_type
             )
 
             # Store enricher input for change tracking
@@ -814,7 +821,8 @@ class GenericAssistantEngine:
         original_query: str,
         start_time: datetime,
         trace: Optional[Dict[str, Any]],
-        state_machine: Optional[QueryStateMachine] = None
+        state_machine: Optional[QueryStateMachine] = None,
+        show_thinking: bool = False
     ) -> Dict[str, Any]:
         """
         Process a direct prompt (// prefix) - bypass pattern search and specialist.
@@ -864,20 +872,32 @@ class GenericAssistantEngine:
         if is_anthropic:
             # Anthropic/GLM API format (uses user role only)
             model_name = model if model.startswith("glm-") else model.replace("gpt-", "claude-")
+            # Prepend reasoning instruction to the query if show_thinking is enabled
+            if show_thinking:
+                reasoning_query = f"""Please show your step-by-step reasoning before giving your final answer.
+
+First, explain your thought process and analysis, then provide your final response.
+
+Question: {actual_query}"""
+            else:
+                reasoning_query = actual_query
             payload = {
                 "model": model_name,
                 "max_tokens": 8192,
                 "messages": [
-                    {"role": "user", "content": actual_query}
+                    {"role": "user", "content": reasoning_query}
                 ]
             }
         else:
             # OpenAI API format
+            system_message = "You are a helpful assistant."
+            if show_thinking:
+                system_message += " Always show your step-by-step reasoning before providing your final answer."
             payload = {
                 "model": model,
                 "max_tokens": 8192,
                 "messages": [
-                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "system", "content": system_message},
                     {"role": "user", "content": actual_query}
                 ]
             }

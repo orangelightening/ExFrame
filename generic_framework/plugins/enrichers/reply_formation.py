@@ -24,12 +24,12 @@ into a coherent reply for the user.
 from typing import List, Dict, Any, Optional
 import logging
 
-from core.enrichment_plugin import EnricherPlugin
+from core.enrichment_plugin import EnrichmentPlugin
 
 logger = logging.getLogger(__name__)
 
 
-class ReplyFormationEnricher(EnricherPlugin):
+class ReplyFormationEnricher(EnrichmentPlugin):
     """Enricher for forming replies from multiple sources.
     
     This enricher combines document store and local pattern results
@@ -78,16 +78,33 @@ class ReplyFormationEnricher(EnricherPlugin):
             # No results from any source
             return response_data
 
-        # Combine based on strategy
-        if self.combine_strategy == "merge":
-            combined = self._merge_results(primary_results, local_results)
-        elif self.combine_strategy == "document_first":
-            combined = self._document_first_strategy(primary_results, local_results)
-        elif self.combine_strategy == "local_first":
-            combined = self._local_first_strategy(primary_results, local_results)
+        # Check if this is a Type 4 (Analytical Engine) domain
+        # Type 4 domains prioritize web search over local patterns
+        domain_type = getattr(context, 'domain_type', None) if context else None
+        is_type4 = domain_type == "4"
+
+        # For Type 4 domains: only include local patterns if NO web search results exist
+        # Type 4 is designed to use web search as primary, local patterns as fallback only
+        if is_type4:
+            if primary_results:
+                # Have web search results - use ONLY those, skip local patterns
+                combined = primary_results[:self.max_results]
+                logger.info(f"[REPLY_FORM] Type 4: Using web search only ({len(combined)} results, skipping {len(local_results)} local)")
+            else:
+                # No web search - fall back to local patterns
+                combined = local_results[:self.max_results]
+                logger.info(f"[REPLY_FORM] Type 4: No web search, using {len(combined)} local patterns as fallback")
         else:
-            # Default to merge
-            combined = self._merge_results(primary_results, local_results)
+            # Non-Type 4 domains: use configured strategy
+            if self.combine_strategy == "merge":
+                combined = self._merge_results(primary_results, local_results)
+            elif self.combine_strategy == "document_first":
+                combined = self._document_first_strategy(primary_results, local_results)
+            elif self.combine_strategy == "local_first":
+                combined = self._local_first_strategy(primary_results, local_results)
+            else:
+                # Default to merge
+                combined = self._merge_results(primary_results, local_results)
 
         response_data["combined_results"] = combined
         response_data["reply"] = self._form_reply(combined)

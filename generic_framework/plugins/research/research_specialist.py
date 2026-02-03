@@ -135,7 +135,8 @@ class ResearchSpecialistPlugin(SpecialistPlugin):
                     research_results.append({
                         "title": result.metadata.get("title", result.source),
                         "content": result.content,
-                        "source": result.source,
+                        "source": "web_search",
+                        "url": result.source,
                         "relevance": result.relevance_score,
                         "metadata": result.metadata
                     })
