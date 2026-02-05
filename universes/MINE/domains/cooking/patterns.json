@@ -36,7 +36,7 @@
     "domain": "cooking",
     "created_at": "2026-01-06T04:34:38.244351",
     "updated_at": "2026-01-06T04:34:38.244394",
-    "times_accessed": 12,
+    "times_accessed": 13,
     "user_rating": null
   },
   {
@@ -109,7 +109,7 @@
     "domain": "cooking",
     "created_at": "2026-01-06T04:34:38.244404",
     "updated_at": "2026-01-06T04:34:38.244406",
-    "times_accessed": 33,
+    "times_accessed": 34,
     "user_rating": null
   },
   {
@@ -151,7 +151,7 @@
     "domain": "cooking",
     "created_at": "2026-01-06T04:34:38.244408",
     "updated_at": "2026-01-06T04:34:38.244410",
-    "times_accessed": 27,
+    "times_accessed": 28,
     "user_rating": null
   },
   {
@@ -229,7 +229,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.073050",
     "updated_at": "2026-01-06T08:38:05.073054",
-    "times_accessed": 72,
+    "times_accessed": 73,
     "user_rating": null,
     "rating": 4.5
   },
@@ -266,7 +266,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.074794",
     "updated_at": "2026-01-06T08:38:05.074796",
-    "times_accessed": 60,
+    "times_accessed": 62,
     "user_rating": null,
     "rating": 4.6
   },
@@ -306,7 +306,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.076446",
     "updated_at": "2026-01-06T08:38:05.076448",
-    "times_accessed": 72,
+    "times_accessed": 73,
     "user_rating": null,
     "rating": 4.7
   },
@@ -346,7 +346,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.079506",
     "updated_at": "2026-01-06T08:38:05.079508",
-    "times_accessed": 48,
+    "times_accessed": 49,
     "user_rating": null,
     "rating": 4.7
   },
@@ -386,7 +386,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.081115",
     "updated_at": "2026-01-06T08:38:05.081117",
-    "times_accessed": 31,
+    "times_accessed": 32,
     "user_rating": null,
     "rating": 4.1
   },
@@ -425,7 +425,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.082808",
     "updated_at": "2026-01-06T08:38:05.082810",
-    "times_accessed": 41,
+    "times_accessed": 44,
     "user_rating": null,
     "rating": 4.6
   },
@@ -460,7 +460,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.084323",
     "updated_at": "2026-01-06T08:38:05.084325",
-    "times_accessed": 22,
+    "times_accessed": 25,
     "user_rating": null,
     "rating": 4.5
   },
@@ -494,7 +494,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.087428",
     "updated_at": "2026-01-06T08:38:05.087430",
-    "times_accessed": 23,
+    "times_accessed": 25,
     "user_rating": null,
     "rating": 4.6
   },
@@ -533,7 +533,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.089007",
     "updated_at": "2026-01-06T08:38:05.089009",
-    "times_accessed": 54,
+    "times_accessed": 56,
     "user_rating": null,
     "rating": 4.6
   },
@@ -573,7 +573,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.092925",
     "updated_at": "2026-01-06T08:38:05.092927",
-    "times_accessed": 26,
+    "times_accessed": 27,
     "user_rating": null,
     "rating": 4.6
   },
@@ -609,7 +609,7 @@
     "examples": [],
     "created_at": "2026-01-06T08:38:05.094797",
     "updated_at": "2026-01-06T08:38:05.094799",
-    "times_accessed": 22,
+    "times_accessed": 23,
     "user_rating": null,
     "rating": 4.6
   },
@@ -641,7 +641,7 @@
     "domain": "cooking",
     "created_at": "2026-01-14T23:11:33.483236",
     "updated_at": "2026-01-14T23:12:39.075172",
-    "times_accessed": 64,
+    "times_accessed": 65,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What is the meat dish in the form of a loaf?",
@@ -683,7 +683,7 @@
     "domain": "cooking",
     "created_at": "2026-01-14T23:28:27.922123",
     "updated_at": "2026-01-14T23:30:22.688549",
-    "times_accessed": 54,
+    "times_accessed": 55,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What kind of bread cools upside down?",
@@ -725,7 +725,7 @@
     "domain": "cooking",
     "created_at": "2026-01-14T23:43:55.580490",
     "updated_at": "2026-01-14T23:44:59.731376",
-    "times_accessed": 65,
+    "times_accessed": 66,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What is a flat bread from the north pole?",
@@ -768,7 +768,7 @@
     "domain": "cooking",
     "created_at": "2026-01-14T23:55:11.058539",
     "updated_at": "2026-01-14T23:56:25.123742",
-    "times_accessed": 62,
+    "times_accessed": 65,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "what is comfort food?",
@@ -811,7 +811,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T03:27:55.518004",
     "updated_at": "2026-01-15T03:29:08.424111",
-    "times_accessed": 61,
+    "times_accessed": 63,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "Can I substitute oil for butter?",
@@ -854,7 +854,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T03:32:22.417563",
     "updated_at": "2026-01-15T03:32:57.744587",
-    "times_accessed": 47,
+    "times_accessed": 48,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "What can I substitute for oil?",
@@ -898,7 +898,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T03:43:00.727930",
     "updated_at": "2026-01-15T03:43:00.727930",
-    "times_accessed": 33,
+    "times_accessed": 34,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "How do I cook chicken breast?",
@@ -941,7 +941,7 @@
     "domain": "cooking",
     "created_at": "2026-01-15T11:52:54.448432",
     "updated_at": "2026-01-15T11:52:54.448432",
-    "times_accessed": 28,
+    "times_accessed": 30,
     "user_rating": null,
     "origin": "llm_fallback",
     "origin_query": "Chicken dinner",
@@ -976,7 +976,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-16T20:13:57.917061",
-    "times_accessed": 31,
+    "times_accessed": 32,
     "updated_at": "2026-01-16T20:13:57.917061"
   },
   {
@@ -1077,7 +1077,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T02:45:25.457656",
-    "times_accessed": 16,
+    "times_accessed": 17,
     "updated_at": "2026-01-21T02:45:25.457656"
   },
   {
@@ -1102,7 +1102,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T02:50:37.014104",
-    "times_accessed": 16,
+    "times_accessed": 17,
     "updated_at": "2026-01-21T02:50:37.014104"
   },
   {
@@ -1152,7 +1152,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T05:54:44.333240",
-    "times_accessed": 9,
+    "times_accessed": 10,
     "updated_at": "2026-01-21T05:54:44.333240"
   },
   {
@@ -1177,7 +1177,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-22T03:50:58.168360",
-    "times_accessed": 5,
+    "times_accessed": 6,
     "code": null,
     "updated_at": "2026-01-22T03:50:58.168360"
   },
@@ -1203,7 +1203,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-28T02:09:39.502837",
-    "times_accessed": 19,
+    "times_accessed": 20,
     "code": null,
     "updated_at": "2026-01-28T02:09:39.502837"
   },
@@ -1229,8 +1229,34 @@
       "llm_generated"
     ],
     "created_at": "2026-01-29T07:09:41.919592",
-    "times_accessed": 8,
+    "times_accessed": 9,
     "code": null,
     "updated_at": "2026-01-29T07:09:41.919592"
+  },
+  {
+    "id": "cooking_a2c7ba46",
+    "pattern_id": "cooking_a2c7ba46",
+    "name": "WHAT IS A recipe for beef tartar",
+    "domain": "cooking",
+    "problem": "WHAT IS A recipe for beef tartar",
+    "solution": "Based on the web search results, a classic beef (or steak) tartare recipe involves finely chopping high-quality raw beef and mixing it with savory seasonings. Here\u2019s a synthesis of the key steps and tips from the sources.\n\n### What is Beef/Steak Tartare?\nIt's a classic French dish made from **minced raw beef** mixed with ingredients like alliums (onions/shallots), capers, Worcestershire sauce, and often served with a raw egg yolk on top, cornichons, and toast or bread. It can be an appetizer or a main course ([Web Result 3](https://web_search)).\n\n### Key Recipe Principles & Steps\nWhile exact recipes vary, the consensus from the sources highlights a few crucial steps:\n\n1.  **Selecting the Beef:** The most critical step for safety and flavor. You must use **very fresh, high-quality beef**. Popular cuts include:\n    *   **Top Round:** Ricardo prefers it for being firmer and more affordable than tenderloin ([Web Result 2](https://web_search)).\n    *   **Tenderloin (Filet Mignon):** A classic, very tender choice.\n    *   **Sirloin:** Another excellent option.\n    *   **General Tip:** Purchase a whole piece from a trusted butcher and chop it yourself at home to minimize surface area where bacteria can grow ([Web Result 4](https://web_search)).\n\n2.  **Preparing the Beef:** Thoroughly trim away any fat and sinew. Then, dice the beef very finely with a sharp knife (a food processor can make it mushy). Keep the meat very cold until ready to serve.\n\n3.  **The Flavor Base:** A typical seasoning mix includes:\n    *   Minced shallots or red onion\n    *   Capers, chopped\n    *   Cornichons or gherkins, chopped\n    *   Fresh parsley or chives\n    *   **Liquid Seasonings:** Worcestershire sauce, Dijon mustard, and sometimes a hot sauce like Tabasco or sambal oelek ([Web Result 2](https://web_search)).\n    *   Salt and freshly ground black pepper.\n\n4.  **Mixing and Serving:** Gently combine the cold, chopped beef with the seasonings. Form it into a mound on a plate. Create a small well in the center and place a **fresh, raw egg yolk** there.\n    *   **Safety Note:** Use the freshest eggs possible, and some prefer using pasteurized eggs for the yolk.\n\n5.  **Presentation:** Serve immediately with toasted baguette slices, rye bread, or crispy French fries ([Web Result 3](https://web_search)).\n\n### Quick Reference: Gordon Ramsay's Simplified Approach\nOne result outlines a quick method inspired by Gordon Ramsay:\n*   Mix high-quality diced beef with tangy capers, shallots, cornichons, and herbs.\n*   Bind it with Dijon mustard and egg yolk.\n*   Season with Worcestershire sauce, salt, and pepper.\n*   The emphasis is on fresh ingredients and simplicity for an elegant appetizer ([Web Result 5](https://web_search)).\n\n### Important Safety Consideration\nBecause this dish is served raw, **food safety is paramount**. All sources stress using the **freshest, highest-quality beef and eggs you can source from a reliable supplier**. Handle the meat carefully, keep everything clean and cold, and consume the tartare immediately after preparing.\n\nFor detailed, step-by-step instructions, you can refer to the full guides:\n*   **[Beef tartare recipe: How to make it perfectly in 5 easy steps](https://web_search)**\n*   **[Classic Steak Tartare - Serious Eats](https://web_search)** for comprehensive safety and technique tips.\n\n---\n\n*Generated by LLMEnricher*",
+    "description": "AI-generated from query: WHAT IS A recipe for beef tartar",
+    "pattern_type": "knowledge",
+    "confidence": 0.8099999999999999,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "WHAT IS A recipe for beef tartar",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-04T01:43:53.472Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-04T01:43:53.479526",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-04T01:43:53.479526"
   }
 ]

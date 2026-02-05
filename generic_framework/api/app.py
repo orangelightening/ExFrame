@@ -39,6 +39,7 @@ from core.factory import DomainFactory
 from core.domain import DomainConfig
 from core.generic_domain import GenericDomain  # NEW: Use GenericDomain
 from core.universe import UniverseManager, UniverseMergeStrategy
+from core.phase1_engine import Phase1Engine  # Phase 1: New simplified engine
 from assist.engine import GenericAssistantEngine
 from diagnostics.search_metrics import SearchMetrics, SearchTrace, SearchOutcome
 from diagnostics.pattern_analyzer import PatternAnalyzer
@@ -58,6 +59,7 @@ class QueryRequest(BaseModel):
     verbose: Optional[bool] = False  # Enable verbose mode with data snapshots
     show_thinking: Optional[bool] = False  # Show step-by-step reasoning before answer
     format: Optional[str] = None  # Output format: json, markdown, compact, table, etc.
+    search_patterns: Optional[bool] = None  # Phase 1: Control pattern search (True/False/None=use config)
 
 
 class ConfirmLLMRequest(BaseModel):
@@ -88,6 +90,10 @@ class DomainCreate(BaseModel):
     enrichers: Optional[List[Dict[str, Any]]] = None
     # Domain Type System (Types 1-5)
     domain_type: Optional[str] = None
+    # Phase 1: Persona System
+    persona: Optional[str] = None
+    library_base_path: Optional[str] = None
+    enable_pattern_override: Optional[bool] = None
     # Type 1: Creative
     creative_keywords: Optional[str] = None
     # Type 2: Knowledge Retrieval
@@ -120,6 +126,10 @@ class DomainUpdate(BaseModel):
     enrichers: Optional[List[Dict[str, Any]]] = None
     # Domain Type System (Types 1-5)
     domain_type: Optional[str] = None
+    # Phase 1: Persona System
+    persona: Optional[str] = None
+    library_base_path: Optional[str] = None
+    enable_pattern_override: Optional[bool] = None
     # Type 1: Creative
     creative_keywords: Optional[str] = None
     # Type 2: Knowledge Retrieval
@@ -1152,6 +1162,75 @@ async def process_query_get(
     )
 
 
+@app.post("/api/query/phase1")
+async def process_query_phase1(request: QueryRequest) -> Response:
+    """
+    Process query using Phase 1 engine (3 Personas + Pattern Override).
+
+    Phase 1 uses simplified architecture:
+    - 3 Personas: Poet (void), Librarian (library), Researcher (internet)
+    - Pattern Override: if patterns found → use them, else → use persona data source
+    - search_patterns flag: True (search), False (skip), None (use domain config)
+
+    Examples:
+        # Search patterns (default)
+        curl -X POST http://localhost:3000/api/query/phase1 \\
+          -H "Content-Type: application/json" \\
+          -d '{"query": "How to cook rice", "domain": "cooking"}'
+
+        # Skip pattern search, use persona data source
+        curl -X POST http://localhost:3000/api/query/phase1 \\
+          -H "Content-Type: application/json" \\
+          -d '{"query": "How to cook rice", "domain": "cooking", "search_patterns": false}'
+
+        # Explicit pattern search
+        curl -X POST http://localhost:3000/api/query/phase1 \\
+          -H "Content-Type: application/json" \\
+          -d '{"query": "How to cook rice", "domain": "cooking", "search_patterns": true}'
+    """
+    # Create Phase 1 engine instance
+    phase1_engine = Phase1Engine(enable_trace=request.include_trace)
+
+    try:
+        # Process query with Phase 1 engine
+        result = await phase1_engine.process_query(
+            query=request.query,
+            domain_name=request.domain,
+            context=request.context,
+            search_patterns=request.search_patterns,  # THE SWITCH
+            show_thinking=request.show_thinking or False  # Show reasoning flag
+        )
+
+        # Map Phase 1 response format to frontend-expected format
+        # Frontend expects: response, specialist, confidence, query, llm_used, ai_generated
+        # Phase 1 returns: answer, persona_type, source, query, pattern_override_used
+        frontend_response = {
+            "response": result.get("answer", ""),  # Map answer → response
+            "specialist": result.get("persona_type", "General"),  # Map persona_type → specialist
+            "confidence": 0.9 if result.get("pattern_override_used") else 0.7,  # Synthetic confidence
+            "query": result.get("query", ""),
+            "llm_used": True,  # Phase 1 always uses LLM
+            "ai_generated": not result.get("pattern_override_used", False),  # True if no patterns used
+            "processing_time_ms": result.get("processing_time_ms", 0),
+            # Keep Phase 1 metadata for debugging
+            "phase1_metadata": {
+                "source": result.get("source"),
+                "persona_type": result.get("persona_type"),
+                "pattern_override_used": result.get("pattern_override_used"),
+                "search_patterns_enabled": result.get("search_patterns_enabled"),
+                "pattern_count": result.get("pattern_count", 0),
+                "engine_version": result.get("engine_version")
+            }
+        }
+
+        # Return mapped result
+        return JSONResponse(content=frontend_response)
+
+    except Exception as e:
+        logger.error(f"[Phase1] Error processing query: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/query/confirm-llm")
 async def confirm_llm_fallback(request: ConfirmLLMRequest) -> Response:
     """
@@ -1657,45 +1736,48 @@ async def list_all_domains() -> Dict[str, Any]:
 @app.get("/api/admin/domains/{domain_id}")
 async def get_domain_config(domain_id: str) -> Dict[str, Any]:
     """Get full domain configuration including specialists."""
-    # Try registry first (for manually created domains)
-    registry = _load_domain_registry()
+    # Load from domain.json file first (source of truth)
+    # Then merge with registry if needed
+    from pathlib import Path
+    import os
+    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+    domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
 
-    if domain_id in registry["domains"]:
-        domain_config = registry["domains"][domain_id]
+    if domain_file.exists():
+        import json
+        with open(domain_file) as f:
+            domain_config = json.load(f)
     else:
-        # Fall back to loading from universe system
-        if not universe_manager or not universe_manager.universes:
-            raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
-
-        # Get the active universe
-        active_universe = None
-        from core.universe import UniverseState
-        for universe in universe_manager.universes.values():
-            if universe.state == UniverseState.ACTIVE:
-                active_universe = universe
-                break
-
-        if not active_universe:
-            # Try to load MINE universe
-            try:
-                active_universe = await universe_manager.load_universe("MINE")
-            except Exception as e:
+        # Fall back to registry
+        registry = _load_domain_registry()
+        if domain_id in registry["domains"]:
+            domain_config = registry["domains"][domain_id]
+        else:
+            # Fall back to loading from universe system
+            if not universe_manager or not universe_manager.universes:
                 raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 
-        domain = active_universe.get_domain(domain_id)
-        if not domain:
-            raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+            # Get the active universe
+            active_universe = None
+            from core.universe import UniverseState
+            for universe in universe_manager.universes.values():
+                if universe.state == UniverseState.ACTIVE:
+                    active_universe = universe
+                    break
 
-        # Build domain config from loaded domain
-        from pathlib import Path
-        import os
-        universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-        domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
-        if domain_file.exists():
-            import json
-            with open(domain_file) as f:
-                domain_config = json.load(f)
-        else:
+            if not active_universe:
+                # Try to load MINE universe
+                try:
+                    active_universe = await universe_manager.load_universe("MINE")
+                except Exception as e:
+                    raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+            domain = active_universe.get_domain(domain_id)
+            if not domain:
+                raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+            # At this point, domain file should have been loaded above
+            # If we're here, something went wrong
             raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 
     # Add live specialist data if domain is loaded
@@ -1784,6 +1866,14 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
         if request.enrichers:
             domain_config["enrichers"] = request.enrichers
 
+        # Add Phase 1 persona fields if provided
+        if request.persona:
+            domain_config["persona"] = request.persona
+        if request.library_base_path:
+            domain_config["library_base_path"] = request.library_base_path
+        if request.enable_pattern_override is not None:
+            domain_config["enable_pattern_override"] = request.enable_pattern_override
+
     except Exception as e:
         print(f"Warning: Domain factory generation failed, using defaults: {e}")
         # Fall back to basic config if factory fails
@@ -1797,6 +1887,13 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
             "created_at": datetime.utcnow().isoformat() + "Z",
             "updated_at": datetime.utcnow().isoformat() + "Z"
         }
+        # Add Phase 1 fields to fallback config
+        if request.persona:
+            domain_config["persona"] = request.persona
+        if request.library_base_path:
+            domain_config["library_base_path"] = request.library_base_path
+        if request.enable_pattern_override is not None:
+            domain_config["enable_pattern_override"] = request.enable_pattern_override
 
     # Create domain.json file in the universe structure
     try:
@@ -1820,12 +1917,28 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
     registry["domains"][request.domain_id] = domain_config
     _save_domain_registry(registry)
 
+    # Auto-load the domain into active engines
+    try:
+        if universe_manager:
+            # Reload the universe to pick up the new domain
+            current_universe = universe_manager.get_active_universe()
+            if current_universe:
+                # Try to load this specific domain
+                domain = await current_universe._load_domain(request.domain_id)
+                if domain:
+                    engines[request.domain_id] = current_universe.engines[request.domain_id]
+                    logger.info(f"✓ Auto-loaded domain: {request.domain_id}")
+    except Exception as e:
+        logger.warning(f"Failed to auto-load domain {request.domain_id}: {e}")
+        logger.warning("Domain created but requires container restart to use")
+
     return {
         "domain_id": request.domain_id,
         "domain_type": request.domain_type,
         "status": "created",
         "message": f"Domain '{request.domain_name}' created successfully",
-        "config": domain_config
+        "config": domain_config,
+        "auto_loaded": request.domain_id in engines
     }
 
 
@@ -1980,6 +2093,14 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
             domain_config["require_confirmation"] = request.require_confirmation
         if request.research_on_fallback is not None:
             domain_config["research_on_fallback"] = request.research_on_fallback
+
+        # Phase 1: Persona system fields
+        if request.persona is not None:
+            domain_config["persona"] = request.persona
+        if request.library_base_path is not None:
+            domain_config["library_base_path"] = request.library_base_path
+        if request.enable_pattern_override is not None:
+            domain_config["enable_pattern_override"] = request.enable_pattern_override
 
     domain_config["updated_at"] = datetime.utcnow().isoformat()
 

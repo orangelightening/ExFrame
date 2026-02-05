@@ -12,6 +12,8 @@
     "Mr fix it"
   ],
   "domain_type": "4",
+  "persona": "researcher",
+  "enable_pattern_override": true,
   "pattern_schema": {
     "required_fields": [
       "id",
@@ -81,6 +83,16 @@
         "mode": "enhance",
         "temperature": 0.5,
         "max_tokens": 8192
+      }
+    },
+    {
+      "module": "plugins.enrichers.citation_checker",
+      "class": "CitationCheckerEnricher",
+      "enabled": true,
+      "config": {
+        "require_for_types": ["4"],
+        "min_citations": 1,
+        "fallback_message": "Insufficient information to provide a response"
       }
     }
   ],

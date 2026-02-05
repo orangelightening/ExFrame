@@ -19,6 +19,8 @@
     "web_search"
   ],
   "domain_type": "4",
+  "persona": "researcher",
+  "enable_pattern_override": true,
   "pattern_schema": {
     "required_fields": [
       "id",

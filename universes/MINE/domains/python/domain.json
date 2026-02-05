@@ -101,5 +101,7 @@
     "related_domains": [],
     "imports_patterns_from": [],
     "suggest_on_confidence_below": 0.3
-  }
+  },
+  "persona": "librarian",
+  "enable_pattern_override": true
 }

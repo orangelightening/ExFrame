@@ -1,0 +1,28 @@
+[
+  {
+    "id": "omv_library_01eb2270",
+    "pattern_id": "omv_library_01eb2270",
+    "name": "What is in the tips and tricks section of the document what is the document title?",
+    "domain": "omv_library",
+    "problem": "what is in the tips and tricks section of the document what is the document title?",
+    "solution": "**Reasoning Process:**  \nFirst, I\u2019ll check the provided document excerpt for a \u201cTips and Tricks\u201d section. The excerpt ends after \u201cWhat is tmux?\u201d and does not show a \u201cTips and Tricks\u201d section. Since only part of the document is given, I can only confirm that the visible content does not contain that section.  \nNext, I\u2019ll note the document title from the provided metadata and headings: it\u2019s titled \u201ctmux Cheat Sheet\u201d (from the `#` header).  \n\n**Answer:**  \nThe provided excerpt of the document does not contain a \u201cTips and Tricks\u201d section.  \nThe document title is **\u201ctmux Cheat Sheet.\u201d**",
+    "description": "AI-generated from query: what is in the tips and tricks section of the document what is the document title?",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "what is in the tips and tricks section of the document what is the document title?",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-04T23:50:21.424Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-04T23:50:21.431097",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-04T23:50:21.431097"
+  }
+]

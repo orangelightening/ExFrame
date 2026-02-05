@@ -179,5 +179,8 @@
   "report_format": "structured",
   "enable_web_search": false,
   "require_confirmation": true,
-  "research_on_fallback": false
+  "research_on_fallback": false,
+  "persona": "librarian",
+  "library_base_path": "/app/project",
+  "enable_pattern_override": true
 }

@@ -114,5 +114,7 @@
     }
   ],
   "storage_path": "/app/data/patterns/psycho",
-  "pattern_format": "json"
+  "pattern_format": "json",
+  "persona": "researcher",
+  "enable_pattern_override": true
 }

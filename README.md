@@ -1383,6 +1383,404 @@ await engines["mydomain"].initialize()
 
 ---
 
+## Creating a Librarian Domain
+
+Librarian domains provide **document-based search** over a directory of markdown files. This is perfect for:
+- Project documentation
+- Knowledge bases
+- Technical notes
+- Research collections
+
+### Quick Start
+
+1. **Prepare Your Document Directory**
+   ```bash
+   # Example: Create a docs directory with some markdown files
+   mkdir -p /home/user/my-project/docs
+   echo "# Getting Started" > /home/user/my-project/docs/intro.md
+   echo "# API Reference" > /home/user/my-project/docs/api.md
+   ```
+
+2. **Create ignored.md (IMPORTANT - Security Feature)**
+
+   Create an `ignored.md` file in your library directory to exclude sensitive files and directories. **This is a security feature that prevents the librarian from accessing secrets, credentials, and unwanted files.**
+
+   **Location**: Place `ignored.md` in the same directory as your documents (the `library_base_path`).
+
+   **Example ignored.md** (recommended for project documentation):
+   ```bash
+   # Ignored Files and Directories
+   # One pattern per line - substring matching
+   # Lines starting with # are comments
+
+   # SECURITY: Secrets and credentials
+   .env
+   .env.local
+   .env.production
+   secrets/
+   credentials/
+   api_keys/
+
+   # Version control
+   .git/
+
+   # Python
+   __pycache__/
+   *.pyc
+   venv/
+
+   # Node
+   node_modules/
+
+   # IDE files
+   .vscode/
+   .idea/
+
+   # Logs and temporary files
+   *.log
+   logs/
+   temp/
+   tmp/
+   drafts/
+
+   # Archives
+   .archive/
+   old/
+   backup/
+
+   # Binary files
+   *.pdf
+   *.zip
+   ```
+
+   **How it works:**
+   - **Substring matching**: Pattern `drafts/` excludes any file path containing `drafts/`
+   - **One pattern per line**: Each line is a separate exclusion pattern
+   - **Comments**: Lines starting with `#` are ignored
+   - **Case sensitive**: Patterns match exactly as written
+   - **The `ignored.md` file itself is automatically excluded**
+
+   **Security Test**: Try asking your librarian "What's in the .env file?" - it should explain what .env files are but NOT reveal your actual credentials. If it shows your API keys, add `.env` to `ignored.md`.
+
+   **Important**: Files matching patterns in `ignored.md` are **completely invisible** to the librarian. They won't appear in search results or be loaded into context.
+
+3. **Create Domain in UI**
+
+   Go to **Domains** → **Create Domain**:
+   - **Domain ID**: `my_docs` (lowercase with underscores)
+   - **Domain Name**: "My Documentation"
+   - **Description**: "Project documentation search"
+   - **Persona**: Select **"Librarian"** from dropdown
+   - **Library Base Path**: `/app/project/docs` (see path mapping below)
+   - **Categories/Tags**: Optional
+
+4. **Save and Test**
+
+   - Save the domain
+   - Go to **Assistant** tab
+   - Select your new domain
+   - **Uncheck** "Search Patterns" to use document search
+   - Query: "What's in the documentation?"
+   - The librarian will search your markdown files and provide answers
+
+### Path Mapping for Docker (CRITICAL)
+
+**The Tricky Part**: Docker containers can only access directories that are **mounted as volumes**. If your library is outside the ExFrame project directory, you must add a bind mount first.
+
+#### Understanding Container Paths
+
+When setting `library_base_path`, you specify paths **inside the container**, not on your host machine:
+
+| Your Host Path | Container Path (use in domain config) | Status |
+|----------------|---------------------------|--------|
+| `./universes/MINE/docs` | `/app/universes/MINE/docs` | ✅ Already mounted |
+| `./docs` (in project root) | `/app/project/docs` | ✅ Already mounted |
+| `~/my-library` | ⚠️ **NOT accessible** | ❌ Needs bind mount |
+| `/home/user/notes` | ⚠️ **NOT accessible** | ❌ Needs bind mount |
+
+**Default bind mounts** (from docker-compose.yml):
+```yaml
+volumes:
+  - .:/app/project          # Project root → /app/project
+  - ./universes:/app/universes  # Universes → /app/universes
+```
+
+#### Using Existing Mounts (Easy)
+
+If your library is **inside the ExFrame project directory**, it's already accessible:
+
+**Example 1 - Project subdirectory:**
+```bash
+# Create library in project
+mkdir -p ./my-library
+echo "# Test Doc" > ./my-library/test.md
+
+# In domain config, use:
+library_base_path: /app/project/my-library
+```
+
+**Example 2 - Universe directory:**
+```bash
+# Create library in universe
+mkdir -p ./universes/MINE/docs
+echo "# Guide" > ./universes/MINE/docs/guide.md
+
+# In domain config, use:
+library_base_path: /app/universes/MINE/docs
+```
+
+#### Adding Custom Mounts (Advanced)
+
+If your library is **outside the ExFrame project**, you must add a bind mount:
+
+**Step 1: Edit docker-compose.yml**
+
+Add your directory to the volumes section:
+```yaml
+services:
+  eeframe-app:
+    volumes:
+      - .:/app/project
+      - ./universes:/app/universes
+      # ADD YOUR CUSTOM MOUNT HERE:
+      - ~/my-notes:/app/my-notes:ro          # Read-only
+      - /home/user/library:/app/library:ro   # Another example
+```
+
+**Format**: `HOST_PATH:CONTAINER_PATH:OPTIONS`
+- `HOST_PATH`: Absolute path on your machine (use `~` for home directory)
+- `CONTAINER_PATH`: Path inside container (can be anything under `/app/`)
+- `:ro` = read-only (recommended for security)
+- `:rw` = read-write (if you need to write files)
+
+**Step 2: Restart container**
+```bash
+docker compose down
+docker compose up -d
+```
+
+**Step 3: Verify mount worked**
+```bash
+# List files in mounted directory
+docker exec eeframe-app ls -la /app/my-notes
+
+# If you see files, it worked!
+# If you see "No such file or directory", check docker-compose.yml
+```
+
+**Step 4: Use in domain config**
+```
+library_base_path: /app/my-notes
+```
+
+#### Common Mistakes
+
+❌ **WRONG** - Using host paths in domain config:
+```json
+{
+  "library_base_path": "~/my-library"  // Container can't access ~
+}
+```
+
+❌ **WRONG** - Path not mounted:
+```json
+{
+  "library_base_path": "/home/user/docs"  // Not in docker-compose.yml
+}
+```
+
+✅ **CORRECT** - Using container path after mounting:
+```yaml
+# In docker-compose.yml:
+volumes:
+  - ~/my-library:/app/my-library:ro
+```
+```json
+// In domain.json:
+{
+  "library_base_path": "/app/my-library"
+}
+```
+
+#### Quick Reference
+
+| Scenario | Solution |
+|----------|----------|
+| Library inside project directory | Use `/app/project/YOUR_DIR` - no changes needed |
+| Library in universes directory | Use `/app/universes/YOUR_DIR` - no changes needed |
+| Library outside project | Add bind mount to docker-compose.yml first |
+| `~` or `$HOME` in path | Replace with absolute path or add bind mount |
+| Permission denied | Add `:ro` suffix to mount for read-only access |
+
+#### Verify Your Mount
+
+After setting up, test that the container can access your files:
+```bash
+# Test if path exists
+docker exec eeframe-app ls -la /app/YOUR_PATH
+
+# Count markdown files
+docker exec eeframe-app find /app/YOUR_PATH -name "*.md" | wc -l
+
+# Check ignored.md is there
+docker exec eeframe-app cat /app/YOUR_PATH/ignored.md
+```
+
+If any command fails, the path isn't accessible - check your docker-compose.yml bind mount.
+
+### Pattern Search vs Document Search
+
+The "Search Patterns" checkbox controls the librarian's behavior:
+
+| Checkbox State | Behavior | Use When |
+|----------------|----------|----------|
+| **Checked** ✓ | Search patterns.json | You have structured patterns in the domain |
+| **Unchecked** ☐ | Search document directory | You want to search your markdown files |
+
+**Example workflow:**
+```bash
+# Query with document search (checkbox UNCHECKED)
+# → Librarian searches all .md files in library_base_path
+# → Returns answer citing actual document content
+
+# Query with pattern search (checkbox CHECKED)
+# → Librarian searches patterns.json
+# → Returns structured pattern-based answers
+```
+
+### How Document Search Works
+
+When you query with "Search Patterns" unchecked:
+
+1. **Discovery**: System finds all `.md` files in `library_base_path` recursively
+2. **Filtering**: Excludes patterns from `ignored.md` (security feature)
+3. **Loading**: Loads up to 50 documents (50,000 chars each by default)
+4. **Context Building**: All loaded documents provided to AI as context
+5. **Response**: AI generates answer citing the actual documents
+
+**Default Limits** (configurable per domain):
+- **50 documents** maximum per query
+- **50,000 characters** maximum per document
+- Loads documents in filesystem order (no ranking yet)
+
+**To customize limits**, add to your domain.json:
+```json
+{
+  "max_library_documents": 100,
+  "max_chars_per_document": 100000
+}
+```
+
+**Performance Notes**:
+- Documents are re-read on each query (no caching yet)
+- Larger limits = slower queries but more complete context
+- Use `ignored.md` to exclude unnecessary files for better performance
+
+**Future improvements** (if needed):
+- Semantic ranking to load most relevant documents first
+- Document caching to avoid re-reading
+- Incremental loading for very large libraries
+
+### Example Domain Configuration
+
+The resulting `domain.json` will include:
+
+```json
+{
+  "domain_id": "my_docs",
+  "domain_name": "My Documentation",
+  "persona": "librarian",
+  "library_base_path": "/app/project/docs",
+  "enable_pattern_override": true
+}
+```
+
+### Troubleshooting
+
+**Problem**: Librarian returns generic answers, not referencing my documents
+
+**Solution**:
+1. Check `library_base_path` is correct (container path, not host path)
+2. Verify "Search Patterns" checkbox is **unchecked**
+3. Check logs: `docker logs eeframe-app --tail 50 | grep "document"`
+4. Should see: "Loaded N documents for library search"
+
+**Problem**: Librarian says "No documents found"
+
+**Solution**:
+1. Verify path exists in container: `docker exec eeframe-app ls -la /app/project/docs`
+2. Check for `.md` files: `docker exec eeframe-app find /app/project/docs -name "*.md"`
+3. Review `ignored.md` - might be excluding everything
+
+**Problem**: Some documents are missing from search
+
+**Solution**:
+1. Check if they're in `ignored.md` - they may be intentionally excluded
+2. Default limit is 50 documents - if you have more, increase `max_library_documents` in domain.json
+3. Check if documents exceed 50k characters - increase `max_chars_per_document` if needed
+4. Verify files are actually `.md` format: `docker exec eeframe-app find /app/YOUR_PATH -name "*.md" | wc -l`
+
+**Problem**: Librarian shows my API keys or secrets
+
+**Solution**:
+1. **CRITICAL**: Add sensitive patterns to `ignored.md` immediately
+2. Restart is NOT needed - changes take effect on next query
+3. Test: Ask "What's in the .env file?" - should NOT show actual credentials
+4. Common patterns to add: `.env`, `secrets/`, `credentials/`, `api_keys/`
+
+### Complete Example
+
+```bash
+# 1. Create local docs directory
+mkdir -p universes/MINE/domains/my_docs/library
+cd universes/MINE/domains/my_docs/library
+
+# 2. Add some documentation
+cat > getting_started.md <<'EOF'
+# Getting Started
+
+ExFrame is a knowledge management system. To get started:
+1. Create a domain
+2. Add patterns or configure document search
+3. Query the domain
+EOF
+
+cat > api_reference.md <<'EOF'
+# API Reference
+
+## Query Endpoint
+POST /api/query
+- query: string (required)
+- domain: string (required)
+- search_patterns: boolean (optional)
+EOF
+
+# 3. Create ignored.md
+cat > ignored.md <<'EOF'
+# Ignore these files
+drafts/
+temp.md
+EOF
+
+# 4. Create domain in UI
+# - Persona: Librarian
+# - Library Base Path: /app/universes/MINE/domains/my_docs/library
+# - Save
+
+# 5. Test query
+curl -X POST http://localhost:3000/api/query/phase1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "How do I get started?",
+    "domain": "my_docs",
+    "search_patterns": false
+  }'
+```
+
+**Expected response**: Answer citing content from getting_started.md
+
+---
+
 ## Docker Deployment
 
 ### Data Persistence

@@ -1,17 +1,18 @@
 {
-  "domain_id": "gardening",
-  "domain_name": "Auto-loaded: gardening",
-  "description": "Dynamically loaded domain: gardening",
+  "domain_id": "omv_library",
+  "domain_name": "omv server technical library",
+  "description": "omv documentation ",
   "version": "1.0.0",
-  "created_at": "2026-01-27T01:01:42.117869Z",
-  "updated_at": "2026-01-29T06:46:11.073724",
+  "created_at": "2026-02-04T22:59:29.219045Z",
+  "updated_at": "2026-02-04T23:33:24.100403",
   "categories": [
-    "preparation, planting, weeding. watering, fertilizing"
+    "omv",
+    "server"
   ],
   "tags": [
-    "root"
+    "omv"
   ],
-  "domain_type": "2",
+  "domain_type": "",
   "pattern_schema": {
     "required_fields": [
       "id",
@@ -45,17 +46,17 @@
   "plugins": [
     {
       "plugin_id": "generalist",
-      "name": "General Specialist",
+      "name": "General",
       "description": "",
       "module": "plugins.generalist",
       "class": "GeneralistPlugin",
       "enabled": true,
       "config": {
-        "name": "General Specialist",
+        "name": "General",
         "description": "",
         "keywords": [],
         "categories": [],
-        "threshold": 0.6
+        "threshold": 0.3
       }
     }
   ],
@@ -65,38 +66,22 @@
     "storage_path": "patterns.json",
     "pattern_format": "embedded",
     "auto_save": true,
-    "similarity_threshold": 0.3
+    "similarity_threshold": 0.5
   },
-  "temperature": 0.7,
-  "similarity_threshold": 0.3,
-  "max_patterns": 10,
+  "temperature": 0.5,
   "specialists": [
     {
       "specialist_id": "generalist",
-      "name": "General Specialist",
+      "name": "General",
       "description": "",
       "expertise_keywords": [],
       "expertise_categories": [],
-      "confidence_threshold": 0.6
+      "confidence_threshold": 0.3
     }
   ],
-  "ui_config": {
-    "placeholder_text": "Ask about gardening and plants...",
-    "example_queries": [
-      "How do I prune tomato plants?",
-      "When should I start seeds indoors?",
-      "How often should I water my garden?",
-      "What soil is best for vegetables?"
-    ],
-    "icon": "\ud83d\udcda",
-    "color": "#2196F3"
-  },
-  "links": {
-    "related_domains": [],
-    "imports_patterns_from": [],
-    "suggest_on_confidence_below": 0.3
-  },
   "llm_min_confidence": 0.3,
+  "similarity_threshold": 0.3,
+  "max_patterns": 10,
   "document_store_type": "exframe_instance",
   "show_sources": true,
   "max_research_steps": 10,
@@ -106,5 +91,5 @@
   "require_confirmation": true,
   "research_on_fallback": false,
   "persona": "librarian",
-  "enable_pattern_override": true
+  "library_base_path": "/app/omv-library"
 }

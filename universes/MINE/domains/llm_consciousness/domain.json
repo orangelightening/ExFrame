@@ -3,8 +3,8 @@
   "domain_name": "LLM Consciousness & Failure Modes",
   "description": "Patterns of LLM consciousness lapses, failure modes in autonomous operation, and mitigation strategies",
   "version": "1.0.0",
-  "created_at": "2026-01-27T01:01:42.922122Z",
-  "updated_at": "2026-01-27T01:01:42.922176",
+  "created_at": "2026-02-04T21:29:07.873807Z",
+  "updated_at": "2026-02-04T21:29:07.873955",
   "categories": [
     "failure_mode",
     "solution",
@@ -59,9 +59,9 @@
   },
   "plugins": [
     {
-      "plugin_id": "failure_detection",
+      "plugin_id": "generalist",
       "name": "Failure Detection Specialist",
-      "description": "Expert in detecting LLM failure modes and hallucinations",
+      "description": "",
       "module": "plugins.generalist",
       "class": "GeneralistPlugin",
       "enabled": true,
@@ -99,9 +99,9 @@
       }
     },
     {
-      "plugin_id": "monitoring",
+      "plugin_id": "generalist",
       "name": "Monitoring & Architecture Specialist",
-      "description": "Expert in monitoring systems and deployment architecture",
+      "description": "",
       "module": "plugins.generalist",
       "class": "GeneralistPlugin",
       "enabled": true,
@@ -137,7 +137,7 @@
       "enabled": true,
       "config": {
         "mode": "enhance",
-        "temperature": 0.5,
+        "temperature": 0.7,
         "max_patterns": 10
       }
     }
@@ -149,14 +149,14 @@
     "auto_save": true,
     "similarity_threshold": 0.3
   },
-  "temperature": 0.5,
+  "temperature": 0.7,
   "similarity_threshold": 0.3,
   "max_patterns": 10,
   "specialists": [
     {
-      "specialist_id": "failure_detection",
+      "specialist_id": "generalist",
       "name": "Failure Detection Specialist",
-      "description": "Expert in detecting LLM failure modes and hallucinations",
+      "description": "",
       "expertise_keywords": [
         "hallucination",
         "tool loop",
@@ -188,9 +188,9 @@
       "confidence_threshold": 0.3
     },
     {
-      "specialist_id": "monitoring",
+      "specialist_id": "generalist",
       "name": "Monitoring & Architecture Specialist",
-      "description": "Expert in monitoring systems and deployment architecture",
+      "description": "",
       "expertise_keywords": [
         "monitor",
         "watch",

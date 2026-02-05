@@ -74,6 +74,9 @@ services:
       # Mount project root for document search access
       - .:/app/project:ro
 
+      # Mount user library directories
+      - ~/omv-library:/app/omv-library:ro
+
       # Persist logs (optional - container logs also captured)
       - eeframe_logs:/app/logs
     restart: unless-stopped

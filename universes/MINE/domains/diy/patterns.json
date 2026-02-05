@@ -112,7 +112,7 @@
     "domain": "diy",
     "created_at": "2026-01-15T00:15:34.744601",
     "updated_at": "2026-01-15T00:15:34.744601",
-    "times_accessed": 47,
+    "times_accessed": 49,
     "user_rating": null,
     "status": "flagged_for_review",
     "origin": "llm_fallback",
@@ -155,7 +155,7 @@
     "domain": "diy",
     "created_at": "2026-01-15T00:19:13.720362",
     "updated_at": "2026-01-15T00:19:52.011327",
-    "times_accessed": 58,
+    "times_accessed": 59,
     "user_rating": null,
     "status": "certified",
     "origin": "llm_fallback",
@@ -243,7 +243,7 @@
     "domain": "diy",
     "created_at": "2026-01-15T00:28:18.098590",
     "updated_at": "2026-01-15T00:29:21.531816",
-    "times_accessed": 55,
+    "times_accessed": 57,
     "user_rating": null,
     "status": "certified",
     "origin": "llm_fallback",
@@ -287,7 +287,7 @@
     "domain": "diy",
     "created_at": "2026-01-15T00:30:47.001397",
     "updated_at": "2026-01-15T00:31:24.974172",
-    "times_accessed": 53,
+    "times_accessed": 55,
     "user_rating": null,
     "status": "certified",
     "origin": "llm_fallback",
@@ -328,7 +328,7 @@
     "domain": "diy",
     "created_at": "2026-01-15T03:48:36.389873",
     "updated_at": "2026-01-21T02:01:13.885991",
-    "times_accessed": 44,
+    "times_accessed": 45,
     "user_rating": null,
     "status": "certified",
     "origin": "llm_fallback",
@@ -390,7 +390,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-21T06:38:36.269155",
-    "times_accessed": 45,
+    "times_accessed": 47,
     "updated_at": "2026-01-21T06:38:36.269155"
   },
   {
@@ -415,7 +415,7 @@
       "certified"
     ],
     "created_at": "2026-01-21T07:14:47.311610",
-    "times_accessed": 32,
+    "times_accessed": 34,
     "updated_at": "2026-01-21T07:15:10.029121",
     "confidence_score": 0.95
   },
@@ -441,7 +441,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-22T01:24:13.206718",
-    "times_accessed": 26,
+    "times_accessed": 27,
     "code": null,
     "updated_at": "2026-01-22T01:24:13.206718"
   },
@@ -467,7 +467,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-25T03:17:52.609195",
-    "times_accessed": 3,
+    "times_accessed": 5,
     "code": null,
     "updated_at": "2026-01-25T03:17:52.609195"
   },
@@ -493,7 +493,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-28T04:37:03.194315",
-    "times_accessed": 6,
+    "times_accessed": 7,
     "code": null,
     "updated_at": "2026-01-28T04:37:03.194315"
   },
@@ -519,7 +519,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-28T04:49:43.967502",
-    "times_accessed": 7,
+    "times_accessed": 8,
     "code": null,
     "updated_at": "2026-01-28T04:49:43.967502"
   },
@@ -545,7 +545,7 @@
       "llm_generated"
     ],
     "created_at": "2026-01-28T05:02:57.634762",
-    "times_accessed": 4,
+    "times_accessed": 6,
     "code": null,
     "updated_at": "2026-01-28T05:02:57.634762"
   },
@@ -623,7 +623,7 @@
       "llm_generated"
     ],
     "created_at": "2026-02-02T02:59:00.964498",
-    "times_accessed": 1,
+    "times_accessed": 2,
     "code": null,
     "updated_at": "2026-02-02T02:59:00.964498"
   },
