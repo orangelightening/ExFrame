@@ -177,7 +177,9 @@ class UniverseDomainFactory(DomainFactory):
                     pattern_format="json",
                     pattern_schema={},
                     categories=[],
-                    tags=[]
+                    tags=[],
+                    domain_type=None,
+                    temperature=None
                 )
             else:
                 # Load from existing config
@@ -296,7 +298,9 @@ class Universe:
                 description=f"Domain {domain_id} in universe {self.universe_id}",
                 pattern_storage_path=str(domain_path),
                 pattern_format="json",
-                pattern_schema={}
+                pattern_schema={},
+                domain_type=None,
+                temperature=None
             )
 
             # Apply universe-level overrides

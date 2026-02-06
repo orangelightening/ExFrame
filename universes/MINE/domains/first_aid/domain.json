@@ -3,10 +3,15 @@
   "domain_name": "Auto-loaded: first_aid",
   "description": "Dynamically loaded domain: first_aid",
   "version": "1.0.0",
-  "created_at": "2026-01-27T01:01:41.293430Z",
-  "updated_at": "2026-01-27T01:01:41.293463",
-  "categories": [],
-  "tags": [],
+  "created_at": "2026-02-06T21:02:47.332510Z",
+  "updated_at": "2026-02-06T21:12:53.182319",
+  "categories": [
+    "blood",
+    "no blood"
+  ],
+  "tags": [
+    "alive"
+  ],
   "domain_type": "2",
   "pattern_schema": {
     "required_fields": [
@@ -42,30 +47,20 @@
     {
       "plugin_id": "generalist",
       "name": "General Specialist",
-      "description": "General expert for first_aid",
+      "description": "",
       "module": "plugins.generalist",
       "class": "GeneralistPlugin",
       "enabled": true,
       "config": {
         "name": "General Specialist",
+        "description": "",
         "keywords": [],
         "categories": [],
         "threshold": 0.6
       }
     }
   ],
-  "enrichers": [
-    {
-      "module": "plugins.enrichers.llm_enricher",
-      "class": "LLMEnricher",
-      "enabled": true,
-      "config": {
-        "mode": "enhance",
-        "temperature": 0.4,
-        "max_patterns": 10
-      }
-    }
-  ],
+  "enrichers": [],
   "knowledge_base": {
     "type": "json",
     "storage_path": "patterns.json",
@@ -73,14 +68,14 @@
     "auto_save": true,
     "similarity_threshold": 0.3
   },
-  "temperature": 0.4,
+  "temperature": 0.7,
   "similarity_threshold": 0.3,
   "max_patterns": 10,
   "specialists": [
     {
       "specialist_id": "generalist",
       "name": "General Specialist",
-      "description": "General expert for first_aid",
+      "description": "",
       "expertise_keywords": [],
       "expertise_categories": [],
       "confidence_threshold": 0.6
@@ -102,6 +97,15 @@
     "imports_patterns_from": [],
     "suggest_on_confidence_below": 0.3
   },
-  "persona": "librarian",
-  "enable_pattern_override": true
+  "llm_min_confidence": 0.3,
+  "document_store_type": "exframe_instance",
+  "show_sources": true,
+  "max_research_steps": 10,
+  "research_timeout": 300,
+  "report_format": "structured",
+  "enable_web_search": false,
+  "require_confirmation": true,
+  "research_on_fallback": false,
+  "persona": "researcher",
+  "library_base_path": "/app/project"
 }

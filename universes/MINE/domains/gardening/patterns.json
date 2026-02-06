@@ -1,43 +1,5 @@
 [
   {
-    "id": "gardening_candidate_001",
-    "name": "How do I prune tomato plants?",
-    "pattern_type": "how_to",
-    "description": "Auto-generated from query: How do I prune tomato plants?",
-    "problem": "How do I prune tomato plants?",
-    "solution": "Pruning tomato plants is an excellent way to improve plant health, increase fruit size, and keep the garden manageable. However, the method depends entirely on the **type** of tomato you are growing.\n\nHere is a guide on how to prune effectively.\n\n### 1. Identify Your Tomato Type\nBefore you make a single cut, you must know if your tomato is **Determinate** or **Indeterminate**.\n\n*   **Determinate (Bush):** These grow to a set height, set all their fruit at once, and then stop growing.\n    *   **To Prune or Not?** Generally, **do not** heavily prune determinates. You can remove damaged leaves or the very bottom branches for airflow, but heavy pruning will reduce your harvest.\n*   **Indeterminate (Vining):** These continue growing, blooming, and setting fruit until frost kills them. They can become huge and unruly.\n    *   **To Prune or Not?** **Yes.** These require regular pruning to keep them under control and direct energy into fruit production rather than foliage.\n\n---\n\n### 2. Identify the \"Suckers\"\nThe main part of pruning involves removing \"suckers.\"\n*   **What are they?** Suckers are small shoots that grow in the \"V\" crotch (axil) between the main stem and a leaf branch.\n*   **Why remove them?** If left alone, a sucker becomes a whole new main stem with its own leaves and fruit. This creates a dense jungle that shades leaves (reducing photosynthesis) and delays ripening.\n\n### 3. Pruning Techniques for Indeterminate Tomatoes\n\n**The Simple Method: Single Stem**\nIf you have limited space or want large fruit, prune so there is only **one main vertical stem**.\n*   **How to do it:** Identify the main stem. Pinch or snip off *every* sucker you see below the top cluster of flowers.\n\n**The Double or Triple Stem Method**\nFor insurance against sunscald or if you want a slightly bushier plant, you can leave 1 or 2 suckers to grow.\n*   **How to do it:** Let the first sucker directly **below** the first flower cluster grow. This will become a second main stem. You can also let the sucker below *that* one grow for a third stem. Remove all other suckers.\n\n### 4. General Maintenance Pruning\nRegardless of the variety, all tomatoes benefit from these maintenance cuts:\n\n*   **The \"Missouri Pruning\" (optional):** If you let suckers grow, you can pinch just the *tip* of the sucker off, leaving one or two leaves behind. This keeps the plant leafy (to shade fruit) but stops new stem growth.\n*   **Clear the Bottom:** As the plant grows, remove the bottom-most leaves. Ideally, the bottom 6\u201310 inches of the stem should be bare. This prevents soil-borne pathogens from splashing onto the leaves during rain or watering.\n*   **Remove Yellow/Diseased Leaves:** If leaves are yellowing, spotted, or dying, remove them immediately to prevent the spread of disease.\n\n### 5. The \"Top Off\" (Late Season)\nAbout 4 weeks before your first expected frost date, you should \"top\" the plant.\n*   Cut the terminal growing tip of the main stem(s).\n*   This signals the plant to stop growing new vegetation and directs all remaining energy into ripening the existing fruit.\n\n### Summary Checklist\n1.  **Check variety:** Only heavily prune **Indeterminate** types.\n2.  **Locate suckers:** Find shoots growing between stem and leaf.\n3.  **Pinch or Cut:** Remove suckers when they are small (2\u20133 inches long). You can pinch them with your fingers or use sharp shears.\n4.  **Sanitize:** If using tools, wipe them with rubbing alcohol between plants to avoid spreading disease.\n5.  **Don't overdo it:** Never remove more than 25-30% of the plant's foliage at once.",
-    "steps": [],
-    "conditions": {},
-    "related_patterns": [],
-    "prerequisites": [],
-    "alternatives": [],
-    "confidence": 0.5,
-    "sources": [],
-    "tags": [
-      "candidate",
-      "llm_generated"
-    ],
-    "examples": [
-      "How do I prune tomato plants?"
-    ],
-    "domain": "gardening",
-    "created_at": "2026-01-11T02:27:41.574245",
-    "updated_at": "2026-01-11T02:27:41.574245",
-    "times_accessed": 4,
-    "user_rating": null,
-    "status": "candidate",
-    "origin": "llm_fallback",
-    "origin_query": "How do I prune tomato plants?",
-    "generated_at": "2026-01-11T02:27:41.574222",
-    "generated_by": "glm-4.7",
-    "confidence_score": 0.0,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "review_notes": null,
-    "usage_count": 0,
-    "user_feedback": []
-  },
-  {
     "id": "gardening_candidate_003",
     "name": "How do I start seeds indoors?",
     "pattern_type": "how_to",
@@ -163,5 +125,31 @@
     "times_accessed": 2,
     "code": null,
     "updated_at": "2026-01-29T06:39:51.724085"
+  },
+  {
+    "id": "gardening_90cd5a36",
+    "pattern_id": "gardening_90cd5a36",
+    "name": "What are shrubs to grow on Vancouver Island that deer do not like to eat?",
+    "domain": "gardening",
+    "problem": "What are shrubs to grow on Vancouver Island that deer do not like to eat?",
+    "solution": "Based on general horticultural knowledge of deer-resistant plants suitable for the Pacific Northwest climate of Vancouver Island, here are shrubs that are typically less palatable to deer:\n\n**Highly Deer-Resistant Shrubs (due to toxicity, strong scent, or texture):**\n\n1.  **Rhododendron & Azalea** (*Rhododendron spp.*): Most varieties contain toxins that deer avoid. Evergreen and flowering.\n2.  **Oregon Grape** (*Mahonia aquifolium*): A native evergreen with holly-like leaves, yellow flowers, and blue berries. The prickly leaves are a strong deterrent.\n3.  **Sword Fern** (*Polystichum munitum*): While a fern, it forms large, dense clumps that function as a shrub-like barrier. Deer rarely browse it.\n4.  **Daphne** (*Daphne spp.*): All parts are poisonous and strongly avoided. Fragrant flowers. (Note: All parts are also toxic to pets and humans).\n5.  **Boxwood** (*Buxus spp.*): The dense foliage and strong scent are unappealing to deer. Excellent for hedging.\n6.  **Pieris** (*Pieris japonica*): Also known as Lily-of-the-Valley Shrub. Contains toxins that make it deer-resistant. Attractive evergreen with cascading flowers.\n7.  **Heavenly Bamboo** (*Nandina domestica*): Berries and foliage are generally avoided. Provides year-round interest.\n8.  **Rosemary** (*Rosalmarinus officinalis*): The strong aromatic oils are a natural deer repellent. Prefers sunny, well-drained spots.\n9.  **Lavender** (*Lavandula spp.*): Like rosemary, its strong scent deters deer. Requires full sun and good drainage.\n10. **Sarcococca** (*Sarcococca spp.*): Sweet Box or Christmas Box. A shade-tolerant evergreen with tiny, powerfully fragrant winter flowers. Deer avoid it.\n11. **Japanese Skimmia** (*Skimmia japonica*): An evergreen shade shrub with fragrant flowers and red berries. Deer tend to leave it alone.\n12. **Ceanothus** (*Ceanothus spp.*): Many varieties, like the native *Ceanothus velutinus* (Snowbrush), have leaves deer dislike. Prefers sun.\n\n**Important Considerations for Vancouver Island:**\n\n*   **Deer Pressure:** In areas with high deer populations and scarce food, **no plant is 100% deer-proof**. Young, newly planted shrubs are most vulnerable and may need protection (e.g., cages, repellents) until established.\n*   **Climate Zones:** Vancouver Island ranges from mild coastal (Zone 8-9) to cooler mountainous areas. Ensure the shrub is suited to your specific hardiness zone.\n*   **Native Plants:** Choosing natives like **Oregon Grape**, **Tall Oregon Grape** (*Mahonia nervosa*), and **Salal** (*Gaultheria shallon*) is ecologically beneficial. While deer may occasionally browse Salal, it's often considered moderately resistant and recovers well.\n*   **Texture & Aroma:** Deer typically avoid plants with:\n    *   **Prickly or fuzzy leaves** (e.g., Oregon Grape).\n    *   **Strong aromatic oils** (e.g., Lavender, Rosemary, Sage).\n    *   **Toxic properties** (e.g., Daphne, Rhododendron, Pieris).\n*   **Local Nurseries:** The best advice often comes from local garden centers. Ask for **\"deer-resistant\"** shrubs that thrive in your specific area of the Island.\n\n**Shrubs to Generally Avoid** if deer are a major concern, as they are highly palatable: Hostas, Roses, Hydrangeas (except *Hydrangea paniculata* may be slightly more resistant), Fruit-bearing shrubs like Blueberries, and most young deciduous trees like Japanese Maples.\n\n**Final Recommendation:** For a reliable, low-maintenance start, consider **Oregon Grape**, **Rhododendron**, **Pieris**, or **Boxwood**. Always layer strategies\u2014combining resistant plants with occasional repellents or physical barriers for new plantings yields the best results.",
+    "description": "AI-generated from query: What are shrubs to grow on Vancouver Island that deer do not like to eat?",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "What are shrubs to grow on Vancouver Island that deer do not like to eat?",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-06T19:04:40.797Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-06T19:04:40.804137",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-06T19:04:40.804137"
   }
 ]

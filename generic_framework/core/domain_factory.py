@@ -317,6 +317,16 @@ class DomainConfigGenerator:
                         "mode": "enhance",
                         "temperature": temp
                     }
+                },
+                {
+                    "module": "plugins.enrichers.citation_checker",
+                    "class": "CitationCheckerEnricher",
+                    "enabled": True,
+                    "config": {
+                        "require_for_types": ["3"],
+                        "min_citations": 1,
+                        "fallback_message": "Insufficient information to provide a response"
+                    }
                 }
             ],
             "knowledge_base": {
@@ -378,6 +388,16 @@ class DomainConfigGenerator:
                         "mode": "enhance",
                         "temperature": temp,
                         "max_tokens": 8192
+                    }
+                },
+                {
+                    "module": "plugins.enrichers.citation_checker",
+                    "class": "CitationCheckerEnricher",
+                    "enabled": True,
+                    "config": {
+                        "require_for_types": ["4"],
+                        "min_citations": 1,
+                        "fallback_message": "Insufficient information to provide a response"
                     }
                 }
             ],

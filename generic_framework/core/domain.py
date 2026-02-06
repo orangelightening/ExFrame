@@ -45,6 +45,12 @@ class DomainConfig:
     version: str
     description: str
 
+    # Domain type (1-5)
+    domain_type: Optional[str] = None
+
+    # LLM temperature
+    temperature: Optional[float] = None
+
     # Data sources
     data_sources: List[str] = field(default_factory=list)
     default_collector_type: CollectorType = CollectorType.FILE_SYSTEM

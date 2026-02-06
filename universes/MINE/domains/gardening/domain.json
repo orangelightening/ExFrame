@@ -3,8 +3,8 @@
   "domain_name": "Auto-loaded: gardening",
   "description": "Dynamically loaded domain: gardening",
   "version": "1.0.0",
-  "created_at": "2026-01-27T01:01:42.117869Z",
-  "updated_at": "2026-01-29T06:46:11.073724",
+  "created_at": "2026-02-06T19:00:55.343580Z",
+  "updated_at": "2026-02-06T21:03:38.781713",
   "categories": [
     "preparation, planting, weeding. watering, fertilizing"
   ],
@@ -105,6 +105,6 @@
   "enable_web_search": false,
   "require_confirmation": true,
   "research_on_fallback": false,
-  "persona": "librarian",
-  "enable_pattern_override": true
+  "persona": "researcher",
+  "library_base_path": "/app/project"
 }

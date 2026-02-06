@@ -1258,5 +1258,57 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-02-04T01:43:53.479526"
+  },
+  {
+    "id": "cooking_39d2deaa",
+    "pattern_id": "cooking_39d2deaa",
+    "name": "Recipe for tamarind sauce using tamarind paste ",
+    "domain": "cooking",
+    "problem": "recipe for tamarind sauce using tamarind paste ",
+    "solution": "Of course. Here is a detailed recipe for a versatile, all-purpose tamarind sauce (or chutney) using tamarind paste. This sweet, sour, and slightly spicy sauce is perfect for samosas, chaat, grilled meats, or as a dipping sauce.\n\n### **Classic Sweet & Sour Tamarind Sauce (Imli Chutney)**\n\nThis recipe yields about 1 cup of sauce and can be easily scaled up.\n\n**Ingredients:**\n\n*   **Tamarind Paste:** \u00bc cup (about 60g) of concentrated tamarind paste (not syrup). Look for a pure paste with no added sugar or spices.\n*   **Water:** 1 cup (240ml), plus more for adjusting consistency.\n*   **Sweetener:** \u2153 to \u00bd cup (65g-100g) of jaggery (traditional) or dark brown sugar. Adjust to taste.\n*   **Spices:**\n    *   \u00bd tsp cumin seeds\n    *   \u00bd tsp ginger powder (or 1 tsp fresh grated ginger)\n    *   \u00bc tsp red chili powder (Kashmiri chili powder for color and mild heat, or cayenne for more heat)\n    *   \u00bc tsp black salt (kala namak) - *essential for the authentic \"chaat\" flavor*\n    *   \u00bc tsp regular salt\n    *   1 small pinch of asafoetida (hing) - optional but traditional\n*   **For Tempering (Tadka) - Optional but recommended:**\n    *   1 tsp oil (vegetable or mustard)\n    *   \u00bd tsp mustard seeds\n    *   1 small dried red chili\n    *   5-6 curry leaves\n\n**Instructions:**\n\n1.  **Combine & Simmer:** In a small saucepan, combine the tamarind paste and 1 cup of water. Whisk until the paste is fully dissolved. Add the jaggery (or brown sugar), cumin seeds, ginger powder, red chili powder, black salt, and regular salt.\n2.  **Cook the Base:** Bring the mixture to a gentle simmer over medium heat. Reduce heat to low and let it cook for 10-15 minutes, stirring occasionally, until the jaggery is completely melted and the sauce has thickened slightly. It will continue to thicken as it cools.\n3.  **Adjust Consistency & Taste:** Remove from heat. Check the consistency\u2014it should be like a thin syrup or maple syrup. If it's too thick, add hot water a tablespoon at a time. Taste and adjust: add more sugar for sweetness, a pinch of salt for balance, or more chili for heat.\n4.  **(Optional) Prepare the Tempering:** In a small pan, heat 1 tsp of oil over medium heat. Add the mustard seeds. Once they begin to pop (30 seconds), add the dried red chili and curry leaves. Swirl for 5-10 seconds until fragrant, then immediately pour this hot oil and spices into the tamarind sauce. Be careful, as it may splutter.\n5.  **Strain & Cool:** For a perfectly smooth sauce, strain it through a fine-mesh sieve into a bowl, pressing with a spoon to extract all the liquid. Discard the solids (cumin seeds, etc.). If you don't mind the texture, you can skip straining.\n6.  **Store:** Let the sauce cool completely. Transfer to a clean glass jar or bottle. It will keep in the refrigerator for up to 3-4 weeks.\n\n### **Key Flavor Variations:**\n\n*   **For a Savory Dipping Sauce (for spring rolls, grilled chicken/fish):** Reduce sugar to 2-3 tablespoons. Add 1 minced garlic clove and 1 tablespoon of soy sauce or fish sauce while simmering.\n*   **For a Mexican-Inspired \"Aglocot\" Style:** Add 1-2 chipotle peppers in adobo sauce (minced) while simmering. Use piloncillo for sweetener. Great for tacos.\n*   **For a Thai-Style Pad Thai Sauce:** Add 2-3 tbsp of fish sauce (or soy sauce for vegan) and 2 tbsp of palm sugar while simmering. The result will be more savory and less sweet than the classic Indian version.\n\n### **Important Tips:**\n\n*   **Tamarind Paste Quality:** The flavor and concentration of tamarind paste can vary by brand. Start with the recipe amount and adjust water and sugar as needed.\n*   **Black Salt (Kala Namak):** This pinkish-grey salt has a distinctive sulfuric, eggy aroma that is crucial for the authentic tangy flavor of Indian chaat. It's available in Indian grocery stores or online.\n*   **Balancing Act:** The magic of this sauce is in the balance of **sweet, sour, and salty**. Always adjust at the end to suit your palate.\n\nEnjoy your homemade tamarind sauce",
+    "description": "AI-generated from query: recipe for tamarind sauce using tamarind paste ",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "recipe for tamarind sauce using tamarind paste ",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-05T03:59:04.097Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-05T03:59:04.109063",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-05T03:59:04.109063"
+  },
+  {
+    "id": "cooking_475ec3ce",
+    "pattern_id": "cooking_475ec3ce",
+    "name": "Recipe for French Canadian pork hocks in white sauce",
+    "domain": "cooking",
+    "problem": "Recipe for French Canadian pork hocks in white sauce",
+    "solution": "Of course! This is a classic, hearty Qu\u00e9b\u00e9cois dish known as **\"Rago\u00fbt de Pattes de Cochon\"** or sometimes \"Pieds de Cochon en Sauce Blanche.\" It's a traditional comfort food, often served during the holidays or at *cabanes \u00e0 sucre* (sugar shacks).\n\nHere is a traditional recipe using LLM knowledge of French-Canadian cuisine.\n\n### **Rago\u00fbt de Pattes de Cochon (French-Canadian Pork Hocks in White Sauce)**\n\n**Ingredients:**\n\n*   **4-6 meaty pork hocks (fresh or smoked)**, about 3-4 lbs total. Smoked hocks will give a deeper, ham-like flavor.\n*   **1 large onion**, chopped\n*   **2 stalks celery**, chopped\n*   **2 cloves garlic**, minced\n*   **2 bay leaves**\n*   **6-8 whole peppercorns**\n*   **1 tsp dried thyme** (or 2-3 sprigs fresh)\n*   **Water** to cover\n*   **Salt** (be cautious if using smoked hocks)\n\n**For the White Sauce (Roux):**\n*   **1/4 cup pork fat or butter** (using the rendered fat from the broth is traditional)\n*   **1/4 cup all-purpose flour**\n*   **2-3 cups of the reserved pork cooking broth**, strained\n*   **Salt and black pepper** to taste\n*   **Pinch of ground cloves or allspice** (optional, traditional spice)\n*   **1-2 tbsp vinegar or a splash of white wine** (for brightness, optional)\n\n**For Serving (Traditional Accompaniments):**\n*   Boiled potatoes\n*   Pickled beets (*betteraves marin\u00e9es*)\n*   Fresh, crusty bread or *pain maison*\n\n---\n\n### **Instructions**\n\n#### **Part 1: Cooking the Pork Hocks**\n1.  **Prepare:** If the pork hocks have skin, you can score it lightly. Rinse them under cold water.\n2.  **Blanch (Optional but Recommended):** Place hocks in a large pot, cover with cold water, and bring to a boil. Let boil for 5-10 minutes, then drain and rinse. This removes impurities for a clearer broth.\n3.  **Simmer:** Return the hocks to the clean pot. Add the chopped onion, celery, garlic, bay leaves, peppercorns, and thyme. Cover with fresh cold water by about 2 inches.\n4.  **Cook:** Bring to a boil, then reduce heat to a very low simmer. Cover and cook for **2.5 to 3.5 hours**, or until the meat is extremely tender and falling off the bone. Skim off any foam or fat that rises to the top during the first hour.\n5.  **Reserve:** Once cooked, carefully remove the hocks and set them aside to cool slightly. **Strain and reserve the cooking broth.** You will need 2-3 cups for the sauce. Discard the vegetables and spices.\n6.  **Meat Prep:** When the hocks are cool enough to handle, remove the meat, discarding the bones, skin, and excess fat. You can shred the meat into bite-sized pieces. Set aside.\n\n#### **Part 2: Making the White Sauce (Roux Li\u00e9)**\n1.  **Make the Roux:** In a heavy-bottomed saucepan or Dutch oven, heat the pork fat or butter over medium heat. Add the flour and whisk constantly for **3-5 minutes** until it forms a smooth, pale blond paste (*roux blond*). Do not let it brown.\n2.  **Add Broth:** Gradually whisk in 2 cups of the reserved hot pork broth. Whisk vigorously to avoid lumps.\n3.  **Thicken:** Bring the sauce to a simmer, whisking frequently. It will thicken to a creamy, gravy-like consistency. If it's too thick, add more broth. If too thin, simmer a bit longer.\n4.  **Season:** Add salt and pepper carefully (remember the smoked hocks are salty). Add the optional pinch of ground cloves for authenticity.\n5.  **Combine:** Add the shredded pork meat to the white sauce. Stir gently and heat through for 10-15 minutes on low to let the flavors meld. For a tangy balance, stir in a tablespoon of vinegar or a splash of white wine at the end.\n\n#### **Part 3: Serving**\nServe the rago\u00fbt hot over boiled potatoes, with a side of vibrant pickled beets and plenty of bread to mop up the delicious sauce.\n\n### **Key Tips for Authenticity:**\n*   **The Fat:** Using the rendered, skimmed fat from the top of the cooled broth for the roux is the traditional method and adds incredible flavor.\n*   **Texture:** The goal is a rich, creamy, clinging sauce\u2014not a thin soup nor a pasty gravy. Adjust with broth accordingly.\n*   **The Spice:** The hint of cloves or allspice is a very old-fashioned touch common in Quebec meat pies and stews.\n*   **Time:** The long, slow simmer is non-negotiable for tender meat and a flavorful broth.\n\nEnjoy this taste of French-Canadian culinary heritage",
+    "description": "AI-generated from query: Recipe for French Canadian pork hocks in white sauce",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Recipe for French Canadian pork hocks in white sauce",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-06T18:59:57.812Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-06T18:59:57.818919",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-06T18:59:57.818919"
   }
 ]

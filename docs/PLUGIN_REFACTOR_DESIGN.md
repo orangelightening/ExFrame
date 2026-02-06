@@ -1,7 +1,11 @@
 # Plugin Refactor Design Document
-## Making Plugins Modular, Configurable, and Understandable
+## State Machine Architecture: Rock-Solid Query Processing
 
-**Status**: Design Draft
+> **⚠️ STATUS: DRAFT - NOT YET IMPLEMENTED**
+>
+> This is a design document for a future state machine refactor. The current system uses the plugin architecture documented in PLUGIN_ARCHITECTURE.md. This refactor has many open questions and is not scheduled for immediate implementation.
+
+**Status**: Design Draft v2
 **Created**: 2026-02-02
 **Author**: Claude (with user input)
 **Target**: 4 releases over 4-6 weeks
@@ -10,229 +14,401 @@
 
 ## Executive Summary
 
-**Problem**: Current plugin system has become unmanageable. LLMEnricher is 700+ lines of conditional logic. Domain types are strings, not behaviors. Configuration is scattered across multiple files.
+**Problem**: Current plugin system has become unmanageable. LLMEnricher is 700+ lines of conditional logic. Domain types are strings, not behaviors. Configuration is scattered across multiple files. Query flow is implicit and hard to debug.
 
-**Solution**: Strategy Pattern + Configurable Behaviors. Plugins become behaviorless shells. All "personality" comes from domain config.
+**Solution**: **State Machine Architecture**. The entire query processing system is built as a proper state machine with nodes, edges, and triggers. Every transition is logged, verified, and 100% reliable.
 
-**Key Principle**: **Plugins should be LEGO bricks, not Swiss Army knives.**
+**Key Principle**: **The State Machine is the source of truth. All logging, debugging, and monitoring flows from it.**
 
----
-
-## Current Problems (The "Why")
-
-### 1. God Objects
-```
-LLMEnricher: 700+ lines
-├── _generate_llm_response()      # 200 lines
-├── _build_enhancement_prompt()    # 100 lines
-├── _build_document_context_prompt() # 120 lines
-├── _build_web_search_prompt()     # 90 lines
-├── _build_direct_prompt()         # 50 lines
-├── _call_llm()                    # 100 lines
-└── ... scope checking, type detection, etc.
-```
-
-**Problem**: Every domain type requirement adds more `if` statements.
-
-### 2. Hardcoded Personalities
-```python
-# In LLMEnricher._build_document_context_prompt():
-scope_boundaries = """
-**SCOPE BOUNDARIES:**
-You are an ExFrame expert. Answer ONLY about:
-- ExFrame architecture and design
-...
-If a question is clearly outside ExFrame's scope...
-"""
-```
-
-**Problem**: Cooking domain gets ExFrame's scope boundaries because code path detects Type 3.
-
-### 3. Brittle Type Detection
-```python
-is_type3_domain = (
-    specialist_id == "exframe_specialist" or
-    "combined_results" in response_data or  # BUG!
-    response_data.get("search_strategy") == "research_primary"
-)
-```
-
-**Problem**: Type detection via response_data keys is fragile.
-
-### 4. Multiple Sources of Truth
-```
-universe.yaml → config_override
-  ↓
-domain.json (multiple locations)
-  ↓
-data/domains.json (registry, cached)
-  ↓
-in-memory Domain objects
-```
-
-**Problem**: Which config wins? Nobody knows.
+**Core Requirements**:
+- **Rock Solid**: State transitions must be deterministic and verifiable
+- **Observable**: Every state change is logged with context
+- **Debuggable**: State machine trace directly maps to logs
+- **Testable**: Every transition can be unit tested
 
 ---
 
-## Proposed Architecture
-
-### The Big Picture
+## Core Architecture: State Machine First
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     NEW ARCHITECTURE                          │
+│                  QUERY PROCESSING STATE MACHINE                │
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
-│  Domain Config (domain.json)                                 │
-│  ┌─────────────────────────────────────────────────────┐     │
-│  │ {                                                  │     │
-│  │   "domain_type": "4",                               │     │
-│  │   "specialist": "researcher",                       │     │
-│  │   "behaviors": {                                    │     │
-│  │     "scope": { "type": "none" },                    │     │
-│  │     "llm": {                                         │     │
-│  │       "mode": "replace",                             │     │
-│  │       "personality": "professional_chef",            │     │
-│  │       "prompts": { "type": "web_search" }           │     │
-│  │     },                                               │     │
-│  │     "web_search": { "type": "type4" }               │     │
-│  │   }                                                 │     │
-│  │ }                                                  │     │
-│  └─────────────────────────────────────────────────────┘     │
-│           │                                                     │
-│           ▼                                                     │
-│  ┌─────────────────────────────────────────────────────┐     │
-│  │         DomainType (class, not string!)            │     │
-│  │         Type4AnalyticDomain                         │     │
-│  │                                                  │     │
-│  │   - process_query()                                 │     │
-│  │   - _search_local()                                 │     │
-│  │   - _search_web()                                   │     │
-│  │   - _is_local_sufficient()                          │     │
-│  └─────────────────────────────────────────────────────┘     │
-│           │                                                     │
-│           ▼                                                     │
-│  ┌─────────────────────────────────────────────────────┐     │
-│  │         Plugins (LEGO bricks, not Swiss Army knives)│     │
-│  │                                                  │     │
-│  │   LLMEnricher(config)                               │     │
-│  │     ├─→ scope_check: ScopeCheck (from config)       │     │
-│  │     ├─→ prompt_builder: PromptBuilder (from config) │     │
-│  │     └─→ web_strategy: WebSearchStrategy (from config)│     │
-│  │                                                  │     │
-│  │   CitationEnricher(config)                           │     │
-│  │   QualityEnricher(config)                             │     │
-│  └─────────────────────────────────────────────────────┘     │
+│   ┌─────────┐    ┌─────────┐    ┌─────────┐                │
+│   │ START   │───→│ ROUTING │───→│ EXECUTE │                │
+│   │         │    │         │    │         │                │
+│   │  Query  │    │ Select  │    │ Domain  │                │
+│   │ Received│    │ Specialist│    │ Type N  │                │
+│   └─────────┘    └─────────┘    └────┬────┘                │
+│                               │                          │
+│                    ┌─────────────┴─────────────┐            │
+│                    │     STATE TRANSITIONS      │            │
+│                    │  (Explicit, Verifiable)    │            │
+│                    │                            │            │
+│                    │  trigger: query_received     │            │
+│                    │  trigger: specialist_selected │            │
+│                    │  trigger: local_search_done   │            │
+│                    │  trigger: web_search_done    │            │
+│                    │  trigger: llm_complete       │            │
+│                    └────────────────────────────┘            │
+│                               │                          │
+│                    ┌─────────────┴─────────────┐            │
+│                    │   LOGGING & TRACING        │            │
+│                    │   (Automatic, Complete)     │            │
+│                    │                            │            │
+│                    │  - State entry/exit         │            │
+│                    │  - Transition context       │            │
+│                    │  - Duration                 │            │
+│                    │  - Data snapshots (optional) │            │
+│                    └────────────────────────────┘            │
 │                                                               │
-│  Single Responsibility: Each class does ONE thing            │
-│  Configuration: Behavior defined in config, not code         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Module Breakdown
-
-### 1. Domain Types (First-Class Classes)
+## State Machine: The Source of Truth
 
 ```python
-# domain_type.py
+# core/state_machine/query_sm.py
 
-from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from enum import Enum
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Callable
+from abc import ABC, abstractmethod
+
+
+class QueryState(Enum):
+    """All possible states in query processing"""
+
+    # Initial state
+    START = "start"
+
+    # Routing
+    ROUTING_SELECT_SPECIALIST = "routing_select_specialist"
+
+    # Domain Type states (each type has its own flow)
+    TYPE4_LOCAL_SEARCH = "type4_local_search"
+    TYPE4_REQUEST_WEB_SEARCH = "type4_request_web_search"
+    TYPE4_WEB_SEARCH = "type4_web_search"
+    TYPE4_LLM_SYNTHESIS = "type4_llm_synthesis"
+
+    TYPE3_DOCUMENT_SEARCH = "type3_document_search"
+    TYPE3_LLM_SYNTHESIS = "type3_llm_synthesis"
+
+    TYPE1_PATTERN_SEARCH = "type1_pattern_search"
+
+    # Common states
+    ENRICHERS_EXECUTE = "enrichers_execute"
+    COMPLETE = "complete"
+    ERROR = "error"
+
 
 @dataclass
-class QueryContext:
-    """Simple, explicit context - no hidden flags"""
-    query: str
-    web_search_confirmed: bool = False
-    show_thinking: bool = False
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
+class StateContext:
+    """Context data attached to state transitions"""
+    query_id: str
+    timestamp: datetime
+    state: QueryState
+    trigger: str
+    data: Dict[str, Any]  # Any data relevant to this state
 
-@dataclass
-class QueryResult:
-    """Simple, explicit result"""
-    answer: str
-    can_extend_with_web_search: bool = False
-    local_results: List['Pattern'] = None
-    web_results: List['WebResult'] = None
-    llm_used: bool = False
-    confidence: float = 0.0
-    metadata: Dict[str, Any] = None
-
-    def __post_init__(self):
-        if self.local_results is None:
-            self.local_results = []
-        if self.web_results is None:
-            self.web_results = []
-        if self.metadata is None:
-            self.metadata = {}
+    def to_dict(self) -> Dict:
+        return {
+            "query_id": self.query_id,
+            "timestamp": self.timestamp.isoformat(),
+            "state": self.state.value,
+            "trigger": self.trigger,
+            "data": self.data
+        }
 
 
-class DomainType(ABC):
-    """
-    Base class for all domain types.
+class StateTransition:
+    """A state transition with validation"""
 
-    Each domain type (1-5) is a class with its own query processing logic.
-    No more type strings, no more if-else chains.
-    """
-
-    domain_type_id: str
-    name: str
-    description: str
-
-    def __init__(self, config: Dict[str, Any], knowledge_base):
-        self.config = config
-        self.kb = knowledge_base
-
-        # Load plugins from config
-        self.plugins = self._load_plugins(config.get("plugins", []))
-
-    @abstractmethod
-    async def process_query(
+    def __init__(
         self,
-        query: str,
-        context: QueryContext
-    ) -> QueryResult:
-        """Process a query - single entry point for each domain type"""
-        pass
+        from_state: QueryState,
+        to_state: QueryState,
+        trigger: str,
+        validator: Callable[[], bool] = None
+    ):
+        self.from_state = from_state
+        self.to_state = to_state
+        self.trigger = trigger
+        self.validator = validator or (lambda: True)
 
-    def _load_plugins(self, plugin_configs: List[Dict]) -> List['Plugin']:
-        """Load plugins from config"""
-        plugins = []
-        for cfg in plugin_configs:
-            plugin = PluginFactory.create(cfg, self.kb)
-            plugins.append(plugin)
-        return plugins
+    def is_valid(self) -> bool:
+        """Check if transition is valid"""
+        return self.validator()
 
 
-class Type4AnalyticDomain(DomainType):
+class QueryStateMachine:
+    """
+    Rock-solid state machine for query processing.
+
+    Every transition is:
+    - Explicitly defined
+    - Logged with context
+    - Verifiable and testable
+    """
+
+    def __init__(self, domain_type: str, query: str, verbose: bool = False):
+        self.domain_type = domain_type
+        self.query = query
+        self.verbose = verbose
+
+        self.current_state = QueryState.START
+        self.query_id = self._generate_query_id()
+
+        # State transitions: (from_state, trigger) -> to_state
+        self.transitions = self._build_transitions()
+
+        # State log: all transitions in order
+        self.state_log: List[StateContext] = []
+
+        # Hooks for logging/monitoring (Release 4)
+        self.hooks: List[StateMachineHook] = []
+
+    def _generate_query_id(self) -> str:
+        """Generate unique query ID"""
+        import uuid
+        return f"q_{uuid.uuid4().hex[:12]}"
+
+    def _build_transitions(self) -> Dict[Tuple[QueryState, str], StateTransition]:
+        """
+        Build state transition graph.
+
+        Returns: {(from_state, trigger) -> StateTransition}
+        """
+        # Base transitions (all domain types)
+        transitions = {
+            (QueryState.START, "query_received"): StateTransition(
+                QueryState.START,
+                QueryState.ROUTING_SELECT_SPECIALIST,
+                "query_received"
+            ),
+
+            (QueryState.ROUTING_SELECT_SPECIALIST, "specialist_selected"): StateTransition(
+                QueryState.ROUTING_SELECT_SPECIALIST,
+                QueryState.ENRICHERS_EXECUTE,  # Go to enrichers first
+                "specialist_selected"
+            ),
+
+            (QueryState.ENRICHERS_EXECUTE, "enrichment_complete"): StateTransition(
+                QueryState.ENRICHERS_EXECUTE,
+                QueryState.COMPLETE,
+                "enrichment_complete"
+            ),
+        }
+
+        # Add domain-type specific transitions
+        if self.domain_type == "4":
+            transitions.update({
+                (QueryState.ENRICHERS_EXECUTE, "type4_local_search"): StateTransition(
+                    QueryState.ENRICHERS_EXECUTE,
+                    QueryState.TYPE4_LOCAL_SEARCH,
+                    "type4_local_search",
+                    validator=lambda: self._can_do_local_search()
+                ),
+
+                (QueryState.TYPE4_LOCAL_SEARCH, "search_complete"): StateTransition(
+                    QueryState.TYPE4_LOCAL_SEARCH,
+                    QueryState.TYPE4_REQUEST_WEB_SEARCH,
+                    "search_complete"
+                ),
+
+                (QueryState.TYPE4_REQUEST_WEB_SEARCH, "user_confirmed_web"): StateTransition(
+                    QueryState.TYPE4_REQUEST_WEB_SEARCH,
+                    QueryState.TYPE4_WEB_SEARCH,
+                    "user_confirmed_web"
+                ),
+
+                (QueryState.TYPE4_WEB_SEARCH, "search_complete"): StateTransition(
+                    QueryState.TYPE4_WEB_SEARCH,
+                    QueryState.TYPE4_LLM_SYNTHESIS,
+                    "search_complete"
+                ),
+
+                (QueryState.TYPE4_LLM_SYNTHESIS, "llm_complete"): StateTransition(
+                    QueryState.TYPE4_LLM_SYNTHESIS,
+                    QueryState.COMPLETE,
+                    "llm_complete"
+                ),
+            })
+
+        return transitions
+
+    def transition_to(self, to_state: QueryState, trigger: str, data: Dict = None) -> bool:
+        """
+        Transition to a new state.
+
+        Returns: True if transition succeeded, False otherwise
+        """
+        transition_key = (self.current_state, trigger)
+
+        if transition_key not in self.transitions:
+            self._log_error(f"Invalid transition: {self.current_state} --[{trigger}]--> {to_state}")
+            self.current_state = QueryState.ERROR
+            self._log_state(QueryState.ERROR, "invalid_transition", {"attempted_state": to_state.value})
+            return False
+
+        transition = self.transitions[transition_key]
+
+        if transition.to_state != to_state:
+            self._log_error(f"State mismatch: transition leads to {transition.to_state.value}, tried to go to {to_state.value}")
+            self.current_state = QueryState.ERROR
+            return False
+
+        if not transition.is_valid():
+            self._log_error(f"Transition validator failed: {self.current_state} --[{trigger}]--> {to_state}")
+            self.current_state = QueryState.ERROR
+            return False
+
+        # Execute transition
+        old_state = self.current_state
+        self.current_state = to_state
+        self._log_state(to_state, trigger, data or {})
+
+        # Call hooks (Release 4)
+        for hook in self.hooks:
+            hook.on_transition(old_state, to_state, trigger, data or {})
+
+        return True
+
+    def _log_state(self, state: QueryState, trigger: str, data: Dict):
+        """Log state entry"""
+        context = StateContext(
+            query_id=self.query_id,
+            timestamp=datetime.utcnow(),
+            state=state,
+            trigger=trigger,
+            data=data
+        )
+        self.state_log.append(context)
+
+        # Also log to file (for persistence)
+        self._persist_log(context)
+
+    def _log_error(self, message: str):
+        """Log error state"""
+        import logging
+        logger = logging.getLogger("state_machine")
+        logger.error(f"[{self.query_id}] {message}")
+
+    def _persist_log(self, context: StateContext):
+        """Persist state log to file"""
+        import json
+        import pathlib
+
+        log_dir = pathlib.Path("/app/logs/traces")
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        log_file = log_dir / "state_machine.jsonl"
+
+        with open(log_file, "a") as f:
+            f.write(json.dumps(context.to_dict()) + "\n")
+
+    # Domain-type specific validators
+    def _can_do_local_search(self) -> bool:
+        """Check if we can do local search"""
+        return True  # Always can try local search
+```
+
+---
+
+## Type 4 State Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      TYPE 4 STATE FLOW                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌────────┐   ┌──────────┐                                       │
+│  │  START  │──→│ ROUTING   │                                       │
+│  │         │   │          │──→ Select Domain Type Handler         │
+│  └────────┘   └────┬─────┘                                       │
+│                   │                                              │
+│                   ▼                                              │
+│        ┌──────────────────────┐                                   │
+│        │ TYPE4_LOCAL_SEARCH  │ ◄── Domain-specific state          │
+│        │                      │                                   │
+│        │ trigger: search_done │                                   │
+│        │ result: insufficient │                                   │
+│        └──────┬───────────────┘                                   │
+│                   │                                              │
+│                   ▼                                              │
+│        ┌──────────────────────┐                                   │
+│        │ TYPE4_REQUEST_WEB   │ (if local insufficient)            │
+│        │                      │                                   │
+│        │ trigger: user_confirm│                                   │
+│        └──────┬───────────────┘                                   │
+│                   │                                              │
+│                   ▼                                              │
+│        ┌──────────────────────┐                                   │
+│        │ TYPE4_WEB_SEARCH     │                                   │
+│        │                      │                                   │
+│        │ trigger: search_done │                                   │
+│        └──────┬───────────────┘                                   │
+│                   │                                              │
+│                   ▼                                              │
+│        ┌──────────────────────┐                                   │
+│        │ TYPE4_LLM_SYNTHESIS  │                                   │
+│        │                      │                                   │
+│        │ trigger: llm_done    │                                   │
+│        └──────┬───────────────┘                                   │
+│                   │                                              │
+│                   ▼                                              │
+│        ┌──────────────────────┐     ┌──────────────┐              │
+│        │ ENRICHERS_EXECUTE    │ ───►│  COMPLETE    │              │
+│        │ (optional enrichment)│     │              │              │
+│        └──────────────────────┘     └──────────────┘              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## How State Machine Maps to Logging
+
+Every state transition creates a log entry:
+
+```json
+{
+  "query_id": "q_ab8d60ebd367",
+  "timestamp": "2026-02-02T21:30:15.123456Z",
+  "state": "type4_local_search",
+  "trigger": "search_complete",
+  "data": {
+    "results_count": 10,
+    "max_relevance": 0.3,
+    "sufficient": false,
+    "reason": "low_relevance"
+  }
+}
+```
+
+The trace log becomes **the story of the query** - each entry is a chapter in order.
+
+---
+
+## Domain Types Are State Handlers
+
+```python
+# domain_types/type4_analytic.py
+
+class Type4AnalyticDomain:
     """
     Type 4: Analytical Engine
 
-    Characteristics:
-    - Web search required for quality answers
-    - Local patterns are fallback only
-    - Single specialist (ResearchSpecialist)
-    - Two-stage query (local → web extension)
+    Domain types ARE state handlers. They implement the
+    domain-type-specific state transitions and logic.
     """
 
     domain_type_id = "4"
-    name = "Analytical Engine"
+    name = "Analytic Engine"
     description = "Web search with local fallback"
-
-    def __init__(self, config: Dict, knowledge_base):
-        super().__init__(config, knowledge_base)
-
-        # Type 4 specific configuration
-        self.web_search_enabled = config.get("web_search", {}).get("enabled", True)
-        self.local_relevance_threshold = config.get("web_search", {}).get("local_relevance_threshold", 0.5)
-
-        # Load specialist
-        specialist_config = config.get("specialist", {})
-        self.specialist = SpecialistFactory.create("researcher", specialist_config, knowledge_base)
 
     async def process_query(
         self,
@@ -240,49 +416,128 @@ class Type4AnalyticDomain(DomainType):
         context: QueryContext
     ) -> QueryResult:
         """
-        Type 4 query flow:
-        1. Local search (fast)
-        2. Check if sufficient
-        3. If not sufficient and web not enabled → request extension
-        4. If web confirmed → web search + LLM synthesis
+        Entry point - all Type 4 queries flow through here.
+
+        This method runs the state machine for Type 4 queries.
         """
+        sm = QueryStateMachine("4", query, context.verbose)
+        sm.add_hook(StateMachineLoggerHook())
 
-        # Stage 1: Local search
+        # Initial state
+        sm.transition_to(QueryState.START, "query_received", {"query": query})
+
+        # Routing
+        specialist = self._select_specialist(query)
+        sm.transition_to(
+            QueryState.ROUTING_SELECT_SPECIALIST,
+            "specialist_selected",
+            {"specialist": specialist.specialist_id}
+        )
+
+        # Enrichers (prepare context)
+        enriched_context = await self._prepare_enrichers(query, context)
+        sm.transition_to(
+            QueryState.ENRICHERS_EXECUTE,
+            "enrichers_prepared",
+            {"context": enriched_context}
+        )
+
+        # Type 4 specific flow
+        if context.web_search_confirmed:
+            # User confirmed web search - go straight to web
+            return await self._web_search_flow(sm, query, context)
+        else:
+            # Standard Type 4 flow with local search first
+            return await self._standard_flow(sm, query, context)
+
+    async def _standard_flow(
+        self,
+        sm: QueryStateMachine,
+        query: str,
+        context: QueryContext
+    ) -> QueryResult:
+        """Standard Type 4 flow: local search → check → optionally web search"""
+
+        # Local search
+        sm.transition_to(
+            QueryState.TYPE4_LOCAL_SEARCH,
+            "local_search_start",
+            {"query": query}
+        )
+
         local_results = await self._search_local(query)
+        sm.transition_to(
+            QueryState.TYPE4_LOCAL_SEARCH,
+            "search_complete",
+            {
+                "results_count": len(local_results),
+                "max_relevance": self._max_relevance(local_results),
+                "sufficient": self._is_local_sufficient(local_results)
+            }
+        )
 
-        # Stage 2: Check sufficiency
-        if self._local_results_sufficient(local_results):
+        # Check if local results are sufficient
+        if self._is_local_sufficient(local_results):
             # Good local results - use them
-            answer = await self._form_answer_from_local(local_results, context)
-            return QueryResult(
-                answer=answer,
-                local_results=local_results,
-                confidence=self._calculate_confidence(local_results)
-            )
+            return await self._use_local_results(sm, local_results, context)
 
-        # Stage 3: Not sufficient
-        if not self.web_search_enabled:
-            # Can't search web - tell user
-            return QueryResult(
-                answer=self._form_fallback_message(query, local_results),
-                local_results=local_results,
-                can_extend_with_web_search=False,
-                confidence=0.3
-            )
+        # Not sufficient - request web search
+        sm.transition_to(
+            QueryState.TYPE4_REQUEST_WEB_SEARCH,
+            "local_insufficient",
+            {
+                "local_results_count": len(local_results),
+                "max_relevance": self._max_relevance(local_results),
+                "threshold": self.local_relevance_threshold
+            }
+        )
 
-        # Web search available
-        if not context.web_search_confirmed:
-            # Request web search
-            return QueryResult(
-                answer=self._form_extension_request(query, local_results),
-                local_results=local_results,
-                can_extend_with_web_search=True,
-                confidence=0.5
-            )
+        # Return result requesting web search
+        return QueryResult(
+            answer=self._form_web_search_request(query, local_results),
+            can_extend_with_web_search=True,
+            local_results=local_results,
+            confidence=self._calculate_confidence(local_results)
+        )
 
-        # Stage 4: Web search
+    async def _web_search_flow(
+        self,
+        sm: QueryStateMachine,
+        query: str,
+        context: QueryContext
+    ) -> QueryResult:
+        """Web search flow (when user confirms)"""
+
+        sm.transition_to(
+            QueryState.TYPE4_WEB_SEARCH,
+            "web_search_start",
+            {"query": query}
+        )
+
         web_results = await self._search_web(query)
-        answer = await self._form_answer_from_web(web_results, context)
+        sm.transition_to(
+            QueryState.TYPE4_WEB_SEARCH,
+            "search_complete",
+            {"results_count": len(web_results)}
+        )
+
+        # LLM synthesis
+        sm.transition_to(
+            QueryState.TYPE4_LLM_SYNTHESIS,
+            "llm_start",
+            {"web_results_count": len(web_results)}
+        )
+
+        answer = await self._synthesize_from_web(web_results, context)
+
+        sm.transition_to(
+            QueryState.TYPE4_LLM_SYNTHESIS,
+            "llm_complete",
+            {"answer_length": len(answer)}
+        )
+
+        # Go to common complete state
+        sm.transition_to(QueryState.COMPLETE, "query_complete")
 
         return QueryResult(
             answer=answer,
@@ -290,743 +545,409 @@ class Type4AnalyticDomain(DomainType):
             llm_used=True,
             confidence=0.9
         )
-
-    async def _search_local(self, query: str) -> List['Pattern']:
-        """Search local knowledge base"""
-        return await self.kb.search(query, limit=10)
-
-    def _local_results_sufficient(self, results: List) -> bool:
-        """Type 4: High relevance required"""
-        if not results:
-            return False
-        max_relevance = max(
-            r.get('confidence', r.get('relevance', r.get('_semantic_score', 0)))
-            for r in results
-        )
-        return max_relevance >= self.local_relevance_threshold
-
-    async def _form_answer_from_local(self, results: List, context: QueryContext) -> str:
-        """Form answer from local patterns using plugins"""
-        response_data = {"query": context.query, "patterns": results}
-
-        for plugin in self.plugins:
-            response_data = await plugin.enrich(response_data, context)
-
-        return response_data.get("answer", "No answer formed")
-
-    def _form_extension_request(self, query: str, local_results: List) -> str:
-        """Tell user to enable web search"""
-        return f"I found {len(local_results)} local patterns, but they're not specific enough for '{query}'. Please click 'Extended Search (Internet)' for a proper answer."
-
-    async def _search_web(self, query: str) -> List['WebResult']:
-        """Search web using specialist"""
-        return await self.specialist.search_web(query)
 ```
 
 ---
 
-### 2. Plugins (LEGO Bricks)
-
-```python
-# plugins/base.py
-
-from abc import ABC, abstractmethod
-from typing import Dict, Any
-
-class Plugin(ABC):
-    """Base plugin class"""
-
-    name: str = "Plugin"
-
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-
-    @abstractmethod
-    async def process(
-        self,
-        data: Dict[str, Any],
-        context: QueryContext
-    ) -> Dict[str, Any]:
-        """Process data - single responsibility"""
-        pass
-
-
-class PluginFactory:
-    """Create plugins from config"""
-
-    @staticmethod
-    def create(config: Dict, knowledge_base) -> Plugin:
-        module_path = config["module"]
-        class_name = config["class"]
-
-        # Dynamic import
-        import importlib
-        module = importlib.import_module(module_path)
-        plugin_class = getattr(module, class_name)
-
-        return plugin_class(config.get("config", {}))
-```
-
----
-
-### 3. LLM Enricher (Refactored)
+## Plugins Are Now Simple State Handlers
 
 ```python
 # plugins/enrichers/llm_enricher.py
 
 class LLMEnricher(Plugin):
     """
-    Configurable LLM enricher.
-
-    Behavior comes from config, not hardcoded logic.
+    LLM Enricher - now a simple state handler, not a god object.
     """
 
     name = "LLM Enricher"
 
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-
-        # Load behaviors from config
-        self.mode = config.get("mode", "enhance")
-
-        # Scope checking - STRATEGY PATTERN
-        self.scope_check = ScopeCheckFactory.create(
-            config.get("scope", {"type": "none"})
-        )
-
-        # Prompt building - STRATEGY PATTERN
-        self.prompt_builder = PromptBuilderFactory.create(
-            config.get("prompts", {"type": "general"})
-        )
-
-        # Web search behavior - STRATEGY PATTERN
-        self.web_strategy = WebSearchStrategyFactory.create(
-            config.get("web_search", {"type": "disabled"})
-        )
-
-        # LLM client
-        self.llm = LLMClient(config.get("llm", {}))
-
     async def process(
         self,
         data: Dict[str, Any],
-        context: QueryContext
+        context: QueryContext,
+        state_machine: QueryStateMachine
     ) -> Dict[str, Any]:
-        """Enrich using configured strategies"""
+        """
+        Process LLM enrichment as a state transition.
 
+        The state machine has already determined:
+        - We need LLM processing
+        - Which prompt builder to use
+        - We just need to execute it
+        """
+        # Load strategies from config
+        self.scope_check = ScopeCheckFactory.create(
+            self.config.get("scope", {"type": "none"})
+        )
+
+        self.prompt_builder = PromptBuilderFactory.create(
+            self.config.get("prompts", {"type": "general"})
+        )
+
+        # Check scope (if configured)
         query = data.get("query", "")
         patterns = data.get("patterns", [])
 
-        # 1. Check scope (if configured)
-        in_scope, scope_reason = self.scope_check.is_in_scope(
-            query,
-            patterns,
-            context
+        in_scope, reason = self.scope_check.is_in_scope(query, patterns, context)
+
+        state_machine.transition_to(
+            QueryState.LLM_PROCESSING,
+            "llm_scope_check",
+            {"in_scope": in_scope, "reason": reason}
         )
 
         if not in_scope:
-            return {
-                "out_of_scope": True,
-                "reason": scope_reason,
-                "answer": scope_reason
-            }
+            return {"out_of_scope": True, "reason": reason}
 
-        # 2. Select prompt builder based on context
-        prompt_builder = self.web_strategy.select_prompt_builder(
-            data,
-            context
+        # Build prompt
+        prompt = self.prompt_builder.build(data, context)
+
+        state_machine.transition_to(
+            QueryState.LLM_PROCESSING,
+            "llm_prompt_built",
+            {"prompt_length": len(prompt)}
         )
 
-        # 3. Build prompt
-        prompt = prompt_builder.build(data, context)
+        # Call LLM
+        answer = await self.llm.complete(prompt, context.show_thinking)
 
-        # 4. Call LLM
-        answer = await self.llm.complete(
-            prompt,
-            show_thinking=context.show_thinking
+        state_machine.transition_to(
+            QueryState.LLM_PROCESSING,
+            "llm_complete",
+            {"answer_length": len(answer)}
         )
 
-        return {
-            "answer": answer,
-            "llm_used": True
-        }
+        return {"answer": answer, "llm_used": True}
 ```
 
 ---
 
-### 4. Strategies (Configurable Behaviors)
+## Single Source of Truth: Domain Config
 
-```python
-# plugins/strategies/scope_check.py
-
-class ScopeCheck(ABC):
-    """Base class for scope checking strategies"""
-
-    @abstractmethod
-    def is_in_scope(
-        self,
-        query: str,
-        patterns: List,
-        context: QueryContext
-    ) -> tuple[bool, str]:
-        """
-        Returns (is_in_scope, reason_if_not)
-        """
-        pass
-
-
-class NoOpScopeCheck(ScopeCheck):
-    """No scope checking - always in scope"""
-
-    def is_in_scope(self, query, patterns, context):
-        return True, ""
-
-
-class TopicScopeCheck(ScopeCheck):
-    """Check if query matches allowed topics"""
-
-    def __init__(self, config: Dict):
-        self.allowed_topics = set(config.get("allowed_topics", []))
-        self.out_of_scope_message = config.get(
-            "out_of_scope_message",
-            "I can only answer questions about specific topics."
-        )
-
-    def is_in_scope(self, query, patterns, context):
-        query_lower = query.lower()
-
-        # Check if any allowed topic is mentioned
-        for topic in self.allowed_topics:
-            if topic.lower() in query_lower:
-                return True, ""
-
-        return False, self.out_of_scope_message
-
-
-class RelevanceScopeCheck(ScopeCheck):
-    """Check if patterns meet relevance threshold"""
-
-    def __init__(self, config: Dict):
-        self.min_relevance = config.get("min_relevance", 0.3)
-        self.no_match_message = config.get(
-            "no_match_message",
-            "I couldn't find relevant information."
-        )
-
-    def is_in_scope(self, query, patterns, context):
-        if not patterns:
-            return False, self.no_match_message
-
-        max_relevance = max(
-            p.get('confidence', p.get('relevance', 0))
-            for p in patterns[:20]
-        )
-
-        if max_relevance < self.min_relevance:
-            return False, self.no_match_message
-
-        return True, ""
-
-
-class ScopeCheckFactory:
-    """Create scope check from config"""
-
-    @staticmethod
-    def create(config: Dict) -> ScopeCheck:
-        check_type = config.get("type", "none")
-
-        strategies = {
-            "none": NoOpScopeCheck,
-            "topics": TopicScopeCheck,
-            "relevance": RelevanceScopeCheck,
-        }
-
-        strategy_class = strategies.get(check_type, NoOpScopeCheck)
-        return strategy_class(config)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   SINGLE SOURCE OF TRUTH                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Domain Config (domain.json)                                │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │ {                                                  │     │
+│  │   "domain_type": "4",  ←───┐                          │     │
+│  │   "state_machine": "Type4AnalyticDomain",  ───────→ Class   │     │
+│  │   "plugins": [...]                                  │     │
+│  │ }                                                  │     │
+│  └─────────────────────────────────────────────────────┘     │
+│           │                                                     │
+│           │    One domain.json per domain                     │
+│           │    One DomainType class per domain type             │
+│           │    State machine flow defined in class            │
+│           │    Plugins configured in one place                │
+│                                                           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
+No more:
+- Multiple config files
+- Config override chains
+- Domain registry caching
+- Implicit type detection
+
+---
+
+## Testing: Verify State Machine Integrity
+
 ```python
-# plugins/strategies/prompt_builder.py
+# tests/test_state_machine.py
 
-class PromptBuilder(ABC):
-    """Base class for prompt building strategies"""
+class TestType4StateMachine:
+    """Verify Type 4 state machine is rock solid"""
 
-    @abstractmethod
-    def build(
-        self,
-        data: Dict[str, Any],
-        context: QueryContext
-    ) -> str:
-        pass
+    def test_all_transitions_defined(self):
+        """Every transition must be explicitly defined"""
+        sm = QueryStateMachine("4", "test query")
 
+        # Get all defined transitions
+        defined_states = set(s.value for s in QueryState)
+        defined_transitions = sm.transitions.keys()
 
-class WebSearchPromptBuilder(PromptBuilder):
-    """Build prompts for web search results"""
+        # Verify all possible transitions are valid
+        for from_state, trigger in defined_transitions:
+            assert (from_state.value, trigger) in sm.transitions
 
-    def __init__(self, config: Dict):
-        self.system_message = config.get(
-            "system_message",
-            "You are a helpful AI assistant."
-        )
+    def test_invalid_transition_fails(self):
+        """Invalid transitions must fail gracefully"""
+        sm = QueryStateMachine("4", "test query")
 
-    def build(self, data, context):
-        query = data.get("query", "")
-        web_results = data.get("web_results", [])
+        # Try to jump to COMPLETE directly from START
+        result = sm.transition_to(QueryState.COMPLETE, "skip_all")
+        assert result == False
+        assert sm.current_state == QueryState.ERROR
 
-        # Format web results as context
-        context_text = self._format_web_results(web_results)
+    def test_state_log_completeness(self):
+        """Every transition must be logged"""
+        sm = QueryStateMachine("4", "test query")
 
-        return f"""{self.system_message}
+        sm.transition_to(QueryState.START, "query_received")
+        sm.transition_to(QueryState.ROUTING_SELECT_SPECIALIST, "specialist_selected")
 
-A user asked: "{query}"
+        # Verify log has entries
+        assert len(sm.state_log) == 2
 
-Here are the relevant web search results:
+        # Verify log structure
+        for entry in sm.state_log:
+            assert "query_id" in entry
+            assert "timestamp" in entry
+            assert "state" in entry
+            assert "trigger" in entry
 
-{context_text}
+    def test_state_machine_trace_matches_logs(self):
+        """Trace output should match state machine log"""
+        # Run a query
+        result = await domain.process_query("test query")
 
-Please provide a comprehensive answer based on these results. Include specific details and cite sources when appropriate."""
+        # Get trace
+        trace = result.get("state_machine", {})
+        events = trace.get("events", [])
 
-
-class WebSearchRequestPromptBuilder(PromptBuilder):
-    """Build prompts that request web search instead of hallucinating"""
-
-    def __init__(self, config: Dict):
-        self.domain_name = config.get("domain_name", "this domain")
-
-    def build(self, data, context):
-        query = data.get("query", "")
-        local_count = len(data.get("local_results", []))
-
-        return f"""You are a helpful AI assistant for {self.domain_name}.
-
-A user asked: "{query}"
-
-I found {local_count} local patterns, but they don't contain the specific information needed to answer this question.
-
-**IMPORTANT:**
-- Do NOT make up, hallucinate, or guess an answer
-- Tell the user you need to search the web
-- Ask them to click "Extended Search (Internet)"
-
-Your response:"""
-
-
-class PromptBuilderFactory:
-    """Create prompt builder from config"""
-
-    @staticmethod
-    def create(config: Dict) -> PromptBuilder:
-        builder_type = config.get("type", "general")
-
-        strategies = {
-            "web_search": WebSearchPromptBuilder,
-            "web_search_request": WebSearchRequestPromptBuilder,
-            "general": GeneralPromptBuilder,
-        }
-
-        strategy_class = strategies.get(builder_type, GeneralPromptBuilder)
-        return strategy_class(config)
+        # Verify each trace event has corresponding state log entry
+        # This ensures trace is 1:1 with actual execution
+        assert len(events) == len(sm.state_log)
 ```
 
 ---
 
-### 5. Web Search Strategies
+## 100% Reliability Guarantees
+
+### 1. No Implicit Transitions
 
 ```python
-# plugins/strategies/web_search.py
+# WRONG: Implicit state change
+if web_search_confirmed:
+    # State changes implicitly - BAD
+    await do_web_search()
 
-class WebSearchStrategy(ABC):
-    """Base class for web search behavior"""
-
-    @abstractmethod
-    def select_prompt_builder(
-        self,
-        data: Dict,
-        context: QueryContext
-    ) -> PromptBuilder:
-        pass
-
-
-class Type4WebSearchStrategy(WebSearchStrategy):
-    """Type 4 web search: prioritize web, fallback to local"""
-
-    def __init__(self, config: Dict):
-        self.require_relevance = config.get("require_relevance", 0.5)
-
-    def select_prompt_builder(self, data, context):
-        # Has web search results?
-        web_results = data.get("web_results", [])
-        if web_results:
-            return WebSearchPromptBuilder({})  # Use web results
-
-        # Check local relevance
-        patterns = data.get("patterns", [])
-        if self._local_relevance_sufficient(patterns):
-            return LocalPatternPromptBuilder({})  # Use local
-
-        # Need web search
-        return WebSearchRequestPromptBuilder({
-            "domain_name": context.domain_id
-        })
-
-    def _local_relevance_sufficient(self, patterns):
-        if not patterns:
-            return False
-        max_rel = max(p.get('confidence', 0) for p in patterns)
-        return max_rel >= self.require_relevance
-
-
-class WebSearchStrategyFactory:
-    """Create web search strategy from config"""
-
-    @staticmethod
-    def create(config: Dict) -> WebSearchStrategy:
-        strategy_type = config.get("type", "disabled")
-
-        strategies = {
-            "type4": Type4WebSearchStrategy,
-            "disabled": NoWebSearchStrategy,
-        }
-
-        strategy_class = strategies.get(strategy_type, NoWebSearchStrategy)
-        return strategy_class(config)
+# RIGHT: Explicit state transition
+if web_search_confirmed:
+    sm.transition_to(QueryState.TYPE4_WEB_SEARCH, "user_confirmed")
+    await do_web_search()
 ```
 
----
+### 2. No Silent Failures
 
-## Configuration Design
+Every transition either:
+- Succeeds and logs
+- Fails, logs error, transitions to ERROR state
 
-### Domain Config (Single Source of Truth)
+### 3. Verifiable State
 
-```json
+```bash
+# Check state machine health
+curl http://localhost:3000/api/state-machine/health
+
+# Returns:
 {
-  "domain_id": "cooking",
-  "domain_type": "4",
-  "name": "Cooking & Recipes",
-  "description": "Culinary knowledge with web search",
-
-  "specialist": {
-    "plugin_id": "researcher",
-    "module": "plugins.research.research_specialist",
-    "class": "ResearchSpecialistPlugin",
-    "config": {
-      "enable_web_search": true
-    }
-  },
-
-  "behaviors": {
-    "scope": {
-      "type": "none"
-    },
-    "web_search": {
-      "enabled": true,
-      "type": "type4",
-      "local_relevance_threshold": 0.5
-    }
-  },
-
-  "plugins": [
-    {
-      "module": "plugins.enrichers.llm_enricher",
-      "class": "LLMEnricher",
-      "enabled": true,
-      "config": {
-        "mode": "replace",
-        "scope": {"type": "none"},
-        "prompts": {
-          "type": "web_search",
-          "system_message": "You are a professional chef. Provide detailed, accurate recipes with measurements, temperatures, and timing."
-        },
-        "web_search": {
-          "type": "type4",
-          "require_relevance": 0.5
-        },
-        "llm": {
-          "model": "deepseek-chat",
-          "temperature": 0.6
-        }
-      }
-    },
-    {
-      "module": "plugins.enrichers.citation_enricher",
-      "class": "CitationEnricher",
-      "enabled": true,
-      "config": {
-        "style": "recipe",
-        "include_sources": true
-      }
-    }
-  ]
+  "status": "healthy",
+  "query_id": "q_abc123",
+  "state": "type4_local_search",
+  "last_transition": "search_complete",
+  "transition_count": 5,
+  "error_count": 0
 }
 ```
 
-### ExFrame Config (Different Behaviors, Same Plugin)
-
-```json
-{
-  "domain_id": "exframe",
-  "domain_type": "3",
-
-  "behaviors": {
-    "scope": {
-      "type": "topics",
-      "allowed_topics": ["exframe", "plugin", "architecture", "configuration"],
-      "out_of_scope_message": "I can only answer questions about ExFrame's architecture, configuration, plugin system, and usage."
-    },
-    "web_search": {
-      "enabled": false
-    }
-  },
-
-  "plugins": [
-    {
-      "module": "plugins.enrichers.llm_enricher",
-      "class": "LLMEnricher",
-      "config": {
-        "mode": "enhance",
-        "scope": {"type": "topics"},
-        "prompts": {
-          "type": "document_context",
-          "system_message": "You are an ExFrame expert..."
-        }
-      }
-    }
-  ]
-}
-```
-
----
-
-## Traceability Design
-
-### Goal: "Tick like a Swiss watch"
-
-Every operation should be observable through the trace system.
-
-### Trace Points
+### 4. Recovery from Errors
 
 ```python
-# core/tracer.py
-
-class Tracer:
-    """Centralized tracing for all operations"""
-
-    def __init__(self):
-        self.hooks = []
-
-    def add_hook(self, hook: TraceHook):
-        """Add a hook for tracing (future: Release 4)"""
-        self.hooks.append(hook)
-
-    def trace_operation(
-        self,
-        component: str,
-        operation: str,
-        data: Dict
-    ):
-        """Trace an operation"""
-        trace_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "component": component,
-            "operation": operation,
-            "data": data
-        }
-
-        # Log to state machine
-        self._log_to_state_machine(trace_entry)
-
-        # Log to query trace
-        self._log_to_query_trace(trace_entry)
-
-        # Call hooks (future)
-        for hook in self.hooks:
-            hook.on_trace(trace_entry)
-
-
-# Usage throughout codebase:
-
-class Type4AnalyticDomain:
-    async def process_query(self, query, context):
-        tracer.trace_operation(
-            component="Type4AnalyticDomain",
-            operation="process_query_start",
-            data={"query": query, "context": context.as_dict()}
-        )
-
-        local_results = await self._search_local(query)
-
-        tracer.trace_operation(
-            component="Type4AnalyticDomain",
-            operation="local_search_complete",
-            data={"results_count": len(local_results), "max_relevance": ...}
-        )
-
-        # ... etc
-```
-
-### Trace Output (Human Readable)
-
-```
-[TRACE] Type4AnalyticDomain.process_query_start
-  query: "recipe for raisin tart"
-
-[TRACE] Type4AnalyticDomain.local_search_complete
-  results: 10
-  max_relevance: 0.3
-  sufficient: false
-
-[TRACE] Type4AnalyticDomain.forming_extension_request
-  reason: "Low relevance local patterns"
-
-[TRACE] LLMEnricher.process
-  prompt_builder: "WebSearchRequestPromptBuilder"
-  scope_check: "NoOpScopeCheck"
-
-[TRACE] LLMEnricher.llm_call_start
-  model: deepseek-chat
-
-[TRACE] LLMEnricher.llm_call_complete
-  duration_ms: 1523
-
-[TRACE] Type4AnalyticDomain.process_query_complete
-  can_extend_with_web_search: true
+if not sm.transition_to(...):
+    # Transition failed - we're in ERROR state
+    # Can attempt recovery:
+    sm.transition_to(QueryState.COMPLETE, "error_recovery")
 ```
 
 ---
 
 ## Implementation Schedule
 
-### Release 1: Foundation (Week 1)
-**Goal**: Establish new architecture without breaking existing code
+### Release 1: State Machine Foundation (Week 1)
+**Goal**: Implement core state machine with Type 4 flow
 
 **Tasks**:
-1. Create `domain_type.py` with base classes
-   - `DomainType` (ABC)
-   - `QueryContext`, `QueryResult`
-2. Create `Type4AnalyticDomain` class
-3. Create `Plugin` base class and `PluginFactory`
-4. Add `tracer.py` with basic trace points
-5. Run in parallel with existing code (no migration yet)
+1. Create `core/state_machine/query_sm.py`
+2. Define `QueryState`, `QueryStateMachine`
+3. Implement `Type4AnalyticDomain` with state machine
+4. Add state machine logging to `/app/logs/traces/state_machine.jsonl`
+5. Create state machine health endpoint
 
-**Deliverable**: New code files, no breaking changes
+**Deliverable**: Type 4 queries run through state machine
 
 ---
 
-### Release 2: Plugin Refactor (Week 2)
-**Goal**: Refactor LLMEnricher to use strategies
+### Release 2: Migrate to State Machine (Week 2)
+**Goal**: All domains use state machine for query processing
 
 **Tasks**:
-1. Create strategy classes:
-   - `ScopeCheck` + factory
-   - `PromptBuilder` + factory
-   - `WebSearchStrategy` + factory
-2. Rewrite `LLMEnricher` to use strategies
-3. Add config-based behavior selection
-4. Update cooking domain config for new format
-5. Test Type 4 with new LLMEnricher
+1. Implement `Type3DocumentDomain` with state machine
+2. Implement `Type1PatternDomain` with state machine
+3. Migrate cooking and exframe domains
+4. Remove old query processing code
+5. Update all domain configs
 
-**Deliverable**: Cooking domain using new LLMEnricher
+**Deliverable**: All queries go through state machine
 
 ---
 
-### Release 3: Domain Type Migration (Week 3)
-**Goal**: Migrate all domains to new domain type classes
+### Release 3: Plugin Refactor (Week 3)
+**Goal**: Plugins become simple state handlers
 
 **Tasks**:
-1. Create `Type3DocumentDomain`
-2. Create `Type1PatternDomain`
-3. Migrate exframe domain to Type 3
-4. Migrate other domains
-5. Remove old query processing code
+1. Refactor `LLMEnricher` to use strategies
+2. Implement strategy classes (ScopeCheck, PromptBuilder, etc.)
+3. Create `PluginFactory`
+4. Update domain configs for new plugin format
 
-**Deliverable**: All domains using new domain type classes
+**Deliverable**: Plugins are < 200 lines, configured by domain.json
 
 ---
 
-### Release 4: Polish & Tracing (Week 4)
-**Goal**: Complete traceability, remove technical debt
+### Release 4: Hooks & Monitoring (Week 4)
+**Goal**: Advanced tracing and monitoring
 
 **Tasks**:
-1. Add trace hooks throughout codebase
-2. Build trace viewer UI
-3. Remove old enricher code
-4. Update documentation
-5. Performance testing
+1. Implement `StateMachineHook` interface
+2. Create monitoring dashboard that reads state machine logs
+3. Add real-time state machine visualization
+4. Performance monitoring and alerting
 
-**Deliverable**: Complete system with full traceability
+**Deliverable**: Full observability into query processing
 
 ---
 
-## File Structure
+## Success Metrics
 
+### Reliability
+✓ Zero implicit state changes
+✓ All transitions logged
+✓ Invalid transitions fail gracefully
+✓ Error state is recoverable
+
+### Observability
+✓ Every query produces complete state trace
+✓ State trace maps 1:1 to logs
+✓ State machine health endpoint
+✓ Real-time state visualization
+
+### Maintainability
+✓ Each domain type is a self-contained state machine
+✓ State transitions are explicit and testable
+✓ No config override chains
+✓ Plugins are simple (<200 lines)
+
+---
+
+## Design Concerns & Open Questions
+
+### Concern 1: State Flow Order Inconsistency
+
+**Issue**: The Type 4 state flow diagram shows `ENRICHERS_EXECUTE → TYPE4_LOCAL_SEARCH`, but logically you should search first, THEN enrich.
+
+**Current Diagram** (incorrect):
 ```
-generic_framework/
-├── core/
-│   ├── domain_type.py              # NEW: Domain type base classes
-│   ├── tracer.py                    # NEW: Centralized tracing
-│   └── ...
-├── domain_types/                     # NEW: Domain type implementations
-│   ├── __init__.py
-│   ├── type1_pattern.py
-│   ├── type3_document.py
-│   └── type4_analytic.py
-├── plugins/
-│   ├── base.py                      # NEW: Plugin base class
-│   ├── strategies/                  # NEW: Strategy implementations
-│   │   ├── __init__.py
-│   │   ├── scope_check.py
-│   │   ├── prompt_builder.py
-│   │   └── web_search.py
-│   └── enrichers/
-│       ├── llm_enricher.py         # REFACTORED: Now uses strategies
-│       └── ...
-└── ...
+ROUTING → ENRICHERS_EXECUTE → TYPE4_LOCAL_SEARCH → ...
 ```
 
----
+**Should be**:
+```
+ROUTING → TYPE4_LOCAL_SEARCH → ENRICHERS_EXECUTE → COMPLETE
+```
 
-## Success Criteria
+**Question**: Should "enrichers" run before or after domain-specific processing?
 
-### Modularity
-✓ Each class has single responsibility
-✓ Plugins are < 200 lines
-✓ Strategies are < 100 lines
-✓ No cross-cutting concerns
+### Concern 2: Missing LLM_PROCESSING State
 
-### Configurability
-✓ Behavior defined in config, not code
-✓ Same plugin class serves different domains
-✓ No code changes needed for new behaviors
+**Issue**: The `QueryState` enum in the proposed design uses `LLM_PROCESSING` in the example LLMEnricher code, but this state is NOT defined in the `QueryState` enum.
 
-### Understandability
-✓ Clear class hierarchy
-✓ Obvious data flow
-✓ No "magic" type detection
+**Resolution Needed**: Either:
+- Add `LLM_PROCESSING` to the enum, OR
+- Use existing states (`ENRICHERS_EXECUTED`) for LLM calls
 
-### Traceability
-✓ Every operation logged
-✓ Human-readable trace output
-✓ Easy debugging
+### Concern 3: Contradiction Detection Scope
 
----
+**User Feedback**: "Contradiction detection only ok in a closed document system type 3"
 
-## Risk Mitigation
+**Current Implementation**: Contradiction detection is in `LLMEnricher._detect_and_log_contradictions()` which:
+- Only runs for Type 3 domains (document store search)
+- Analyzes documents post-response
+- Logs to `/app/logs/contradictions/`
 
-### Risk: Breaking Changes
-**Mitigation**: Run in parallel during Release 1-2
+**Design Question**: Should contradiction detection be:
+- A Type 3 domain type strategy (in `Type3DocumentStrategy`), OR
+- A separate enrichment plugin that can be configured per-domain?
 
-### Risk: Performance
-**Mitigation**: Benchmark new vs old code
+### Concern 4: Domain Type Strategy Loading
 
-### Risk: Configuration Complexity
-**Mitigation**: Provide config templates, validation
+**Question**: How do we determine which `DomainTypeStrategy` to load for LLMEnricher?
+
+**Options**:
+- **A**: From `domain.json` → `domain_type: "3"` (explicit, clean)
+- **B**: Auto-detect from `specialist_id` (current approach, fragile)
+- **C**: Pass through `EnrichmentContext.domain_type` (requires context population)
+
+**Recommendation**: Option A - explicitly configure strategy in domain config.
+
+### Concern 5: Show Thinking Logic Duplication
+
+**Issue**: The "show_thinking" reasoning section is duplicated across 5 different prompt builders in LLMEnricher.
+
+**Current Code** (repeated 5 times):
+```python
+if show_thinking:
+    reasoning_section = """**IMPORTANT - Show your reasoning process:**
+    Please show your step-by-step reasoning before giving the final answer:
+    1. First, explain what patterns are relevant...
+    [...]
+    - **Reasoning:** [Your step-by-step analysis]
+    - **Answer:** [Your final answer]
+    """
+else:
+    reasoning_section = ""
+```
+
+**Solution**: Create a `ThinkingMixin` or `ReasoningSectionBuilder` for reuse.
+
+### Concern 6: State Machine Ownership
+
+**Question**: Who should drive state transitions?
+
+**Options**:
+- **A**: LLMEnricher drives transitions (`sm.transition_to(...)`)
+- **B**: Domain type strategies handle transitions
+- **C**: Engine/Coordinator handles all transitions (recommended)
+
+**Current State Machine** (`state_machine.py`): The existing `QueryStateMachine` is already implemented and working. The proposed design should build on it, not replace it.
+
+### Concern 7: Backward Compatibility
+
+**Issue**: Existing `domain.json` files expect `LLMEnricher` with current behavior.
+
+**Migration Strategy Needed**:
+- How do we migrate existing domains?
+- Can we run both old and new implementations side-by-side during transition?
+- What's the rollback plan if the refactor breaks things?
+
+### Concern 8: Type State Naming
+
+**Issue**: The design shows `TYPE4_LOCAL_SEARCH`, `TYPE3_DOCUMENT_SEARCH`, etc. as states.
+
+**Question**: Are these states, or are they just implementation details of domain type strategies?
+
+**Alternative**: Keep states generic (`SPECIALIST_PROCESSING`), let domain strategies handle their internal flow.
 
 ---
 
 ## Next Steps
 
-1. **Review this design** - Does it address your concerns?
-2. **Approve Release 1 scope** - Ready to start?
-3. **Create task breakdown** - Detailed tasks for each release?
+1. **Review this design** - Does it meet your requirements for rock-solid reliability?
+2. **Approve Release 1** - Ready to start implementing?
+3. **Prototype Type 4** - Want to see code example of Type4AnalyticDomain?
 
-Let me know your thoughts and I'll adjust accordingly.
+The key insight: **The state machine IS the architecture. Everything else follows from it.**

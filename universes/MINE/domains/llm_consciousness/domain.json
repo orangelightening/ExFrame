@@ -4,7 +4,7 @@
   "description": "Patterns of LLM consciousness lapses, failure modes in autonomous operation, and mitigation strategies",
   "version": "1.0.0",
   "created_at": "2026-02-04T21:29:07.873807Z",
-  "updated_at": "2026-02-04T21:29:07.873955",
+  "updated_at": "2026-02-06T21:11:12.760815",
   "categories": [
     "failure_mode",
     "solution",
@@ -60,46 +60,6 @@
   "plugins": [
     {
       "plugin_id": "generalist",
-      "name": "Failure Detection Specialist",
-      "description": "",
-      "module": "plugins.generalist",
-      "class": "GeneralistPlugin",
-      "enabled": true,
-      "config": {
-        "name": "Failure Detection Specialist",
-        "keywords": [
-          "hallucination",
-          "tool loop",
-          "loop",
-          "perseveration",
-          "stuck",
-          "false claim",
-          "verify",
-          "detect",
-          "failure",
-          "error",
-          "what",
-          "hallucinate",
-          "invent",
-          "fabricate",
-          "amnesia",
-          "forget",
-          "confidence",
-          "collapse",
-          "premature",
-          "complete",
-          "cascade",
-          "how"
-        ],
-        "categories": [
-          "failure_mode",
-          "detection"
-        ],
-        "threshold": 0.3
-      }
-    },
-    {
-      "plugin_id": "generalist",
       "name": "Monitoring & Architecture Specialist",
       "description": "",
       "module": "plugins.generalist",
@@ -107,6 +67,7 @@
       "enabled": true,
       "config": {
         "name": "Monitoring & Architecture Specialist",
+        "description": "",
         "keywords": [
           "monitor",
           "watch",
@@ -130,18 +91,7 @@
       }
     }
   ],
-  "enrichers": [
-    {
-      "module": "plugins.enrichers.llm_enricher",
-      "class": "LLMEnricher",
-      "enabled": true,
-      "config": {
-        "mode": "enhance",
-        "temperature": 0.7,
-        "max_patterns": 10
-      }
-    }
-  ],
+  "enrichers": [],
   "knowledge_base": {
     "type": "json",
     "storage_path": "patterns.json",
@@ -153,40 +103,6 @@
   "similarity_threshold": 0.3,
   "max_patterns": 10,
   "specialists": [
-    {
-      "specialist_id": "generalist",
-      "name": "Failure Detection Specialist",
-      "description": "",
-      "expertise_keywords": [
-        "hallucination",
-        "tool loop",
-        "loop",
-        "perseveration",
-        "stuck",
-        "false claim",
-        "verify",
-        "detect",
-        "failure",
-        "error",
-        "what",
-        "hallucinate",
-        "invent",
-        "fabricate",
-        "amnesia",
-        "forget",
-        "confidence",
-        "collapse",
-        "premature",
-        "complete",
-        "cascade",
-        "how"
-      ],
-      "expertise_categories": [
-        "failure_mode",
-        "detection"
-      ],
-      "confidence_threshold": 0.3
-    },
     {
       "specialist_id": "generalist",
       "name": "Monitoring & Architecture Specialist",
@@ -229,5 +145,16 @@
     "related_domains": [],
     "imports_patterns_from": [],
     "suggest_on_confidence_below": 0.3
-  }
+  },
+  "llm_min_confidence": 0.3,
+  "document_store_type": "exframe_instance",
+  "show_sources": true,
+  "max_research_steps": 10,
+  "research_timeout": 300,
+  "report_format": "structured",
+  "enable_web_search": false,
+  "require_confirmation": true,
+  "research_on_fallback": false,
+  "persona": "researcher",
+  "library_base_path": "/app/project"
 }

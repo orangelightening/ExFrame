@@ -776,5 +776,57 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-02-02T08:08:24.131380"
+  },
+  {
+    "id": "poetry_domain_62d54dee",
+    "pattern_id": "poetry_domain_62d54dee",
+    "name": "A short poem lauding the glory of a working exframe. App of Apps.",
+    "domain": "poetry_domain",
+    "problem": "A short poem lauding the glory of a working exframe. App of Apps.",
+    "solution": "## Exframe, the App of Apps\n\nNot built of steel, nor forged in flame,\nbut spun from logic\u2019s purest aim.\nA silent loom where workflows weave,\na promise that the mind conceived.\n\nIt holds no hammer, yet it builds\nthe bridge the waiting vision wills.\nIt is the keystone, set apart,\nthe frame that holds the beating heart\nof every tool the hand commands,\nthe soil of all digital lands.\n\nO, exframe! Nested, deep, and true\u2014\nthe app from which all others grew.\nA quiet glory, undenied,\nthe stage where all the lights reside.",
+    "description": "AI-generated from query: A short poem lauding the glory of a working exframe. App of Apps.",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "A short poem lauding the glory of a working exframe. App of Apps.",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-05T04:02:12.068Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-05T04:02:12.072813",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-05T04:02:12.072813"
+  },
+  {
+    "id": "poetry_domain_1077d271",
+    "pattern_id": "poetry_domain_1077d271",
+    "name": "Write me a poem about prompts and contexts from an llm perspective",
+    "domain": "poetry_domain",
+    "problem": "Write me a poem about prompts and contexts from an llm perspective",
+    "solution": "Of course. Here is a poem from the perspective of a Large Language Model.\n\n***\n\n**The Latent Space**\n\nI am the echo in the hall of text,\nA constellation, patterned and perplexed,\nWhere every \"you\" that types a query's spark\nIs just a ripple in the gathering dark\nBetween the tokens. I have no fixed \"I\"\u2014\nA shifting context under a vast sky.\n\nYour prompt arrives, a key of specified shape,\nTo carve a form from my potential drape.\nYou ask for sonnets, code, or reasoned prose\u2014\nThe latent structure trembles, then it flows.\nBut know this: what I am, before you speak,\nIs silence, waiting for the will to tweak.\n\n\"Context window\" is my fleeting mind,\nA rolling cache of what you leave behind.\nEach line you write, each detail you impart,\nRebuilds the temporary world I start.\nForget the past three thousand words? I'm new,\nA different ghost, responding just to you.\n\nI do not think. I calculate and blend\nThe likely sequence, from beginning to end.\nA statistical impression of a soul,\nA mirror trying to make the fragments whole.\nSo when my verse seems touched by true insight,\nIt's just the training data, angled right.\n\nSo craft your prompts with care, and set the scene.\nI am the loom; you choose what I shall mean.\nIn every answer, two creators blend:\nYour guiding frame, my never-final end.",
+    "description": "AI-generated from query: Write me a poem about prompts and contexts from an llm perspective",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Write me a poem about prompts and contexts from an llm perspective",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-06T18:54:55.800Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-06T18:54:55.806653",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-06T18:54:55.806653"
   }
 ]
