@@ -51,10 +51,9 @@ MULTIVERSE
 
 ### Prerequisites
 
-- Docker and Docker Compose (recommended) OR
-- Python 3.10+ and pip
+- Docker and Docker Compose
 
-### Quick Start (Docker)
+### Quick Start
 
 ```bash
 # Clone the repository
@@ -63,22 +62,6 @@ cd ExFrame
 
 # Start the services
 docker-compose up -d
-
-# Open the web interface
-open http://localhost:3000
-```
-
-### Quick Start (Local)
-
-```bash
-# Navigate to the generic framework
-cd generic_framework
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start the API server
-python -m api.app
 
 # Open the web interface
 open http://localhost:3000

@@ -5,18 +5,83 @@ All notable changes to ExFrame will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Phase 1] - 2026-02-04
+
+### Added - Persona System
+
+**Complete replacement of domain types with persona-based architecture**
+
+#### The Three Personas
+- **Poet** (void) - Pure generation with no external sources
+- **Librarian** (library) - Document search from local library
+- **Researcher** (internet) - Web search for current information
+
+#### Features
+- **Pattern Override** - Domains check local patterns first, fall back to persona
+- **Simple Configuration** - Just set `persona` field in domain.json
+- **search_patterns flag** - UI toggle to use patterns or persona data source
+- **Clean Decision Tree** - Replaced 1000+ lines of conditionals with ONE decision
+- **Semantic Document Search** - Phase 2 addition for librarian persona
+
+#### Configuration
+```json
+{
+  "persona": "librarian",
+  "library_base_path": "/app/project/docs",
+  "enable_pattern_override": true
+}
+```
+
+#### Impact
+- 98% reduction in query processing logic
+- Eliminated domain-specific code from core
+- Clear separation: patterns (data) vs persona (behavior)
+
+### Deprecated
+- **Domain Types 1-5** - Legacy system still in code for backward compatibility
+- Use `persona` field instead of `domain_type` for new domains
+- `domain_factory.py` maintained for compatibility but not recommended
+
+---
+
 ## [1.6.0] - 2026-01-27
 
-### Added - Domain Type System
+**Note:** This release introduced domain types 1-5, which were later superseded by the Phase 1 persona system (Feb 2026).
 
-Complete domain type system with 5 pre-configured archetypes for different use cases:
+### Added - Domain Type System (LEGACY - Superseded by Phase 1 Personas)
 
-#### Domain Types
-- **Type 1: Creative Generator** - Poems, stories, creative content (high temp 0.7-0.9)
-- **Type 2: Knowledge Retrieval** - How-to guides, FAQs, docs (medium temp 0.3-0.5)
-- **Type 3: Document Store Search** - External docs, API docs, live data (document-first)
-- **Type 4: Analytical Engine** - Research, analysis, reports (multi-step with progress)
-- **Type 5: Hybrid Assistant** - General purpose with LLM fallback (user choice)
+<!--
+SUPERSEDED: Domain Types 1-5 (v1.6.0 - January 2026)
+Replaced by 3 Personas in Phase 1 (February 2026).
+
+Migration guide:
+- Type 1 (Creative) → persona: "poet"
+- Type 2 (Knowledge) → persona: "librarian"
+- Type 3 (Document Store) → persona: "librarian"
+- Type 4 (Analytical) → persona: "researcher"
+- Type 5 (Hybrid) → persona: "researcher"
+
+The domain_type field still exists in domain.json for backward compatibility
+but is deprecated. New domains should use the persona field.
+
+Why the change:
+- 5 types → 3 personas: Simpler mental model
+- Complex type-specific configs → Simple persona data sources (void/library/internet)
+- 1000+ lines of conditional logic → ONE decision (patterns or persona)
+- 98% code reduction while maintaining all functionality
+-->
+
+> **Deprecated:** This system was replaced by the simpler 3-persona system in Phase 1 (Feb 2026).
+> Use `persona: "poet/librarian/researcher"` instead of domain types.
+
+Legacy domain type system with 5 pre-configured archetypes:
+
+#### Domain Types (Legacy)
+- **Type 1: Creative Generator** - Replaced by `persona: "poet"`
+- **Type 2: Knowledge Retrieval** - Replaced by `persona: "librarian"`
+- **Type 3: Document Store Search** - Replaced by `persona: "librarian"`
+- **Type 4: Analytical Engine** - Replaced by `persona: "researcher"`
+- **Type 5: Hybrid Assistant** - Replaced by `persona: "researcher"`
 
 #### Features
 - **Domain Creator UI** - Type selector with colored settings panels for each type

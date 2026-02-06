@@ -30,7 +30,9 @@ Each domain has:
   "created_at": "2026-01-09T00:00:00Z",
   "updated_at": "2026-01-09T00:00:00Z",
 
-  "domain_type": "4",
+  "persona": "librarian",
+  "library_base_path": "/app/project/docs",
+  "enable_pattern_override": true,
 
   "categories": ["category1", "category2"],
   "tags": ["tag1", "tag2"],
@@ -108,13 +110,20 @@ Each domain has:
 | `created_at` | ISO datetime | ✅ | Creation timestamp |
 | `updated_at` | ISO datetime | ✅ | Last update timestamp |
 
-### Domain Type
+### Persona Configuration (Phase 1)
 
 | Field | Type | Required | Values | Description |
 |-------|------|----------|--------|-------------|
-| `domain_type` | string | ✅ | "1", "2", "3", "4", "5" | Determines plugin/enricher configuration |
+| `persona` | string | ✅ | "poet", "librarian", "researcher" | AI persona that determines query processing |
+| `library_base_path` | string | ❌ | "/app/project/docs" | Document library path (librarian only) |
+| `enable_pattern_override` | boolean | ❌ | true/false | If true, local patterns override persona |
 
-**See:** [Domain Types Guide](docs/guides/domain-types.md)
+**Personas:**
+- `poet`: Pure generation (void) - no external sources
+- `librarian`: Document search (library) - searches local docs
+- `researcher`: Web search (internet) - searches the web
+
+**Pattern Override:** When enabled, the domain checks local patterns first. If patterns match, use them. Otherwise, fall back to persona's data source.
 
 ### Organization
 
@@ -227,92 +236,53 @@ Each domain has:
 
 ---
 
-## Type-Specific Fields
+## Persona-Specific Configuration
 
-### Type 1: Creative Generator
-
-```json
-{
-  "temperature": 0.8,
-  "similarity_threshold": 0.2,
-  "creative_keywords": "poem, story, write, create, compose",
-  "max_patterns": 5
-}
-```
-
-### Type 2: Knowledge Retrieval
+### Poet (void)
 
 ```json
 {
-  "temperature": 0.4,
-  "similarity_threshold": 0.3,
-  "max_patterns": 10
+  "persona": "poet",
+  "enable_pattern_override": true,
+  "temperature": 0.8
 }
 ```
 
-### Type 3: Document Store Search
+**Use for:** Creative writing, poems, stories
+**Data source:** Pure generation (no external sources)
+
+### Librarian (library)
 
 ```json
 {
-  "temperature": 0.6,
-  "similarity_threshold": 0.3,
-  "document_store_type": "exframe_instance",
-  "remote_url": "",
-  "show_sources": true
+  "persona": "librarian",
+  "library_base_path": "/app/project/docs",
+  "enable_pattern_override": true,
+  "document_search": {
+    "algorithm": "semantic",
+    "max_documents": 10,
+    "min_similarity": 0.3,
+    "auto_generate_embeddings": true
+  }
 }
 ```
 
-**Plugin Config (Scope Boundaries):**
-```json
-{
-  "plugins": [{
-    "config": {
-      "scope": {
-        "enabled": true,
-        "min_confidence": 0.0,
-        "in_scope": ["Allowed topics"],
-        "out_of_scope": ["Blocked topics"],
-        "out_of_scope_response": "Rejection message"
-      }
-    }
-  }]
-}
-```
+**Use for:** Technical documentation, how-to guides, API references
+**Data source:** Local document library (semantic search)
 
-**Scope Fields:**
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `enabled` | boolean | false | Enable scope checking |
-| `min_confidence` | float | 0.0 | Min confidence for in-scope |
-| `in_scope` | array | [] | Allowed topics |
-| `out_of_scope` | array | [] | Blocked topics |
-| `out_of_scope_response` | string | Default | Rejection message |
-
-### Type 4: Analytical Engine
+### Researcher (internet)
 
 ```json
 {
-  "temperature": 0.5,
-  "max_research_steps": 10,
-  "research_timeout": 300,
-  "report_format": "structured",
-  "enable_web_search": true
+  "persona": "researcher",
+  "enable_pattern_override": true,
+  "enable_web_search": true,
+  "require_confirmation": false
 }
 ```
 
-**Key Field:** `enable_web_search` (default: `true`)
-
-### Type 5: Hybrid Assistant
-
-```json
-{
-  "temperature": 0.5,
-  "similarity_threshold": 0.3,
-  "llm_min_confidence": 0.3,
-  "require_confirmation": true,
-  "research_on_fallback": false
-}
-```
+**Use for:** Current events, research, analysis
+**Data source:** Web search (internet)
 
 ---
 

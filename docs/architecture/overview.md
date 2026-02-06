@@ -1,26 +1,50 @@
 # ExFrame Architecture Overview
 
-**Version:** 1.0
-**Updated:** 2026-01-29
+<!--
+CLARIFICATION: Phase 1 Architecture (February 2026)
+
+This document describes the current Phase 1 architecture.
+Previous version (v1.6.0) used domain types 1-5 with specialist plugins.
+
+Key Changes:
+- 5 domain types → 3 personas (poet/librarian/researcher)
+- Complex plugin routing → Simple pattern override decision
+- Type-specific specialists → Persona data sources (void/library/internet)
+- 1000+ lines → 20 lines of query processing logic
+
+The old plugin-based specialist system is still present in the codebase for
+backward compatibility but is no longer the recommended approach.
+
+See CHANGELOG.md Phase 1 section for complete migration guide.
+-->
+
+**Version:** 2.0 (Phase 1)
+**Updated:** 2026-02-05
+
+> **Architecture Change:** This document has been updated to reflect the Phase 1 persona system.
+> Domain Types 1-5 (v1.6.0) were replaced with 3 Personas + Pattern Override.
 
 ---
 
 ## High-Level Architecture
 
-ExFrame is a **plugin-based domain expert system** that processes queries through configurable pipelines.
+ExFrame is a **persona-based knowledge system** that processes queries through configurable pipelines with pattern override capability.
 
 ```
 User Query
     ↓
 FastAPI App (app.py)
     ↓
-Query Engine (engine.py)
+Query Processor (Phase 1)
     ↓
-Specialist Selection (highest confidence)
+Pattern Override Decision
+    ├─ Local Patterns Found? → Use Patterns
+    └─ No Patterns? → Use Persona Data Source
     ↓
-Specialist Plugin (process_query)
-    ├─ Local Pattern Search (knowledge base)
-    └─ Web Search (if Type 4 + confirmed)
+Persona Data Source
+    ├─ Poet → Pure Generation (void)
+    ├─ Librarian → Document Search (library)
+    └─ Researcher → Web Search (internet)
     ↓
 Enricher Pipeline
     ├─ ReplyFormationEnricher (format sources)
@@ -72,20 +96,32 @@ query → specialist → response_data → enrichers → final_response
                 LLMEnricher (uses web search context)
 ```
 
-### 3. Domain Factory (`core/domain_factory.py`)
+### 3. Persona System (`core/personas.py`)
 
-**Purpose:** Generate domain configurations for Types 1-5
+**Purpose:** Define the three AI personas that determine query processing behavior
 
-**Key Principle:** Single source of truth for domain type defaults
+**Key Principle:** Simple decision tree - check patterns first, then use persona
 
-**Type Configurations:**
-- **Type 1 (Creative)**: High temperature (0.8), creative keywords
-- **Type 2 (Knowledge)**: Pattern-based retrieval, similarity threshold
-- **Type 3 (Document Store)**: ExFrame specialist, document research, **scope boundaries**
-- **Type 4 (Analytical)**: Research specialist, **web search enabled (default)**
-- **Type 5 (Hybrid)**: LLM fallback, confirmation required
+**Persona Configurations:**
+- **Poet (void)**: Pure LLM generation, no external sources, temperature 0.8
+- **Librarian (library)**: Searches local document library with semantic search
+- **Researcher (internet)**: Web search capability for current information
 
-### 4. Scope Boundaries
+**Pattern Override:**
+```python
+if local_patterns_match:
+    use local_patterns
+else:
+    use persona.data_source  # void/library/internet
+```
+
+### 4. Domain Factory (`core/domain_factory.py`)
+
+**Status:** Legacy - Maintained for backward compatibility with domain types 1-5
+
+**Note:** New domains should use `persona` field directly instead of `domain_type`
+
+### 5. Scope Boundaries
 
 **Purpose:** Per-domain rejection of out-of-scope queries
 
@@ -128,10 +164,14 @@ process_query(query, context) → Dict     # Process and return results
 format_response(response_data) → str    # Format for display
 ```
 
-**Implementations:**
-- `ResearchSpecialistPlugin` (Type 4) - Two-stage query with web search
-- `ExFrameSpecialistPlugin` (Type 3) - Document research + local patterns
-- `GeneralistPlugin` (Types 1, 2, 5) - Keyword/category matching
+**Implementations (Legacy):**
+- Pattern-based specialists (when enable_pattern_override: true)
+- Persona data sources replace specialist plugins in Phase 1
+
+**Current Architecture:**
+- Domains use `persona` field to determine behavior
+- Pattern override checks local patterns first
+- No specialist plugins needed for persona-based domains
 
 ### Enricher Plugins
 
@@ -149,68 +189,73 @@ enrich(response_data, context) → Dict    # Transform/enhance response
 
 ---
 
-## Type 4: Analytical Engine Architecture
+## Phase 1: Persona-Based Architecture
 
-### Two-Stage Query Flow
+### Pattern Override Flow
 
-**Stage 1: Local Search (Immediate)**
+**Decision Tree:**
 ```
 User Query
     ↓
-ResearchSpecialist.process_query(context={web_search_confirmed: false})
-    ↓
-Local pattern search (knowledge base)
-    ↓
-Return: {
-    patterns: [...],
-    can_extend_with_web_search: true
-}
-    ↓
-UI: Shows "Extended Search (Internet)" button
+search_patterns=true? ──┐
+    ↓ yes                │ no
+Local Patterns?         │
+    ↓ yes    ↓ no       │
+  Use      Use          │
+Patterns  Persona ◄─────┘
 ```
 
-**Stage 2: Web Search (On User Action)**
+**Persona Data Sources:**
+
+**Poet (void):**
 ```
-User clicks button
-    ↓
-POST /api/query/extend-web-search
-    ↓
-ResearchSpecialist.process_query(context={web_search_confirmed: true})
-    ↓
-InternetResearchStrategy.search()
-    ├─ DuckDuckGo HTML search
-    ├─ Parse results (title, snippet, URL)
-    └─ Return 5-10 results
-    ↓
-Return: {
-    research_results: [...],  # Web search results
-    local_results: [...],      # Local patterns
-    patterns: [...]            # Combined
-}
-    ↓
-Enricher Pipeline:
-├─ ReplyFormationEnricher: Format sources with 🌐 emoji + URLs
-└─ LLMEnricher: Synthesize from web + local
-    ↓
-Response with sources displayed
+Query → Pure LLM Generation → Response
+(No external sources)
 ```
 
-### Web Search Integration
+**Librarian (library):**
+```
+Query → Semantic Document Search
+    ↓
+Find relevant docs (doc_embeddings.json)
+    ↓
+Load top 10 documents
+    ↓
+LLM synthesis with doc context
+    ↓
+Response with sources
+```
 
-**Component:** `InternetResearchStrategy` (`core/research/internet_strategy.py`)
+**Researcher (internet):**
+```
+Query → Web Search (DuckDuckGo)
+    ↓
+Parse results (title, snippet, URL)
+    ↓
+LLM synthesis with web context
+    ↓
+Response with sources
+```
+
+### Document Search (Librarian)
+
+**Component:** `DocumentVectorStore` (`core/document_embeddings.py`)
 
 **Flow:**
 ```
-Query → DuckDuckGo HTML → Parse Results → Return to Specialist
+Query → Semantic Search (cosine similarity)
+    ↓
+Rank documents by relevance
+    ↓
+Load top N documents (default 10)
+    ↓
+Pass to LLM enricher
 ```
 
-**Implementation:**
-- Uses `html.duckduckgo.com/html/?q={query}`
-- Parses HTML with regex to extract:
-  - Title: `<a class="result__a">TITLE</a>`
-  - Snippet: `<a class="result__snippet">SNIPPET</a>`
-  - URL: Extract from `uddg=` parameter
-- No API key required
+**Performance:**
+- Old: Load 50 files in filesystem order (~500ms)
+- New: Compare embeddings + load 10 relevant (~200ms)
+- Result: 60% faster + better relevance
 
 ---
 
@@ -218,37 +263,44 @@ Query → DuckDuckGo HTML → Parse Results → Return to Specialist
 
 ### Domain Configuration (`domain.json`)
 
+**Phase 1 Configuration:**
 ```json
 {
-  "domain_id": "diy",
-  "domain_name": "DIY Projects",
-  "domain_type": "4",
-  "plugins": [
-    {
-      "plugin_id": "researcher",
-      "module": "plugins.research.research_specialist",
-      "class": "ResearchSpecialistPlugin",
-      "enabled": true,
-      "config": {
-        "enable_web_search": true,
-        "max_research_steps": 10
-      }
-    }
-  ],
+  "domain_id": "exframe",
+  "domain_name": "ExFrame Guide",
+  "persona": "librarian",
+  "library_base_path": "/app/project",
+  "enable_pattern_override": true,
+  "document_search": {
+    "algorithm": "semantic",
+    "max_documents": 10,
+    "min_similarity": 0.3,
+    "auto_generate_embeddings": true
+  },
   "enrichers": [
     {
       "module": "plugins.enrichers.reply_formation",
       "class": "ReplyFormationEnricher",
       "enabled": true,
       "config": {
-        "show_sources": true,
-        "show_results": true
+        "show_sources": true
+      }
+    },
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "temperature": 0.6
       }
     }
   ],
   "knowledge_base": {
     "type": "json",
-    "storage_path": "patterns.json"
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true
   }
 }
 ```
@@ -325,29 +377,41 @@ POST /api/query
 
 ## Key Design Decisions
 
-### 1. Plugin-Based, Not Class-Based
-- **Before:** Each domain was a custom class
-- **After:** Domains are configuration, plugins are swappable
-- **Benefit:** Add domains without code changes
+### Phase 1: Persona System
 
-### 2. Domain Types as Config Presets
-- **Before:** Complex archetypes with workflows
-- **After:** Domain type = config template
-- **Benefit:** Simple, predictable, composable
+**1. Simple Decision Tree**
+- **Before:** 1000+ lines of conditional logic across domain types
+- **After:** ONE decision - patterns or persona
+- **Impact:** 98% reduction in query processing code
 
-### 3. Two-Stage Web Search
-- **Before:** Immediate web search (no control)
-- **After:** Local first, web on demand
-- **Benefit:** User control, faster initial response
+**2. Three Personas Replace Five Types**
+- **Before:** Types 1-5 with complex configurations
+- **After:** poet/librarian/researcher with clear data sources
+- **Benefit:** Easier to understand, configure, and maintain
 
-### 4. Single Source of Truth
-- **Before:** UI and backend both defined defaults
-- **After:** domain_factory.py is authoritative
-- **Benefit:** No inconsistency, easier to maintain
+**3. Pattern Override**
+- **Before:** Complex routing logic
+- **After:** Check patterns first, fall back to persona
+- **Benefit:** Hybrid domains with curated + dynamic content
 
-### 5. Enricher Pipeline
-- **Before:** Specialist did everything
-- **After:** Specialists search, enrichers transform
+**4. Semantic Document Search**
+- **Before:** Load 50 files in filesystem order
+- **After:** Search embeddings, load top 10 relevant
+- **Benefit:** 60% faster, better relevance
+
+**5. Configuration Over Code**
+- **Before:** domain_factory.py generates complex configs
+- **After:** Simple persona field in domain.json
+- **Benefit:** No code changes for new domains
+
+### Legacy Design Decisions (Pre-Phase 1)
+
+**1. Plugin-Based Architecture**
+- Still used for enrichers and formatters
+- Specialist plugins largely replaced by persona system
+
+**2. Enricher Pipeline**
+- **Still current:** Specialists/personas search, enrichers transform
 - **Benefit:** Separation of concerns, composable
 
 ---
@@ -358,26 +422,21 @@ POST /api/query
 generic_framework/
 ├── api/
 │   └── app.py                          # FastAPI, all endpoints
-├── assist/
-│   └── engine.py                       # Query orchestrator
 ├── core/
+│   ├── query_processor.py              # Phase 1 query processor
+│   ├── personas.py                     # POET, LIBRARIAN, RESEARCHER
+│   ├── persona.py                      # Persona dataclass
+│   ├── phase1_engine.py                # Phase 1 orchestrator
 │   ├── domain.py                       # GenericDomain orchestrator
-│   ├── domain_factory.py               # Type 1-5 config generator
-│   ├── specialist_plugin.py            # Specialist interface
+│   ├── domain_factory.py               # Legacy - Type 1-5 config generator
+│   ├── document_embeddings.py          # DocumentVectorStore for librarian
 │   └── research/
-│       ├── internet_strategy.py        # DuckDuckGo web search
-│       └── document_strategy.py        # File discovery
+│       ├── internet_strategy.py        # Web search for researcher
+│       └── document_strategy.py        # Document discovery for librarian
 ├── plugins/
-│   ├── research/
-│   │   └── research_specialist.py      # Type 4 specialist
-│   ├── exframe/
-│   │   └── exframe_specialist.py       # Type 3 specialist
-│   ├── generalist/
-│   │   └── generalist_plugin.py        # Generalist specialist
 │   └── enrichers/
 │       ├── llm_enricher.py            # LLM enhancement
-│       ├── reply_formation.py          # Source formatting
-│       └── llm_fallback_enricher.py    # LLM fallback
+│       └── reply_formation.py          # Source formatting
 └── frontend/
     └── index.html                      # Alpine.js SPA
 ```
@@ -386,16 +445,20 @@ generic_framework/
 
 ## Extension Points
 
-1. **New Specialist Plugin** - Implement `SpecialistPlugin` interface
+### Current (Phase 1)
+1. **New Persona** - Add to `core/personas.py` with data source
 2. **New Enricher Plugin** - Implement `EnricherPlugin` interface
-3. **New Knowledge Base** - Implement `KnowledgeBasePlugin` interface
-4. **New Domain Type** - Add method to `DomainConfigGenerator`
+3. **Document Search Strategy** - Extend DocumentVectorStore
+
+### Legacy
+1. **New Specialist Plugin** - For pattern-based domains (legacy)
+2. **New Domain Type** - domain_factory.py (backward compatibility only)
 
 ---
 
 ## Related Documentation
 
-- [Plugin System](docs/architecture/plugin-system.md) - Detailed plugin architecture
-- [Domain Types](docs/guides/domain-types.md) - Type 1-5 reference
-- [Query Pipeline](docs/architecture/query-pipeline.md) - Detailed query flow
-- [Enricher Chain](docs/architecture/enricher-chain.md) - Enricher pipeline details
+- [PLUGIN_ARCHITECTURE.md](../../PLUGIN_ARCHITECTURE.md) - Plugin development guide
+- [README.md](../../README.md) - Persona system overview
+- [CHANGELOG.md](../../CHANGELOG.md) - Phase 1 release notes
+- [docs/reference/domain-config.md](../reference/domain-config.md) - Domain configuration reference

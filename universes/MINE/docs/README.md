@@ -671,22 +671,7 @@ services:
 
 ## Development
 
-### Running Locally (Without Docker)
-
-```bash
-# Setup virtual environment
-python3.11 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Set environment variables
-export OPENAI_API_KEY=your_key
-export PYTHONPATH=generic_framework:$PYTHONPATH
-
-# Run the application
-cd generic_framework
-python -m uvicorn api.app:app --reload --host 0.0.0.0 --port 3000
-```
+> **Note:** ExFrame runs in Docker only. All development should be done via Docker Compose.
 
 ### Code Formatting
 

@@ -4,7 +4,7 @@
   "description": "Learn how to use ExFrame - self-documenting patterns",
   "version": "1.0.0",
   "created_at": "2026-01-27T05:21:02.525897Z",
-  "updated_at": "2026-01-29T21:42:01.363164",
+  "updated_at": "2026-02-06T01:14:59.395462",
   "categories": [
     "getting_started",
     "features",
@@ -55,83 +55,19 @@
       "plugin_id": "exframe_specialist",
       "name": "ExFrame Knowledge Specialist",
       "description": "",
-      "module": "plugins.exframe.exframe_specialist",
-      "class": "ExFrameSpecialistPlugin",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
       "enabled": true,
       "config": {
-        "document_store_enabled": true,
-        "local_patterns_enabled": true,
-        "document_store_config": {
-          "type": "exframe_instance",
-          "remote_url": ""
-        },
-        "research_strategy": {
-          "type": "document",
-          "base_path": "/app/project",
-          "auto_discover": true,
-          "file_pattern": "**/*",
-          "exclude_patterns": [
-            ".git",
-            "__pycache__",
-            "node_modules",
-            ".env",
-            "*.pyc",
-            "venv",
-            ".archive"
-          ]
-        },
-        "scope": {
-          "enabled": true,
-          "min_confidence": 0.0,
-          "in_scope": [
-            "ExFrame architecture and design",
-            "Plugin system (Router, Specialist, Enricher, Formatter)",
-            "Domain types 1-5 and their configurations",
-            "Configuration and setup",
-            "API endpoints and usage",
-            "Universe and domain management",
-            "Pattern-based knowledge",
-            "Semantic search",
-            "Self-healing features",
-            "Citation requirements",
-            "Docker deployment"
-          ],
-          "out_of_scope": [
-            "General Python questions (syntax, language features)",
-            "Other frameworks (Django, Flask, FastAPI internals)",
-            "Infrastructure best practices (Docker, Kubernetes, networking)",
-            "Business logic for specific domains (cooking, DIY, gardening)",
-            "General software development questions",
-            "AI/ML theory unrelated to ExFrame"
-          ],
-          "out_of_scope_response": "This question is outside ExFrame's documentation scope. I can only answer questions about ExFrame's architecture, configuration, plugin system, and usage. For general Python questions or other topics, please use a different domain or resource."
-        }
+        "name": "ExFrame Knowledge Specialist",
+        "description": "",
+        "keywords": [],
+        "categories": [],
+        "threshold": 0.5
       }
     }
   ],
-  "enrichers": [
-    {
-      "module": "plugins.enrichers.reply_formation",
-      "class": "ReplyFormationEnricher",
-      "enabled": true,
-      "config": {
-        "combine_strategy": "document_first",
-        "max_results": 10,
-        "show_sources": true,
-        "show_results": false
-      }
-    },
-    {
-      "module": "plugins.enrichers.llm_enricher",
-      "class": "LLMEnricher",
-      "enabled": true,
-      "config": {
-        "mode": "enhance",
-        "temperature": 0.6,
-        "max_tokens": 8192
-      }
-    }
-  ],
+  "enrichers": [],
   "knowledge_base": {
     "type": "json",
     "storage_path": "patterns.json",
@@ -139,7 +75,7 @@
     "auto_save": true,
     "similarity_threshold": 0.3
   },
-  "temperature": 0.6,
+  "temperature": 0.75,
   "document_store_type": "exframe_instance",
   "remote_url": "",
   "show_sources": true,
@@ -182,5 +118,12 @@
   "research_on_fallback": false,
   "persona": "librarian",
   "library_base_path": "/app/project",
-  "enable_pattern_override": true
+  "enable_pattern_override": true,
+  "document_search": {
+    "algorithm": "semantic",
+    "max_documents": 10,
+    "min_similarity": 0.3,
+    "auto_generate_embeddings": true,
+    "cache_embeddings": true
+  }
 }

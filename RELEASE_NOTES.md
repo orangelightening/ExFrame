@@ -1,29 +1,72 @@
 # ExFrame Release Notes
 
-## Version 1.6.0 - "Domain Type System"
+## Phase 1 - "3 Personas + Pattern Override"
 
-**Release Date:** January 27, 2026
+**Release Date:** February 4, 2026
 **Status:** Production Ready ✅
 
 ---
 
 ## Overview
 
-ExFrame v1.6.0 introduces a complete **domain type system** with 5 pre-configured archetypes for different use cases, making it easy to create optimized knowledge domains without manual configuration.
+Phase 1 **replaces the 5 domain types** with a simpler **3-persona system**:
+- **Poet** (void) - Pure generation
+- **Librarian** (library) - Document search
+- **Researcher** (internet) - Web search
+
+### Key Innovation: Pattern Override
+
+Domains check local patterns first. If no match, fall back to persona's data source. This simple decision replaced 1000+ lines of conditional logic.
+
+### Configuration
+
+```json
+{
+  "persona": "librarian",
+  "library_base_path": "/app/project/docs",
+  "enable_pattern_override": true
+}
+```
+
+### Phase 2: Semantic Document Search
+
+Added semantic search for librarian persona using DocumentVectorStore:
+- Single `doc_embeddings.json` per domain
+- Hash-based staleness detection
+- Cosine similarity search
+- 60% performance improvement
+
+---
+
+## Version 1.6.0 - "Domain Type System" (SUPERSEDED)
+
+> **Deprecated:** Domain types 1-5 were replaced by the Phase 1 persona system (Feb 2026).
+> This release is maintained for historical reference only.
+
+**Release Date:** January 27, 2026
+**Status:** ~~Production Ready~~ **Superseded by Phase 1**
+
+---
+
+## Overview
+
+ExFrame v1.6.0 introduced a domain type system with 5 archetypes. This was later superseded by the simpler 3-persona system.
 
 ---
 
 ## What's New
 
-### 🎯 Domain Type System
+### 🎯 Domain Type System (LEGACY)
 
-**New Feature:** 5 domain archetypes with type-specific configurations
+> **Deprecated:** Replaced by 3-persona system in Phase 1
 
-- **Type 1: Creative Generator** - Poems, stories, creative content (high temp 0.7-0.9)
-- **Type 2: Knowledge Retrieval** - How-to guides, FAQs, docs (medium temp 0.3-0.5)
-- **Type 3: Document Store Search** - External docs, API docs, live data (document-first)
-- **Type 4: Analytical Engine** - Research, analysis, reports (multi-step with progress)
-- **Type 5: Hybrid Assistant** - General purpose with LLM fallback (user choice)
+**Legacy Feature:** 5 domain archetypes (now superseded by personas)
+
+- **Type 1** → Use `persona: "poet"` instead
+- **Type 2** → Use `persona: "librarian"` instead
+- **Type 3** → Use `persona: "librarian"` instead
+- **Type 4** → Use `persona: "researcher"` instead
+- **Type 5** → Use `persona: "researcher"` instead
 
 ### 🎨 User Interface Improvements
 

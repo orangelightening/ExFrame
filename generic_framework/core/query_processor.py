@@ -9,6 +9,7 @@ The core decision:
 
 from typing import Dict, Any, Optional, List
 import logging
+from pathlib import Path
 from .personas import get_persona
 
 
@@ -97,7 +98,7 @@ async def process_query(
         # Use persona's data source
         # For librarian persona, try to load documents if available
         if persona_type == "librarian":
-            documents = _search_domain_documents(domain_name, domain_config)
+            documents = _search_domain_documents(domain_name, domain_config, query)
             if documents:
                 logger.info(f"Found {len(documents)} documents for library search")
                 # Pass documents in context for persona to use
@@ -234,15 +235,53 @@ def _search_domain_patterns(
 
 def _search_domain_documents(
     domain_name: str,
-    domain_config: Dict[str, Any]
+    domain_config: Dict[str, Any],
+    query: Optional[str] = None
 ) -> Optional[List[Dict[str, Any]]]:
     """
     Search domain for documents to use as library context.
+
+    Can use either:
+    - Semantic search (if query provided and document_search_algorithm="semantic")
+    - Filesystem order (default, legacy Phase 1 behavior)
 
     Simple approach:
     - library_base_path: Base directory to search
     - ignored.md: Optional file listing patterns to ignore (one per line)
     - Everything else: All .md files are fair game
+
+    Args:
+        domain_name: Domain name
+        domain_config: Domain configuration dict
+        query: Optional query for semantic ranking
+
+    Returns:
+        List of document dicts or None
+    """
+    # Check if semantic search is enabled and available
+    doc_search_config = domain_config.get("document_search", {})
+    algorithm = doc_search_config.get("algorithm", "filesystem")
+
+    if algorithm == "semantic" and query:
+        # Try semantic search
+        result = _search_domain_documents_semantic(domain_name, domain_config, query)
+        if result is not None:
+            return result
+        # Fall back to filesystem search if semantic fails
+        logger.info(f"Semantic search failed, falling back to filesystem search")
+
+    # Filesystem search (Phase 1 behavior)
+    return _search_domain_documents_filesystem(domain_name, domain_config)
+
+
+def _search_domain_documents_filesystem(
+    domain_name: str,
+    domain_config: Dict[str, Any]
+) -> Optional[List[Dict[str, Any]]]:
+    """
+    Search domain for documents using filesystem order (Phase 1).
+
+    This is the original implementation - loads first N documents.
 
     Args:
         domain_name: Domain name
@@ -356,4 +395,192 @@ def _search_domain_documents(
         return None
 
     logger.info(f"No documents found")
+    return None
+
+def _search_domain_documents_semantic(
+    domain_name: str,
+    domain_config: Dict[str, Any],
+    query: str
+) -> Optional[List[Dict[str, Any]]]:
+    """
+    Search domain for documents using semantic similarity (Phase 2).
+
+    Uses DocumentVectorStore to rank documents by relevance to query.
+    Only loads the most relevant documents.
+
+    Args:
+        domain_name: Domain name
+        domain_config: Domain configuration dict
+        query: Search query for semantic ranking
+
+    Returns:
+        List of document dicts ordered by relevance, or None
+    """
+    import glob
+    from pathlib import Path
+    from .document_embeddings import get_document_store
+
+    logger.info(f"[SEMANTIC] Searching documents for {domain_name}")
+
+    # Get base path
+    base_path = domain_config.get("library_base_path")
+    if not base_path:
+        logger.info(f"No library_base_path configured for {domain_name}")
+        return None
+
+    logger.info(f"[SEMANTIC] Library path: {base_path}")
+
+    try:
+        base_dir = Path(base_path)
+        if not base_dir.exists():
+            logger.warning(f"Document base path does not exist: {base_path}")
+            return None
+
+        # Get document search config
+        doc_search_config = domain_config.get("document_search", {})
+        max_docs = doc_search_config.get("max_documents", 10)  # Semantic: default 10 (not 50)
+        min_similarity = doc_search_config.get("min_similarity", 0.3)
+        max_chars_per_doc = domain_config.get("max_chars_per_document", 50000)
+        auto_generate = doc_search_config.get("auto_generate_embeddings", True)
+
+        # Load ignore patterns from ignored.md
+        ignore_patterns = []
+        ignored_file = base_dir / "ignored.md"
+        if ignored_file.exists():
+            try:
+                with open(ignored_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#'):
+                            ignore_patterns.append(line)
+                logger.info(f"[SEMANTIC] Loaded {len(ignore_patterns)} ignore patterns")
+            except Exception as e:
+                logger.warning(f"Could not read ignored.md: {e}")
+
+        # Find all markdown files
+        all_files = glob.glob(str(base_dir / "**/*.md"), recursive=True)
+
+        # Filter out ignored patterns
+        filtered_files = []
+        for file_path in all_files:
+            rel_path = str(Path(file_path).relative_to(base_dir))
+
+            # Skip ignored.md itself
+            if rel_path == "ignored.md":
+                continue
+
+            # Check against ignore patterns
+            excluded = False
+            for pattern in ignore_patterns:
+                if pattern in rel_path:
+                    excluded = True
+                    logger.debug(f"[SEMANTIC] Excluding {rel_path} (matches pattern: {pattern})")
+                    break
+
+            if not excluded:
+                filtered_files.append(file_path)
+
+        if not filtered_files:
+            logger.info("[SEMANTIC] No documents found")
+            return None
+
+        logger.info(f"[SEMANTIC] Found {len(filtered_files)} documents (after filtering)")
+
+        # Get or create document store
+        # Store in domain directory (same place as pattern embeddings)
+        domain_path = _get_domain_path(domain_name)
+        if not domain_path:
+            logger.warning(f"[SEMANTIC] Could not find domain path for {domain_name}")
+            return None
+
+        doc_store = get_document_store(domain_name, domain_path)
+        if not doc_store:
+            logger.warning(f"[SEMANTIC] Document store not available (sentence-transformers not installed)")
+            return None
+
+        # Load existing embeddings
+        doc_store.load()
+
+        # Generate embeddings if needed
+        if auto_generate:
+            doc_store.generate_embeddings(filtered_files, force=False)
+
+            # Clean up embeddings for documents that no longer exist
+            doc_store.remove_missing_documents(filtered_files)
+
+        # Search for relevant documents
+        results = doc_store.search(
+            query=query,
+            top_k=max_docs,
+            min_similarity=min_similarity
+        )
+
+        if not results:
+            logger.info(f"[SEMANTIC] No relevant documents found above {min_similarity} similarity")
+            return None
+
+        logger.info(f"[SEMANTIC] Found {len(results)} relevant documents")
+
+        # Load the relevant documents
+        documents = []
+        for doc_path, similarity in results:
+            try:
+                with open(doc_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                    # Truncate if needed
+                    if len(content) > max_chars_per_doc:
+                        content = content[:max_chars_per_doc]
+                        logger.debug(f"[SEMANTIC] Truncated {Path(doc_path).name} to {max_chars_per_doc} chars")
+
+                    documents.append({
+                        "path": doc_path,
+                        "content": content,
+                        "name": Path(doc_path).name,
+                        "similarity_score": similarity
+                    })
+
+                    logger.info(f"[SEMANTIC]   {Path(doc_path).name}: {similarity:.3f}")
+
+            except Exception as e:
+                logger.error(f"[SEMANTIC] Could not read {doc_path}: {e}")
+                continue
+
+        if documents:
+            logger.info(f"[SEMANTIC] Loaded {len(documents)} relevant documents")
+            return documents
+
+    except Exception as e:
+        logger.error(f"[SEMANTIC] Error in semantic search: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+    return None
+
+
+def _get_domain_path(domain_name: str) -> Optional[Path]:
+    """
+    Get path to domain directory.
+
+    Args:
+        domain_name: Domain name
+
+    Returns:
+        Path to domain directory or None
+    """
+    import os
+    from pathlib import Path
+
+    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+    domain_path = Path(universes_base) / "MINE" / "domains" / domain_name
+
+    if domain_path.exists():
+        return domain_path
+
+    # Try alternate path
+    domain_path = Path(f"universes/MINE/domains/{domain_name}")
+    if domain_path.exists():
+        return domain_path
+
     return None

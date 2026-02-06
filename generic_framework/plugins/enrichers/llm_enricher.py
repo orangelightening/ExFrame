@@ -840,22 +840,28 @@ Your response:"""
         if not patterns:
             return
 
-        # First, check if there's a naming/nomenclature note in the documentation
-        # This provides context about historical naming (EEFrame → ExFrame)
-        # IMPORTANT: Search ALL patterns for nomenclature docs, not just first 20
-        nomenclature_context = ""
+        # First, extract annotation context from the documentation
+        # Annotations provide historical context, known issues, and superseded systems
+        # Look for: <!-- HISTORICAL NOTE -->, <!-- SUPERSEDED -->, <!-- CONTRADICTION -->
+        # IMPORTANT: Search ALL documents for annotation markers
+        annotation_context = ""
         for doc in patterns:
             title = doc.get("title", doc.get("name", ""))
-            # Check for INDEX.md or similar naming documentation
-            if "INDEX" in title.upper() or "nomenclature" in title.lower() or "naming" in title.lower():
-                content = doc.get("content", doc.get("solution", ""))
-                # Extract the nomenclature section if present
-                if "Historical Nomenclature" in content or "EEFrame → ExFrame" in content or "nomenclature" in content.lower():
-                    # Get a substantial excerpt (up to 2000 chars to include full context)
-                    nomenclature_context = content[:2000]
-                    nomenclature_context = f"\n*** NAMING CONTEXT (from {title}) ***\n{nomenclature_context}\n***\n"
-                    print(f"  [LLMEnricher] Found nomenclature context in: {title}")
-                    break
+            content = doc.get("content", doc.get("solution", ""))
+
+            # Look for annotation markers or historical context
+            if any(marker in content for marker in [
+                "<!-- HISTORICAL NOTE",
+                "<!-- SUPERSEDED",
+                "Historical Nomenclature",
+                "EEFrame → ExFrame",
+                "nomenclature"
+            ]):
+                # Extract a substantial excerpt (up to 2000 chars to include full context)
+                annotation_context = content[:2000]
+                annotation_context = f"\n*** ANNOTATION CONTEXT (from {title}) ***\n{annotation_context}\n***\n"
+                print(f"  [LLMEnricher] Found annotation context in: {title}")
+                break
 
         # Build contradiction detection prompt
         # Limit to top 20 documents to avoid token limits
@@ -869,14 +875,14 @@ Your response:"""
 
         contradiction_prompt = f"""You are a documentation quality analyst. Analyze these documents for contradictions, ambiguities, or inconsistencies.
 
-{nomenclature_context}
+{annotation_context}
 
 Query: "{query}"
 
 Documents:
 {doc_summary}
 
-*** IMPORTANT INSTRUCTIONS: If there is a nomenclature section above, read it carefully: ***
+*** IMPORTANT INSTRUCTIONS: If there is an annotation context section above, read it carefully: ***
 
 1. HISTORICAL NAMES (EEFrame, omv-copilot, eeframe-app, eeframe-*) are INTENTIONAL and should NOT be flagged.
 
