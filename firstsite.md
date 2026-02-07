@@ -214,3 +214,103 @@ Once you review this document, I can:
 - **D)** Something else based on your feedback
 
 **Review the recommendations above and let me know your direction.**
+
+---
+
+## Decision Log
+
+### February 6, 2026: Wiseman Experiment Abandoned ❌
+
+**Decision**: Abandon Wiseman config-driven approach, return to Phase1 implementation.
+
+**Rationale**:
+1. **Complexity vs. Simplicity**: Wiseman violated core principle of simplicity
+   - Added layers of configuration hierarchy (System → Universe → Domain → Pattern)
+   - Created circular import issues that couldn't be resolved
+   - Made debugging more difficult
+
+2. **Technical Blockers**:
+   - Persistent circular import errors: `ImportError: cannot import name 'WiseManPersona'`
+   - Container crashes despite multiple rebuild attempts
+   - Multiple interdependent files creating fragile system
+
+3. **User Recognition**:
+   > "I thought we avoided recursive config to avoid dealing with wiseman issues."
+   > "Clean it up. Better to use phase 1. I started to see the exceptions piling up and the import issues. Not worth the trouble."
+
+**Action Taken**:
+- Git reset to commit `a9f80be3` (last stable push)
+- Removed all Wiseman files (~1,200 lines of code)
+- Archived Wiseman documentation to `.archive/wiseman-experiment/`
+- Restored Phase1 engine (3 personas: poet/librarian/researcher)
+
+**Current State**: ✅ Phase1 Working
+- 11 domains loaded and accessible
+- Web GUI at http://localhost:3000
+- API healthy at `/api/query/phase1`
+- Pattern search functional
+- LLM integration with thinking toggle
+
+**Key Insight**: Phase1 provides all the same user-facing features without the complexity. Wiseman was architectural optimization that became complexity for complexity's sake.
+
+**Documentation**: See `SYSTEM_RESTORED.md` for full restoration details.
+
+---
+
+## Updated Assessment (Post-Decision)
+
+### What Works Now ✅
+
+**Phase1 Architecture**:
+- Simple, stable persona system (poet/librarian/researcher)
+- Domain-based pattern search
+- LLM integration with configurable thinking toggle
+- Web search for researcher domains
+- Clean API with single endpoint
+
+**11 Active Domains**:
+1. binary_symmetry
+2. cooking
+3. diy
+4. first_aid
+5. gardening
+6. llm_consciousness
+7. python
+8. exframe
+9. poetry_domain
+10. psycho
+11. omv_library
+
+**System Health**:
+- Container stable
+- API responsive
+- All domains accessible via dropdown
+- Pattern search functional
+
+### Recommendations Updated
+
+**Previous recommendation** (above): Implement Wiseman config-driven approach
+**Actual decision**: Abandon Wiseman, use Phase1 ✅
+
+**Revised Strategy**:
+1. ✅ **Keep Phase1** - It's working and provides all needed features
+2. 📚 **Document current state** - Capture what's working
+3. 🔧 **Fix ISSUES-001** - Domains losing persona type on reload (being tested)
+4. 📖 **Clean up docs** - Archive obsolete designs, update README
+
+### Simplicity Principle Validated
+
+The Wiseman experiment validated a key system principle:
+> **"Simplicity, structure, modularity, and recursion. Everything must be viewable and accountable."**
+
+Wiseman failed this test:
+- ❌ Not simple (complex config hierarchy)
+- ❌ Not viewable (circular imports)
+- ❌ Not accountable (hard to debug)
+
+Phase1 passes this test:
+- ✅ Simple (3 personas, 1 engine class)
+- ✅ Viewable (clean code flow)
+- ✅ Accountable (clear query path)
+
+**Lesson**: When architectural improvements violate simplicity principles, abandon them quickly.

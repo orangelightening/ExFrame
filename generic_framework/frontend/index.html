@@ -306,7 +306,7 @@
                     </div>
 
                     <!-- Query Trace -->
-                    <div class="glass rounded-xl p-6" x-show="displayTrace">
+                    <div class="glass rounded-xl p-6" x-show="enableTrace || selectedTrace">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg font-semibold flex items-center gap-2">
                                 <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,95 +495,15 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Specialists & Patterns -->
+                <!-- Right Column: Statistics -->
                 <div class="space-y-6">
-                    <!-- Specialists -->
-                    <div class="glass rounded-xl p-6">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            Specialists
-                        </h2>
-                        <div class="space-y-3">
-                            <template x-for="spec in specialists">
-                                <div class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-emerald-500 transition-all">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="font-medium text-emerald-400" x-text="spec.name"></span>
-                                        <span class="text-xs text-gray-400" x-text="spec.keywords.slice(0, 3).join(', ')"></span>
-                                    </div>
-                                    <p class="text-sm text-gray-400" x-text="spec.description"></p>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Recent Patterns -->
-                    <div class="glass rounded-xl p-6">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012 2h6a2 2 0 012-2V5a2 2 0 00-2-2M5 11a2 2 0 012 2m0 0a2 2 0 012 2m6-6v-5a2 2 0 012-2m0 0a2 2 0 012 2"></path>
-                            </svg>
-                            Knowledge Patterns
-                        </h2>
-                        <div class="space-y-3 max-h-96 overflow-y-auto">
-                            <template x-for="pattern in patterns">
-                                <div class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-emerald-500 transition-all">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span class="font-medium text-sm" x-text="pattern.name"></span>
-                                        <span class="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400" x-text="pattern.type"></span>
-                                    </div>
-                                    <p class="text-xs text-gray-400 line-clamp-2" x-text="pattern.description"></p>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Query Traces (Historical) -->
-                    <div class="glass rounded-xl p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold flex items-center gap-2">
-                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Recent Traces
-                            </h2>
-                            <button @click="loadHistoricalTraces()" class="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300">Refresh</button>
-                        </div>
-                        <div class="space-y-3 max-h-96 overflow-y-auto">
-                            <template x-for="historyItem in historicalTraces.slice().reverse()" :key="historyItem.start_time">
-                                <div class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-purple-500 transition-all cursor-pointer"
-                                     @click="selectedTrace = historyItem;">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span class="text-sm text-gray-200 truncate" x-text="truncate(historyItem.query, 40)"></span>
-                                        <span class="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-400" x-text="(historyItem.confidence * 100).toFixed(0) + '%'"></span>
-                                    </div>
-                                    <div class="flex items-center gap-2 text-xs text-gray-500">
-                                        <span x-text="historyItem.processing_method || 'general'"></span>
-                                        <span>•</span>
-                                        <span x-text="historyItem.total_time_ms + 'ms'"></span>
-                                        <span>•</span>
-                                        <span x-text="formatTimestamp(historyItem.logged_at || historyItem.start_time)"></span>
-                                    </div>
-                                </div>
-                            </template>
-                            <div x-show="historicalTraces.length === 0" class="text-sm text-gray-500 text-center py-4">
-                                Enable trace mode and submit queries to see traces here
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Stats -->
                     <div class="glass rounded-xl p-6">
                         <h2 class="text-lg font-semibold mb-4">Statistics</h2>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-3 gap-4">
                             <div class="text-center">
                                 <div class="text-3xl font-bold text-emerald-400" x-text="patternCount"></div>
                                 <div class="text-sm text-gray-400">Patterns</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-bold text-blue-400" x-text="specialists.length"></div>
-                                <div class="text-sm text-gray-400">Specialists</div>
                             </div>
                             <div class="text-center">
                                 <div class="text-3xl font-bold text-purple-400" x-text="categories.length"></div>

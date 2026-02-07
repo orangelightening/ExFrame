@@ -44,6 +44,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.1] - 2026-02-06
+
+### Changed - Wiseman Experiment Abandoned
+
+**Decision**: Abandoned Wiseman config-driven architecture experiment, restored Phase1 implementation.
+
+#### What Happened
+- **Wiseman Experiment** (Feb 1-6, 2026): Attempted config-driven universal execution engine
+- **Technical Issues**: Circular import errors, container crashes, complexity creep
+- **User Decision**: "Clean it up. Better to use phase 1. I started to see the exceptions piling up and the import issues. Not worth the trouble."
+- **Action Taken**: Git reset to commit `a9f80be3`, removed ~1,200 lines of Wiseman code
+
+#### Files Removed
+- `generic_framework/core/wiseman.py` (~470 lines)
+- `generic_framework/core/wiseman_personas.py` (~150 lines)
+- `generic_framework/core/wiseman_engine.py` (~200 lines)
+- `generic_framework/core/document_embeddings.py` (~377 lines)
+- API endpoint `/api/query/wiseman` removed
+
+#### Documentation Changes
+- Wiseman documentation archived to `.archive/wiseman-experiment/`
+- Created `CURRENT_STATE.md` documenting Phase1 system
+- Updated `firstsite.md` with decision log
+- Created `SYSTEM_RESTORED.md` documenting restoration process
+
+#### Current State
+- ✅ Phase1 engine stable with 3 personas (poet/librarian/researcher)
+- ✅ 11 domains loaded and accessible
+- ✅ Web GUI at http://localhost:3000
+- ✅ API healthy at `/api/query/phase1`
+- ✅ All user-facing features working
+
+#### Lessons Learned
+- Phase1 provides all the same features without complexity
+- Architectural optimization that violates simplicity principles should be abandoned early
+- Git checkpoints are essential for safe experimentation
+- KISS principle validated: simpler is better
+
+### Added
+- Inter-system communications: Claude Code integration on local network
+- CORS enabled for local network access
+- Testing at http://192.168.3.29:3000 (Martha Machine)
+
+### Fixed
+- Container stability issues resolved by Wiseman removal
+- Circular import errors eliminated
+
+---
+
 ## [1.6.0] - 2026-01-27
 
 **Note:** This release introduced domain types 1-5, which were later superseded by the Phase 1 persona system (Feb 2026).
