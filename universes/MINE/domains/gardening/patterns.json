@@ -1,43 +1,5 @@
 [
   {
-    "id": "gardening_candidate_003",
-    "name": "How do I start seeds indoors?",
-    "pattern_type": "how_to",
-    "description": "Auto-generated from query: How do I start seeds indoors?",
-    "problem": "How do I start seeds indoors?",
-    "solution": "It looks like the information we found in our knowledge base was about pruning tomatoes rather than starting seeds, but I can certainly help you get started with seeding indoors!\n\nHere is a step-by-step guide to starting seeds indoors to ensure your garden gets a head start this season.\n\n### 1. Timing is Everything\nYou don't want to start seeds too early or they will become root-bound and leggy before you can plant them outside.\n*   **Calculate backwards:** Look up the \"last frost date\" for your area.\n*   **Check the seed packet:** Most packets will say something like \"Start indoors 6\u20138 weeks before last frost.\" Count back from your frost date to find your planting window.\n\n### 2. Gather Your Supplies\nYou don't need expensive gear, but you do need the right setup:\n*   **Containers:** You can use plastic cell trays, peat pots, or even recycled egg cartons (just make sure they have drainage holes).\n*   **Seed Starting Mix:** Do **not** use regular garden soil or potting soil. Garden soil is too heavy and can harbor diseases. Use a light, sterile, soilless mix specifically designed for seeds.\n*   **Light:** This is where most people fail. A sunny windowsill is rarely enough. You will likely need grow lights or a strong fluorescent/shop light setup.\n*   **Warmth:** Most seeds need warm soil to germinate (around 65\u201375\u00b0F / 18\u201324\u00b0C).\n\n### 3. Planting Steps\n1.  **Moisten the Mix:** Put your seed starting mix in a bucket and add water until it feels like a wrung-out sponge. It should be damp, not soggy.\n2.  **Fill Containers:** Fill your pots or cells with the damp mix. Tap the container gently to settle the soil\u2014don't pack it down tight.\n3.  **Plant the Seeds:** Check the packet for depth. A general rule of thumb is to plant the seed **twice as deep as the seed is wide**. Tiny seeds might just need to be pressed onto the surface.\n4.  **Label:** Trust me, you will forget which pot is which. Use a waterproof marker.\n\n### 4. The Germination Phase (Keep them Humid)\nUntil the seeds sprout, they need high humidity.\n*   Cover your trays with a clear plastic dome or a piece of plastic wrap to keep moisture in.\n*   Keep them in a warm spot. The top of a refrigerator is often good, or you can buy a seedling heat mat.\n*   **Check daily:** As soon as you see green sprouts poking through the soil, remove the plastic cover immediately and move them under your lights.\n\n### 5. Caring for Seedlings\n*   **Light:** Seedlings need 14\u201316 hours of light a day. Keep the lights very close to the plants (2\u20133 inches away) to prevent them from getting \"leggy\" (tall and spindly).\n*   **Water:** Keep the soil consistently moist but not drowning. Water from the bottom if possible (pour water into the tray and let the soil soak it up) to encourage strong roots.\n*   **Fertilizer:** Once the seedlings have their first set of \"true leaves\" (the second set of leaves that appear), you can start feeding them with a weak, liquid fertilizer at half strength.\n*   **Air Flow:** A small fan on low setting nearby helps strengthen the stems and prevents mold.\n\n### 6. Hardening Off\nBefore planting outside, you must acclimate your plants or they will go into shock.\n*   About a week before you plan to transplant, start taking your plants outside for a few hours a day.\n*   Start in a shady, protected spot and gradually increase their time outside and their exposure to sun over 7\u201310 days.\n\n**Quick Checklist:**\n1.  Calculate your date based on the last frost.\n2.  Use sterile seed starting mix.\n3.  Keep seeds warm and moist until they sprout.\n4.  Move sprouts immediately to bright light.\n5.  Harden them off before the final move outdoors.",
-    "steps": [],
-    "conditions": {},
-    "related_patterns": [],
-    "prerequisites": [],
-    "alternatives": [],
-    "confidence": 0.5,
-    "sources": [],
-    "tags": [
-      "candidate",
-      "llm_generated"
-    ],
-    "examples": [
-      "How do I start seeds indoors?"
-    ],
-    "domain": "gardening",
-    "created_at": "2026-01-11T02:31:35.953321",
-    "updated_at": "2026-01-11T02:31:35.953321",
-    "times_accessed": 4,
-    "user_rating": null,
-    "status": "candidate",
-    "origin": "llm_fallback",
-    "origin_query": "How do I start seeds indoors?",
-    "generated_at": "2026-01-11T02:31:35.953261",
-    "generated_by": "glm-4.7",
-    "confidence_score": 0.5,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "review_notes": null,
-    "usage_count": 0,
-    "user_feedback": []
-  },
-  {
     "id": "gardening_candidate_004",
     "name": "How do I prune tomato plants?",
     "pattern_type": "how_to",

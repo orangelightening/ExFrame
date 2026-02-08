@@ -546,5 +546,31 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-01-25T22:35:44.820448"
+  },
+  {
+    "id": "llm_consciousness_50d63d52",
+    "pattern_id": "llm_consciousness_50d63d52",
+    "name": "What are the things to remember when providing llm context and prompt?",
+    "domain": "llm_consciousness",
+    "problem": "What are the things to remember when providing llm context and prompt?",
+    "solution": "When providing context and prompts to an LLM, here are the key things to remember for effective and reliable results:\n\n### 1. **Be Explicit and Specific**\n   * **Clarity is key:** Ambiguous prompts lead to ambiguous outputs. State exactly what you want, including format, length, tone, and perspective.\n   * **Use examples:** A few-shot prompt (providing examples of desired input/output) is often more effective than a lengthy description.\n   * **Define terms:** If using jargon or specific concepts, briefly define them in the context.\n\n### 2. **Structure Your Context Effectively**\n   * **Placement matters:** The most critical instructions and context are often best placed at the **beginning** (system prompt) and **end** (user request) of the prompt.\n   * **Use delimiters:** Separate different parts (instructions, context, query) with clear markers like `###`, `\"\"\"`, or `---`. This helps the LLM parse your intent.\n   * **Prioritize information:** Put the most important information first. LLMs have a limited \"attention span\" within the context window.\n\n### 3. **Provide Adequate, Relevant Context**\n   * **Include necessary background:** Give the LLM all the information it needs to answer accurately. Don't assume knowledge.\n   * **But avoid \"context flooding\":** Extremely long, irrelevant context can dilute the important instructions and degrade performance. Be concise and relevant.\n   * **For long documents:** Use techniques like summaries, key excerpts, or structured data instead of pasting entire documents if possible.\n\n### 4. **Assign a Clear Role**\n   * **Role prompting:** Instruct the model to act as a specific expert (e.g., \"You are a senior software architect...\") to shape its perspective and style.\n   * **This sets the tone, domain knowledge level, and output format expectations.**\n\n### 5. **Specify the Desired Output Format**\n   * **Explicitly state the format:** JSON, bulleted list, CSV, a paragraph, code block, etc.\n   * **Provide a template or schema:** For complex outputs (like structured data), giving a skeleton or schema dramatically improves consistency.\n   * **Example:** \"Output a JSON object with keys 'summary' and 'key_points'.\"\n\n### 6. **Break Down Complex Tasks**\n   * **Chain of Thought (CoT):** For reasoning tasks, add \"Let's think step by step\" or break the instruction into a numbered sequence of sub-tasks.\n   * **Step-by-step instructions:** Complex tasks should be decomposed into a clear series of actions for the LLM to follow.\n\n### 7. **Set Constraints and Guardrails**\n   * **Define boundaries:** Specify what *not* to do (e.g., \"Do not make up information,\" \"Avoid technical jargon\").\n   * **Set length limits:** \"Respond in 2-3 sentences.\"\n   * **Control creativity:** Use directives like \"Be factual and concise,\" or \"Use a creative metaphor.\"\n\n### 8. **Anticipate and Mitigate Issues**\n   * **Instruction following vs. context following:** Be aware that the LLM might sometimes prioritize information in the *context* over your *instructions*. Structure carefully to avoid this.\n   * **Hallucination mitigation:** Ask the model to cite its source from the provided context, or to say \"I don't know\" if the answer isn't present.\n   * **Bias & safety:** Be mindful that context can introduce or amplify biases. Frame questions neutrally.\n\n### 9. **Iterate and Refine**\n   * **Prompt engineering is iterative:** The first prompt is rarely perfect. Test, analyze failures, and refine.\n   * **Experiment with phrasing:** Small changes in wording can lead to significantly different outputs.\n\n### 10. **Technical Considerations**\n   * **Context window limit:** Know the model's token limit. Summarize or truncate context if necessary.\n   * **Token counting:** Be aware that longer contexts are more expensive (in cost/compute) and slower.\n   * **Order sensitivity:** Some models are sensitive to the order of information. Important details should not be buried in the middle.\n\n**Golden Rule:** **Write your prompt as if you were giving precise, foolproof instructions to a very competent but literal-minded assistant who has not seen the conversation before.** The model has no memory between calls unless you provide the prior context.\n\nBy following these guidelines, you significantly increase the likelihood of getting a useful, accurate, and well-formatted response from an LLM.",
+    "description": "AI-generated from query: What are the things to remember when providing llm context and prompt?",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "What are the things to remember when providing llm context and prompt?",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-08T01:10:22.504Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-08T01:10:22.509256",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-08T01:10:22.509256"
   }
 ]

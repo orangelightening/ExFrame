@@ -1419,6 +1419,33 @@
     "updated_at": "2026-02-08T11:20:23.539975"
   },
   {
+    "id": "2fbd5cd0",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Pie is the best summer, fall, winter, and spring dessert",
+      "From blueberry and cherry pies to apple, these are the best all-year-round pie recipes"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "dessert",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:24.050512",
+    "source": "https://www.delish.com/cooking/recipe-ideas/g28931947/best-pie-recipes/",
+    "origin": "surveyor",
+    "origin_query": "cooking pie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:24.050512"
+  },
+  {
     "id": "138333bc",
     "name": "These 30 pie recipe",
     "pattern_type": "procedure",
@@ -1598,6 +1625,84 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:20:27.607315"
+  },
+  {
+    "id": "979e8b4f",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Find classic pies just like Grandma used to make, such as traditional apple pie and old-fashioned chocolate pie",
+      "Get the Grandma-approved pie ideas here"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:28.935444",
+    "source": "https://www.allrecipes.com/vintage-pies-from-grandmas-recipe-box-11861550",
+    "origin": "surveyor",
+    "origin_query": "cooking Collecting pie recipes from web",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:28.935444"
+  },
+  {
+    "id": "d2ccbcf2",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "There's something about pie that reminds us of days gone by",
+      "From meringue-topped beauties to rustic apple treats, these old-fashioned pie recipes bring the nostalgia"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:29.445761",
+    "source": "https://www.tasteofhome.com/collection/vintage-pie-recipes/",
+    "origin": "surveyor",
+    "origin_query": "cooking Collecting pie recipes from web",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:29.445761"
+  },
+  {
+    "id": "62f4f95d",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "From blueberry pie and lemon icebox pie to chicken pot pie and tomato pie , you can't go wrong with any of these classic recipes that Grandma always serves"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chicken",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:29.954272",
+    "source": "https://www.southernliving.com/grandma-classic-pies-11896930",
+    "origin": "surveyor",
+    "origin_query": "cooking Collecting pie recipes from web",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:29.954272"
   },
   {
     "id": "4f050178",
@@ -1841,6 +1946,33 @@
     "updated_at": "2026-02-08T11:20:36.199953"
   },
   {
+    "id": "7885af27",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Pie is the best summer, fall, winter, and spring dessert",
+      "From blueberry and cherry pies to apple, these are the best all-year-round pie recipes"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "dessert",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:36.709977",
+    "source": "https://www.delish.com/cooking/recipe-ideas/g28931947/best-pie-recipes/",
+    "origin": "surveyor",
+    "origin_query": "pie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:36.709977"
+  },
+  {
     "id": "55739d8e",
     "name": "Find sweet and savory pie recipe",
     "pattern_type": "procedure",
@@ -1972,6 +2104,32 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:20:39.259981"
+  },
+  {
+    "id": "27f44693",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "We love pie , and we have one perfect for every season, holiday, or occasion",
+      "Embrace the seasons with our best apple pie recipe , peach pie recipe , or pumpkin pie recipe"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:39.770464",
+    "source": "https://tastesbetterfromscratch.com/category/dessert/pie/",
+    "origin": "surveyor",
+    "origin_query": "pie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:39.770464"
   },
   {
     "id": "5f5a5780",
@@ -2240,6 +2398,84 @@
     "updated_at": "2026-02-08T11:20:45.600662"
   },
   {
+    "id": "b5424aed",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "cook every single Tasty recipe and video ever - all in one place!"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:46.110169",
+    "source": "https://tasty.co/",
+    "origin": "surveyor",
+    "origin_query": "cooking recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:46.110169"
+  },
+  {
+    "id": "52c025b3",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake perfectly with these 25 tips from a seasoned expert.",
+      "preheating ovens to storing dry goods, these tips will help you avoid common mistakes and improve your results."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:47.572595",
+    "source": "https://www.bakingkneads.com/baking-tips-and-tricks/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:47.572595"
+  },
+  {
+    "id": "99f09873",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "baked goods every time? We're sharing the best baking tips from our kitchen so you'll have that baking knack, too!"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:48.083554",
+    "source": "https://www.tasteofhome.com/collection/baking-tips-that-take-your-baking-from-good-to-great/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:48.083554"
+  },
+  {
     "id": "bef3141e",
     "name": "Properly Measure Ingredients",
     "pattern_type": "procedure",
@@ -2266,6 +2502,138 @@
     "updated_at": "2026-02-08T11:20:48.597985"
   },
   {
+    "id": "da8b071a",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "cooks sometimes need help baking ."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:49.111061",
+    "source": "https://www.thespruceeats.com/baking-tips-and-tricks-4165823",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:49.111061"
+  },
+  {
+    "id": "f349cd97",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake with confidence! From measuring flour the right way to using your oven like a pro, this guide is packed with helpful advice for anyone learning to bake.",
+      "baker #homebaking #bakingforbeginners #cookietips #bakinghacks #familyrecipeideas"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:49.617449",
+    "source": "https://familyrecipeideas.com/baking-tips-every-beginner-should-know/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:49.617449"
+  },
+  {
+    "id": "106640c0",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake cookies, cakes, and other treats with this guide to common baking terms and phrases.",
+      "beat egg whites, cut in fat, and more."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:50.134343",
+    "source": "https://www.kingarthurbaking.com/learn/resources/baking-tips-techniques",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:50.134343"
+  },
+  {
+    "id": "33572bd1",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "baked goods better."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "dessert",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:50.646571",
+    "source": "https://www.epicurious.com/expert-advice/our-best-baking-tips-roll-pie-dough-swap-ingredients-make-best-brownies-gallery",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:50.646571"
+  },
+  {
+    "id": "078f3c94",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake? Check out these 15 tips and tricks to streamline the process, from preparing doughs and batters to applying final decorations."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:51.154867",
+    "source": "https://foodal.com/knowledge/baking/tips-tricks-improve-baking/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:51.154867"
+  },
+  {
     "id": "fb01fbe6",
     "name": "Learn the basics of baking with easy recipe",
     "pattern_type": "procedure",
@@ -2289,6 +2657,32 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:20:51.668905"
+  },
+  {
+    "id": "c821139f",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake successfully with these 18 tips and tricks, from getting to know your oven to choosing the right recipe."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "pie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:20:52.180222",
+    "source": "https://wheelofbaking.com/baking-101-baking-tips-for-beginners/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:20:52.180222"
   },
   {
     "id": "c2c373a3",
@@ -2339,6 +2733,58 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:36:59.520012"
+  },
+  {
+    "id": "dbd92855",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bakery-style results."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:02.026004",
+    "source": "https://thecookingfoodie.com/recipe/the-best-chocolate-cake-recipe/",
+    "origin": "surveyor",
+    "origin_query": "cooking chocolate cake recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:02.026004"
+  },
+  {
+    "id": "cf5cc80a",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Satisfy your chocolate cravings with the chocolate cake of your dreams",
+      "This cake is moist, fudgy, and has received thousands of rave reviews"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:04.707144",
+    "source": "https://thestayathomechef.com/the-most-amazing-chocolate-cake/",
+    "origin": "surveyor",
+    "origin_query": "cooking chocolate cake recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:04.707144"
   },
   {
     "id": "83ae51ef",
@@ -2496,6 +2942,31 @@
     "updated_at": "2026-02-08T11:37:20.475517"
   },
   {
+    "id": "cf9bb471",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "cooking and preparation times yields image and many more."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:23.864409",
+    "source": "https://docs.recipe-scrapers.com/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:23.864409"
+  },
+  {
     "id": "84f7fa6a",
     "name": "What's the best cooking recipe",
     "pattern_type": "procedure",
@@ -2520,6 +2991,210 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:37:26.675581"
+  },
+  {
+    "id": "67d6511b",
+    "name": "The Recipe Scraper is a powerful Apify Actor designed to extract detailed recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make the recipe scraper is a powerful apify actor designed to extract detailed recipe",
+    "solution": "Follow these steps to create the recipe scraper is a powerful apify actor designed to extract detailed recipe",
+    "description": "A step-by-step the recipe scraper is a powerful apify actor designed to extract detailed recipe",
+    "steps": [
+      "cooking websites.",
+      "cooking websites."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:29.607479",
+    "source": "https://apify.com/vulnv/recipe-scraper",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:29.607479"
+  },
+  {
+    "id": "dae893ce",
+    "name": "Python package for scraping recipe",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Python package for scraping recipes data",
+      "Contribute to hhursev/recipe-scrapers development by creating an account on GitHub"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:32.657219",
+    "source": "https://github.com/hhursev/recipe-scrapers",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:32.657219"
+  },
+  {
+    "id": "764e8893",
+    "name": "6 Best Multisite Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make 6 best multisite recipe",
+    "solution": "Follow these steps to create 6 best multisite recipe",
+    "description": "A step-by-step 6 best multisite recipe",
+    "steps": [
+      "cooking websites at once."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:34.836719",
+    "source": "https://www.scrapediary.com/multisite-recipes-scrapers/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:34.836719"
+  },
+  {
+    "id": "4cf5017d",
+    "name": "The Benefits of Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make the benefits of recipe",
+    "solution": "Follow these steps to create the benefits of recipe",
+    "description": "A step-by-step the benefits of recipe",
+    "steps": [
+      "cooking interests by accessing diverse platforms ."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:37.614567",
+    "source": "https://www.fooddatascrape.com/scrape-food-recipe-data-for-gourmet-insights.php",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:37.614567"
+  },
+  {
+    "id": "fd2733a4",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "cooking instructions from Akis Petretzikis using Thunderbit's AI-powered scraper."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:40.612302",
+    "source": "https://thunderbit.com/template/akis-petretzikis-scraper",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:40.612302"
+  },
+  {
+    "id": "bf3fc4f9",
+    "name": "STEP-BY-STEP GUIDE Python Selenium: Scraping A Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "STEP-BY-STEP GUIDE Python Selenium: Scraping A Recipe Website Data science insights while you scrapping a platform for data science practice",
+      "This time I will explain (with full code \u2026"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:42.765054",
+    "source": "https://medium.com/analytics-vidhya/python-selenium-web-scraping-in-eight-steps-7d33b263f399",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:42.765054"
+  },
+  {
+    "id": "f03c1691",
+    "name": "What does Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make what does recipe",
+    "solution": "Follow these steps to create what does recipe",
+    "description": "A step-by-step what does recipe",
+    "steps": [
+      "Cookpad, Allrecipes, Foodnetwork, and Tasty."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:45.140346",
+    "source": "https://apify.com/web.harvester/recipes-scraper",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:45.140346"
+  },
+  {
+    "id": "b3082a99",
+    "name": "Finding the best recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make finding the best recipe",
+    "solution": "Follow these steps to create finding the best recipe",
+    "description": "A step-by-step finding the best recipe",
+    "steps": [
+      "cooking easier for both home cooks and food professionals.",
+      "cooking times, and nutritional information automatically from"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:37:47.512748",
+    "source": "https://www.scrapediary.com/recipe-scrapers/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping for",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:37:47.512748"
   },
   {
     "id": "be8e87b3",
@@ -3049,6 +3724,59 @@
     "updated_at": "2026-02-08T11:38:46.999635"
   },
   {
+    "id": "b9a38775",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake perfectly with these 25 tips from a seasoned expert.",
+      "preheating ovens to storing dry goods, these tips will help you avoid common mistakes and improve your results."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:38:50.332535",
+    "source": "https://www.bakingkneads.com/baking-tips-and-tricks/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:38:50.332535"
+  },
+  {
+    "id": "ea1c9288",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "baked goods every time? We're sharing the best baking tips from our kitchen so you'll have that baking knack, too!"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:38:52.556786",
+    "source": "https://www.tasteofhome.com/collection/baking-tips-that-take-your-baking-from-good-to-great/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:38:52.556786"
+  },
+  {
     "id": "d1dd5008",
     "name": "Properly Measure Ingredients",
     "pattern_type": "procedure",
@@ -3075,6 +3803,138 @@
     "updated_at": "2026-02-08T11:38:54.999223"
   },
   {
+    "id": "f86e7991",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "cooks sometimes need help baking ."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:38:57.361268",
+    "source": "https://www.thespruceeats.com/baking-tips-and-tricks-4165823",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:38:57.361268"
+  },
+  {
+    "id": "e8315751",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake with confidence! From measuring flour the right way to using your oven like a pro, this guide is packed with helpful advice for anyone learning to bake.",
+      "baker #homebaking #bakingforbeginners #cookietips #bakinghacks #familyrecipeideas"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:39:00.137981",
+    "source": "https://familyrecipeideas.com/baking-tips-every-beginner-should-know/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:39:00.137981"
+  },
+  {
+    "id": "6e8e3e30",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake cookies, cakes, and other treats with this guide to common baking terms and phrases.",
+      "beat egg whites, cut in fat, and more."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:39:02.880766",
+    "source": "https://www.kingarthurbaking.com/learn/resources/baking-tips-techniques",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:39:02.880766"
+  },
+  {
+    "id": "171dd177",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "baked goods better."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "dessert",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:39:08.184212",
+    "source": "https://www.epicurious.com/expert-advice/our-best-baking-tips-roll-pie-dough-swap-ingredients-make-best-brownies-gallery",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:39:08.184212"
+  },
+  {
+    "id": "7c800faf",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake? Check out these 15 tips and tricks to streamline the process, from preparing doughs and batters to applying final decorations."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:39:10.937050",
+    "source": "https://foodal.com/knowledge/baking/tips-tricks-improve-baking/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:39:10.937050"
+  },
+  {
     "id": "439ddb11",
     "name": "Learn the basics of baking with easy recipe",
     "pattern_type": "procedure",
@@ -3098,6 +3958,32 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:39:13.378476"
+  },
+  {
+    "id": "16aea041",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to make recipe from cooking",
+    "solution": "Follow these steps to create recipe from cooking",
+    "description": "A step-by-step recipe from cooking",
+    "steps": [
+      "bake successfully with these 18 tips and tricks, from getting to know your oven to choosing the right recipe."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "baking",
+      "chocolate cake recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:39:15.834380",
+    "source": "https://wheelofbaking.com/baking-101-baking-tips-for-beginners/",
+    "origin": "surveyor",
+    "origin_query": "baking tips",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:39:15.834380"
   },
   {
     "id": "b75b1e2e",
@@ -3168,6 +4054,29 @@
     "updated_at": "2026-02-08T11:41:17.786342"
   },
   {
+    "id": "6f5f386c",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "whenever you need to quickly satisfy your sweet tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:17.790759",
+    "source": "https://www.allrecipes.com/recipe/9599/quick-and-easy-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:17.790759"
+  },
+  {
     "id": "3924b33e",
     "name": "Most Amazing Brownies",
     "pattern_type": "procedure",
@@ -3199,6 +4108,52 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:41:20.131203"
+  },
+  {
+    "id": "8db119c3",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you like darker chocolate, or milk chocolate for those with a sweeter tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:20.136558",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:20.136558"
+  },
+  {
+    "id": "7e08700a",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ifting, and secure it with a quick spritz of non-stick spray underneath.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:20.141139",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:20.141139"
   },
   {
     "id": "2d059eee",
@@ -3233,6 +4188,29 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:41:22.678032"
+  },
+  {
+    "id": "cbe582f4",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you think about it, we can never have too many recipes that combine butter, sugar, and chocolate.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:22.682612",
+    "source": "https://sallysbakingaddiction.com/seriously-fudgy-homemade-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:22.682612"
   },
   {
     "id": "d959a970",
@@ -3337,6 +4315,29 @@
     "updated_at": "2026-02-08T11:41:25.862340"
   },
   {
+    "id": "d2813b9b",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "whenever you need to quickly satisfy your sweet tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:25.866889",
+    "source": "https://www.allrecipes.com/recipe/9599/quick-and-easy-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:25.866889"
+  },
+  {
     "id": "77347579",
     "name": "Our Absolute Best Brownie Recipe",
     "pattern_type": "procedure",
@@ -3370,6 +4371,29 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:41:27.885537"
+  },
+  {
+    "id": "ee84b633",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "If you\u2019ve got leftover sweet potatoes hanging out in the fridge, this is a delicious way to put them to work.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:27.890523",
+    "source": "https://www.bhg.com/brownie-recipes-11896170",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:27.890523"
   },
   {
     "id": "d9a9dbed",
@@ -3406,6 +4430,29 @@
     "updated_at": "2026-02-08T11:41:28.244129"
   },
   {
+    "id": "ad085a0c",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you think about it, we can never have too many recipes that combine butter, sugar, and chocolate.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:28.248847",
+    "source": "https://sallysbakingaddiction.com/seriously-fudgy-homemade-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:28.248847"
+  },
+  {
     "id": "18825f20",
     "name": "Homemade Chocolate Brownies",
     "pattern_type": "procedure",
@@ -3438,6 +4485,75 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:41:30.749418"
+  },
+  {
+    "id": "28e51830",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "you can actually pick it up, rather than scooping up gloops of raw batter!\nAnd that crinkly top we all know and love!\nWhat makes a good brownie\nThe secret to a really great brownie is using both melted chocolate AND cocoa powder, plus butter instead of oil (because butter has way better flavour than oil).",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:30.754508",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:30.754508"
+  },
+  {
+    "id": "40af3c59",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you overcook them, they might\ncakey, but they still have that rich, fudgy mouthfeel.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:30.763391",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:30.763391"
+  },
+  {
+    "id": "5616148e",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "when brownies are done\nStick a toothpick in the centre of the brownie, hold it for 2 seconds, then take it out.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:30.769456",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:30.769456"
   },
   {
     "id": "95e9fe0a",
@@ -3508,6 +4624,29 @@
     "updated_at": "2026-02-08T11:41:33.781295"
   },
   {
+    "id": "9d11a357",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "should be just soft enough to incorporate with the other ingredients but not too runny, or it will flow over the top of the brownies and create two distinct layers.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:33.789424",
+    "source": "https://cooking.nytimes.com/article/brownies-recipes",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:33.789424"
+  },
+  {
     "id": "92ead838",
     "name": "Most Amazing Brownies",
     "pattern_type": "procedure",
@@ -3539,6 +4678,52 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:41:34.124883"
+  },
+  {
+    "id": "ea2c5da1",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you like darker chocolate, or milk chocolate for those with a sweeter tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:34.130605",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:34.130605"
+  },
+  {
+    "id": "796c39f0",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ifting, and secure it with a quick spritz of non-stick spray underneath.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:34.139128",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:34.139128"
   },
   {
     "id": "49b73708",
@@ -3610,6 +4795,75 @@
     "updated_at": "2026-02-08T11:41:36.733674"
   },
   {
+    "id": "26f49d91",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "you can actually pick it up, rather than scooping up gloops of raw batter!\nAnd that crinkly top we all know and love!\nWhat makes a good brownie\nThe secret to a really great brownie is using both melted chocolate AND cocoa powder, plus butter instead of oil (because butter has way better flavour than oil).",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:36.738829",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:36.738829"
+  },
+  {
+    "id": "01cd9823",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you overcook them, they might\ncakey, but they still have that rich, fudgy mouthfeel.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:36.751984",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:36.751984"
+  },
+  {
+    "id": "8db62c7d",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "when brownies are done\nStick a toothpick in the centre of the brownie, hold it for 2 seconds, then take it out.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:36.756703",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:36.756703"
+  },
+  {
     "id": "04a3b789",
     "name": "I can confidently say that this is the best brownie recipe",
     "pattern_type": "procedure",
@@ -3669,6 +4923,29 @@
     "updated_at": "2026-02-08T11:41:39.348482"
   },
   {
+    "id": "4823098f",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "should be just soft enough to incorporate with the other ingredients but not too runny, or it will flow over the top of the brownies and create two distinct layers.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:39.355972",
+    "source": "https://cooking.nytimes.com/article/brownies-recipes",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:39.355972"
+  },
+  {
     "id": "47edbb39",
     "name": "Our Absolute Best Brownie Recipe",
     "pattern_type": "procedure",
@@ -3704,6 +4981,55 @@
     "updated_at": "2026-02-08T11:41:41.990460"
   },
   {
+    "id": "e91cf072",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "If you\u2019ve got leftover sweet potatoes hanging out in the fridge, this is a delicious way to put them to work.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:41.995370",
+    "source": "https://www.bhg.com/brownie-recipes-11896170",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:41.995370"
+  },
+  {
+    "id": "40a41d2e",
+    "name": "STEP-BY-STEP GUIDE Python Selenium: Scraping A Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "STEP-BY-STEP GUIDE Python Selenium: Scraping A Recipe Website Data science insights while you scrapping a platform for data science practice",
+      "This time I will explain ( with full code \u2026"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:42.289670",
+    "source": "https://medium.com/analytics-vidhya/python-selenium-web-scraping-in-eight-steps-7d33b263f399",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:42.289670"
+  },
+  {
     "id": "44f64586",
     "name": "I can confidently say that this is the best brownie recipe",
     "pattern_type": "procedure",
@@ -3727,6 +5053,35 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:41:44.336499"
+  },
+  {
+    "id": "a8060b46",
+    "name": "package for extracting recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make package for extracting recipe",
+    "solution": "Follow these steps to create package for extracting recipe",
+    "description": "A step-by-step package for extracting recipe",
+    "steps": [
+      "cooking websites.",
+      "cooking times, and more.",
+      "cooking websites currently supported.",
+      "cooking and preparation times\nsection to see how to get started with the library.",
+      "cooking landscape:\nMeal prep and planning applications\nSmart shopping list generators\nRecipe collection managers\nCooking time estimators\nDiet and nutrition trackers\nFood blogs and recipe aggregators\nWe're excited to see what you'll create! Feel free to share your project in our\n- we love seeing what others build with the library."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:44.568839",
+    "source": "https://docs.recipe-scrapers.com/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:44.568839"
   },
   {
     "id": "defea957",
@@ -3763,6 +5118,500 @@
     "updated_at": "2026-02-08T11:41:47.023129"
   },
   {
+    "id": "1830e9d0",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "If you like you can now\nadd 1/2 cup of chocolate chips\n, nuts, m&m\u2019s, marshmallows, Reese\u2019s or whatever your heart desires!\nTIP FOR MAKING THE BEST FUDGE BROWNIES\nDon\u2019t overmix the batter.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:47.029270",
+    "source": "https://gimmedelicious.com/easy-one-bowl-fudgy-cocoa-brownies/",
+    "origin": "surveyor",
+    "origin_query": "cooking brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:47.029270"
+  },
+  {
+    "id": "2436e57a",
+    "name": "A Python package for extracting recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make a python package for extracting recipe",
+    "solution": "Follow these steps to create a python package for extracting recipe",
+    "description": "A step-by-step a python package for extracting recipe",
+    "steps": [
+      "cooking websites."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:48.335380",
+    "source": "https://github.com/hhursev/recipe-scrapers",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:48.335380"
+  },
+  {
+    "id": "e9c2633f",
+    "name": "package for extracting recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make package for extracting recipe",
+    "solution": "Follow these steps to create package for extracting recipe",
+    "description": "A step-by-step package for extracting recipe",
+    "steps": [
+      "cooking websites.",
+      "cooking times, and more.",
+      "cooking websites currently supported.",
+      "cooking and preparation times\nsection to see how to get started with the library.",
+      "cooking landscape:\nMeal prep and planning applications\nSmart shopping list generators\nRecipe collection managers\nCooking time estimators\nDiet and nutrition trackers\nFood blogs and recipe aggregators\nWe're excited to see what you'll create! Feel free to share your project in our\n- we love seeing what others build with the library."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:50.321180",
+    "source": "https://docs.recipe-scrapers.com/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:50.321180"
+  },
+  {
+    "id": "28e68092",
+    "name": "Python Web Scraping",
+    "pattern_type": "procedure",
+    "problem": "How to make python web scraping",
+    "solution": "Follow these steps to create python web scraping",
+    "description": "A step-by-step python web scraping",
+    "steps": [
+      "address"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:50.951938",
+    "source": "https://www.scrapingbee.com/blog/web-scraping-101-with-python/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:50.951938"
+  },
+  {
+    "id": "31d03b0c",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "If not, we can grab it from the\nofficial Python website\nNow that Python's ready to go, we should create a virtual environment to keep things organized.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:50.957409",
+    "source": "https://www.scrapingbee.com/blog/web-scraping-101-with-python/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:50.957409"
+  },
+  {
+    "id": "15caf94b",
+    "name": "A Python package for extracting recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make a python package for extracting recipe",
+    "solution": "Follow these steps to create a python package for extracting recipe",
+    "description": "A step-by-step a python package for extracting recipe",
+    "steps": [
+      "cooking websites."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:53.166513",
+    "source": "https://github.com/hhursev/recipe-scrapers",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:53.166513"
+  },
+  {
+    "id": "94aabf3c",
+    "name": "Recipes Ready-to-use code examples for common web scraping tasks. Each recipe",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Recipes Ready-to-use code examples for common web scraping tasks",
+      "Each recipe is a complete, runnable example you can copy and adapt",
+      "For full API reference, see the API documentation"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:53.686394",
+    "source": "https://spider.cloud/docs/guides/recipes/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:53.686394"
+  },
+  {
+    "id": "c07e3b72",
+    "name": "The Recipe Scraper is a powerful Apify Actor designed to extract detailed recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make the recipe scraper is a powerful apify actor designed to extract detailed recipe",
+    "solution": "Follow these steps to create the recipe scraper is a powerful apify actor designed to extract detailed recipe",
+    "description": "A step-by-step the recipe scraper is a powerful apify actor designed to extract detailed recipe",
+    "steps": [
+      "cooking websites.",
+      "cooking websites."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:55.784728",
+    "source": "https://apify.com/vulnv/recipe-scraper",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:55.784728"
+  },
+  {
+    "id": "294ead0e",
+    "name": "Recipe from Cooking",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Web Scraping with Python Tutorial - A Complete Guide with Examples Learn web scraping with our guide on extracting data from websites using Python libraries PyUnit, pytest, and Beautiful Soup for static and dynamic sites"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:56.702506",
+    "source": "https://www.testmuai.com/blog/web-scraping-with-python/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:56.702506"
+  },
+  {
+    "id": "c47021c7",
+    "name": "Powered Akis Petretzikis Scraper",
+    "pattern_type": "procedure",
+    "problem": "How to make powered akis petretzikis scraper",
+    "solution": "Follow these steps to create powered akis petretzikis scraper",
+    "description": "A step-by-step powered akis petretzikis scraper",
+    "steps": [
+      "cooking instructions from\n.",
+      "cooking instructions from the\n, you simply navigate to any recipe or ingredient page, click\nto instantly generate structured data\u2014no coding or manual copy-pasting required.",
+      "cooking instructions.",
+      "cook the dish.",
+      "cookbooks.",
+      "Cooks & Meal Planners\n: Organize favorite recipes, compare preparation times, or create shopping lists."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:58.709834",
+    "source": "https://thunderbit.com/template/akis-petretzikis-scraper",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:58.709834"
+  },
+  {
+    "id": "52acbcd0",
+    "name": "The Benefits of Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make the benefits of recipe",
+    "solution": "Follow these steps to create the benefits of recipe",
+    "description": "A step-by-step the benefits of recipe",
+    "steps": [
+      "cooking interests by accessing diverse platforms ."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:41:59.563701",
+    "source": "https://www.fooddatascrape.com/scrape-food-recipe-data-for-gourmet-insights.php",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:41:59.563701"
+  },
+  {
+    "id": "5d1997b1",
+    "name": "STEP-BY-STEP GUIDE Python Selenium: Scraping A Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "STEP-BY-STEP GUIDE Python Selenium: Scraping A Recipe Website Data science insights while you scrapping a platform for data science practice",
+      "This time I will explain ( with full code \u2026"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:01.031445",
+    "source": "https://medium.com/analytics-vidhya/python-selenium-web-scraping-in-eight-steps-7d33b263f399",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:01.031445"
+  },
+  {
+    "id": "158dd123",
+    "name": "What does Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make what does recipe",
+    "solution": "Follow these steps to create what does recipe",
+    "description": "A step-by-step what does recipe",
+    "steps": [
+      "Cookpad, Allrecipes, Foodnetwork, and Tasty."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:01.967704",
+    "source": "https://apify.com/web.harvester/recipes-scraper",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:01.967704"
+  },
+  {
+    "id": "99c85523",
+    "name": "The Benefits of Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make the benefits of recipe",
+    "solution": "Follow these steps to create the benefits of recipe",
+    "description": "A step-by-step the benefits of recipe",
+    "steps": [
+      "cooking interests by accessing diverse platforms ."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:04.832848",
+    "source": "https://www.fooddatascrape.com/scrape-food-recipe-data-for-gourmet-insights.php",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:04.832848"
+  },
+  {
+    "id": "f0d0eaff",
+    "name": "Explore this online recipe",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Explore this online recipe-scraper sandbox and experiment with it yourself using our interactive online playground",
+      "You can use it as a template to jumpstart your development with this pre-built solution",
+      "With CodeSandbox, you can easily learn how CodeSandbox has skilfully integrated different packages and frameworks to create a truly impressive web app",
+      "You can also fork this sandbox and keep"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:05.448615",
+    "source": "https://codesandbox.io/s/recipe-scraper-c2ht3q",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:05.448615"
+  },
+  {
+    "id": "8456db34",
+    "name": "Finding the best recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make finding the best recipe",
+    "solution": "Follow these steps to create finding the best recipe",
+    "description": "A step-by-step finding the best recipe",
+    "steps": [
+      "cooking easier for both home cooks and food professionals.",
+      "cooking utensils and ingredients\nRecipe scraping tools\ncan extract ingredients, instructions, cooking times, and nutritional information automatically from any cooking website.",
+      "cooking websites.",
+      "Cookpad, Allrecipes, Food Network, and Tasty, making it useful for food bloggers, researchers, and culinary enthusiasts who need to gather recipe data efficiently.",
+      "cooking websites.",
+      "cooking times from both standard HTML structure and Schema markup.",
+      "cooking instructions, and preparation times\nHandles both HTML structure and Schema markup\nMaintains active development and community support\nProvides consistent data formatting\nIncludes built-in error handling\nRegular updates with new website support\n3.",
+      "cooking instructions, preparation times, and user ratings automatically and at scale."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:07.315658",
+    "source": "https://www.scrapediary.com/recipe-scrapers/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:07.315658"
+  },
+  {
+    "id": "4edc79ab",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ify Recipes Scraper\nApify Recipes Scraper\nis a versatile web scraping tool designed to collect recipe data from multiple popular cooking websites.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:07.332219",
+    "source": "https://www.scrapediary.com/recipe-scrapers/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:07.332219"
+  },
+  {
+    "id": "835d0238",
+    "name": "Practical Web Scraping Exercise Not",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "Reverse Engineering a Food Nutrition API: A Practical Web Scraping Exercise Not too long ago, I came across a Reddit post where someone new to web scraping asked a pretty straightforward \u2026"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:07.718302",
+    "source": "https://medium.com/@redhawk1230/reverse-engineering-a-food-nutrition-api-a-practical-web-scraping-exercise-74c75a9053ad",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:07.718302"
+  },
+  {
+    "id": "b5be4b56",
+    "name": "Simplescraper Meet Simplescraper",
+    "pattern_type": "procedure",
+    "problem": "How to prepare this recipe",
+    "solution": "Follow the recipe steps",
+    "description": "Cooking instructions extracted from recipe",
+    "steps": [
+      "How to Scrape websites with Simplescraper Meet Simplescraper 2",
+      "0 The new Simplescraper sidepanel extension makes web scraping more simple than ever",
+      "Follow the updated steps below to start scraping data quickly and easily"
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:09.846007",
+    "source": "https://simplescraper.io/docs/how-scrape-save-recipes",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:09.846007"
+  },
+  {
     "id": "5ee3d0cb",
     "name": "Tricia Manzanero Stuedeman",
     "pattern_type": "procedure",
@@ -3794,6 +5643,84 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:42:11.406125"
+  },
+  {
+    "id": "292a9040",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "whenever you need to quickly satisfy your sweet tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:11.411790",
+    "source": "https://www.allrecipes.com/recipe/9599/quick-and-easy-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:11.411790"
+  },
+  {
+    "id": "cfbbb829",
+    "name": "Finding the best Multisite Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make finding the best multisite recipe",
+    "solution": "Follow these steps to create finding the best multisite recipe",
+    "description": "A step-by-step finding the best multisite recipe",
+    "steps": [
+      "cooking websites at once.",
+      "cooking websites across the internet.",
+      "cooking websites.",
+      "cooking websites simultaneously\nCollects detailed recipe information, including ingredients, instructions, and cooking times\nSupports automated data extraction through API integration\nProvides structured data output for easy organization\nWorks with real-time recipe updates\nHandles multiple recipe formats and layouts\nCompatible with various data export formats\n2.",
+      "cooking times, nutritional values, and user ratings automatically and at scale, making it valuable for food-related businesses and recipe aggregators.",
+      "cooking websites.",
+      "cooking times.",
+      "cooking times, and other recipe details\nCompatible with numerous popular cooking websites\nEasy-to-use, consistent API across different websites\nWorks with both HTML structure and Schema markup data\nPython-based implementation for seamless integration\nCommunity-driven development with open contributions\nWell-documented codebase for developer reference\nis a powerful web scraping API service that helps extract data from websites without getting blocked."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:11.996288",
+    "source": "https://www.scrapediary.com/multisite-recipes-scrapers/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:11.996288"
+  },
+  {
+    "id": "c5c85db9",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ify Multisite Recipes Scraper\nApify Multisite Recipes Scraper\nis a powerful tool designed to extract recipe data from multiple popular cooking websites.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:12.009313",
+    "source": "https://www.scrapediary.com/multisite-recipes-scrapers/",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:12.009313"
   },
   {
     "id": "89eeaa43",
@@ -3828,6 +5755,123 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:42:13.912022"
+  },
+  {
+    "id": "ab16cb9e",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "substitute will work ok for gluten free brownies.",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:13.918362",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:13.918362"
+  },
+  {
+    "id": "3fe93b20",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "replacement and DO NOT suggest making them without eggs.",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:13.924175",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:13.924175"
+  },
+  {
+    "id": "cf7e1f12",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "You can never have enough chocolate flavor! Use milk chocolate chips, white chocolate chips, dark chocolate, or even, peanut butter chips! Chocolate chunks make a wonderful replacement, especially for larger pockets of gooey chocolate.",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:13.930267",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:13.930267"
+  },
+  {
+    "id": "213c12ba",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ift helps them not be too fudgy.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:13.935849",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:13.935849"
+  },
+  {
+    "id": "304cba4a",
+    "name": "What does Recipe",
+    "pattern_type": "procedure",
+    "problem": "How to make what does recipe",
+    "solution": "Follow these steps to create what does recipe",
+    "description": "A step-by-step what does recipe",
+    "steps": [
+      "Cookpad, Allrecipes, Foodnetwork, and Tasty."
+    ],
+    "tags": [
+      "cooking",
+      "recipe",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:14.218740",
+    "source": "https://apify.com/web.harvester/recipes-scraper",
+    "origin": "surveyor",
+    "origin_query": "cooking Testing full page scraping with",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:14.218740"
   },
   {
     "id": "c26afcef",
@@ -3895,6 +5939,29 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:42:17.876126"
+  },
+  {
+    "id": "043a7971",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "whenever you need to quickly satisfy your sweet tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:42:17.882553",
+    "source": "https://www.allrecipes.com/recipe/9599/quick-and-easy-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:42:17.882553"
   },
   {
     "id": "f30a90d2",
@@ -3966,6 +6033,98 @@
     "updated_at": "2026-02-08T11:43:09.576327"
   },
   {
+    "id": "09c25252",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "substitute will work ok for gluten free brownies.",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:09.582688",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:09.582688"
+  },
+  {
+    "id": "1ba86a77",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "replacement and DO NOT suggest making them without eggs.",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:09.591850",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:09.591850"
+  },
+  {
+    "id": "96689348",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "You can never have enough chocolate flavor! Use milk chocolate chips, white chocolate chips, dark chocolate, or even, peanut butter chips! Chocolate chunks make a wonderful replacement, especially for larger pockets of gooey chocolate.",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:09.598204",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:09.598204"
+  },
+  {
+    "id": "1add9e0d",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ift helps them not be too fudgy.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:09.604534",
+    "source": "https://bakerbynature.com/the-best-cocoa-fudge-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:09.604534"
+  },
+  {
     "id": "a4a5edf1",
     "name": "Most Amazing Brownies",
     "pattern_type": "procedure",
@@ -3997,6 +6156,52 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:43:10.185761"
+  },
+  {
+    "id": "bf366ba9",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you like darker chocolate, or milk chocolate for those with a sweeter tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:10.193526",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:10.193526"
+  },
+  {
+    "id": "0deed435",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ifting, and secure it with a quick spritz of non-stick spray underneath.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:10.203642",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:10.203642"
   },
   {
     "id": "c6c2c67c",
@@ -4065,6 +6270,75 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:43:12.905268"
+  },
+  {
+    "id": "24ad9cfb",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "you can actually pick it up, rather than scooping up gloops of raw batter!\nAnd that crinkly top we all know and love!\nWhat makes a good brownie\nThe secret to a really great brownie is using both melted chocolate AND cocoa powder, plus butter instead of oil (because butter has way better flavour than oil).",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:12.911988",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:12.911988"
+  },
+  {
+    "id": "0853f2f9",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you overcook them, they might\ncakey, but they still have that rich, fudgy mouthfeel.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:12.921350",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:12.921350"
+  },
+  {
+    "id": "30f19fe5",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "when brownies are done\nStick a toothpick in the centre of the brownie, hold it for 2 seconds, then take it out.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:12.927823",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:12.927823"
   },
   {
     "id": "c7e2caa0",
@@ -4136,6 +6410,29 @@
     "updated_at": "2026-02-08T11:43:15.546296"
   },
   {
+    "id": "f94c6a11",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you think about it, we can never have too many recipes that combine butter, sugar, and chocolate.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:15.553647",
+    "source": "https://sallysbakingaddiction.com/seriously-fudgy-homemade-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:15.553647"
+  },
+  {
     "id": "35c13d14",
     "name": "Most Amazing Brownies",
     "pattern_type": "procedure",
@@ -4167,6 +6464,52 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:43:16.947421"
+  },
+  {
+    "id": "7809fa3d",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you like darker chocolate, or milk chocolate for those with a sweeter tooth.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:16.954455",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:16.954455"
+  },
+  {
+    "id": "065d8ad2",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "ifting, and secure it with a quick spritz of non-stick spray underneath.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:16.961150",
+    "source": "https://thestayathomechef.com/brownie-recipe/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:16.961150"
   },
   {
     "id": "03302397",
@@ -4227,6 +6570,75 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:43:19.560981"
+  },
+  {
+    "id": "2bd86692",
+    "name": "Ingredient Substitution",
+    "pattern_type": "substitution",
+    "problem": "Missing an ingredient or need alternative",
+    "solution": "you can actually pick it up, rather than scooping up gloops of raw batter!\nAnd that crinkly top we all know and love!\nWhat makes a good brownie\nThe secret to a really great brownie is using both melted chocolate AND cocoa powder, plus butter instead of oil (because butter has way better flavour than oil).",
+    "description": "Substitute one ingredient for another",
+    "steps": [],
+    "tags": [
+      "substitution",
+      "ingredients",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:19.570838",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:19.570838"
+  },
+  {
+    "id": "702bd83d",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you overcook them, they might\ncakey, but they still have that rich, fudgy mouthfeel.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:19.581494",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:19.581494"
+  },
+  {
+    "id": "eb847b91",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "when brownies are done\nStick a toothpick in the centre of the brownie, hold it for 2 seconds, then take it out.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:19.588397",
+    "source": "https://www.recipetineats.com/easy-chocolate-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:19.588397"
   },
   {
     "id": "46fd8ea1",
@@ -4296,6 +6708,29 @@
     "llm_generated": true,
     "confidence": 0.7,
     "updated_at": "2026-02-08T11:43:22.087672"
+  },
+  {
+    "id": "ae7f0e88",
+    "name": "Cooking Troubleshooting Tip",
+    "pattern_type": "troubleshooting",
+    "problem": "Something might go wrong during cooking",
+    "solution": "if you think about it, we can never have too many recipes that combine butter, sugar, and chocolate.",
+    "description": "Handle common cooking issues",
+    "steps": [],
+    "tags": [
+      "troubleshooting",
+      "tips",
+      "brownie recipes",
+      "surveyor"
+    ],
+    "domain": "cooking",
+    "created_at": "2026-02-08T11:43:22.094755",
+    "source": "https://sallysbakingaddiction.com/seriously-fudgy-homemade-brownies/",
+    "origin": "surveyor",
+    "origin_query": "brownie recipes",
+    "llm_generated": true,
+    "confidence": 0.7,
+    "updated_at": "2026-02-08T11:43:22.094755"
   },
   {
     "id": "c61edf24",
@@ -6022,107 +8457,5 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-02-08T14:25:34.100384"
-  },
-  {
-    "id": "cooking_d03ad898",
-    "pattern_id": "cooking_d03ad898",
-    "name": "// get me a recipe for dutch apple pie. the one made with granny smith apples and crumble topping. citations please.",
-    "domain": "cooking",
-    "problem": "// get me a recipe for dutch apple pie. the one made with granny smith apples and crumble topping. citations please.",
-    "solution": "Of course. Here is a recipe for a classic Dutch Apple Pie (*Appeltaart*) with a crumble topping (*kruimeldeeg*), specifically using Granny Smith apples.\n\n### **Dutch Apple Pie with Crumble Topping**\n\nThis version features a buttery, shortcrust-style base, a filling of tart Granny Smith apples spiced with cinnamon, and a signature sandy crumble topping.\n\n**Yield:** One 9-inch (23 cm) pie, serving 8-10\n**Prep Time:** 30 minutes\n**Chill Time:** 30 minutes\n**Cook Time:** 60-70 minutes\n\n---\n\n#### **Ingredients**\n\n**For the Crust:**\n*   2 cups (250g) all-purpose flour\n*   \u00be cup (150g) granulated sugar\n*   \u00bd teaspoon salt\n*   \u00be cup (170g) cold unsalted butter, cubed\n*   1 large egg, lightly beaten\n*   (Optional) 1 teaspoon vanilla extract\n\n**For the Filling:**\n*   2 lbs (about 900g or 6-7 medium) Granny Smith apples\n*   \u2153 cup (65g) granulated sugar\n*   2 tablespoons (15g) all-purpose flour\n*   1 \u00bd teaspoons ground cinnamon\n*   1 tablespoon fresh lemon juice\n\n**For the Crumble Topping:**\n*   1 cup (125g) all-purpose flour\n*   \u00bd cup (100g) light brown sugar, packed\n*   \u00bd cup (115g) cold unsalted butter, cubed\n*   \u00bc teaspoon salt\n\n---\n\n#### **Instructions**\n\n**1. Make the Crust:**\n*   In a food processor, pulse the flour, sugar, and salt. Add the cold, cubed butter and pulse until the mixture resembles coarse sand.\n*   Add the beaten egg (and vanilla, if using) and pulse just until the dough begins to clump together.\n*   Turn the dough out onto a work surface. Knead briefly to bring it together, then press it into a disk. Wrap in plastic and refrigerate for at least 30 minutes.\n\n**2. Prepare the Filling:**\n*   Peel, core, and slice the Granny Smith apples into \u00bc-inch thick slices or chunks.\n*   In a large bowl, toss the apple slices with lemon juice. Add the sugar, flour, and cinnamon, and toss until evenly coated. Set aside.\n\n**3. Make the Crumble Topping:**\n*   In a medium bowl, combine the flour, brown sugar, and salt. Add the cold, cubed butter.\n*   Using your fingertips, a pastry cutter, or a fork, work the butter into the dry ingredients until the mixture forms clumps of varying sizes, from pea-sized to coarse crumbs. Refrigerate until needed.\n\n**4. Assemble the Pie:**\n*   Preheat your oven to 375\u00b0F (190\u00b0C). Lightly grease a 9-inch springform or deep pie pan.\n*   Press the chilled crust dough evenly into the bottom and up the sides of the pan. There is no need to pre-bake (blind bake) for this style.\n*   Spoon the apple filling into the crust, pressing down gently to minimize gaps.\n*   Evenly sprinkle the chilled crumble topping over the entire surface of the apples.\n\n**5. Bake:**\n*   Place the pie on a baking sheet (to catch any drips) and bake for 60-70 minutes, or until the crumble topping is golden brown and the filling is bubbling around the edges.\n*   If the topping browns too quickly, you can loosely tent the pie with aluminum foil.\n\n**6. Cool and Serve:**\n*   Let the pie cool completely in the pan on a wire rack (at least 2-3 hours). This is crucial for the filling to set.\n*   Serve at room temperature, ideally with a dollop of freshly whipped cream.\n\n---\n\n### **Citations & Key Knowledge Points (Based on LLM Training Data):**\n\n*   **Distinction from American Pie:** Dutch apple pie is characterized by its **crumb topping** (*kruimeldeeg* or *kruimel*), as opposed to a full top crust. The base is also typically a sweet, shortcrust pastry, not a flaky pie dough (Source: General culinary knowledge of European baking traditions).\n*   **Apple Choice:** **Granny Smith apples** are highly recommended for baking due to their firm texture and tart flavor, which holds up well during cooking and balances the sweetness of the crust and topping (Source: Widely accepted culinary principle).\n*   **No Pre-Baking:** Traditional Dutch *appeltaart* recipes often do **not** require pre-baking (blind baking) the crust, as the long baking time with the filling is sufficient to cook it through (Source: Common technique in recipes from authoritative sources like *The Dutch Table* and other culinary websites).\n*   **Use of a Springform Pan:** While a pie dish works, a **springform pan** is traditional for deeper Dutch apple pies, making for easier serving (Source: Standard equipment noted in recipes for Dutch *appeltaart*).\n*   **Importance of Cooling:** Allowing the pie to cool completely is non-negotiable. This allows the pectin in the apples to set the juices, preventing a runny filling (Source: Fundamental fruit pie baking science).",
-    "description": "AI-generated from query: // get me a recipe for dutch apple pie. the one made with granny smith apples and crumble topping. citations please.",
-    "pattern_type": "knowledge",
-    "confidence": 0.7,
-    "status": "validated",
-    "origin": "llm_external_search",
-    "origin_query": "// get me a recipe for dutch apple pie. the one made with granny smith apples and crumble topping. citations please.",
-    "llm_generated": true,
-    "validated_by": "current_user",
-    "validated_at": "2026-02-08T20:31:51.580Z",
-    "validation_method": "query_portal_acceptance",
-    "tags": [
-      "external_search",
-      "llm_generated"
-    ],
-    "created_at": "2026-02-08T20:31:51.589382",
-    "times_accessed": 0,
-    "code": null,
-    "updated_at": "2026-02-08T20:31:51.589382"
-  },
-  {
-    "id": "cooking_be640f84",
-    "pattern_id": "cooking_be640f84",
-    "name": "Test Save Pattern",
-    "domain": "cooking",
-    "problem": "Test",
-    "solution": "Test solution",
-    "description": "Testing if save works",
-    "pattern_type": "knowledge",
-    "confidence": 0.5,
-    "status": "validated",
-    "origin": "llm_external_search",
-    "origin_query": "",
-    "llm_generated": true,
-    "validated_by": "current_user",
-    "validated_at": "2026-02-08T20:54:09.026336Z",
-    "validation_method": "query_portal_acceptance",
-    "tags": [
-      "llm_generated"
-    ],
-    "created_at": "2026-02-08T20:54:09.026361",
-    "times_accessed": 0,
-    "code": null,
-    "updated_at": "2026-02-08T20:54:09.026361"
-  },
-  {
-    "id": "cooking_96158bac",
-    "pattern_id": "cooking_96158bac",
-    "name": "Test Save",
-    "domain": "cooking",
-    "problem": "",
-    "solution": "",
-    "description": "Test",
-    "pattern_type": "knowledge",
-    "confidence": 0.5,
-    "status": "validated",
-    "origin": "llm_external_search",
-    "origin_query": "",
-    "llm_generated": true,
-    "validated_by": "current_user",
-    "validated_at": "2026-02-08T20:54:19.048454Z",
-    "validation_method": "query_portal_acceptance",
-    "tags": [
-      "llm_generated"
-    ],
-    "created_at": "2026-02-08T20:54:19.048480",
-    "times_accessed": 0,
-    "code": null,
-    "updated_at": "2026-02-08T20:54:19.048480"
-  },
-  {
-    "id": "cooking_5ba62a07",
-    "pattern_id": "cooking_5ba62a07",
-    "name": "I need a recipe for german apple pie.",
-    "domain": "cooking",
-    "problem": "I need a recipe for german apple pie.",
-    "solution": "Of course! German apple pie is most famously known as **Apfelkuchen** or the more specific **Versunkener Apfelkuchen** (\"sunken apple cake\"). There's also the crumb-topped **Apfelstreuselkuchen**.\n\nHere is a classic, beloved recipe for **Versunkener Apfelkuchen**, a simple, moist, buttery cake where apple halves are pressed into the batter and sink as they bake.\n\n### **German Sunken Apple Cake (Versunkener Apfelkuchen)**\n\nThis is a rustic, homestyle cake perfect for coffee time (*Kaffee und Kuchen*).\n\n**Ingredients:**\n\n*For the cake batter:*\n* 200 g (1 \u2154 cups) all-purpose flour\n* 2 tsp baking powder\n* 150 g (\u2154 cup) granulated sugar\n* 1 tsp vanilla extract or 1 packet vanilla sugar (common in Germany)\n* 1 pinch of salt\n* 3 large eggs, at room temperature\n* 150 g (\u2154 cup) unsalted butter, softened\n* 2-3 tbsp milk or cream, if needed\n\n*For the apples & topping:*\n* 4-5 medium baking apples (e.g., Granny Smith, Braeburn, or Boskoop)\n* Juice of half a lemon\n* 2-3 tbsp apricot jam (for glazing, optional)\n* 1-2 tbsp powdered sugar (for dusting)\n\n**Instructions:**\n\n1.  **Prepare:** Preheat your oven to 180\u00b0C (350\u00b0F). Grease and flour a 9-inch (24 cm) springform pan.\n2.  **Prepare Apples:** Peel the apples, cut them in half, and remove the cores. To prevent browning, you can toss them lightly with lemon juice. Set aside.\n3.  **Make Batter:** In a large bowl, beat the softened butter, sugar, vanilla, and salt until light and fluffy (about 3 minutes). Add the eggs one at a time, beating well after each addition.\n4.  **Combine Dry & Wet:** In a separate bowl, whisk together the flour and baking powder. Gradually add the flour mixture to the wet ingredients, mixing on low speed just until combined. The batter should be thick but spreadable. If it seems too stiff, mix in a tablespoon or two of milk.\n5.  **Assemble:** Spread the batter evenly into the prepared springform pan. Now, take your apple halves and press them cut-side-down into the batter, arranging them in a circular pattern. They should be partially submerged.\n6.  **Bake:** Bake in the preheated oven for 45-55 minutes, or until a toothpick inserted into the cake part (not an apple) comes out clean. The top should be golden brown.\n7.  **Glaze (Optional):** While the cake is still warm, you can gently warm the apricot jam with a teaspoon of water and brush it over the apples and cake for a shiny, slightly sweet finish.\n8.  **Cool & Serve:** Let the cake cool in the pan for about 20 minutes before carefully releasing the springform. Dust with powdered sugar just before serving.\n\n**Serving Suggestion:** Serve slightly warm or at room temperature. It's traditionally enjoyed with a cup of coffee or tea, and is delicious plain or with a dollop of **whipped cream** or a scoop of **vanilla ice cream**.\n\n---\n\n### **Key German Variations:**\n\n*   **Apfelstreuselkuchen (Crumb Apple Cake):** This version has a layer of sliced apples on a thin cake base or shortcrust pastry, topped with a generous layer of buttery crumbles (*Streusel*). The crumble is made from equal parts flour, sugar, and cold butter, rubbed together with your fingers.\n*   **Gedeckter Apfelkuchen (Covered Apple Pie):** More like a double-crust pie, often made with a shortcrust or yeasted dough, filled with spiced apple slices, and with a lattice or full top crust.\n\n**Tip:** German baking often uses **vanilla sugar** (1 packet = about 1 tsp) and **rum or cinnamon** can be added to the apples for extra flavor. Quark (a fresh dairy cheese) is also sometimes used in the batter for extra moisture and tenderness.\n\nEnjoy your baking!",
-    "description": "AI-generated from query: I need a recipe for german apple pie.",
-    "pattern_type": "knowledge",
-    "confidence": 0.7,
-    "status": "validated",
-    "origin": "llm_external_search",
-    "origin_query": "I need a recipe for german apple pie.",
-    "llm_generated": true,
-    "validated_by": "current_user",
-    "validated_at": "2026-02-08T21:00:25.123Z",
-    "validation_method": "query_portal_acceptance",
-    "tags": [
-      "external_search",
-      "llm_generated"
-    ],
-    "created_at": "2026-02-08T21:00:25.132225",
-    "times_accessed": 0,
-    "code": null,
-    "updated_at": "2026-02-08T21:00:25.132225"
   }
 ]

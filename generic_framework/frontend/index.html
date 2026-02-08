@@ -607,6 +607,20 @@
 
             <!-- SURVEYOR VIEW -->
             <div x-show="currentView === 'surveyor'" x-transition class="h-full">
+                <!-- WIP NOTICE -->
+                <div class="mb-4 px-4 py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl">🚧</span>
+                        <div>
+                            <h3 class="font-semibold text-yellow-400">Work in Progress</h3>
+                            <p class="text-sm text-gray-300 mt-1">
+                                The Surveyor system is currently under development. Pattern extraction from web scraping produces mixed quality results.
+                                For now, we recommend using the <strong>Researcher</strong> persona with citations for high-quality patterns.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-12 gap-4 h-full">
                     <!-- Survey List (Left Sidebar) -->
                     <div class="col-span-3">
@@ -1012,29 +1026,6 @@
                             </div>
 
                             <!-- Seed URL -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    🔗 Seed URL
-                                    <span class="text-xs text-gray-500 ml-2">— where to start scraping</span>
-                                </label>
-                                <input type="url" x-model="newSurveyForm.seed_url"
-                                       class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500"
-                                       placeholder="https://www.allrecipes.com/recipes/17215/best-chocolate-chip-cookies">
-                                <p class="text-xs text-gray-400 mt-1">The starting point. The scraper will begin here and follow relevant links.</p>
-                            </div>
-
-                            <!-- Additional URLs -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    📎 Additional URLs
-                                    <span class="text-xs text-gray-500 ml-2">— optional, one per line</span>
-                                </label>
-                                <textarea x-model="newSurveyForm.additional_urls" rows="3"
-                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500 resize-none"
-                                          placeholder="https://www.foodnetwork.com/recipes/chocolate-cookies&#10;https://www.tasty.co/recipe/baking-101"></textarea>
-                                <p class="text-xs text-gray-400 mt-1">Extra sources to include. Add one URL per line.</p>
-                            </div>
-
                             <!-- Scraping Prompt -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">
@@ -1191,20 +1182,6 @@
                             <div class="flex items-center gap-2 mb-4">
                                 <span class="text-amber-400">⚙️</span>
                                 <h3 class="font-semibold text-amber-400">Scraping Control</h3>
-                            </div>
-
-                            <!-- Seed URL -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">🔗 Seed URL</label>
-                                <input type="url" x-model="editSurveyForm.seed_url"
-                                       class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500">
-                            </div>
-
-                            <!-- Additional URLs -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">📎 Additional URLs</label>
-                                <textarea x-model="editSurveyForm.additional_urls" rows="2"
-                                          class="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-amber-500 outline-none text-white placeholder-gray-500 resize-none"></textarea>
                             </div>
 
                             <!-- Scraping Prompt -->
@@ -2455,8 +2432,6 @@
                     // Source selection
                     source_type: 'web', // 'web' or 'documents'
                     // Scraping control (web)
-                    seed_url: '',
-                    additional_urls: '',
                     scraping_prompt: '',
                     // Document control (documents)
                     docs_base_path: '/app/universes/MINE/docs',
@@ -2477,8 +2452,6 @@
                     // Source selection
                     source_type: 'web', // 'web' or 'documents'
                     // Scraping control (web)
-                    seed_url: '',
-                    additional_urls: '',
                     scraping_prompt: '',
                     // Document control (documents)
                     docs_base_path: '/app/universes/MINE/docs',
@@ -2580,14 +2553,21 @@
                     });
 
                     // Watch for domain/response changes to control constellation
-                    this.$watch('currentDomain', (val) => {
-                        this.$nextTick(() => {
+                    this.$watch('currentDomain', async (val) => {
+                        console.log('Domain changed to:', val);
+                        this.$nextTick(async () => {
                             if (val === 'exframe' && !this.response) {
                                 this.initConstellation();
                             } else {
                                 if (this.constellation.animationId) {
                                     cancelAnimationFrame(this.constellation.animationId);
                                 }
+                            }
+
+                            // Reload patterns if on patterns view
+                            if (val && this.currentView === 'patterns') {
+                                console.log('Reloading patterns for domain:', val);
+                                await this.loadPatterns();
                             }
                         });
                     });
@@ -2816,6 +2796,17 @@
                     console.log('=== switchDomain START ===');
                     console.log('Switching to domain:', this.currentDomain);
 
+                    // Force Alpine to pick up the domain change from the select element
+                    const selectEl = document.getElementById('domain_selector');
+                    if (selectEl && selectEl.value) {
+                        this.currentDomain = selectEl.value;
+                        console.log('Forced currentDomain to:', this.currentDomain);
+                    }
+
+                    // Clear current patterns first to avoid showing stale data
+                    this.patterns = [];
+                    this.patternCount = 0;
+
                     this.response = '';
                     this.query = '';  // Clear the input field
                     this.specialist = '';
@@ -2828,6 +2819,7 @@
 
                     // If on patterns view, load patterns with health data
                     if (this.currentView === 'patterns') {
+                        console.log('On patterns view, loading patterns for:', this.currentDomain);
                         await this.loadPatterns();
                     } else {
                         // Otherwise, load domain info normally
@@ -2838,6 +2830,8 @@
                     this.updateDisplayProperties();
 
                     console.log('=== switchDomain END ===');
+                    console.log('Domain is now:', this.currentDomain);
+                    console.log('Patterns loaded:', this.patterns.length);
                 },
 
                 updateDisplayProperties() {
@@ -4310,10 +4304,10 @@
 
                 async loadSurveys() {
                     try {
-                        const res = await fetch('/api/learning/api/surveys');
+                        const res = await fetch('/api/learning/surveys');
                         if (res.ok) {
                             const data = await res.json();
-                            this.surveys = data.surveys || [];
+                            this.surveys = data || [];  // API returns array directly
                         } else {
                             // Fall back to stub data if API not available
                             console.warn('Learning API not available, using stub data');
@@ -4457,6 +4451,20 @@
                     }
                 },
 
+                openEditSurvey() {
+                    if (!this.selectedSurvey) return;
+                    // Populate edit form with selected survey data
+                    this.editSurveyForm = {
+                        name: this.selectedSurvey.name || '',
+                        description: this.selectedSurvey.description || '',
+                        target_patterns: this.selectedSurvey.target_patterns || 100,
+                        min_confidence: this.selectedSurvey.min_confidence || 0.8,
+                        scraping_prompt: this.selectedSurvey.scraping_prompt || ''
+                    };
+                    // Show the edit modal
+                    this.showEditSurveyModal = true;
+                },
+
                 formatTime(date) {
                     const hours = date.getHours().toString().padStart(2, '0');
                     const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -4480,14 +4488,6 @@
 
                         // Add source-specific configuration
                         if (this.newSurveyForm.source_type === 'web') {
-                            // Parse additional URLs (one per line)
-                            const additionalUrls = this.newSurveyForm.additional_urls
-                                .split('\n')
-                                .map(url => url.trim())
-                                .filter(url => url.length > 0);
-
-                            requestBody.seed_url = this.newSurveyForm.seed_url || null;
-                            requestBody.additional_urls = additionalUrls.length > 0 ? additionalUrls : null;
                             requestBody.scraping_prompt = this.newSurveyForm.scraping_prompt || null;
                         } else if (this.newSurveyForm.source_type === 'documents') {
                             // Parse documents list (one per line)
@@ -4503,7 +4503,7 @@
                             requestBody.scraping_prompt = this.newSurveyForm.scraping_prompt || null;
                         }
 
-                        const res = await fetch('/api/learning/api/surveys', {
+                        const res = await fetch('/api/learning/surveys', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(requestBody)
@@ -4535,11 +4535,6 @@
                             target_patterns: parseInt(this.newSurveyForm.target_patterns),
                             min_confidence: parseFloat(this.newSurveyForm.min_confidence),
                             source_type: this.newSurveyForm.source_type,
-                            // Include source-specific fields for stub
-                            ...(this.newSurveyForm.source_type === 'web' ? {
-                                seed_url: this.newSurveyForm.seed_url,
-                                additional_urls: this.newSurveyForm.additional_urls.split('\n').map(u => u.trim()).filter(u => u)
-                            } : {}),
                             ...(this.newSurveyForm.source_type === 'documents' ? {
                                 docs_base_path: this.newSurveyForm.docs_base_path,
                                 docs_list: this.newSurveyForm.docs_list.split('\n').map(d => d.trim()).filter(d => d),
@@ -4573,8 +4568,6 @@
                         domains_created: 0,
                         created_at: new Date().toISOString(),
                         // Scraping config (stored for display)
-                        seed_url: requestBody.seed_url,
-                        additional_urls: requestBody.additional_urls,
                         scraping_prompt: requestBody.scraping_prompt
                     };
 
@@ -4594,8 +4587,6 @@
                         // Source selection
                         source_type: 'web',
                         // Scraping control (web)
-                        seed_url: '',
-                        additional_urls: '',
                         scraping_prompt: '',
                         // Document control (documents)
                         docs_base_path: '/app/universes/MINE/docs',
@@ -4611,22 +4602,16 @@
                 async saveSurveyEdit() {
                     try {
                         const survey = this.selectedSurvey;
-                        const additionalUrls = this.editSurveyForm.additional_urls
-                            .split('\n')
-                            .map(url => url.trim())
-                            .filter(url => url.length > 0);
 
                         const requestBody = {
                             name: this.editSurveyForm.name,
                             description: this.editSurveyForm.description,
                             target_patterns: parseInt(this.editSurveyForm.target_patterns),
                             min_confidence: parseFloat(this.editSurveyForm.min_confidence),
-                            seed_url: this.editSurveyForm.seed_url || null,
-                            additional_urls: additionalUrls.length > 0 ? additionalUrls : null,
                             scraping_prompt: this.editSurveyForm.scraping_prompt || null
                         };
 
-                        const res = await fetch(`/api/learning/api/surveys/${survey.id}`, {
+                        const res = await fetch(`/api/learning/surveys/${survey.id}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(requestBody)
@@ -4638,8 +4623,6 @@
                             survey.description = this.editSurveyForm.description;
                             survey.target_patterns = parseInt(this.editSurveyForm.target_patterns);
                             survey.min_confidence = parseFloat(this.editSurveyForm.min_confidence);
-                            survey.seed_url = this.editSurveyForm.seed_url;
-                            survey.additional_urls = additionalUrls;
                             survey.scraping_prompt = this.editSurveyForm.scraping_prompt;
 
                             this.showEditSurveyModal = false;
@@ -4656,8 +4639,6 @@
                             description: this.editSurveyForm.description,
                             target_patterns: parseInt(this.editSurveyForm.target_patterns),
                             min_confidence: parseFloat(this.editSurveyForm.min_confidence),
-                            seed_url: this.editSurveyForm.seed_url,
-                            additional_urls: this.editSurveyForm.additional_urls.split('\n').map(u => u.trim()).filter(u => u),
                             scraping_prompt: this.editSurveyForm.scraping_prompt
                         });
                     }
@@ -4669,8 +4650,6 @@
                     survey.description = updates.description;
                     survey.target_patterns = updates.target_patterns;
                     survey.min_confidence = updates.min_confidence;
-                    survey.seed_url = updates.seed_url;
-                    survey.additional_urls = updates.additional_urls;
                     survey.scraping_prompt = updates.scraping_prompt;
                     this.showEditSurveyModal = false;
                 },

@@ -28,6 +28,7 @@ import asyncio
 import sys
 import json
 import os
+import uuid
 from pathlib import Path
 from datetime import datetime, timedelta
 import logging
@@ -207,15 +208,20 @@ app.add_middleware(
 # =============================================================================
 # MOUNT AUTONOMOUS LEARNING API
 # =============================================================================
-# Mount the autonomous learning FastAPI app as a sub-application
-# This allows the Surveyor UI to interact with the learning system
+# Include autonomous learning routers directly for Surveyor UI
 try:
-    # Add autonomous_learning to path
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "autonomous_learning"))
-    from api.app import app as learning_app
-    # Mount at /api/learning path
-    app.mount("/api/learning", learning_app)
-    logger.info("✓ Autonomous Learning API mounted at /api/learning")
+    import importlib.util
+
+    # Load the surveys module directly
+    learning_path = Path(__file__).parent.parent.parent / "autonomous_learning" / "api" / "surveys.py"
+    spec = importlib.util.spec_from_file_location("surveys", learning_path)
+    surveys_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(surveys_module)
+
+    # Include the router with /api/learning prefix
+    # Note: router already has /surveys prefix, so full path is /api/learning/surveys
+    app.include_router(surveys_module.router, prefix="/api/learning", tags=["learning"])
+    logger.info("✓ Autonomous Learning API routers mounted at /api/learning")
 except ImportError as e:
     logger.warning(f"✗ Could not mount Autonomous Learning API: {e}")
     logger.info("  Surveyor UI will run in stub mode")
@@ -946,12 +952,12 @@ async def list_patterns(domain_id: str, category: Optional[str] = None) -> Dict[
     else:
         # Get all patterns - try async method first
         if hasattr(kb, 'get_all_patterns'):
-            patterns = await kb.get_all_patterns(limit=100)
+            patterns = await kb.get_all_patterns()  # No limit - get all patterns
         elif hasattr(kb, 'get_patterns_by_category'):
             patterns = kb.get_patterns_by_category(None)
         else:
-            # Last resort: search with a broad query
-            patterns = await kb.search(query="", limit=100)
+            # Last resort: search with a broad query (very high limit)
+            patterns = await kb.search(query="", limit=10000)
 
     return {
         "domain": domain_id,
@@ -968,9 +974,11 @@ async def list_patterns(domain_id: str, category: Optional[str] = None) -> Dict[
                 "llm_generated": p.get("llm_generated", False),  # Include llm_generated flag
                 "confidence": p.get("confidence", p.get("confidence_score", 0.5)),  # Include confidence
                 "confidence_score": p.get("confidence_score", p.get("confidence", 0.5)),  # Include confidence_score
-                "times_accessed": p.get("times_accessed", 0)
+                "times_accessed": p.get("times_accessed", 0),
+                "source": p.get("source", ""),  # Include source for surveyor patterns
+                "origin": p.get("origin", "")  # Include origin for tracking
             }
-            for p in patterns[:50]  # Limit to 50 for performance
+            for p in patterns  # Return all patterns
         ]
     }
 
@@ -2955,6 +2963,728 @@ async def get_embedding_model_info() -> Dict[str, Any]:
         "loaded": service.is_loaded if service else False,
         "embedding_dim": 384 if service else None,
         "description": "SentenceTransformers model for semantic search"
+    }
+
+
+# =============================================================================
+# SURVEYOR API (Stub Endpoints)
+# =============================================================================
+# Stub endpoints for Surveyor UI until autonomous learning is fully integrated
+# These provide in-memory storage for testing the UI
+
+# In-memory survey storage
+_surveys_storage: dict = {
+    "survey_001": {
+        "id": "survey_001",
+        "name": "Culinary Arts",
+        "description": "Full survey of the cooking domain",
+        "level": "domain",
+        "universe": "MINE",
+        "neighbourhood": None,
+        "domain": "cooking",
+        "status": "idle",
+        "progress": 0.0,
+        "patterns_created": 0,
+        "patterns_certified": 0,
+        "patterns_flagged": 0,
+        "patterns_rejected": 0,
+        "patterns_pending": 0,
+        "domains_created": 0,
+        "neighbourhoods_created": 0,
+        "created_at": "2025-01-09T09:15:00Z",
+        "started_at": None,
+        "completed_at": None,
+        "error_message": None
+    },
+    "survey_002": {
+        "id": "survey_002",
+        "name": "Python Basics",
+        "description": "Python programming fundamentals",
+        "level": "domain",
+        "universe": "MINE",
+        "neighbourhood": None,
+        "domain": "python",
+        "status": "idle",
+        "progress": 0.0,
+        "patterns_created": 0,
+        "patterns_certified": 0,
+        "patterns_flagged": 0,
+        "patterns_rejected": 0,
+        "patterns_pending": 0,
+        "domains_created": 0,
+        "neighbourhoods_created": 0,
+        "created_at": "2025-01-09T10:20:00Z",
+        "started_at": None,
+        "completed_at": None,
+        "error_message": None
+    }
+}
+
+
+class SurveyRequest(BaseModel):
+    name: str
+    description: str
+    level: str  # "domain", "neighbourhood", "universe"
+    universe: str
+    neighbourhood: Optional[str] = None
+    domain: Optional[str] = None
+    sources: List[str] = []
+    target_patterns: int = 100
+    min_confidence: float = 0.8
+    timeline_hours: int = 24
+
+
+@app.get("/api/learning/surveys", response_model=List[dict])
+async def list_surveys():
+    """List all surveys"""
+    return list(_surveys_storage.values())
+
+
+@app.post("/api/learning/surveys", response_model=dict)
+async def create_survey(request: SurveyRequest):
+    """Create a new survey"""
+    import uuid
+    from datetime import datetime
+
+    survey_id = str(uuid.uuid4())[:8]
+    survey = {
+        "id": survey_id,
+        "name": request.name,
+        "description": request.description,
+        "level": request.level,
+        "universe": request.universe,
+        "neighbourhood": request.neighbourhood,
+        "domain": request.domain,
+        "status": "idle",
+        "progress": 0.0,
+        "patterns_created": 0,
+        "patterns_certified": 0,
+        "patterns_flagged": 0,
+        "patterns_rejected": 0,
+        "patterns_pending": 0,
+        "domains_created": 0,
+        "neighbourhoods_created": 0,
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "started_at": None,
+        "completed_at": None,
+        "error_message": None
+    }
+    _surveys_storage[survey_id] = survey
+    logger.info(f"Created survey: {survey_id} - {request.name}")
+    return survey
+
+
+@app.get("/api/learning/surveys/{survey_id}", response_model=dict)
+async def get_survey(survey_id: str):
+    """Get survey details"""
+    if survey_id not in _surveys_storage:
+        raise HTTPException(status_code=404, detail="Survey not found")
+    return _surveys_storage[survey_id]
+
+
+@app.put("/api/learning/surveys/{survey_id}", response_model=dict)
+async def update_survey(survey_id: str, request: SurveyRequest):
+    """Update survey"""
+    if survey_id not in _surveys_storage:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
+    survey = _surveys_storage[survey_id]
+    survey["name"] = request.name
+    survey["description"] = request.description
+    # Note: domain, level etc. can't be changed after creation
+    logger.info(f"Updated survey: {survey_id}")
+    return survey
+
+
+@app.post("/api/learning/surveys/{survey_id}/start", response_model=dict)
+async def start_survey_api(survey_id: str):
+    """Start a survey - spawns background worker to collect patterns"""
+    if survey_id not in _surveys_storage:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
+    survey = _surveys_storage[survey_id]
+    survey["status"] = "running"
+    survey["started_at"] = datetime.utcnow().isoformat() + "Z"
+    logger.info(f"Started survey: {survey_id}")
+
+    # Spawn background worker to do actual pattern collection
+    import asyncio
+    asyncio.create_task(run_survey_worker(survey_id))
+
+    return survey
+
+
+async def run_survey_worker(survey_id: str):
+    """
+    Background worker that collects patterns using DuckDuckGo search.
+
+    Workflow:
+    1. Generate search queries from survey info
+    2. Search DuckDuckGo for results
+    3. Extract patterns from search result snippets
+    4. Save patterns to domain
+    5. Update survey progress
+    """
+    import asyncio
+
+    try:
+        survey = _surveys_storage.get(survey_id)
+        if not survey:
+            logger.error(f"Survey {survey_id} not found")
+            return
+
+        domain_id = survey.get("domain")
+        if not domain_id:
+            logger.error(f"Survey {survey_id} has no domain")
+            survey["status"] = "failed"
+            survey["error_message"] = "No domain specified"
+            return
+
+        # Get the domain
+        if not universe_manager:
+            logger.error("Universe manager not initialized")
+            survey["status"] = "failed"
+            survey["error_message"] = "Universe manager not available"
+            return
+
+        universe = await universe_manager.get_universe(survey.get("universe", "MINE"))
+        if not universe:
+            logger.error(f"Universe {survey.get('universe')} not found")
+            survey["status"] = "failed"
+            survey["error_message"] = f"Universe {survey.get('universe')} not found"
+            return
+
+        domain = universe.get_domain(domain_id)
+        if not domain:
+            logger.error(f"Domain {domain_id} not found in universe")
+            survey["status"] = "failed"
+            survey["error_message"] = f"Domain {domain_id} not found"
+            return
+
+        # For cooking domain, use AllRecipesScraper instead of web search
+        if domain_id == "cooking":
+            await _run_cooking_survey(survey_id, survey, domain)
+            return
+
+        # For other domains, use DuckDuckGo search
+        # Initialize searcher (DuckDuckGo)
+        from core.research.internet_strategy import InternetResearchStrategy
+
+        search_config = {
+            'search_provider': 'auto',
+            'max_results': 10,
+            'timeout': 10
+        }
+        searcher = InternetResearchStrategy(search_config)
+        await searcher.initialize()
+
+        # Generate search queries from survey info
+        queries = _generate_search_queries(survey)
+        logger.info(f"Survey {survey_id}: Will run {len(queries)} search queries")
+
+        target_patterns = survey.get("target_patterns", 50)
+        patterns_collected = 0
+
+        # Run searches
+        for round_num, query in enumerate(queries[:5], 1):  # Max 5 search rounds
+            if survey["status"] not in ["running", "paused"]:
+                logger.info(f"Survey {survey_id}: Stopped (status={survey['status']})")
+                break
+
+            if patterns_collected >= target_patterns:
+                logger.info(f"Survey {survey_id}: Target reached ({patterns_collected} patterns)")
+                break
+
+            logger.info(f"Survey {survey_id}: Round {round_num}/{len(queries)}: Searching for '{query}'")
+
+            try:
+                # Search DuckDuckGo
+                results = await searcher.search(query, limit=10)
+                logger.info(f"Survey {survey_id}: Found {len(results)} results")
+
+                # Extract patterns from search results
+                for idx, result in enumerate(results):
+                    if survey["status"] != "running":
+                        break
+
+                    try:
+                        # Fetch full page content for better patterns
+                        url = result.metadata.get('url', '')
+                        if not url:
+                            logger.warning(f"Survey {survey_id}: Skipping result {idx+1} - no URL")
+                            continue
+
+                        logger.info(f"Survey {survey_id}: Fetching full page from {url}")
+
+                        # Fetch full page (this is the NEW part!)
+                        full_content = await fetch_full_page_content(url)
+
+                        if not full_content or len(full_content) < 100:
+                            logger.warning(f"Survey {survey_id}: Page too short, using snippet")
+                            full_content = result.content  # Fallback to snippet
+
+                        # Extract patterns from full page content
+                        patterns = await _extract_patterns_from_text(
+                            full_content,
+                            domain_id,
+                            url,
+                            survey.get("name", "Survey")
+                        )
+
+                        if patterns:
+                            # Add patterns to domain
+                            for pattern in patterns:
+                                # Convert to dict for JSON storage
+                                pattern_dict = {
+                                    "id": str(uuid.uuid4())[:8],
+                                    "name": pattern.get("name", "Extracted Pattern"),
+                                    "pattern_type": pattern.get("pattern_type", "procedure"),
+                                    "problem": pattern.get("problem", ""),
+                                    "solution": pattern.get("solution", ""),
+                                    "description": pattern.get("description", ""),
+                                    "steps": pattern.get("steps", []),
+                                    "tags": pattern.get("tags", []),
+                                    "domain": domain_id,
+                                    "created_at": datetime.utcnow().isoformat() + "Z",
+                                    "source": url,
+                                    "origin": "surveyor",
+                                    "origin_query": query,
+                                    "llm_generated": True,
+                                    "confidence": 0.7
+                                }
+
+                                # Add to domain's knowledge base
+                                await domain.knowledge_base.add_pattern(pattern_dict)
+                                logger.info(f"Survey {survey_id}: Saved pattern '{pattern_dict.get('name', 'unknown')}' to {domain_id}")
+
+                            patterns_collected += len(patterns)
+                            survey["patterns_created"] = patterns_collected
+                            survey["progress"] = min(1.0, patterns_collected / target_patterns)
+
+                            logger.info(f"Survey {survey_id}: Extracted {len(patterns)} patterns from result {idx+1}")
+
+                            # Longer delay to be polite (full page scraping)
+                            await asyncio.sleep(2.0)
+
+                    except Exception as e:
+                        logger.error(f"Survey {survey_id}: Error processing result: {e}")
+                        survey["patterns_rejected"] = survey.get("patterns_rejected", 0) + 1
+
+            except Exception as e:
+                logger.error(f"Survey {survey_id}: Search failed: {e}")
+                survey["errors"] = survey.get("errors", 0) + 1
+
+        # Mark completed
+        survey["status"] = "completed"
+        survey["completed_at"] = datetime.utcnow().isoformat() + "Z"
+        survey["patterns_certified"] = patterns_collected  # Auto-certify for now
+        logger.info(f"Survey {survey_id}: COMPLETED with {patterns_collected} patterns created")
+
+    except Exception as e:
+        logger.error(f"Survey {survey_id}: Worker failed: {e}")
+        survey["status"] = "failed"
+        survey["error_message"] = str(e)
+
+
+async def _run_cooking_survey(survey_id: str, survey: dict, domain):
+    """
+    Run a cooking domain survey using AllRecipesScraper.
+
+    This bypasses the generic web search and uses the specialized
+    AllRecipes scraper which actually extracts structured recipe data.
+    """
+    from ingestion.allrecipes_scraper import AllRecipesScraper
+
+    target_patterns = survey.get("target_patterns", 50)
+    patterns_collected = 0
+
+    logger.info(f"Survey {survey_id}: Using AllRecipesScraper for cooking domain")
+
+    try:
+        # Initialize scraper with 2 second delay between requests
+        scraper = AllRecipesScraper(delay=2.0, max_recipes=target_patterns)
+
+        # Define AllRecipes category URLs based on survey name
+        category_urls = _get_allrecipes_categories(survey.get("name", ""))
+
+        logger.info(f"Survey {survey_id}: Scraping {len(category_urls)} AllRecipes categories")
+
+        for category_url in category_urls:
+            if patterns_collected >= target_patterns:
+                break
+
+            if survey["status"] not in ["running", "paused"]:
+                logger.info(f"Survey {survey_id}: Stopped (status={survey['status']})")
+                break
+
+            logger.info(f"Survey {survey_id}: Scraping category {category_url}")
+
+            # Get recipe URLs from category
+            recipe_urls = scraper.scrape_category(category_url, max_pages=3)
+            logger.info(f"Survey {survey_id}: Found {len(recipe_urls)} recipe URLs")
+
+            # Scrape each recipe
+            for recipe_url in recipe_urls:
+                if patterns_collected >= target_patterns:
+                    break
+
+                if survey["status"] not in ["running", "paused"]:
+                    break
+
+                logger.info(f"Survey {survey_id}: Scraping recipe {patterns_collected + 1}/{target_patterns}")
+
+                # Extract recipe data
+                recipe_data = scraper.scrape_recipe(recipe_url)
+
+                # Check for errors
+                if recipe_data.get('error'):
+                    logger.warning(f"Survey {survey_id}: Error scraping {recipe_url}: {recipe_data['error']}")
+                    continue
+
+                # Convert to pattern format
+                pattern_dict = _recipe_to_pattern(recipe_data, survey.get("name", "cooking survey"))
+
+                # Save to domain
+                try:
+                    await domain.knowledge_base.add_pattern(pattern_dict)
+                    patterns_collected += 1
+                    survey["patterns_created"] = patterns_collected
+                    survey["progress"] = min(1.0, patterns_collected / target_patterns)
+
+                    logger.info(f"Survey {survey_id}: Saved recipe '{recipe_data.get('title', 'Unknown')}' to cooking")
+
+                except Exception as e:
+                    logger.error(f"Survey {survey_id}: Failed to save pattern: {e}")
+                    survey["errors"] = survey.get("errors", 0) + 1
+
+        # Mark completed
+        survey["status"] = "completed"
+        survey["completed_at"] = datetime.utcnow().isoformat() + "Z"
+        survey["patterns_certified"] = patterns_collected
+        logger.info(f"Survey {survey_id}: COMPLETED with {patterns_collected} recipes created")
+
+    except Exception as e:
+        logger.error(f"Survey {survey_id}: Cooking survey failed: {e}")
+        survey["status"] = "failed"
+        survey["error_message"] = str(e)
+
+
+def _get_allrecipes_categories(survey_name: str) -> list:
+    """
+    Get AllRecipes category URLs based on survey name.
+
+    Args:
+        survey_name: Name of the survey (e.g., "pie recipes", "brownies")
+
+    Returns:
+        List of AllRecipes category URLs
+    """
+    # AllRecipes category URLs (working URLs as of Feb 2026)
+    categories = {
+        "pie": "https://www.allrecipes.com/recipes/367/desserts/pies",
+        "dessert": "https://www.allrecipes.com/recipes/80/desserts",
+        "cookie": "https://www.allrecipes.com/recipes/1622/desserts/cookies",
+        "cake": "https://www.allrecipes.com/recipes/1621/desserts/cakes",
+        "chicken": "https://www.allrecipes.com/recipes/17561/chicken",
+        "beef": "https://www.allrecipes.com/recipes/236/beef",
+        "pasta": "https://www.allrecipes.com/recipes/17218/pasta",
+    }
+
+    # Default to desserts if survey name doesn't match
+    survey_lower = survey_name.lower()
+
+    matched = []
+    for keyword, url in categories.items():
+        if keyword in survey_lower:
+            matched.append(url)
+
+    # If no match, use desserts as default
+    if not matched:
+        matched.append(categories["dessert"])
+
+    return matched
+
+
+def _recipe_to_pattern(recipe: dict, survey_name: str) -> dict:
+    """
+    Convert AllRecipes recipe data to pattern format.
+
+    Args:
+        recipe: Recipe dict from AllRecipesScraper
+        survey_name: Name of the survey for tagging
+
+    Returns:
+        Pattern dict compatible with knowledge base
+    """
+    import hashlib
+
+    # Generate unique ID
+    content = f"{recipe.get('title', '')}{recipe.get('url', '')}"
+    pattern_id = hashlib.md5(content.encode()).hexdigest()[:8]
+
+    # Build description from ingredients and steps
+    description_parts = []
+    if recipe.get('description'):
+        description_parts.append(recipe['description'])
+
+    if recipe.get('ingredients'):
+        description_parts.append(f"\n**Ingredients** ({len(recipe['ingredients'])}):")
+        for i, ing in enumerate(recipe['ingredients'][:10], 1):
+            description_parts.append(f"{i}. {ing}")
+
+    if recipe.get('steps'):
+        description_parts.append(f"\n**Instructions** ({len(recipe['steps'])}):")
+        for i, step in enumerate(recipe['steps'], 1):
+            description_parts.append(f"{i}. {step}")
+
+    description = "\n".join(description_parts)
+
+    return {
+        "id": pattern_id,
+        "name": recipe.get('title', 'Untitled Recipe'),
+        "pattern_type": "procedure",
+        "problem": f"How to make {recipe.get('title', 'this recipe')}",
+        "solution": f"Follow the recipe steps for {recipe.get('title', 'this recipe')}",
+        "description": description,
+        "steps": recipe.get('steps', [])[:20],  # Max 20 steps
+        "tags": [
+            "cooking",
+            "recipe",
+            "allrecipes",
+            recipe.get('category', 'dessert').lower(),
+            survey_name,
+            "surveyor"
+        ],
+        "domain": "cooking",
+        "source": recipe.get('url', ''),
+        "origin": "surveyor",
+        "origin_query": survey_name,
+        "confidence": 0.9,  # High confidence for structured recipes
+        "metadata": {
+            "prep_time": recipe.get('prep_time', ''),
+            "cook_time": recipe.get('cook_time', ''),
+            "total_time": recipe.get('total_time', ''),
+            "rating": recipe.get('rating', 0),
+            "review_count": recipe.get('review_count', 0),
+            "author": recipe.get('author', ''),
+            "yield": recipe.get('yield', '')
+        }
+    }
+
+
+async def fetch_full_page_content(url: str) -> str:
+    """
+    Fetch full page and extract main content.
+
+    Returns the main text content from the page (article body, recipe, etc.)
+    """
+    import requests
+    import re
+    from bs4 import BeautifulSoup, SoupStrainer
+
+    try:
+        # Fetch the page
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        # Parse HTML
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Remove script, style, nav, footer, ads
+        for element in soup(['script', 'style', 'nav', 'footer', 'header', 'aside', 'iframe']):
+            element.decompose()
+
+        # Try to find the main content
+        # Look for common article/recipe containers
+        main_content = None
+
+        # Try common selectors
+        for selector in [
+            ['article'],
+            ['div', {'class': re.compile('recipe|article|content|post', re.I)}],
+            ['div', {'id': re.compile('content|article|main', re.I)}],
+            ['main'],
+        ]:
+            found = soup.select(*selector) if isinstance(selector[0], str) else soup.find_all(selector[0], selector[1])
+            if found:
+                main_content = found[0]
+                break
+
+        # Fallback to body if nothing found
+        if not main_content:
+            main_content = soup.find('body') or soup
+
+        # Extract text
+        text = main_content.get_text(separator='\n', strip=True)
+
+        # Clean up: remove excessive whitespace
+        lines = [line.strip() for line in text.split('\n')]
+        lines = [line for line in lines if line and len(line) > 20]
+        clean_text = '\n'.join(lines[:50])  # Max 50 lines
+
+        logger.info(f"Fetched {len(clean_text)} chars from {url}")
+        return clean_text
+
+    except Exception as e:
+        logger.error(f"Failed to fetch {url}: {e}")
+        return ""
+
+
+def _generate_search_queries(survey: dict) -> list:
+    """Generate DuckDuckGo search queries from survey information."""
+    domain = survey.get("domain", "")
+    name = survey.get("name", "")
+    description = survey.get("description", "")
+
+    queries = []
+
+    # Query 1: Domain + name
+    if domain and name:
+        queries.append(f"{domain} {name}")
+
+    # Query 2: Domain + description keywords
+    if domain and description:
+        # Extract key phrases from description (simple approach)
+        words = description.split()[:5]  # First 5 words
+        queries.append(f"{domain} {' '.join(words)}")
+
+    # Query 3: Just the name
+    if name:
+        queries.append(name)
+
+    # Query 4: Domain-specific searches
+    domain_queries = {
+        "cooking": ["cooking recipes", "baking tips", "cooking techniques"],
+        "python": ["python programming", "python code examples", "python tutorial"],
+        "diy": ["diy projects", "how-to guides", "diy tips"],
+        "gardening": ["gardening tips", "plant care", "growing guides"],
+        "first_aid": ["first aid tips", "emergency procedures", "medical first aid"],
+        "psycho": ["psychology tips", "mental health", "therapy techniques"],
+        "llm_consciousness": ["AI consciousness", "machine learning", "neural networks"],
+        "binary_symmetry": ["binary operations", "bitwise operations", "computer science"],
+        "poetry_domain": ["poetry techniques", "writing poetry", "literary devices"],
+        "exframe": ["knowledge management", "pattern systems", "domain expertise"]
+    }
+
+    if domain in domain_queries:
+        queries.extend(domain_queries[domain][:3])
+
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_queries = []
+    for q in queries:
+        if q and q not in seen:
+            seen.add(q)
+            unique_queries.append(q)
+
+    return unique_queries[:10]  # Max 10 queries
+
+
+async def _extract_patterns_from_text(text: str, domain_id: str, source: str, survey_name: str) -> list:
+    """Extract patterns from text using rule-based extraction (fast, no LLM needed)."""
+
+    patterns = []
+
+    # Try to use PatternExtractor if available
+    try:
+        from extraction.extractor import PatternExtractor
+        extractor = PatternExtractor(domain=domain_id)
+
+        # Use rule-based extraction (no LLM call)
+        result = extractor.extract_from_text(text)
+
+        if result.patterns_found > 0:
+            for pattern in result.patterns:
+                patterns.append({
+                    "name": pattern.name,
+                    "pattern_type": pattern.pattern_type.value if hasattr(pattern.pattern_type, 'value') else str(pattern.pattern_type),
+                    "description": pattern.description,
+                    "problem": pattern.problem,
+                    "solution": pattern.solution,
+                    "steps": pattern.steps,
+                    "tags": pattern.tags + [survey_name, "surveyor"],
+                    "sources": [source]
+                })
+    except Exception as e:
+        logger.debug(f"PatternExtractor failed: {e}, using fallback")
+
+    # Fallback: Simple sentence-based extraction
+    if not patterns and len(text) > 50:
+        import re
+
+        # Split into sentences
+        sentences = re.split(r'[.!?]+', text)
+        sentences = [s.strip() for s in sentences if len(s.strip()) > 30]
+
+        for sentence in sentences[:3]:  # Max 3 sentences
+            patterns.append({
+                "name": f"Extracted from {source.split('/')[-1][:30]}",
+                "pattern_type": "procedure",
+                "description": sentence,
+                "problem": f"Need information about {survey_name}",
+                "solution": sentence,
+                "steps": [sentence],
+                "tags": [domain_id, survey_name, "surveyor", "extracted"],
+                "sources": [source]
+            })
+
+    return patterns
+
+
+@app.post("/api/learning/surveys/{survey_id}/stop", response_model=dict)
+async def stop_survey_api(survey_id: str):
+    """Stop a survey"""
+    if survey_id not in _surveys_storage:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
+    survey = _surveys_storage[survey_id]
+    survey["status"] = "idle"
+    logger.info(f"Stopped survey: {survey_id}")
+    return survey
+
+
+@app.post("/api/learning/surveys/{survey_id}/pause", response_model=dict)
+async def pause_survey_api(survey_id: str):
+    """Pause a survey"""
+    if survey_id not in _surveys_storage:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
+    survey = _surveys_storage[survey_id]
+    survey["status"] = "paused"
+    logger.info(f"Paused survey: {survey_id}")
+    return survey
+
+
+@app.get("/api/learning/surveys/{survey_id}/metrics", response_model=dict)
+async def get_survey_metrics(survey_id: str):
+    """Get real-time survey metrics"""
+    if survey_id not in _surveys_storage:
+        raise HTTPException(status_code=404, detail="Survey not found")
+
+    survey = _surveys_storage[survey_id]
+    return {
+        "survey_id": survey_id,
+        "pulse": "● ● ● ● ○" if survey["status"] == "running" else "○ ○ ○ ○ ○",
+        "status": survey["status"],
+        "progress": survey["progress"],
+        "throughput": 0.0,
+        "certification": {
+            "certified": survey["patterns_certified"],
+            "flagged": survey["patterns_flagged"],
+            "rejected": survey["patterns_rejected"],
+            "pending": survey["patterns_pending"]
+        },
+        "judge_activity": {
+            "J1": 85,
+            "J2": 62,
+            "J3": 94,
+            "J4": 71
+        },
+        "errors": 0,
+        "focus": 0.95
     }
 
 

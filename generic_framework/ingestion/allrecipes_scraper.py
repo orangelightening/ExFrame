@@ -365,18 +365,74 @@ class AllRecipesScraper:
         return ingredients
 
     def _extract_steps(self, soup: BeautifulSoup) -> List[str]:
+        """
+        Extract recipe steps/instructions from AllRecipes HTML.
+
+        Handles AllRecipes' new HTML structure (2025+) with classes like:
+        - mm-recipes-steps__content
+        - mntl-sc-block
+        - mntl-sc-block-group--OL
+        """
         steps = []
+
+        # Try new AllRecipes structure first (2025+)
+        # Look for the main steps container
+        steps_container = soup.find('div', class_=lambda x: x and 'mm-recipes-steps__content' in ' '.join(x))
+        if steps_container:
+            # Find all list items (OL) inside the container
+            ol = steps_container.find('ol')
+            if ol:
+                for li in ol.find_all('li', recursive=False):
+                    # Get text, but exclude nested elements like "I Made It" buttons
+                    text_parts = []
+                    for elem in li.descendants:
+                        if elem.name in ['p', 'span', 'div']:
+                            text = elem.get_text(strip=True)
+                            if text and len(text) > 3:
+                                # Skip button text and helper text
+                                if 'button' not in str(elem.get('class', '')).lower():
+                                    text_parts.append(text)
+                        elif elem.name == '#text':
+                            text = str(elem).strip()
+                            if text and len(text) > 3:
+                                text_parts.append(text)
+
+                    if text_parts:
+                        # Join unique non-empty parts
+                        unique_parts = []
+                        seen = set()
+                        for part in text_parts:
+                            if part and part not in seen:
+                                seen.add(part)
+                                unique_parts.append(part)
+
+                        step_text = ' '.join(unique_parts)
+                        if len(step_text) > 10:
+                            steps.append(step_text)
+
+        if steps:
+            return steps
+
+        # Fallback to older/newer selectors
         for selector in [
-            '[class*="instruction"]',
+            'div.mm-recipes-steps__content ol li',
+            'div.mntl-sc-block ol li',
+            'ol[class*="instruction"] li',
             'li[class*="step"]',
+            '[class*="instruction"]',
             'p[class*="instruction"]',
         ]:
             elems = soup.select(selector)
             if elems:
                 for elem in elems:
-                    text = elem.get_text().strip()
+                    # Get all text content, excluding buttons
+                    text = elem.get_text(separator=' ', strip=True)
+                    # Filter out common non-instruction text
+                    skip_phrases = ['I Made It', 'Something went wrong', 'Please reload',
+                                  'Add Photo', 'Show Full Nutrition', 'Hide Full Nutrition']
                     if text and len(text) > 5:
-                        steps.append(text)
+                        if not any(phrase in text for phrase in skip_phrases):
+                            steps.append(text)
                 if steps:
                     break
         return steps

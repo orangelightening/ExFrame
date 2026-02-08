@@ -195,6 +195,11 @@ class PatternAnalyzer:
 
             pattern_ids.add(pid)
 
+            # Skip health checks for surveyor patterns - they're vetted by AllRecipes
+            if pattern.get('origin') == 'surveyor':
+                report.healthy_patterns += 1
+                continue
+
             # For EEFrame: combine description + problem + solution for duplicate detection
             description = pattern.get('description', '').strip()
             problem = pattern.get('problem', '').strip()

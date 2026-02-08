@@ -121,59 +121,72 @@ This project uses open-source libraries with compatible licenses. See [NOTICE](N
 
 ---
 
-## Plugin Architecture
+## Architecture
 
-ExFrame v1.3.0 features a complete pluggable pipeline that separates **data** (patterns) from **transformation logic** (plugins).
+ExFrame uses a **Phase1 Persona System** with three AI personas, each optimized for different types of knowledge work.
 
-### Pipeline Overview
+### Query Pipeline
 
 ```
-Query → Router → Specialist → Enrichers → Formatter → Response
+Query → Phase1 Engine → Persona Selection → Pattern Search → LLM Enrichment → Response
 ```
 
-### Plugin Types
+### Phase1 Personas
 
-#### 1. Router Plugins
+| Persona | Data Source | Use Case | Domain Types |
+|---------|-------------|----------|--------------|
+| **Poet** | Void/creative | Creative writing, poetry, abstract concepts | Type 1 (creative) |
+| **Librarian** | Library/docs | Technical documentation, code, structured knowledge | Type 2 (documentation) |
+| **Researcher** | Internet/web | Current information, research, web search | Type 4 (research) |
 
-Router plugins determine which specialist(s) should handle a query.
+### Pattern Override
 
-**Available Routers:**
-- `ConfidenceBasedRouter` - Selects highest-scoring specialist
-- `MultiSpecialistRouter` - Routes to top-N specialists
-- `ParallelRouter` - All specialists in parallel
+Each domain has a primary persona:
+- If **patterns found** → Use patterns (from domain knowledge base)
+- If **no patterns** → Use persona's data source (library, web, or void)
 
-#### 2. Specialist Plugins
+This ensures the best response regardless of whether patterns exist.
 
-Specialist plugins answer questions in specific domain areas.
+### Persona Configuration
 
-**Interface**:
-```python
-from core.specialist_plugin import SpecialistPlugin
+Domains specify their persona in `domain.json`:
 
-class MySpecialist(SpecialistPlugin):
-    name = "My Specialist"
-    specialist_id = "my_specialist"
-
-    def can_handle(self, query: str) -> float:
-        """Return confidence score 0.0 to 1.0"""
-        pass
-
-    async def process_query(self, query: str, context: Dict = None) -> Dict:
-        """Process query and return response data"""
-        pass
-
-    def format_response(self, response_data: Dict) -> str:
-        """Format response for user display"""
-        pass
+```json
+{
+  "domain_id": "cooking",
+  "persona": "researcher",
+  "enable_web_search": true,
+  "temperature": 0.7
+}
 ```
 
-**Included Specialists**:
-- `BitwiseMasterPlugin` - Binary and bitwise operations
-- `PatternAnalystPlugin` - Binary pattern detection
-- `AlgorithmExplorerPlugin` - Bitwise algorithms
-- `FailureDetectionPlugin` - LLM failure mode detection
-- `MonitoringPlugin` - System architecture patterns
-- `GeneralistPlugin` - Fallback for unmatched queries
+**Persona Types**:
+- `"poet"` - Creative, void-based (no external data)
+- `"librarian"` - Documentation and library search
+- `"researcher"` - Web search with DuckDuckGo
+
+### Enrichers
+
+After persona selection, enrichers enhance the response:
+
+**Available Enrichers:**
+- **LLM Enricher** - Uses Claude API to enhance and format responses
+- **Reply Formation** - Combines multiple sources into coherent response
+- **Code Generator** - Generates code examples (for programming domains)
+- **Citation Checker** - Adds source citations
+
+Enrichers are configured per domain in `domain.json`.
+
+### Knowledge Bases
+
+Each domain stores patterns in a knowledge base:
+
+**Available Knowledge Bases:**
+- **JSON Knowledge Base** - File-based JSON storage (default)
+- **SQLite Knowledge Base** - SQLite with FTS5 full-text search
+- **Document Store** - For structured document collections
+
+Patterns are stored in `universes/{universe}/domains/{domain}/patterns.json`.
 
 #### 2. Knowledge Base Plugins
 
@@ -211,28 +224,63 @@ class MyKnowledgeBase(KnowledgeBasePlugin):
 - `JSONKnowledgeBase` - File-based storage (default)
 - `SQLiteKnowledgeBase` - SQLite with FTS5 full-text search
 
-### Adding Plugins
+### Domain Configuration
 
-Plugins are configured in `data/patterns/{domain}/domain.json`:
+Each domain is configured in `universes/{universe}/domains/{domain}/domain.json`:
 
 ```json
 {
+  "domain_id": "cooking",
+  "domain_name": "Cooking",
+  "description": "Recipes and cooking techniques",
+  "persona": "researcher",
+  "enable_web_search": true,
+  "temperature": 0.7,
   "plugins": [
     {
-      "plugin_id": "my_specialist",
-      "name": "My Specialist",
-      "module": "plugins.my_domain.my_specialist",
-      "class": "MySpecialistPlugin",
+      "plugin_id": "researcher",
+      "module": "plugins.research.research_specialist",
+      "class": "ResearchSpecialistPlugin",
       "enabled": true,
       "config": {
-        "keywords": ["keyword1", "keyword2"],
-        "categories": ["category1"],
-        "threshold": 0.30
+        "enable_web_search": true,
+        "max_research_steps": 10
+      }
+    }
+  ],
+  "enrichers": [
+    {
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "temperature": 0.7
       }
     }
   ]
 }
 ```
+
+**Key Configuration Options**:
+- `persona` - "poet", "librarian", or "researcher"
+- `enable_web_search` - Enable DuckDuckGo search (researcher persona)
+- `temperature` - LLM temperature (0.0-1.0)
+- `plugins` - Plugin configuration for the domain
+- `enrichers` - Response enrichment plugins
+
+### Adding a New Domain
+
+1. Create domain directory:
+```bash
+mkdir -p universes/MINE/domains/my_topic
+```
+
+2. Create `domain.json` with persona configuration
+
+3. Add `patterns.json` with initial patterns
+
+4. Reload universe via API or restart server
 
 ### For More Information
 
@@ -2095,8 +2143,13 @@ MIT License
 
 Contributions are welcome! Areas of interest:
 
-- New domains and specialist plugins
-- Pattern ingestion improvements
+- New domains and patterns
+- Persona enhancements and configurations
+- **Pattern ingestion improvements** (🚧 Surveyor system is WIP - see `SURVEYOR_STATUS.md`)
 - UI enhancements
 - Additional knowledge base backends (Vector DB, Graph DB)
-- Router and formatter plugins (v1.1)
+- Additional enricher plugins
+
+### Note on Surveyor System
+
+The Surveyor autonomous learning system is currently **under active development** and not production-ready. For high-quality pattern collection, we recommend using the **Researcher persona with citations** rather than web scraping. See `easy-recipe.md` for an example of LLM-generated patterns vs scraped patterns.

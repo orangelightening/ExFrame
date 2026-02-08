@@ -675,12 +675,12 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
             # Return all patterns
             return self._patterns
 
-    async def get_all_patterns(self, limit: int = 100) -> List[Dict[str, Any]]:
+    async def get_all_patterns(self, limit: int = None) -> List[Dict[str, Any]]:
         """
         Get all patterns (async wrapper for API compatibility).
 
         Args:
-            limit: Maximum patterns to return
+            limit: Maximum patterns to return (None = all patterns)
 
         Returns:
             List of pattern dictionaries
@@ -688,6 +688,9 @@ class JSONKnowledgeBase(KnowledgeBasePlugin):
         if not self._loaded:
             await self.load_patterns()
 
+        # Return all patterns if no limit specified, otherwise apply limit
+        if limit is None or limit == 0:
+            return self._patterns
         return self._patterns[:limit]
 
     def get_pattern_by_id(self, pattern_id: str) -> Optional[Dict[str, Any]]:
