@@ -55,7 +55,8 @@ async def process_query(
 
     logger.info(f"Using persona: {persona_type}")
 
-    # ==================== ACCUMULATOR CHECK ====================
+    # ==================== ACCUMULATOR CHECK (Memory/Context Loading) ====================
+    # Accumulator: Load previous content into LLM context for memory/learning
     accumulator_content = None
     accumulator_config = domain_config.get("accumulator", {})
 
@@ -64,20 +65,20 @@ async def process_query(
         output_file = accumulator_config.get("output_file", "stories/active_story.md")
         max_chars = accumulator_config.get("max_context_chars", 15000)
 
-        should_accumulate = False
+        should_load_context = False
 
         if mode == "all":
-            # Log all queries/responses
-            should_accumulate = True
+            # Load all content as context
+            should_load_context = True
             logger.info(f"Accumulator mode 'all': loading context from {output_file}")
         elif mode == "triggers":
-            # Only log on trigger phrases
+            # Only load context on trigger phrases
             trigger_phrases = accumulator_config.get("trigger_phrases", [])
             if trigger_phrases and _check_accumulator_trigger(query, trigger_phrases):
-                should_accumulate = True
+                should_load_context = True
                 logger.info(f"Accumulator mode 'triggers': triggered by query, loading context from {output_file}")
 
-        if should_accumulate:
+        if should_load_context:
             accumulator_content = _load_accumulator_content(domain_name, output_file, max_chars)
 
             if accumulator_content:
@@ -146,14 +147,40 @@ async def process_query(
 
         response = await persona.respond(query, context=context)
 
-    # ==================== ACCUMULATOR APPEND ====================
-    # Append to accumulator if enabled and mode matches
+    # ==================== LOGGING & ACCUMULATOR APPEND ====================
+    # Two separate append operations:
+    # 1. Universal Logging: Always append to log if logging.enabled (default: true)
+    # 2. Accumulator: Append to accumulator if enabled and mode matches
+
+    # 1. Universal Logging (append to domain log)
+    logging_config = domain_config.get("logging", {"enabled": True})
+    if logging_config.get("enabled", True):
+        log_file = logging_config.get("output_file", "domain_log.md")
+        format_type = logging_config.get("format", "markdown")
+
+        success = _append_to_log(
+            domain_name,
+            log_file,
+            query,
+            response.get("answer", ""),
+            format_type
+        )
+
+        if success:
+            response["logging_updated"] = True
+            response["log_file"] = log_file
+            logger.info(f"Response appended to domain log: {log_file}")
+        else:
+            response["logging_updated"] = False
+            logger.warning("Failed to append response to domain log")
+
+    # 2. Accumulator (append for memory/context)
     if accumulator_config.get("enabled", False):
         mode = accumulator_config.get("mode", "triggers")
         should_append = False
 
         if mode == "all":
-            # Append all queries/responses
+            # Append all queries/responses to accumulator
             should_append = True
             logger.info(f"Accumulator mode 'all': appending response")
         elif mode == "triggers":
@@ -182,7 +209,7 @@ async def process_query(
             else:
                 response["accumulator_updated"] = False
                 logger.warning("Failed to append response to accumulator")
-    # ==================== END ACCUMULATOR APPEND ====================
+    # ==================== END LOGGING & ACCUMULATOR APPEND ====================
 
     # Add domain metadata
     response["domain"] = domain_name
@@ -666,6 +693,68 @@ def _get_domain_path(domain_name: str) -> Optional[Path]:
         return domain_path
 
     return None
+
+
+# ==================== LOGGING FUNCTIONS ====================
+
+def _append_to_log(domain_name: str, output_file: str, query: str, response: str, format_type: str = "markdown") -> bool:
+    """
+    Append new query/response to domain log file (universal logging).
+
+    Args:
+        domain_name: Domain name
+        output_file: Relative path to log file
+        query: User query
+        response: LLM response
+        format_type: Format type (markdown, plain, etc.)
+
+    Returns:
+        True if successful, False otherwise
+    """
+    from pathlib import Path
+    from datetime import datetime
+
+    domain_path = _get_domain_path(domain_name)
+    if not domain_path:
+        logger.warning(f"Cannot append to log: domain path not found for {domain_name}")
+        return False
+
+    log_path = domain_path / output_file
+
+    # Create directory if it doesn't exist
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        # Check if file exists to determine if we need a header
+        file_exists = log_path.exists()
+
+        with open(log_path, 'a', encoding='utf-8') as f:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            if format_type == "markdown":
+                if not file_exists:
+                    f.write(f"# Domain Log\nCreated: {timestamp}\n\n")
+
+                f.write(f"## {timestamp}\n\n")
+                f.write(f"**Query:** {query}\n\n")
+                f.write(f"{response}\n\n")
+                f.write("---\n\n")
+            else:
+                # Plain text format
+                if not file_exists:
+                    f.write(f"Domain Log - Created: {timestamp}\n\n")
+
+                f.write(f"[{timestamp}]\n")
+                f.write(f"Query: {query}\n")
+                f.write(f"Response: {response}\n")
+                f.write("\n" + "-"*80 + "\n\n")
+
+        logger.info(f"Appended to domain log: {log_path}")
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to append to domain log: {e}")
+        return False
 
 
 # ==================== ACCUMULATOR FUNCTIONS ====================
