@@ -55,6 +55,28 @@ async def process_query(
 
     logger.info(f"Using persona: {persona_type}")
 
+    # ==================== ACCUMULATOR CHECK ====================
+    accumulator_content = None
+    accumulator_config = domain_config.get("accumulator", {})
+
+    if accumulator_config.get("enabled", False):
+        trigger_phrases = accumulator_config.get("trigger_phrases", [])
+
+        if trigger_phrases and _check_accumulator_trigger(query, trigger_phrases):
+            output_file = accumulator_config.get("output_file", "stories/active_story.md")
+            max_chars = accumulator_config.get("max_context_chars", 15000)
+
+            logger.info(f"Accumulator triggered by query, loading context from {output_file}")
+            accumulator_content = _load_accumulator_content(domain_name, output_file, max_chars)
+
+            if accumulator_content:
+                # Prepend accumulator content to context
+                context = context or {}
+                context["accumulator_content"] = accumulator_content
+                context["accumulator_used"] = True
+                logger.info(f"Loaded {len(accumulator_content)} chars of accumulator context")
+    # ==================== END ACCUMULATOR CHECK ====================
+
     # THE SWITCH: Determine if we should search patterns
     # Priority: explicit flag > context flag > domain config > default True
     if search_patterns is not None:
@@ -87,6 +109,12 @@ async def process_query(
     context = context or {}
     context["show_thinking"] = show_thinking
 
+    # If accumulator content exists, inject it into the prompt
+    if accumulator_content:
+        # Add accumulator content as a prefix to the context
+        context["accumulator_prefix"] = f"Story so far:\n\n{accumulator_content}\n\n---\n\n"
+        logger.info("Injected accumulator content into prompt")
+
     if patterns and len(patterns) > 0:
         # Use patterns (override)
         response = await persona.respond(
@@ -106,11 +134,38 @@ async def process_query(
 
         response = await persona.respond(query, context=context)
 
+    # ==================== ACCUMULATOR APPEND ====================
+    # If accumulator was triggered (even if file doesn't exist yet), append the response
+    if accumulator_config.get("enabled", False) and _check_accumulator_trigger(query, accumulator_config.get("trigger_phrases", [])):
+        output_file = accumulator_config.get("output_file", "stories/active_story.md")
+        format_type = accumulator_config.get("format", "markdown")
+
+        success = _append_to_accumulator(
+            domain_name,
+            output_file,
+            query,
+            response.get("answer", ""),
+            format_type
+        )
+
+        if success:
+            response["accumulator_updated"] = True
+            response["accumulator_file"] = output_file
+            logger.info(f"Response appended to accumulator: {output_file}")
+        else:
+            response["accumulator_updated"] = False
+            logger.warning("Failed to append response to accumulator")
+    # ==================== END ACCUMULATOR APPEND ====================
+
     # Add domain metadata
     response["domain"] = domain_name
     response["pattern_override_used"] = bool(patterns)
     response["persona_type"] = persona_type
     response["search_patterns_enabled"] = should_search_patterns
+
+    # Add accumulator metadata
+    if accumulator_content is not None:
+        response["accumulator_used"] = True
 
     return response
 
@@ -584,3 +639,123 @@ def _get_domain_path(domain_name: str) -> Optional[Path]:
         return domain_path
 
     return None
+
+
+# ==================== ACCUMULATOR FUNCTIONS ====================
+
+def _check_accumulator_trigger(query: str, trigger_phrases: List[str]) -> bool:
+    """
+    Check if query contains any accumulator trigger phrases.
+
+    Args:
+        query: User query string
+        trigger_phrases: List of trigger phrases
+
+    Returns:
+        True if any trigger phrase found in query (case-insensitive)
+    """
+    query_lower = query.lower()
+    return any(phrase.lower() in query_lower for phrase in trigger_phrases)
+
+
+def _load_accumulator_content(domain_name: str, output_file: str, max_chars: int = 15000) -> Optional[str]:
+    """
+    Load accumulated content from file.
+
+    Args:
+        domain_name: Domain name
+        output_file: Relative path to accumulator file
+        max_chars: Maximum characters to load
+
+    Returns:
+        Accumulated content string or None if file doesn't exist
+    """
+    from pathlib import Path
+
+    domain_path = _get_domain_path(domain_name)
+    if not domain_path:
+        logger.warning(f"Cannot load accumulator: domain path not found for {domain_name}")
+        return None
+
+    accumulator_path = domain_path / output_file
+
+    if not accumulator_path.exists():
+        logger.info(f"Accumulator file not found: {accumulator_path}")
+        return None
+
+    try:
+        with open(accumulator_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Truncate if too long
+        if len(content) > max_chars:
+            content = content[-max_chars:]
+            logger.info(f"Accumulator content truncated to {max_chars} chars")
+
+        logger.info(f"Loaded {len(content)} chars from accumulator: {accumulator_path}")
+        return content
+
+    except Exception as e:
+        logger.error(f"Failed to load accumulator: {e}")
+        return None
+
+
+def _append_to_accumulator(domain_name: str, output_file: str, query: str, response: str, format_type: str = "markdown") -> bool:
+    """
+    Append new query/response to accumulator file.
+
+    Args:
+        domain_name: Domain name
+        output_file: Relative path to accumulator file
+        query: User query
+        response: LLM response
+        format_type: Format type (markdown, plain, etc.)
+
+    Returns:
+        True if successful, False otherwise
+    """
+    from pathlib import Path
+    from datetime import datetime
+
+    domain_path = _get_domain_path(domain_name)
+    if not domain_path:
+        logger.warning(f"Cannot append to accumulator: domain path not found for {domain_name}")
+        return False
+
+    accumulator_path = domain_path / output_file
+
+    # Create directory if it doesn't exist
+    accumulator_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        # Check if file exists to determine if we need a header
+        file_exists = accumulator_path.exists()
+
+        with open(accumulator_path, 'a', encoding='utf-8') as f:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            if format_type == "markdown":
+                if not file_exists:
+                    f.write(f"# Story Accumulator\nStarted: {timestamp}\n\n")
+
+                f.write(f"## {timestamp}\n\n")
+                f.write(f"**Query:** {query}\n\n")
+                f.write(f"{response}\n\n")
+                f.write("---\n\n")
+            else:
+                # Plain text format
+                if not file_exists:
+                    f.write(f"Story Accumulator - Started: {timestamp}\n\n")
+
+                f.write(f"[{timestamp}]\n")
+                f.write(f"Query: {query}\n")
+                f.write(f"Response: {response}\n")
+                f.write("\n" + "-"*80 + "\n\n")
+
+        logger.info(f"Appended to accumulator: {accumulator_path}")
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to append to accumulator: {e}")
+        return False
+

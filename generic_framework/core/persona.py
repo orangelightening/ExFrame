@@ -92,6 +92,17 @@ class Persona:
         context = context or {}
         show_thinking = context.get("show_thinking", self.show_thinking)
 
+        # Check for accumulator prefix (story so far)
+        accumulator_prefix = context.get("accumulator_prefix", "")
+        if accumulator_prefix:
+            if self.trace:
+                self.logger.info(f"[{self.name}] Using accumulator prefix ({len(accumulator_prefix)} chars)")
+            # Prepend accumulator content to whatever content we have
+            if content:
+                content = accumulator_prefix + content
+            else:
+                content = accumulator_prefix
+
         # Build prompt
         prompt = self._build_prompt(query, content, show_thinking)
 
