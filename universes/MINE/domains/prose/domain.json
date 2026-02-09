@@ -82,6 +82,7 @@
   "library_base_path": "/app/project",
   "accumulator": {
     "enabled": true,
+    "mode": "all",
     "output_file": "stories/active_story.md",
     "trigger_phrases": ["next chapter", "continue", "write chapter", "chapter", "part"],
     "max_context_chars": 15000,

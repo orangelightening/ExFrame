@@ -60,13 +60,24 @@ async def process_query(
     accumulator_config = domain_config.get("accumulator", {})
 
     if accumulator_config.get("enabled", False):
-        trigger_phrases = accumulator_config.get("trigger_phrases", [])
+        mode = accumulator_config.get("mode", "triggers")
+        output_file = accumulator_config.get("output_file", "stories/active_story.md")
+        max_chars = accumulator_config.get("max_context_chars", 15000)
 
-        if trigger_phrases and _check_accumulator_trigger(query, trigger_phrases):
-            output_file = accumulator_config.get("output_file", "stories/active_story.md")
-            max_chars = accumulator_config.get("max_context_chars", 15000)
+        should_accumulate = False
 
-            logger.info(f"Accumulator triggered by query, loading context from {output_file}")
+        if mode == "all":
+            # Log all queries/responses
+            should_accumulate = True
+            logger.info(f"Accumulator mode 'all': loading context from {output_file}")
+        elif mode == "triggers":
+            # Only log on trigger phrases
+            trigger_phrases = accumulator_config.get("trigger_phrases", [])
+            if trigger_phrases and _check_accumulator_trigger(query, trigger_phrases):
+                should_accumulate = True
+                logger.info(f"Accumulator mode 'triggers': triggered by query, loading context from {output_file}")
+
+        if should_accumulate:
             accumulator_content = _load_accumulator_content(domain_name, output_file, max_chars)
 
             if accumulator_content:
@@ -74,6 +85,7 @@ async def process_query(
                 context = context or {}
                 context["accumulator_content"] = accumulator_content
                 context["accumulator_used"] = True
+                context["accumulator_mode"] = mode
                 logger.info(f"Loaded {len(accumulator_content)} chars of accumulator context")
     # ==================== END ACCUMULATOR CHECK ====================
 
@@ -135,26 +147,41 @@ async def process_query(
         response = await persona.respond(query, context=context)
 
     # ==================== ACCUMULATOR APPEND ====================
-    # If accumulator was triggered (even if file doesn't exist yet), append the response
-    if accumulator_config.get("enabled", False) and _check_accumulator_trigger(query, accumulator_config.get("trigger_phrases", [])):
-        output_file = accumulator_config.get("output_file", "stories/active_story.md")
-        format_type = accumulator_config.get("format", "markdown")
+    # Append to accumulator if enabled and mode matches
+    if accumulator_config.get("enabled", False):
+        mode = accumulator_config.get("mode", "triggers")
+        should_append = False
 
-        success = _append_to_accumulator(
-            domain_name,
-            output_file,
-            query,
-            response.get("answer", ""),
-            format_type
-        )
+        if mode == "all":
+            # Append all queries/responses
+            should_append = True
+            logger.info(f"Accumulator mode 'all': appending response")
+        elif mode == "triggers":
+            # Only append on trigger phrases
+            trigger_phrases = accumulator_config.get("trigger_phrases", [])
+            if trigger_phrases and _check_accumulator_trigger(query, trigger_phrases):
+                should_append = True
+                logger.info(f"Accumulator mode 'triggers': triggered, appending response")
 
-        if success:
-            response["accumulator_updated"] = True
-            response["accumulator_file"] = output_file
-            logger.info(f"Response appended to accumulator: {output_file}")
-        else:
-            response["accumulator_updated"] = False
-            logger.warning("Failed to append response to accumulator")
+        if should_append:
+            output_file = accumulator_config.get("output_file", "stories/active_story.md")
+            format_type = accumulator_config.get("format", "markdown")
+
+            success = _append_to_accumulator(
+                domain_name,
+                output_file,
+                query,
+                response.get("answer", ""),
+                format_type
+            )
+
+            if success:
+                response["accumulator_updated"] = True
+                response["accumulator_file"] = output_file
+                logger.info(f"Response appended to accumulator: {output_file}")
+            else:
+                response["accumulator_updated"] = False
+                logger.warning("Failed to append response to accumulator")
     # ==================== END ACCUMULATOR APPEND ====================
 
     # Add domain metadata
