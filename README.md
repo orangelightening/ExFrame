@@ -13,11 +13,92 @@ See CHANGELOG.md for complete naming history.
 
 *Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
 
-> **Deployment**: Docker Compose for production (not on PyPI). Local development: clone + `pip install -e .`. See [Quick Start](#quick-start).
+---
+
+## ⚡ 5-Minute Installation
+
+**Get ExFrame running in 5 minutes with Docker Compose.**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+
+# 2. Configure your AI provider
+cp .env.example .env
+# Edit .env and add your API key (OpenAI, Anthropic, or compatible)
+# For OpenAI: OPENAI_API_KEY=your-key-here
+
+# 3. Start ExFrame
+docker-compose up -d
+
+# 4. Open your browser
+# Navigate to: http://localhost:3000
+```
+
+**That's it!** ExFrame is now running. Create a domain and start asking questions.
+
+**Need help?** See [Configuration Guide](#configuration) below.
 
 ---
 
-ExFrame is a unified, domain-agnostic AI-powered knowledge management system with a **universe-based architecture** and **plugin-based pipeline**. It provides:
+## 🔧 Configuration
+
+### Step 1: Copy .env.example to .env
+
+```bash
+cp .env.example .env
+```
+
+### Step 2: Add Your API Key
+
+Edit `.env` and configure one of these providers:
+
+#### **Option A: OpenAI (Recommended)**
+```bash
+LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+#### **Option B: Anthropic Claude**
+```bash
+LLM_MODEL=claude-3-5-sonnet-20241022
+OPENAI_API_KEY=your-anthropic-api-key-here
+OPENAI_BASE_URL=https://api.anthropic.com/v1
+```
+
+#### **Option C: Zhipu GLM (Cost-Effective)**
+```bash
+LLM_MODEL=glm-4.7
+OPENAI_API_KEY=your-zhipu-api-key-here
+OPENAI_BASE_URL=https://api.z.ai/api/anthropic
+```
+
+#### **Option D: Local LLM (Ollama)**
+```bash
+LLM_MODEL=llama3
+OPENAI_API_KEY=not-needed
+OPENAI_BASE_URL=http://host.docker.internal:11434/v1
+```
+
+**That's it!** Just save the `.env` file and restart:
+
+```bash
+docker-compose up -d
+```
+
+### Verify It's Working
+
+Open http://localhost:3000 and:
+1. Go to the **Assistant** tab
+2. Select any domain
+3. Ask a question
+4. You should get a response!
+
+---
+
+**ExFrame** is a unified, domain-agnostic AI-powered knowledge management system with a **universe-based architecture** and **plugin-based pipeline**. It provides:
 
 - **Universe Architecture**: Complete isolation and portability of knowledge configurations
 - **Plugin Pipeline**: Router → Specialist → Enricher → Formatter - all swappable
