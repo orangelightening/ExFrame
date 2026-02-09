@@ -1383,6 +1383,61 @@
                             </div>
                         </div>
 
+                        <!-- Accumulator (Memory) -->
+                        <div x-show="domainForm.persona" class="p-4 rounded-lg bg-blue-900/10 border border-blue-500/30">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-blue-400">🧠</span>
+                                <h3 class="font-semibold text-blue-400">Accumulator (Memory)</h3>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-4">Enable conversation memory - AI remembers everything discussed in this domain.</p>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" id="accumulator_enabled" x-model="domainForm.accumulator_enabled">
+                                    <label for="accumulator_enabled" class="text-sm text-gray-300">Enable accumulator</label>
+                                </div>
+
+                                <div x-show="domainForm.accumulator_enabled">
+                                    <div class="mb-4">
+                                        <label class="block text-xs text-gray-400 mb-2">Mode</label>
+                                        <select x-model="domainForm.accumulator_mode"
+                                                class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none">
+                                            <option value="all">All - Remember everything (learning, research, projects)</option>
+                                            <option value="triggers">Triggers - Only on specific phrases (novels, stories)</option>
+                                        </select>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            <span x-show="domainForm.accumulator_mode === 'all'">Every query/response is logged. Perfect for learning and research.</span>
+                                            <span x-show="domainForm.accumulator_mode === 'triggers'">Only logs when trigger phrases detected. Good for sequential stories.</span>
+                                        </p>
+                                    </div>
+
+                                    <div x-show="domainForm.accumulator_mode === 'triggers'" class="mb-4">
+                                        <label class="block text-xs text-gray-400 mb-2">Trigger Phrases</label>
+                                        <input type="text" x-model="domainForm.accumulator_triggers"
+                                               class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none"
+                                               placeholder="chapter, continue, next, part">
+                                        <p class="text-xs text-gray-500 mt-1">Comma-separated phrases that trigger memory (e.g., "chapter, continue, next")</p>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="block text-xs text-gray-400 mb-2">Output File</label>
+                                        <input type="text" x-model="domainForm.accumulator_file"
+                                               class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none"
+                                               placeholder="learning_log.md or stories/active_story.md">
+                                        <p class="text-xs text-gray-500 mt-1">Relative path in domain directory (e.g., "learning_log.md")</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs text-gray-400 mb-2">Max Context Length</label>
+                                        <input type="number" x-model.number="domainForm.accumulator_max_chars" min="1000" max="100000" step="1000"
+                                               class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none"
+                                               placeholder="15000">
+                                        <p class="text-xs text-gray-500 mt-1">Maximum characters to load from memory (higher = more context, but slower)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Basic Settings -->
                         <div x-show="domainForm.persona" class="p-4 rounded-lg border border-gray-700">
                             <div class="flex items-center gap-2 mb-4">
@@ -3671,7 +3726,13 @@
                         research_chunk_overlap: 100,
                         auto_certify_docs: true,
                         llm_model: 'glm-4.7',
-                        llm_min_confidence: 0.3
+                        llm_min_confidence: 0.3,
+                        // Accumulator (Memory)
+                        accumulator_enabled: false,
+                        accumulator_mode: 'all',
+                        accumulator_triggers: 'chapter, continue, next, part',
+                        accumulator_file: 'learning_log.md',
+                        accumulator_max_chars: 15000
                     };
                     this.newCategory = '';
                     this.newTag = '';
@@ -3767,7 +3828,13 @@
                             report_format: data.report_format || 'structured',
                             enable_web_search: data.enable_web_search || false,
                             require_confirmation: data.require_confirmation !== undefined ? data.require_confirmation : true,
-                            research_on_fallback: data.research_on_fallback || false
+                            research_on_fallback: data.research_on_fallback || false,
+                            // Accumulator (Memory)
+                            accumulator_enabled: data.accumulator?.enabled || false,
+                            accumulator_mode: data.accumulator?.mode || 'all',
+                            accumulator_triggers: data.accumulator?.trigger_phrases ? data.accumulator.trigger_phrases.join(', ') : 'chapter, continue, next, part',
+                            accumulator_file: data.accumulator?.output_file || 'learning_log.md',
+                            accumulator_max_chars: data.accumulator?.max_context_chars || 15000
                         };
                         this.newCategory = '';
                         this.newTag = '';
@@ -3854,7 +3921,17 @@
                             enable_web_search: this.domainForm.enable_web_search,
                             require_confirmation: this.domainForm.require_confirmation,
                             research_on_fallback: this.domainForm.research_on_fallback,
-                            llm_min_confidence: parseFloat(this.domainForm.llm_min_confidence) || null
+                            llm_min_confidence: parseFloat(this.domainForm.llm_min_confidence) || null,
+                            // Accumulator (Memory)
+                            accumulator: this.domainForm.accumulator_enabled ? {
+                                enabled: true,
+                                mode: this.domainForm.accumulator_mode || 'all',
+                                output_file: this.domainForm.accumulator_file || 'learning_log.md',
+                                trigger_phrases: this.domainForm.accumulator_triggers ? this.domainForm.accumulator_triggers.split(',').map(t => t.trim()) : [],
+                                max_context_chars: parseInt(this.domainForm.accumulator_max_chars) || 15000,
+                                include_query_history: true,
+                                format: 'markdown'
+                            } : null
                         };
 
                         const url = this.creatingDomain ? '/api/admin/domains' : `/api/admin/domains/${this.domainForm.domain_id}`;
