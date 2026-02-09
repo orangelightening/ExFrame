@@ -119,6 +119,7 @@
             </div>
         </header>
 
+
         <!-- Main Content Area - View-based -->
         <main class="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
 
@@ -2923,6 +2924,9 @@
 
                         // Load domain config to get placeholder text
                         const configData = await configRes.json();
+                        console.log('📋 Domain config loaded:', configData);
+                        console.log('📋 Persona from config:', configData.persona);
+
                         // Store domain description and last update for display
                         this.domainDescription = configData.description || '';
                         this.domainLastUpdate = configData.updated_at || '';
@@ -2930,6 +2934,13 @@
                         this.currentTemperature = configData.temperature || 0.5;
                         this.currentDomainType = configData.domain_type || '';
                         this.currentPersona = configData.persona || '';
+
+                        console.log('✅ currentPersona set to:', this.currentPersona);
+                        console.log('✅ Full app state:', {
+                            domain: this.currentDomain,
+                            persona: this.currentPersona,
+                            temp: this.currentTemperature
+                        });
 
                         // Extract library path for librarian persona
                         this.currentLibraryPath = '';
@@ -3865,7 +3876,13 @@
                         await this.loadAllDomains();
                         // If we saved the current domain, reload its info to update temperature/domain type display
                         if (this.domainForm.domain_id === this.currentDomain) {
+                            console.log('🔄 Reloading domain info after save...');
                             await this.loadDomainInfo();
+                            console.log('✅ Domain info reloaded. Persona is now:', this.currentPersona);
+                            // Force Alpine to reactivity
+                            this.$nextTick(() => {
+                                console.log('✅ NextTick - Persona should be:', this.currentPersona);
+                            });
                         }
                         this.cancelDomainEdit();
                     } catch (error) {

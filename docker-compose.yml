@@ -79,7 +79,9 @@ services:
 
       # Persist logs (optional - container logs also captured)
       - eeframe_logs:/app/logs
-    restart: unless-stopped
+    # DISABLED: Using manual uvicorn instead for development
+    # restart: unless-stopped
+    restart: "no"
     networks:
       - monitoring
     healthcheck:
