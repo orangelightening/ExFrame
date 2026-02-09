@@ -13,6 +13,8 @@ See CHANGELOG.md for complete naming history.
 
 *Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
 
+**📖 [Quick Start Guide (5 minutes)](QUICKSTART.md)** | **🎓 Learn about Universal Logging** | **📚 Personal University**
+
 ---
 
 ## ⚡ 5-Minute Installation
