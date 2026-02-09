@@ -34,6 +34,16 @@ Each domain has:
   "library_base_path": "/app/project/docs",
   "enable_pattern_override": true,
 
+  "accumulator": {
+    "enabled": true,
+    "mode": "all",
+    "output_file": "learning_log.md",
+    "trigger_phrases": ["chapter", "continue"],
+    "max_context_chars": 15000,
+    "include_query_history": true,
+    "format": "markdown"
+  },
+
   "categories": ["category1", "category2"],
   "tags": ["tag1", "tag2"],
 
@@ -124,6 +134,45 @@ Each domain has:
 - `researcher`: Web search (internet) - searches the web
 
 **Pattern Override:** When enabled, the domain checks local patterns first. If patterns match, use them. Otherwise, fall back to persona's data source.
+
+### Accumulator Configuration
+
+**Purpose:** Enable persistent conversation memory for learning and sequential content generation
+
+```json
+"accumulator": {
+  "enabled": true,
+  "mode": "all",
+  "output_file": "learning_log.md",
+  "trigger_phrases": ["chapter", "continue"],
+  "max_context_chars": 15000,
+  "include_query_history": true,
+  "format": "markdown"
+}
+```
+
+**Fields:**
+| Field | Type | Required | Values | Description |
+|-------|------|----------|--------|-------------|
+| `enabled` | boolean | ✅ | true/false | Enable accumulator for this domain |
+| `mode` | string | ✅ | "all", "triggers" | "all" = Log every query (learning)<br>"triggers" = Log on trigger phrases (stories) |
+| `output_file` | string | ✅ | - | Relative path to accumulator file (from domain directory) |
+| `trigger_phrases` | array | ❌ | ["chapter", "continue"] | Phrases that trigger logging in "triggers" mode |
+| `max_context_chars` | integer | ❌ | 1000-100000 | Maximum characters to load from accumulator (default: 15000) |
+| `include_query_history` | boolean | ❌ | true/false | Include query history in context (default: true) |
+| `format` | string | ❌ | "markdown", "plain" | Output format for accumulator file (default: "markdown") |
+
+**Modes:**
+- `all`: Remember everything - Perfect for learning, research threads, project continuity
+- `triggers`: Remember on demand - Perfect for novel writing, serialized content
+
+**Use Cases:**
+- **Learning domains**: Enable with mode "all" for persistent educational memory
+- **Novel writing**: Enable with mode "triggers" for sequential chapter generation
+- **Research threads**: Enable with mode "all" for cumulative research logs
+- **Project planning**: Enable with mode "all" for ongoing project discussions
+
+**See also:** [Accumulator Design Document](docs/ACCUMULATOR_DESIGN.md)
 
 ### Organization
 

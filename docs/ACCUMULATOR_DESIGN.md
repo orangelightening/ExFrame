@@ -1,18 +1,26 @@
-# Story Accumulator Design Document
+# Accumulator Design Document
 
-**Status:** ✅ Implemented
-**Version:** 1.0
+**Status:** ✅ Implemented with UI
+**Version:** 2.0
 **Last Updated:** 2026-02-09
 
 ---
 
 ## Overview
 
-The **Accumulator** is a domain-level feature that provides **sequential context memory** for LLM conversations. It enables:
+The **Accumulator** is a domain-level feature that provides **persistent conversation memory** for LLM conversations. It transforms each domain into a personalized learning environment where the AI remembers everything discussed.
 
-1. **Story writing** - Chapter-by-chapter novel creation
-2. **Conversation memory** - Ongoing dialogue with full history
-3. **Project continuity** - Long-running discussions that build context over time
+**Key insight:** This is not just a feature - it's a **personal university system** where:
+- Each domain = A course or subject
+- The accumulator = Your learning log
+- The LLM = Your personal tutor who remembers EVERYTHING
+
+### Use Cases
+
+1. **Story Writing** - Chapter-by-chapter novel creation
+2. **Conversation Memory** - Ongoing dialogue with full history
+3. **Learning Domains** - Personalized education on any topic
+4. **Project Continuity** - Long-running discussions that build context
 
 ---
 
@@ -83,6 +91,52 @@ Append query + response to accumulator file
 | `trigger_phrases` | array | No | [] | Phrases that trigger logging in "triggers" mode |
 | `max_context_chars` | integer | No | 15000 | Maximum characters to load from accumulator (truncates if too long) |
 | `format` | string | No | "markdown" | Output format: "markdown" or "plain" |
+
+---
+
+## Creating Domains with Accumulator (Web UI)
+
+You can now create domains with accumulator enabled directly through the **web interface** - no need to edit JSON files manually.
+
+### Step-by-Step: Create a Learning Domain
+
+1. **Navigate to Domains tab**
+2. **Click "Create New Domain" button**
+3. **Fill in the basic info:**
+   - Domain ID: `quantum_physics` (unique identifier)
+   - Domain Name: `Quantum Physics` (display name)
+   - Description: `Learn quantum mechanics from basics to advanced`
+
+4. **Select Persona:**
+   - Choose **"Researcher - Research and analysis"** for learning
+   - Temperature will auto-set to 0.7 (balanced)
+   - Researcher uses LLM knowledge and research capabilities
+
+5. **Configure Accumulator (Memory):**
+   - ✅ **Enable accumulator** - Check the checkbox
+   - **Mode:** Choose "All - Remember everything"
+   - **Output File:** `learning_log.md` (or any name you want)
+   - **Max Context Length:** `15000` (adjustable 1000-100000)
+
+6. **Click Save**
+
+**Your learning domain is ready!**
+
+### UI Fields
+
+| Field | Description | Recommendation for Learning |
+|-------|-------------|-------------------------------|
+| Enable accumulator | Turn on memory for this domain | ✅ Always enable for learning |
+| Mode | "all" or "triggers" | Choose "all" for learning |
+| Output file | Where conversation log is stored | `learning_log.md` or similar |
+| Max context length | How much history to load (chars) | 15000-30000 for deep learning |
+
+### Editing Existing Domains
+
+1. **Domains tab** → Click domain name
+2. **Edit** button
+3. **Enable accumulator** (if not already enabled)
+4. **Save**
 
 ---
 
@@ -312,6 +366,210 @@ Next query starts with blank slate.
 1. **Context window** - LLMs have token limits (handled by `max_context_chars`)
 2. **File size** - Very long conversations will be truncated
 3. **Manual management** - Starting fresh requires file deletion/renaming
+
+---
+
+## 🎓 The Personal University: Primary Use Case
+
+### What Is It?
+
+The Accumulator transforms ExFrame into a **personalized university system** where:
+- Each domain = A course or subject
+- Each accumulator = Your learning log/transcript
+- The LLM = Your personal tutor who remembers EVERYTHING
+
+### Why It's Revolutionary
+
+**Traditional Education vs ExFrame University:**
+
+| Aspect | Traditional University | ExFrame University |
+|--------|----------------------|-------------------|
+| **Memory** | Teacher forgets between sessions | AI remembers EVERYTHING |
+| **Continuity** | Starts fresh each lesson | Builds on every discussion |
+| **Pacing** | Fixed curriculum for everyone | Adapts to YOUR learning speed |
+| **Availability** | Scheduled hours (10-15 weeks) | 24/7/365, forever |
+| **Cost** | $50-100/hour for tutoring | ~$5/month for unlimited AI |
+| **Personalization** | One-size-fits-all | Tailored to your struggles |
+
+### Real Example: Learning Rust Programming
+
+**Week 1: Foundations**
+```
+You: "I'm new to programming. Teach me Rust basics."
+AI: "Great choice! Let's start with ownership..."
+[Saved to rust_programming/learning_log.md]
+```
+
+**Week 2: Struggling**
+```
+You: "I still don't get borrowing."
+AI: [Sees you've asked 3 times about borrowing]
+    "Let me try a different approach. Remember when we compared
+     ownership to library books? Think of borrowing like..."
+[Saved to rust_programming/learning_log.md]
+```
+
+**Week 5: Progress Check**
+```
+You: "Quiz me on ownership and borrowing."
+AI: [Reads 5 weeks of your learning journey]
+    """
+    You've struggled with borrowing but have shown improvement.
+    You mastered ownership immediately.
+    Let's test you on some edge cases...
+    """
+[Saved to rust_programming/learning_log.md]
+```
+
+**Week 10: Advanced Topics**
+```
+You: "I'm ready for lifetimes."
+AI: [Sees 10 weeks of context]
+    "Since you're solid on ownership and borrowing, lifetimes
+     will make sense. They solve the 'when to free memory' problem..."
+[Saved to rust_programming/learning_log.md]
+```
+
+### The Socratic Method
+
+The accumulator enables AI-guided Socratic learning:
+
+**Day 1:**
+```
+You: "What is entropy?"
+AI: [Explains entropy with examples]
+```
+
+**Day 5:**
+```
+You: "How does entropy relate to information theory?"
+AI: [Sees your Day 1 discussion]
+    "Great connection! Remember when we discussed entropy as disorder?
+    In information theory, entropy measures uncertainty..."
+```
+
+**Day 15:**
+```
+You: "Connect entropy to both thermodynamics AND information."
+AI: [Reads your entire learning journey]
+    "Perfect synthesis! You've grasped that entropy is the bridge between
+     thermodynamic disorder and information content..."
+```
+
+### Progress Tracking
+
+At any point, ask: "What have I learned so far?"
+
+The AI reads your entire learning log and provides:
+```
+Mastery Assessment (30 sessions):
+
+✓ Wave-particle duality (mastered - Day 1)
+✓ Superposition (understood - Day 7)
+→ Entanglement (just introduced - Day 25)
+→ Uncertainty principle (covered briefly - Day 15)
+→ Quantum tunneling (not yet covered)
+
+Recommended next: Deep dive on entanglement, then tunneling
+```
+
+### Creating Your University
+
+**Example: Complete Curriculum**
+
+```javascript
+{
+  "my_university": {
+    "physics": {
+      "quantum_mechanics": {
+        "domain_id": "quantum_physics",
+        "persona": "researcher",
+        "accumulator": {
+          "enabled": true,
+          "mode": "all",
+          "output_file": "learning_log.md"
+        }
+      },
+      "relativity": {
+        "domain_id": "relativity_theory",
+        "persona": "researcher",
+        "accumulator": {
+          "enabled": true,
+          "mode": "all",
+          "output_file": "learning_log.md"
+        }
+      }
+    },
+    "programming": {
+      "rust": {
+        "domain_id": "rust_programming",
+        "persona": "researcher",
+        "accumulator": {
+          "enabled": true,
+          "mode": "all",
+          "output_file": "learning_log.md"
+        }
+      },
+      "python": {
+        "domain_id": "python_basics",
+        "persona": "librarian",
+        "accumulator": {
+          "enabled": true,
+          "mode": "all",
+          "output_file": "learning_log.md"
+        }
+      }
+    },
+    "history": {
+      "renaissance": {
+        "domain_id": "renaissance_history",
+        "persona": "researcher",
+        "accumulator": {
+          "enabled": true,
+          "mode": "all",
+          "output_file": "learning_log.md"
+        }
+      }
+    }
+  }
+}
+```
+
+Each domain is a self-contained course with its own memory.
+
+### Cross-Domain Connections
+
+The AI can reference your other learning:
+
+```
+In quantum_physics domain:
+"This wave interference is similar to something in music_theory
+ that you learned about last month..."
+
+In rust_programming domain:
+"This ownership concept is like the borrowing we discussed
+ in your economics_domain..."
+```
+
+### The Cost
+
+**Traditional tutoring:** $50-100/hour × 3 hours/week × 12 weeks = $1,800-3,600 per course
+
+**ExFrame University:** $5/month for UNLIMITED courses, tutoring, and progress tracking
+
+### Key Insight
+
+> "Learn anything."
+
+That's not hyperbole. The accumulator gives you:
+
+1. **Persistent memory** - Never forgets what you discussed
+2. **Adaptive pacing** - Slows down when you're stuck, speeds up when you're confident
+3. **Always available** - 24/7/365, no appointments needed
+4. **Cumulative context** - Each session builds on all previous ones
+5. **Cross-references** - Connects topics across your different domains
+
+**This is your personal university for $5/month.**
 
 ---
 

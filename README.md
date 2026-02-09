@@ -71,6 +71,64 @@ ExFrame is a unified, domain-agnostic AI-powered knowledge management system wit
 - **Diagnostics Dashboard**: System health, search metrics, and pattern analysis
 - **Health Monitoring**: Built-in Prometheus metrics and Grafana dashboards
 - **Self-Testing**: Automated test suite with regression detection
+- **🎓 Story Accumulator**: Persistent conversation memory for sequential content (novels, learning logs)
+
+---
+
+## 🎓 Personal University: Your AI-Powered Learning System
+
+**NEW:** The Story Accumulator transforms ExFrame into a **personalized university** where each domain becomes a course with full memory of your learning journey.
+
+### What Makes It Revolutionary
+
+| Traditional Education | ExFrame University |
+|----------------------|-------------------|
+| Teacher forgets between sessions | **AI remembers EVERYTHING** |
+| Fixed curriculum for everyone | **Adapts to YOUR pace** |
+| Scheduled hours (10-15 weeks) | **24/7/365, forever** |
+| $50-100/hour for tutoring | **~$5/month unlimited** |
+
+### How It Works
+
+1. **Create a domain** (e.g., `quantum_physics`) through the web UI
+2. **Enable accumulator** with mode "all" - remembers everything
+3. **Start learning** - ask questions, get explanations
+4. **AI remembers** - every conversation is logged and loaded as context
+5. **Build knowledge** - each session picks up where you left off
+
+### Example: Learning Rust Programming
+
+```
+Week 1: "Teach me Rust basics"
+Week 2: "I'm stuck on borrowing" → AI sees you've asked 3 times, tries new approach
+Week 5: "Quiz me on ownership" → AI reviews your entire learning journey
+Week 10: "Ready for lifetimes" → AI builds on 10 weeks of context
+```
+
+### Key Features
+
+- **Persistent Memory**: Every query/response logged to `learning_log.md`
+- **Cumulative Context**: AI sees entire conversation history
+- **Adaptive Pacing**: Slows down when you're stuck, speeds up when confident
+- **Progress Tracking**: Ask "What have I learned?" anytime
+- **Cross-Domain**: AI can reference learning from other domains
+
+### Create Your University
+
+**Step 1:** Domains tab → Create New Domain
+**Step 2:** Set persona (Researcher for learning)
+**Step 3:** Enable accumulator (mode: "all")
+**Step 4:** Start learning!
+
+**Example domains:**
+- `quantum_physics` - Learn quantum mechanics
+- `rust_programming` - Master Rust development
+- `renaissance_history` - Study historical periods
+- `music_theory` - Understand music composition
+
+**Cost**: ~$5/month for unlimited personalized education across any number of subjects.
+
+**Documentation**: See [Accumulator Design](docs/ACCUMULATOR_DESIGN.md) for complete details.
 
 ---
 
