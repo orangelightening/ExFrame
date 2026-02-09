@@ -1928,8 +1928,8 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
     # Auto-load the domain into active engines
     try:
         if universe_manager:
-            # Reload the universe to pick up the new domain
-            current_universe = universe_manager.get_active_universe()
+            # Get the MINE universe (default)
+            current_universe = await universe_manager.get_universe("MINE")
             if current_universe:
                 # Try to load this specific domain
                 domain = await current_universe._load_domain(request.domain_id)
