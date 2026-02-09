@@ -168,6 +168,36 @@ Day 15: "Connect to modern themes" → Builds on entire research journey
 
 ---
 
+## 📚 Learn More: Marketing Materials
+
+Interested in exploring ExFrame's capabilities? Check out our detailed marketing guides:
+
+### [entice.md](entice.md) - Universal Conversation Logging
+**"Every conversation. Automatically saved. Forever."**
+
+For developers, technical users, and knowledge management professionals:
+- Learn how ExFrame provides universal query/response logging
+- Discover the archive that builds itself automatically
+- Understand the difference between logging (saving) and memory (remembering)
+- See real debugging scenarios and knowledge management use cases
+
+**Best for:** Developers, DevOps engineers, technical leads, power users
+
+---
+
+### [university.md](university.md) - Your Personal AI University
+**"Learn anything. At any level. With a tutor who never forgets."**
+
+For learners, educators, writers, researchers, and lifelong learners:
+- Explore ExFrame as a personalized learning environment
+- See real learning journeys (90-day Rust programming example)
+- Understand three AI personas: Researcher, Librarian, and Poet
+- Discover creative writing applications with perfect story continuity
+
+**Best for:** Students, career changers, writers, researchers, lifelong learners
+
+---
+
 ## License
 
 This project is licensed under the **Apache License 2.0**.
