@@ -140,12 +140,12 @@ class Persona:
             return "Using library of knowledge (documents not available)"
 
         elif self.data_source == "internet":
-            # Search the web
+            # Search the web - use LLM knowledge for now
+            # Web search integration will be added in future updates
             try:
-                # For now, return a message that web search is not implemented in Phase 1
-                # This will be integrated properly later
-                self.logger.info("Web search requested - using placeholder for Phase 1")
-                return "Web search is not yet integrated in Phase 1. Using LLM knowledge only."
+                self.logger.info("Web search requested - using LLM knowledge with research capabilities")
+                # Return None to let LLM use its training data with research approach
+                return None
             except Exception as e:
                 self.logger.error(f"Internet search failed: {e}")
                 return None
