@@ -60,6 +60,8 @@ ExFrame is a unified, domain-agnostic AI-powered knowledge management system wit
 
 ### Key Features
 
+- **📝 Universal Conversation Logging**: Every query/response automatically saved to permanent archives
+- **🧠 Conversation Memory**: Enable AI to remember everything and build on previous discussions
 - **Universe Management**: Create, load, switch, merge, and export knowledge universes
 - **Plugin Architecture**: Router, Specialist, Enricher, and Formatter plugins for extensibility
 - **Pure Semantic Search**: AI-powered semantic search using embeddings (100% semantic, 0% keyword)
@@ -71,64 +73,98 @@ ExFrame is a unified, domain-agnostic AI-powered knowledge management system wit
 - **Diagnostics Dashboard**: System health, search metrics, and pattern analysis
 - **Health Monitoring**: Built-in Prometheus metrics and Grafana dashboards
 - **Self-Testing**: Automated test suite with regression detection
-- **🎓 Story Accumulator**: Persistent conversation memory for sequential content (novels, learning logs)
 
 ---
 
-## 🎓 Personal University: Your AI-Powered Learning System
+## 📝 Universal Conversation Logging
 
-**NEW:** The Story Accumulator transforms ExFrame into a **personalized university** where each domain becomes a course with full memory of your learning journey.
+**Every conversation. Automatically saved. Forever.**
 
-### What Makes It Revolutionary
+ExFrame now provides **universal conversation logging** across all domains. Every query and response is automatically saved to permanent archives, creating a complete record of your AI interactions.
 
-| Traditional Education | ExFrame University |
-|----------------------|-------------------|
-| Teacher forgets between sessions | **AI remembers EVERYTHING** |
-| Fixed curriculum for everyone | **Adapts to YOUR pace** |
-| Scheduled hours (10-15 weeks) | **24/7/365, forever** |
-| $50-100/hour for tutoring | **~$5/month unlimited** |
+### The Promise
+
+> **No more "what did we discuss?"**
+> **No more "I wish I had saved that conversation"**
+> **No more lost insights or forgotten answers**
+
+### What This Means
+
+✅ **Automatic Archiving**: Every query/response saved to `domain_log.md` files
+✅ **Searchable History**: Review past conversations anytime
+✅ **Debugging**: Track what went wrong and what worked
+✅ **Documentation**: Conversations become reusable resources
+✅ **Audit Trail**: Full history of all AI interactions
+✅ **No Configuration**: Works out of the box, no setup required
 
 ### How It Works
 
-1. **Create a domain** (e.g., `quantum_physics`) through the web UI
-2. **Enable accumulator** with mode "all" - remembers everything
-3. **Start learning** - ask questions, get explanations
-4. **AI remembers** - every conversation is logged and loaded as context
-5. **Build knowledge** - each session picks up where you left off
+```
+1. Create a domain (any domain)
+2. Start asking questions
+3. Every query/response automatically saved to domain_log.md
+4. Review, search, and export anytime
+```
 
-### Example: Learning Rust Programming
+**Just use ExFrame normally. Your archive builds itself.**
 
+---
+
+## 🧠 Conversation Memory (Optional)
+
+**Enable your AI to remember everything.**
+
+While logging saves conversations to files, **Conversation Memory** loads that history back into the AI context, allowing it to remember and build on previous discussions.
+
+### What Makes It Revolutionary
+
+| Traditional AI Chat | ExFrame with Memory |
+|--------------------|---------------------|
+| Starts fresh each session | **Remembers everything** |
+| No context between sessions | **Builds on every discussion** |
+| One-and-done answers | **Cumulative learning** |
+| Fixed context window | **Growing knowledge base** |
+
+### Use Cases
+
+**1. Learning Domains**
 ```
 Week 1: "Teach me Rust basics"
-Week 2: "I'm stuck on borrowing" → AI sees you've asked 3 times, tries new approach
-Week 5: "Quiz me on ownership" → AI reviews your entire learning journey
+Week 2: "I'm stuck on borrowing" → AI sees you've asked 3 times, adapts explanation
 Week 10: "Ready for lifetimes" → AI builds on 10 weeks of context
+```
+
+**2. Story Writing**
+```
+Chapter 1: "Write about space explorers"
+Chapter 2: "Continue the story" → AI remembers characters, plot, setting
+Chapter 3: "Add a twist" → Maintains continuity
+```
+
+**3. Research Threads**
+```
+Day 1: "I'm researching Victorian literature"
+Day 5: "Compare Dickens to Thackeray" → AI remembers Day 1 discussion
+Day 15: "Connect to modern themes" → Builds on entire research journey
 ```
 
 ### Key Features
 
-- **Persistent Memory**: Every query/response logged to `learning_log.md`
 - **Cumulative Context**: AI sees entire conversation history
-- **Adaptive Pacing**: Slows down when you're stuck, speeds up when confident
+- **Adaptive Memory**: Two modes - remember everything or on trigger phrases
 - **Progress Tracking**: Ask "What have I learned?" anytime
-- **Cross-Domain**: AI can reference learning from other domains
+- **Cross-Domain**: AI can reference conversations from other domains
+- **Flexible Control**: Enable per domain, disable anytime
 
-### Create Your University
+### Enable Conversation Memory
 
-**Step 1:** Domains tab → Create New Domain
-**Step 2:** Set persona (Researcher for learning)
-**Step 3:** Enable accumulator (mode: "all")
-**Step 4:** Start learning!
+**Step 1:** Domains tab → Create/Edit Domain
+**Step 2:** Scroll to "Conversation Memory" section (blue)
+**Step 3:** Check "Enable conversation memory"
+**Step 4:** Choose mode: "All" or "Triggers"
+**Step 5:** Start building context!
 
-**Example domains:**
-- `quantum_physics` - Learn quantum mechanics
-- `rust_programming` - Master Rust development
-- `renaissance_history` - Study historical periods
-- `music_theory` - Understand music composition
-
-**Cost**: ~$5/month for unlimited personalized education across any number of subjects.
-
-**Documentation**: See [Accumulator Design](docs/ACCUMULATOR_DESIGN.md) for complete details.
+**Documentation**: See [Universal Logging Design](docs/UNIVERSAL_LOGGING_DESIGN.md) for complete details.
 
 ---
 
