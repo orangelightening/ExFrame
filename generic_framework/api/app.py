@@ -84,6 +84,7 @@ class DomainCreate(BaseModel):
     domain_id: str
     domain_name: str
     description: str
+    role_context: Optional[str] = None
     categories: List[str]
     tags: List[str]
     specialists: List[SpecialistConfig]
@@ -126,6 +127,7 @@ class DomainCreate(BaseModel):
 class DomainUpdate(BaseModel):
     domain_name: Optional[str] = None
     description: Optional[str] = None
+    role_context: Optional[str] = None
     categories: Optional[List[str]] = None
     tags: Optional[List[str]] = None
     specialists: Optional[List[SpecialistConfig]] = None
@@ -1528,7 +1530,18 @@ async def clear_domain_log(domain_id: str) -> Dict[str, Any]:
             with open(log_file, 'r', encoding='utf-8') as f:
                 old_lines = len(f.readlines())
 
-        # Create fresh log file with header
+        # Load domain config to get role_context
+        domain_file = domain_path / "domain.json"
+        role_context = None
+        if domain_file.exists():
+            try:
+                with open(domain_file, 'r', encoding='utf-8') as f:
+                    domain_config = json.load(f)
+                    role_context = domain_config.get("role_context", "")
+            except:
+                pass  # If we can't load role_context, continue without it
+
+        # Create fresh log file with header and role context
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(log_file, 'w', encoding='utf-8') as f:
             f.write(f"# Domain Log: {domain_id}\n")
@@ -1536,6 +1549,12 @@ async def clear_domain_log(domain_id: str) -> Dict[str, Any]:
             f.write(f"Created: {timestamp}\n")
             f.write(f"Description: Conversation log for {domain_id} domain\n\n")
             f.write("---\n\n")
+
+            # Write role context if available (establishes AI relationship)
+            if role_context:
+                f.write(f"## Role Context\n\n{role_context}\n\n")
+                f.write("---\n\n")
+
             f.write(f"*Log cleared and restarted on {timestamp}*\n\n")
             f.write("---\n\n")
 
@@ -1544,7 +1563,8 @@ async def clear_domain_log(domain_id: str) -> Dict[str, Any]:
             "cleared": True,
             "old_size_bytes": old_size,
             "old_line_count": old_lines,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "role_context_included": role_context is not None
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to clear log: {str(e)}")
@@ -2068,6 +2088,7 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
             "domain_id": request.domain_id,
             "domain_name": request.domain_name,
             "description": request.description,
+            "role_context": request.role_context,
             "version": "1.0.0",
             "categories": request.categories or [],
             "tags": request.tags or [],
@@ -2252,6 +2273,8 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
             domain_config["domain_name"] = request.domain_name
         if request.description is not None:
             domain_config["description"] = request.description
+        if request.role_context is not None:
+            domain_config["role_context"] = request.role_context
         if request.categories is not None:
             domain_config["categories"] = request.categories
         if request.tags is not None:
