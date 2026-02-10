@@ -312,34 +312,10 @@ class Persona:
                 ]
             }
 
-            # Enable GLM native web_search for internet data source or // queries
-            is_glm = model.startswith("glm-")
-            has_direct_prompt = prompt.startswith("Query: //")
-            use_web_search = (self.data_source == "internet") or has_direct_prompt
-
-            if is_glm and use_web_search:
-                # Extract actual query from prompt (remove "Query: " prefix if present)
-                search_query = prompt
-                if prompt.startswith("Query: "):
-                    search_query = prompt[7:]  # Remove "Query: " prefix
-                elif prompt.startswith("Context:"):
-                    # Multi-line prompt, extract just the query line
-                    lines = prompt.split("\n")
-                    for line in lines:
-                        if line.startswith("Query: //"):
-                            search_query = line[7:]
-                            break
-                    if search_query == prompt:
-                        search_query = prompt.split("Query:")[-1].strip()
-
-                payload["tools"] = [{
-                    "type": "web_search",
-                    "name": "web_search",  # GLM requires name field
-                    "web_search": {
-                        "search_query": search_query
-                    }
-                }]
-                self.logger.info(f"Enabled GLM native web_search for: {search_query[:50]}...")
+            # Note: GLM-4.x has automatic web search built-in
+            # No tools parameter needed - GLM decides when to search based on query
+            if model.startswith("glm-") and (self.data_source == "internet" or "//" in prompt):
+                self.logger.info(f"GLM model with internet query - GLM will use automatic web search")
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
@@ -370,6 +346,21 @@ class Persona:
                 )
                 response.raise_for_status()
                 data = response.json()
+
+                # Check for tool calls (GLM web_search)
+                if "content" in data and isinstance(data["content"], list):
+                    for block in data["content"]:
+                        if block.get("type") == "tool_calls":
+                            # GLM wants to use tools - send back confirmation to execute
+                            tool_id = block.get("id", "")
+                            self.logger.info(f"GLM requested tool call: {block.get('name', 'unknown')}")
+
+                            # Extract tool calls from the block
+                            tool_calls_block = block
+                            break
+                    else:
+                        # No tool calls, return text content
+                        return data["content"][0]["text"]
 
                 # Parse response based on API format
                 # Handle multiple response formats
