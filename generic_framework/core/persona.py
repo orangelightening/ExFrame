@@ -334,6 +334,7 @@ class Persona:
 
                 payload["tools"] = [{
                     "type": "web_search",
+                    "name": "web_search",  # GLM requires name field
                     "web_search": {
                         "search_query": search_query
                     }
