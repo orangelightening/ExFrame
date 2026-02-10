@@ -326,6 +326,44 @@ c7d6818e - fix: remove tools parameter, let GLM use automatic web search
 
 ---
 
+## Root Cause Identified (Final)
+
+**The Core Issue:** GLM-4.7's tools API requires multi-turn conversation handling, but our implementation only handles single request/response.
+
+**What happens:**
+1. We send: `POST /chat/completions` with `{"tools": [...]}`
+2. GLM responds: `"I'll search for current weather..."` (tool_call response)
+3. GLM waits for: Us to send back the tool_call to confirm execution
+4. Then GLM would: Execute search and return final answer with actual data
+
+**What we do:**
+- Send request with tools ✅
+- Try to extract `content` from response ❌
+- Get truncated "I'll search..." message ❌
+- Never send confirmation ❌
+- Never get final answer ❌
+
+**Why response is truncated:** When GLM returns `tool_calls`, the `content` field is empty or minimal. We're trying to extract content that doesn't exist yet.
+
+---
+
+## Current State (2026-02-10)
+
+**Working:**
+- ✅ Correct Z.AI endpoint: `https://api.z.ai/api/coding/paas/v4`
+- ✅ GLM-4.7 model connects successfully
+- ✅ Tools parameter accepted (no 422/400 errors)
+- ✅ Smart keyword detection (weather, news, current, etc.)
+- ✅ `//` prefix recognized
+
+**Broken:**
+- ❌ Web search responses truncated at "I'll search..."
+- ❌ No multi-turn tool call handling implemented
+- ❌ GLM's tool_calls never confirmed/executed
+- ❌ Final answer with actual data never retrieved
+
+---
+
 ## Status Summary
 
 **Fixed:**
