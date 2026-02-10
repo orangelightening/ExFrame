@@ -185,6 +185,9 @@
   },
   "active": "f5f5336008d771fc",
   "lastOpenFiles": [
+    "universes/MINE/logs/archived/sidekick_20260210_045758.md",
+    "universes/MINE/logs/archived",
+    "universes/MINE/logs",
     "generic_framework/core/persona.py.tmp.1478318.1770696375445",
     "generic_framework/core/query_processor.py.tmp.1478318.1770695936131",
     "test_query1.json",
@@ -207,9 +210,6 @@
     "docs/UNIVERSAL_LOGGING_DESIGN.md",
     "universes/MINE/domains/test_logging/test_memory.md",
     "universes/MINE/domains/test_logging/test_log.md",
-    "universes/MINE/domains/test_logging/patterns.json",
-    "universes/MINE/domains/test_logging/domain.json",
-    "universes/MINE/domains/test_logging",
     "universes/MINE/domains/prose/stories/active_story.md",
     "SURVEYOR_STATUS.md"
   ]

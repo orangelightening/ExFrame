@@ -1400,6 +1400,156 @@ async def domain_health(domain_id: str) -> Dict[str, Any]:
     }
 
 
+@app.get("/api/domains/{domain_id}/log")
+async def get_domain_log(domain_id: str) -> Dict[str, Any]:
+    """Get the current domain log file content and metadata."""
+    import os
+    from pathlib import Path
+
+    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+    domain_path = Path(universes_base) / "MINE" / "domains" / domain_id
+
+    if not domain_path.exists():
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    log_file = domain_path / "domain_log.md"
+
+    if not log_file.exists():
+        return {
+            "domain": domain_id,
+            "exists": False,
+            "content": "",
+            "size_bytes": 0,
+            "line_count": 0
+        }
+
+    try:
+        with open(log_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        lines = content.split('\n')
+        file_size = log_file.stat().st_size
+
+        return {
+            "domain": domain_id,
+            "exists": True,
+            "content": content,
+            "size_bytes": file_size,
+            "line_count": len(lines),
+            "file_path": str(log_file)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read log file: {str(e)}")
+
+
+@app.post("/api/domains/{domain_id}/log/archive")
+async def archive_domain_log(domain_id: str) -> Dict[str, Any]:
+    """
+    Archive the current domain log file with a timestamp.
+
+    Creates a backup copy in the project's log archive directory:
+    <project>/logs/archived/<domain_name>_YYYYMMDD_HHMMSS.md
+    """
+    import os
+    from pathlib import Path
+    from datetime import datetime
+    import shutil
+
+    # Get domain path
+    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+    domain_path = Path(universes_base) / "MINE" / "domains" / domain_id
+
+    if not domain_path.exists():
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    log_file = domain_path / "domain_log.md"
+
+    if not log_file.exists():
+        raise HTTPException(status_code=404, detail="Log file does not exist")
+
+    # Create archive directory in universe space (writable)
+    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+    archive_dir = Path(universes_base) / "MINE" / "logs" / "archived"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate timestamped filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archive_filename = f"{domain_id}_{timestamp}.md"
+    archive_path = archive_dir / archive_filename
+
+    try:
+        # Copy log file to archive
+        shutil.copy2(log_file, archive_path)
+
+        # Get file info
+        original_size = log_file.stat().st_size
+        archived_size = archive_path.stat().st_size
+
+        return {
+            "domain": domain_id,
+            "archived": True,
+            "archive_path": str(archive_path),
+            "archive_filename": archive_filename,
+            "original_size_bytes": original_size,
+            "archived_size_bytes": archived_size,
+            "timestamp": timestamp
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to archive log: {str(e)}")
+
+
+@app.post("/api/domains/{domain_id}/log/clear")
+async def clear_domain_log(domain_id: str) -> Dict[str, Any]:
+    """
+    Clear the domain log file and create a fresh one with header.
+
+    WARNING: This permanently deletes the current log content.
+    Archive first if you want to keep it.
+    """
+    import os
+    from pathlib import Path
+    from datetime import datetime
+
+    # Get domain path
+    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
+    domain_path = Path(universes_base) / "MINE" / "domains" / domain_id
+
+    if not domain_path.exists():
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
+
+    log_file = domain_path / "domain_log.md"
+
+    try:
+        # Get current file stats before clearing (if exists)
+        old_size = 0
+        old_lines = 0
+        if log_file.exists():
+            old_size = log_file.stat().st_size
+            with open(log_file, 'r', encoding='utf-8') as f:
+                old_lines = len(f.readlines())
+
+        # Create fresh log file with header
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(log_file, 'w', encoding='utf-8') as f:
+            f.write(f"# Domain Log: {domain_id}\n")
+            f.write(f"Domain ID: {domain_id}\n")
+            f.write(f"Created: {timestamp}\n")
+            f.write(f"Description: Conversation log for {domain_id} domain\n\n")
+            f.write("---\n\n")
+            f.write(f"*Log cleared and restarted on {timestamp}*\n\n")
+            f.write("---\n\n")
+
+        return {
+            "domain": domain_id,
+            "cleared": True,
+            "old_size_bytes": old_size,
+            "old_line_count": old_lines,
+            "timestamp": timestamp
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clear log: {str(e)}")
+
+
 @app.get("/api/history")
 async def get_history(domain: Optional[str] = None, limit: int = 10) -> Dict[str, Any]:
     """Get query history."""

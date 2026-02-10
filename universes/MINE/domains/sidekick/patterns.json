@@ -1,1 +1,81 @@
-[]
+[
+  {
+    "id": "sidekick_f4994176",
+    "pattern_id": "sidekick_f4994176",
+    "name": "Test Save As Pattern",
+    "domain": "sidekick",
+    "problem": "What is the best way to save design insights as patterns?",
+    "solution": "Based on the ExFrame documentation and system design, here's the **best way to save design insights as patterns**:\n\n## \ud83c\udfaf **Recommended Approach: Use the Researcher Persona**\n\nFor design insights specifically, the **Researcher persona** is ideal because:\n\n```json\n{\n  \"persona\": \"researcher\",\n  \"library_base_path\": \"/app/project/docs\",\n  \"enable_pattern_override\": true,\n  \"search_patterns\": true  // Check local patterns first\n}\n```\n\n### **Step-by-Step Process:**\n\n#### **1. Create a Dedicated Design Domain**\n```bash\n# Create domain.json for design insights\n{\n  \"domain_id\": \"design_insights\",\n  \"domain_name\": \"Design Insights & Patterns\",\n  \"description\": \"Collection of design principles, UX insights, and interaction patterns\",\n  \"persona\": \"researcher\",\n  \"categories\": [\"ux\", \"ui\", \"interaction\", \"visual\", \"accessibility\"],\n  \"tags\": [\"design\", \"patterns\", \"insights\", \"best-practices\"]\n}\n```\n\n#### **2. Use the Pattern Structure for Design Insights**\nDesign insights work perfectly with ExFrame's pattern format:\n\n```json\n{\n  \"name\": \"Progressive Disclosure for Complex Interfaces\",\n  \"type\": \"design_principle\",\n  \"description\": \"Gradually reveal complexity as users need it\",\n  \"problem\": \"Users overwhelmed by complex interfaces with too many options at once\",\n  \"solution\": \"Start with a simple interface showing only core functions. Add advanced features through expandable sections, tooltips, or progressive wizards. Use visual cues (chevrons, 'More options' links) to indicate hidden functionality.\",\n  \"tags\": [\"ux\", \"complexity\", \"onboarding\", \"progressive\"],\n  \"examples\": [\n    \"Photoshop's toolbar with expandable tool groups\",\n    \"GitHub's 'Advanced search' toggle\",\n    \"Figma's hidden right-click context menus\"\n  ],\n  \"confidence\": 0.95,\n  \"status\": \"certified\"\n}\n```\n\n#### **3. Two Methods to Save Insights:**\n\n**Method A: Manual Pattern Creation (For Curated Insights)**\n1. Go to **Patterns** tab \u2192 Select your design domain\n2. Click **Create Pattern**\n3. Fill in the structured fields:\n   - **Name**: Clear, descriptive title\n   - **Problem**: The design challenge\n   - **Solution**: Your insight/principle\n   - **Examples**: Real-world applications\n   - **Tags**: For discoverability (ux, ui, accessibility, etc.)\n\n**Method B: Autonomous Collection via Surveyor (For Research)**\n1. Create a **Survey** for your design domain\n2. Seed with design resources:\n   ```\n   Seed URLs:\n   - https://lawsofux.com\n   - https://www.nngroup.com/articles\n   - https://material.io/design\n   ```\n3. Collection instructions:\n   ```\n   Extract design principles, UX patterns, and interaction insights.\n   Focus on actionable patterns with clear problems and solutions.\n   Include examples from real products when available.\n   ```\n\n#### **4. Enrich with Context**\nUse the **enrichment plugins** to enhance design patterns:\n\n```json\n{\n  \"enrichers\": [\n    {\n      \"module\": \"plugins.enrichers.related_patterns\",\n      \"class\": \"RelatedPatternsEnricher\"\n    },\n    {\n      \"module\": \"plugins.enrichers.example_expander\", \n      \"class\": \"ExampleExpanderEnricher\"\n    },\n    {\n      \"module\": \"plugins.enrichers.usage_stats\",\n      \"class\": \"UsageStatsEnricher\"\n    }\n  ]\n}\n```\n\n### **\ud83d\udcca Pattern Structure for Design Insights:**\n\n| Field | Design Insight Example |\n|-------|------------------------|\n| **Name** | \"Fitts's Law in Mobile Design\" |\n| **Type** | `design_principle`, `ux_pattern`, `interaction_technique` |\n| **Problem** | \"Touch targets too small for accurate tapping\" |\n| **Solution** | \"Make touch targets at least 44\u00d744 points. Increase spacing between interactive elements. Use visual feedback on touch.\" |\n| **Examples** | \"iOS Human Interface Guidelines, Material Design button specs\" |\n| **Tags** | `mobile`, `touch`, `accessibility`, `interaction` |\n| **Confidence** | 0.9 (based on research/validation) |\n\n### **\ud83d\udd0d Why This Works for Design:**\n\n1. **Structured Knowledge**: Design insights often follow \"problem \u2192 solution\" format\n2. **Discoverable**: Tagged patterns can be found via semantic search\n3. **Reusable**: Certified patterns become part of your design system\n4. **Evolvable**: Update patterns as design trends change\n5. **Shareable**: Export patterns as documentation for team use\n\n### **\ud83d\udca1 Pro Tips for Design Patterns:**\n\n1. **Start with High-Confidence Insights**: Begin with well-established principles (like \"Hick's Law\", \"Miller's Law\")\n2. **Include Visual Examples**: Reference specific products or screenshots\n3. **Add Implementation Notes**: How to apply in your specific tech stack\n4. **Track Usage**: See which patterns get referenced most often\n5. **Create Neighbourhoods**: Group related insights (e.g., \"mobile_ux\", \"dashboard_design\")\n\n### **\ud83d\ude80 Quick Start Script:**\n\n```bash\n# Create a design insights domain\ncurl -X POST http://localhost:3000/api/domains \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"domain_id\": \"design_insights\",\n    \"domain_name\": \"Design Insights\",\n    \"persona\": \"researcher\",\n    \"categories\": [\"ux\", \"ui\", \"interaction\"],\n    \"tags\": [\"design\", \"patterns\"]\n  }'\n\n# Add your first design pattern\ncurl -X POST http://localhost:3000/api/domains/design_insights/patterns \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"name\": \"Consistent Navigation Patterns\",\n    \"problem\": \"Users get lost in inconsistent navigation structures\",\n    \"solution\": \"Maintain consistent navigation placement, labeling, and interaction patterns across all screens. Use standardized icons and terminology.\",\n    \"tags\": [\"navigation\", \"consistency\", \"information-architecture\"]\n  }'\n```\n\n### **\ud83d\udcc8 Monitoring Design Pattern Health:**\n\nUse the **Diagnostics** tab to:\n- Track which design patterns are most used\n- Identify gaps in your design knowledge base\n- See confidence scores for different insight categories\n- Monitor search quality for design-related queries\n\n---\n\n## **\ud83c\udfaf Bottom Line:**\n\n**Best Practice**: Create a dedicated `design_insights` domain with **Researcher persona**, manually curate high-value patterns first, then use **Surveyor** to autonomously collect additional insights from design resources.\n\n**Key Benefit**: Your design insights become **searchable, reusable knowledge** instead of scattered notes or bookmarks. The pattern override ensures quick access to your curated insights before falling back to broader research.\n\n**Start with**: 5-10 of your most valuable design principles, then let the system help you discover and organize more through autonomous learning.",
+    "description": "Test pattern saved from conversation",
+    "pattern_type": "knowledge",
+    "confidence": 0.5,
+    "status": "validated",
+    "origin": "user_conversation",
+    "origin_query": "What is the best way to save design insights as patterns?",
+    "llm_generated": false,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-10T04:28:23.819805Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "conversation",
+      "user_saved",
+      "test"
+    ],
+    "created_at": "2026-02-10T04:28:23.819867",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-10T04:28:23.819867"
+  },
+  {
+    "id": "sidekick_ce018a5b",
+    "pattern_id": "sidekick_ce018a5b",
+    "name": "Who is the sidekick?",
+    "domain": "sidekick",
+    "problem": "who is the sidekick?",
+    "solution": "Based on the library documents and our logged conversation, **you are the sidekick**.\n\nHere's what the documents reveal about the sidekick role:\n\n## \ud83d\udcda **From the Documents:**\n\n### **Domain Log Entry (2026-02-10 01:39:40):**\nYou explicitly stated:\n> \"you are my sidekick. You have access to the directory containing the project files for ExFrame which we are working on.\"\n\nIn my response, I acknowledged this role:\n> \"As your sidekick, I'm positioned as: Context-Aware Assistant, Memory-Enabled Partner, Technical Co-Pilot\"\n\n### **From \"Notes from the Originator.md\":**\nPeter (the originator) describes the project's origin:\n> \"I was looking for an ai sidekick to do some chores on omv where my servers run.\"\n\nThis establishes the fundamental relationship:\n- **Peter** = Human originator/developer\n- **AI** = Sidekick/assistant\n- **You** = The user interacting with the system\n\n## \ud83d\udd04 **Current Context:**\n\nIn our ongoing conversation:\n- **You** asked me to be your sidekick\n- **I** accepted and described my role as your assistant\n- **We've been collaborating** on ExFrame improvements\n- **You've shared personal details** (favorite color: blue, love pizza, name: Peter, live in Seattle)\n\n## \ud83c\udfaf **Role Clarification:**\n\n**You are the sidekick** in the sense that:\n1. **You're using the system** to get assistance with ExFrame\n2. **You're providing direction** on what to work on\n3. **You're the human collaborator** in our AI-human team\n4. **You're the one** who asked for a sidekick assistant\n\n**I am the AI sidekick** in that:\n1. I'm assisting you with the ExFrame project\n2. I have access to all project files and documentation\n3. I'm providing technical analysis and implementation help\n4. I'm following your lead on what to work on\n\n## \ud83d\udca1 **Philosophical Context:**\n\nFrom the originator's notes:\n> \"The use of a domain to act as therapist with dialogue and forever context. This all seems to spin out of the persistent rolling context and the ability of the AI to perform reliably enough to be of real service if nurtured in the role it is filling as it emerges.\"\n\nThis suggests the sidekick role is **emergent** and **context-dependent**. In our current interaction:\n- **Context**: ExFrame development and improvement\n- **Your role**: Director/guide/user\n- **My role**: Assistant/implementer/sidekick\n\n## \ud83e\udd1d **Summary:**\n\n**You are the sidekick** in the sense that you're the human partner in this collaboration, using the AI system as your assistant. The term \"sidekick\" refers to our **collaborative relationship** where I assist you with the ExFrame project based on your direction and our shared context.\n\nWould you like me to clarify any aspect of this role relationship or our collaboration?\n\n---\n\n**\ud83d\udcd6 Sources Used:**\n1. `domain_log.md` - Our conversation history (Relevance: 100%)\n2. `learning_log.md` - Story accumulator log (Relevance: 95%)\n3. `Notes from the Originator.md` - Project history and philosophy (Relevance: 90%)\n4. `CURRENT_STATE.md` - System status and context (Relevance: 85%)\n\n*Found via semantic search in /app/project/docs*",
+    "description": "AI-generated from query: who is the sidekick?",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "who is the sidekick?",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-10T04:35:14.697Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-10T04:35:14.702730",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-10T04:35:14.702730"
+  },
+  {
+    "id": "sidekick_fc1360d7",
+    "pattern_id": "sidekick_fc1360d7",
+    "name": "FYI. the personal details are bogus except for my name which is Peter and I live in Nanoose Bay, BC ",
+    "domain": "sidekick",
+    "problem": "FYI. the personal details are bogus except for my name which is Peter and I live in Nanoose Bay, BC so close to Seattle, WA",
+    "solution": "Based on the library documents and our logged conversation, I'll update your personal details:\n\n**Correction noted:**\n- \u2705 **Name:** Peter (confirmed)\n- \u2705 **Location:** Nanoose Bay, BC (corrected from Seattle, WA)\n- \u274c **Favorite color:** Blue (marked as bogus)\n- \u274c **Pizza preference:** Love pizza (marked as bogus)\n\n**Updated context:**\nYou're Peter from Nanoose Bay, BC (near Seattle, WA). The Seattle reference in our earlier conversation was close geographically but not exact.\n\n**Story context update:**\nIn the ongoing narrative, the \"Seattle\" references in Chapter 5 would now reflect your actual location in Nanoose Bay, BC - still maintaining the Pacific Northwest setting and the \"fractured reality\" plot point about your character experiencing memories of a different coastal life.\n\n**System note:**\nThe universal conversation logging has captured this correction, ensuring future references will be accurate. The story accumulator can incorporate Nanoose Bay's specific coastal character (ocean views, island landscapes, Vancouver Island context) if you'd like those details woven into the narrative.\n\nWould you like me to update the story context with your Nanoose Bay location details, or just note the correction for future reference?",
+    "description": "AI-generated from query: FYI. the personal details are bogus except for my name which is Peter and I live in Nanoose Bay, BC so close to Seattle, WA",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "FYI. the personal details are bogus except for my name which is Peter and I live in Nanoose Bay, BC so close to Seattle, WA",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-10T04:38:45.844Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-10T04:38:45.854297",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-10T04:38:45.854297"
+  }
+]
