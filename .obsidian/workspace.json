@@ -185,6 +185,8 @@
   },
   "active": "f5f5336008d771fc",
   "lastOpenFiles": [
+    "ZAI_CREDIT_ISSUE.md",
+    "zai-sdk-python/test_web_search.py",
     "ZAI_WEB_SEARCH_ARCHITECTURE.md",
     "zai-sdk-python/tests/integration_tests/img/MetaGLM.png",
     "zai-sdk-python/tests/unit_tests/maybe/test_maybe_transform.py",
@@ -196,7 +198,6 @@
     "zai-sdk-python/tests/integration_tests/voice_clone_input.mp3",
     "zai-sdk-python/tests/integration_tests/test_web_reader.py",
     "zai-sdk-python/tests/integration_tests/test_voice_clone.py",
-    "zai-sdk-python/tests/integration_tests/test_vlm_thinking.py",
     "zai-sdk-python/examples/test_multi_modal.jpeg",
     "zai-sdk-python/Release-Note.md",
     "zai-sdk-python/README_CN.md",
@@ -221,7 +222,6 @@
     "easy-recipe.md",
     "entice.md",
     "QUICKSTART.md",
-    "university.md",
-    "aged.md"
+    "university.md"
   ]
 }

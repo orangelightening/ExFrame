@@ -381,6 +381,15 @@ class Persona:
                 response.raise_for_status()
                 data = response.json()
 
+                # Log the full response for debugging web search
+                if self.trace or model.startswith("glm-"):
+                    self.logger.info(f"GLM response keys: {list(data.keys())}")
+                    if "choices" in data:
+                        msg = data["choices"][0].get("message", {})
+                        self.logger.info(f"Message keys: {list(msg.keys())}")
+                        if "tool_calls" in msg:
+                            self.logger.info(f"Has tool_calls: {len(msg['tool_calls'])}")
+
                 # Check for tool calls (GLM web_search)
                 if "content" in data and isinstance(data["content"], list):
                     for block in data["content"]:
@@ -417,7 +426,14 @@ class Persona:
 
                 # Standard OpenAI format
                 if "choices" in data:
-                    return data["choices"][0]["message"]["content"]
+                    message = data["choices"][0]["message"]
+                    # Check for tool_calls in OpenAI format
+                    if "tool_calls" in message and message["tool_calls"]:
+                        self.logger.warning(f"GLM returned tool_calls (not implemented): {message['tool_calls']}")
+                        self.logger.info(f"Message content: {message.get('content', 'no content')}")
+                        # For now, return content even if tool_calls present
+                        return message.get("content", "[GLM requested tool calls but not handled]")
+                    return message["content"]
 
                 # Anthropic format
                 elif "content" in data and isinstance(data["content"], list):
