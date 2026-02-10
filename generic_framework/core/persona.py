@@ -252,6 +252,10 @@ class Persona:
         if content:
             parts.append(f"Context:\n{content}\n")
 
+        # For internet data source or // queries, explicitly tell GLM to search
+        if self.data_source == "internet" or "//" in query:
+            parts.append("IMPORTANT: You have access to web search. Use your browser tool to search for current information online.")
+
         # Add query
         parts.append(f"Query: {query}")
 
