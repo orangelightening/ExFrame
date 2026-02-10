@@ -285,7 +285,7 @@ class Persona:
         api_key = os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
         # Use AllTools variant for web search capability
-        model = os.getenv("LLM_MODEL", "glm-4-alltools")  # Changed from deepseek-chat
+        model = os.getenv("LLM_MODEL", "glm-4.7")  # Standard model
 
         if not api_key:
             self.logger.warning("LLM not configured: No API key")
@@ -317,11 +317,10 @@ class Persona:
                 ]
             }
 
-            # Enable GLM web search for internet queries or // prefix
-            if model.startswith("glm-") and (self.data_source == "internet" or "//" in prompt):
-                self.logger.info(f"GLM model detected - trying web_search tool")
-                # TEMPORARY: Skip tools to test if model works
-                self.logger.warning(f"Web search disabled temporarily - model check needed")
+            # Note: GLM web search requires specific model variants and tool handling
+            # For now, // prefix goes to LLM knowledge only
+            if "//" in prompt:
+                self.logger.info(f"Direct prompt detected - using LLM knowledge")
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
