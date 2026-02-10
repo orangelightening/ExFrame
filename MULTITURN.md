@@ -6,6 +6,118 @@
 
 ---
 
+## Z.AI SDK Protocol (ACTUAL - VERIFIED)
+
+Source: https://github.com/zai-org/zai-sdk-python/examples/function_call_example.py
+
+### The Actual Multi-Turn Flow
+
+**Step 1: Initial Request with Tools**
+```python
+messages = [
+    {"role": "user", "content": "What's the weather in Nanaimo?"}
+]
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Get weather",
+        "parameters": {...}
+    }
+}]
+
+response = client.chat.completions.create(
+    model="glm-4.7",
+    messages=messages,
+    tools=tools
+)
+```
+
+**Step 2: GLM Returns tool_calls**
+```python
+# Response has tool_calls, not content
+message = response.choices[0].message
+# message.tool_calls = [
+#     {
+#         "type": "function",
+#         "id": "call_abc123",
+#         "function": {
+#             "name": "get_weather",
+#             "arguments": '{"location": "Nanaimo"}'
+#         }
+#     }
+# ]
+
+tool_call = message.tool_calls[0]
+args = tool_call.function.arguments
+```
+
+**Step 3: Execute Function Locally**
+```python
+# Call the actual function
+function_result = get_weather(**json.loads(args))
+```
+
+**Step 4: Send Back Tool Message with Results**
+```python
+messages.append({
+    "role": "tool",
+    "content": json.dumps(function_result),
+    "tool_call_id": tool_call.id
+})
+
+response = client.chat.completions.create(
+    model="glm-4.7",
+    messages=messages,
+    tools=tools
+)
+```
+
+**Step 5: GLM Returns Final Answer**
+```python
+final_message = response.choices[0].message
+content = final_message.content  # Final answer with function results
+```
+
+---
+
+## Key Implementation Details
+
+### 1. Tool Message Format
+
+**NOT** `"role": "assistant"` but **`"role": "tool"`**
+
+```python
+messages.append({
+    "role": "tool",  # IMPORTANT: Not "assistant"
+    "content": json.dumps(function_result),
+    "tool_call_id": tool_call.id
+})
+```
+
+### 2. Function Execution
+
+For web_search, GLM handles execution server-side:
+- We just send back confirmation (maybe with empty content?)
+- GLM executes search internally
+- Returns final answer with search results
+
+### 3. For Web Search Specifically
+
+From Z.AI types:
+```python
+class WebSearchMessageToolCall:
+    id: str
+    search_intent: Optional[SearchIntent]
+    search_result: Optional[SearchResult]
+    search_recommend: Optional[SearchRecommend]
+    type: str
+```
+
+Web search might be a **special built-in tool** not a generic function.
+
+---
+
 ## Problem Statement
 
 Current implementation sends tool definitions to GLM-4.7 but only handles single request/response cycle. GLM returns `tool_calls` requiring confirmation, but we never send it. Result: Truncated responses like "I'll search..." with no actual search execution.
@@ -232,13 +344,179 @@ async def _handle_tool_calls(
 
 ## Code Changes Required
 
-### File: `generic_framework/core/persona.py`
+### Implementation Plan (UPDATED with Z.AI SDK Knowledge)
 
-#### Change 1: Update `_call_llm()` to detect tool_calls
+#### Phase 1: Tool Call Detection
+
+**File:** `generic_framework/core/persona.py`
+**Function:** `_call_llm()`
 
 **Location:** After line 372 (response parsing)
 
 **Current code:**
+```python
+data = response.json()
+
+# Parse response based on API format
+if "code" in data and "success" in data:
+```
+
+**New code:**
+```python
+data = response.json()
+
+# Check for tool_calls (multi-turn required)
+if "choices" in data:
+    msg = data["choices"][0]["message"]
+
+    # Tool calls detected - need multi-turn
+    if "tool_calls" in msg and len(msg.get("tool_calls", [])) > 0:
+        self.logger.info(f"Tool calls detected - entering multi-turn conversation")
+        self.logger.debug(f"Tool calls: {msg['tool_calls']}")
+
+        return await self._handle_tool_calls(prompt, msg['tool_calls'], messages)
+
+    # No tool_calls - extract content directly
+    content = msg.get("content", "")
+    if content:
+        return content
+
+# ... rest of response parsing
+```
+
+#### Phase 2: Tool Call Handler (UPDATED)
+
+**New function in** `generic_framework/core/persona.py`
+
+```python
+async def _handle_tool_calls(
+    self,
+    prompt: str,
+    tool_calls: List[Dict],
+    messages: List[Dict]
+) -> str:
+    """
+    Handle GLM tool_calls by sending confirmation with results.
+
+    Z.AI SDK Protocol:
+    1. Append {"role": "tool", "content": result, "tool_call_id": id}
+    2. Send back to GLM
+    3. GLM executes and returns final answer
+
+    For web_search: We might not execute it ourselves, just confirm.
+    """
+    import httpx
+    import json
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    base_url = os.getenv("OPENAI_BASE_URL")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    # Process each tool call
+    for tool_call in tool_calls:
+        tool_id = tool_call.get("id", "")
+        tool_name = tool_call.get("function", {}).get("name", "")
+        tool_args = tool_call.get("function", {}).get("arguments", "{}")
+
+        self.logger.info(f"Processing tool: {tool_name} (id: {tool_id})")
+
+        # Check if this is web_search (built-in) or custom function
+        if tool_name == "web_search":
+            # Web search is handled by GLM server-side
+            # Just send confirmation without executing
+            self.logger.info(f"Web search tool - sending confirmation only")
+            messages.append({
+                "role": "tool",
+                "content": "",  # Empty content, GLM will execute
+                "tool_call_id": tool_id,
+                "name": tool_name
+            })
+        else:
+            # Custom function - we would execute it here
+            # For now, return error saying not implemented
+            self.logger.error(f"Unknown tool: {tool_name}")
+            return f"[Error: Tool '{tool_name}' not implemented]"
+
+    # Build payload for second request
+    model = os.getenv("LLM_MODEL", "glm-4.7")
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": 0.7
+    }
+
+    endpoint = f"{base_url.rstrip('/')}/chat/completions"
+
+    self.logger.info(f"Sending tool confirmation to GLM (messages: {len(messages)})")
+
+    # Increased timeout for tool execution
+    timeout = httpx.Timeout(timeout=240.0, connect=60.0, pool=60.0)
+
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.post(
+                endpoint,
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
+            data = response.json()
+
+        self.logger.info(f"Tool execution completed, parsing final response")
+
+        # Extract final response
+        if "choices" in data:
+            final_msg = data["choices"][0]["message"]
+
+            # Check for recursive tool calls (not supported)
+            if "tool_calls" in final_msg and len(final_msg.get("tool_calls", [])) > 0:
+                self.logger.warning(f"Recursive tool calls detected - not supported")
+                return "[Error: Multi-round tool calls not supported]"
+
+            content = final_msg.get("content", "")
+
+            if not content:
+                self.logger.error("Tool executed but returned empty content")
+                return "[Error: Tool returned no data]"
+
+            self.logger.info(f"Final response received: {len(content)} chars")
+            return content
+
+        self.logger.error(f"Unexpected response format: {list(data.keys())}")
+        return "[Error: Unexpected tool response format]"
+
+    except httpx.HTTPStatusError as e:
+        self.logger.error(f"HTTP error during tool execution: {e}")
+        return f"[Error: Tool execution failed - HTTP {e.response.status_code}]"
+
+    except Exception as e:
+        self.logger.error(f"Unexpected error during tool execution: {e}", exc_info=True)
+        return f"[Error: Tool execution failed - {str(e)}]"
+```
+
+---
+
+## Key Differences from Original Design
+
+### Original Design (WRONG)
+- ✅ Detect tool_calls
+- ❌ **Wrong:** Send back `{"role": "assistant", "tool_calls": [...]}``
+
+### Z.AI Protocol (CORRECT)
+- ✅ Detect tool_calls
+- ✅ **Correct:** Send back `{"role": "tool", "content": results, "tool_call_id": "id"}`
+
+### Why This Matters
+
+The `"role": "tool"` message type is **critical**. Using `"role": "assistant"` will not work - GLM won't recognize it as tool confirmation.
+
+---
+
+## Implementation Plan
 ```python
 data = response.json()
 

@@ -317,10 +317,10 @@ class Persona:
                 ]
             }
 
-            # Note: GLM-4.7 has built-in web search when it detects need for current info
-            # Don't use explicit tools parameter to avoid multi-turn tool call complexity
+            # Note: For Anthropic-compatible endpoints, GLM web search tools aren't supported
+            # Use OpenAI-compatible endpoint (/api/coding/paas/v4) for web search
             if model.startswith("glm-") and "//" in prompt:
-                self.logger.info(f"GLM model detected - relying on automatic web search")
+                self.logger.info(f"GLM model detected on Anthropic endpoint - web search not available, switching to OpenAI endpoint for // queries")
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
@@ -339,37 +339,31 @@ class Persona:
                 ]
             }
 
-            # Enable GLM web search for // prefix (for OpenAI-compatible endpoints)
+            # Enable GLM web search for // prefix (single-turn embedded format)
             if model.startswith("glm-") and "//" in prompt:
                 # Only enable tools for queries that actually need web search
                 query_lower = prompt.lower()
                 needs_web_search = any(word in query_lower for word in [
                     "weather", "news", "current", "latest", "price", "stock",
-                    "temperature", "forecast", "today", "now", "recent"
+                    "temperature", "forecast", "today", "now", "recent", "breaking"
                 ])
 
                 if needs_web_search:
-                    self.logger.info(f"GLM model (OpenAI format) - enabling web_search")
+                    self.logger.info(f"GLM model (OpenAI format) - enabling embedded web_search tool")
                     payload["tools"] = [{
-                        "type": "function",
-                        "name": "web_search",
-                        "function": {
-                            "name": "web_search",
-                            "description": "Search the web for current information",
-                            "parameters": {
-                                "type": "object",
-                                "properties": {
-                                    "query": {
-                                        "type": "string",
-                                        "description": "Search query"
-                                    }
-                                },
-                                "required": ["query"]
-                            }
+                        "type": "web_search",
+                        "web_search": {
+                            "enable": "True",
+                            "search_result": "True",  # CRITICAL: Include actual search results
+                            "search_engine": "search_pro",
+                            "search_prompt": "You are a helpful assistant. Use the search results to provide accurate, current information. Include citations with your answers.",
+                            "count": "10",
+                            "search_recency_filter": "noLimit",
+                            "content_size": "high"
                         }
                     }]
                 else:
-                    self.logger.info(f"GLM model (OpenAI format) - simple query, no tools")
+                    self.logger.info(f"GLM model (OpenAI format) - simple query, no web search needed")
 
             endpoint = f"{base_url.rstrip('/')}/chat/completions"
 
