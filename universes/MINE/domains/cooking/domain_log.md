@@ -181,3 +181,103 @@ Warm your pita bread and stuff it with the sliced chicken. Top with tahini sauce
 
 ---
 
+## 2026-02-10 17:46:53
+
+**Query:** A recipe for chicken shwarma. citations please.
+
+# Authentic Chicken Shawarma Recipe
+
+Based on my search of several authentic recipes, here's a comprehensive chicken shawarma recipe with proper citations.
+
+## Ingredients
+
+**For the Chicken:**
+- 2 lbs chicken thighs, boneless and skinless [1][2][3]
+- ¼ cup olive oil [1][2][3]
+- ¼ cup fresh lemon juice [1][2]
+- 5-6 garlic cloves, minced [1][2]
+- 2 teaspoons cumin [1][2][3]
+- 2 teaspoons paprika [1][2][3]
+- 1 teaspoon ground coriander [2][3]
+- 1 teaspoon turmeric [3][5]
+- ½ teaspoon cinnamon [1][2][3]
+- ¼ teaspoon cardamom [1][2]
+- ¼ teaspoon cayenne or red pepper flakes [1][3]
+- Salt and black pepper to taste [1][2][3]
+
+**Optional Marinade Ingredients (varies by recipe):**
+- 1 tablespoon tomato paste (some recipes include this) [2]
+- 1 tablespoon vinegar [3]
+
+**For Serving:**
+- Pita bread or flatbread [1][2]
+- Garlic sauce or tahini sauce [1][2][5]
+- Pickles [2][3]
+- Sliced tomatoes and cucumbers [1][2]
+- Thinly sliced red onions tossed with sumac [2]
+
+## Instructions
+
+1. **Prepare the Marinade:**
+   - In a large bowl, whisk together the olive oil, lemon juice, garlic, and all the spices [1][2][3].
+
+2. **Marinate the Chicken:**
+   - Add the chicken thighs to the bowl and toss to coat thoroughly with the marinade [1][2].
+   - Cover and refrigerate for at least 1 hour, preferably 3-4 hours for maximum flavor [1][3]. Some recipes suggest marinating overnight [2].
+
+3. **Cook the Chicken (choose one method):**
+
+   **Stovetop Method:**
+   - Heat a large skillet or cast-iron pan over medium-high heat [1][3].
+   - Add the marinated chicken in a single layer (cook in batches if necessary).
+   - Cook for 5-7 minutes per side until browned and cooked through [1].
+   - Remove from heat and let rest for 5 minutes, then slice into thin strips [1].
+
+   **Oven Method:**
+   - Preheat oven to 425°F (220°C) [1].
+   - Place chicken on a baking sheet lined with parchment paper [1].
+   - Bake for 20-25 minutes until cooked through and slightly charred at edges [1].
+   - Then heat a skillet over high heat and sear the cooked chicken slices for 2-3 minutes to get crispy edges [1].
+
+   **Air Fryer Method:**
+   - Preheat air fryer to 400°F (200°C) [3].
+   - Cook chicken for 12-15 minutes, shaking halfway through, until cooked through with crispy edges [3].
+
+4. **Prepare the Sauce (Optional but Recommended):**
+   - Mix Greek yogurt with crushed garlic, lemon juice, and salt to taste for a simple garlic sauce [5].
+   - Alternatively, use tahini mixed with lemon juice, garlic, and a little water for tahini sauce [2].
+
+5. **Assemble and Serve:**
+   - Warm the pita bread [1][2].
+   - Spread your chosen sauce on the bread [1][5].
+   - Add sliced chicken shawarma [1][2].
+   - Top with pickles, tomatoes, cucumbers, and sumac-spiced onions [1][2].
+   - Wrap tightly and serve [1][2].
+
+## Tips for Best Results
+
+- Use chicken thighs rather than breasts for juicier, more flavorful results [1][3].
+- Don't skip the marinating time – it's essential for authentic flavor [1][2].
+- For the most authentic taste, use fresh garlic rather than garlic powder [1].
+- Searing the chicken after cooking (if using the oven method) adds those characteristic crispy edges [1].
+
+## Variations
+
+- Add a tablespoon of tomato paste to the marinade for a deeper color and flavor [2].
+- Include ½ teaspoon of allspice in the spice blend for a more traditional flavor profile [2].
+- Serve over rice with hummus and tabbouleh for a shawarma bowl instead of a wrap [2].
+
+## Citations
+
+1. Jawad, Y. (2025). *Authentic Middle Eastern Chicken Shawarma Recipe*. Feel Good Foodie. https://feelgoodfoodie.net/recipe/chicken-shawarma/
+
+2. Shami, W. (2023). *Authentic Chicken Shawarma Recipe*. Palestine In A Dish. https://palestineinadish.com/recipes/authentic-chicken-shawarma-recipe/
+
+3. Al-Saigh, A. (2025). *20-Minute Authentic Arabic Chicken Shawarma*. Hungry Paprikas. https://www.hungrypaprikas.com/chicken-shawarma/
+
+4. Damn Delicious. (2023). *Easy Chicken Shawarma*. https://damndelicious.net/2023/06/23/easy-chicken-shawarma/
+
+5. Recipes by Lena. *Authentic Chicken Shawarma with Creamy Garlic Sauce*. https://recipesbylena.com/recipes/chicken-shawarma-garlic-sauce
+
+---
+

@@ -148,29 +148,40 @@ async def process_query(
         response = await persona.respond(query, context=context)
 
     # ==================== LOGGING (Single Log File) ====================
-    # Universal Logging: Always append query/response to domain_log.md
-    # If conversation memory is enabled, this same file is loaded as context before next query
+    # Universal Logging: Append query/response to domain_log.md
+    # EXCEPTION: Don't log web search results - they go stale and poison the cache
+    # Only log: patterns (saved knowledge), library results, void (generation)
 
     logging_config = domain_config.get("logging", {"enabled": True})
     if logging_config.get("enabled", True):
-        log_file = logging_config.get("output_file", "domain_log.md")
-        format_type = logging_config.get("format", "markdown")
+        # Check if this is web search (internet source) - don't log to prevent stale cache
+        response_source = response.get("source", "")
 
-        success = _append_to_log(
-            domain_name,
-            log_file,
-            query,
-            response.get("answer", ""),
-            format_type
-        )
-
-        if success:
-            response["logging_updated"] = True
-            response["log_file"] = log_file
-            logger.info(f"Response appended to domain log: {log_file}")
-        else:
+        if response_source == "internet":
+            # Web search results - don't log to prevent stale data in conversation memory
+            logger.info("Web search response - NOT logging to domain_log.md (prevents stale cache)")
             response["logging_updated"] = False
-            logger.warning("Failed to append response to domain log")
+            response["log_skip_reason"] = "web_search"
+        else:
+            # Log patterns, library results, and void (generation)
+            log_file = logging_config.get("output_file", "domain_log.md")
+            format_type = logging_config.get("format", "markdown")
+
+            success = _append_to_log(
+                domain_name,
+                log_file,
+                query,
+                response.get("answer", ""),
+                format_type
+            )
+
+            if success:
+                response["logging_updated"] = True
+                response["log_file"] = log_file
+                logger.info(f"Response appended to domain log: {log_file}")
+            else:
+                response["logging_updated"] = False
+                logger.warning("Failed to append response to domain log")
     # ==================== END LOGGING ====================
 
     # Add domain metadata
