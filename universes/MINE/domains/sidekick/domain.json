@@ -61,7 +61,22 @@
       }
     }
   ],
-  "enrichers": [],
+  "enrichers": [
+    {
+      "plugin_id": "llm_enricher",
+      "name": "LLM Enricher",
+      "description": "Uses LLM to enhance responses, including GLM native web search",
+      "module": "plugins.enrichers.llm_enricher",
+      "class": "LLMEnricher",
+      "enabled": true,
+      "config": {
+        "mode": "enhance",
+        "min_confidence": 0.3,
+        "max_patterns": 10,
+        "temperature": 0.7
+      }
+    }
+  ],
   "knowledge_base": {
     "type": "json",
     "storage_path": "patterns.json",
