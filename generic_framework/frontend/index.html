@@ -2334,6 +2334,83 @@
             </div>
 
         </main>
+
+        <!-- Domain Log Management Modal -->
+        <div x-show="showLogModal" x-cloak class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" style="display: none;">
+            <div class="glass rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto" @click.away="showLogModal = false">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Domain Log: <span class="text-blue-400" x-text="logModalDomain"></span>
+                    </h2>
+                    <button @click="showLogModal = false" class="text-gray-400 hover:text-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Log Stats -->
+                <div class="mb-6 p-4 rounded-lg bg-gray-800/50 border border-gray-700">
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-2xl font-bold text-blue-400" x-text="logInfo.size_bytes ? (logInfo.size_bytes / 1024).toFixed(1) + ' KB' : 'N/A'"></p>
+                            <p class="text-xs text-gray-400">File Size</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-emerald-400" x-text="logInfo.line_count || 0"></p>
+                            <p class="text-xs text-gray-400">Lines</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-purple-400" x-text="logInfo.exists ? 'Active' : 'Empty'"></p>
+                            <p class="text-xs text-gray-400">Status</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-6 p-4 rounded-lg bg-blue-900/10 border border-blue-500/30">
+                    <h3 class="font-semibold text-blue-400 mb-3">Log Management Actions</h3>
+                    <div class="flex gap-3">
+                        <button @click="archiveDomainLog()"
+                                :disabled="loading || !logInfo.exists"
+                                class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                            </svg>
+                            <span>Archive Log</span>
+                        </button>
+                        <button @click="clearDomainLog()"
+                                :disabled="loading || !logInfo.exists"
+                                class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            <span>Clear Log</span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">
+                        <strong>Archive:</strong> Saves copy to <code class="bg-gray-800 px-1 rounded">logs/archived/domain_YYYYMMDD_HHMMSS.md</code><br>
+                        <strong>Clear:</strong> Deletes current log and starts fresh (archive first!)
+                    </p>
+                </div>
+
+                <!-- Last Action Result -->
+                <div x-show="logActionResult" x-transition class="mb-4 p-3 rounded-lg" :class="logActionSuccess ? 'bg-emerald-900/20 border border-emerald-500/30' : 'bg-red-900/20 border border-red-500/30'">
+                    <p class="text-sm" :class="logActionSuccess ? 'text-emerald-400' : 'text-red-400'" x-text="logActionResult"></p>
+                </div>
+
+                <!-- Close Button -->
+                <div class="flex justify-end">
+                    <button @click="showLogModal = false"
+                            class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -4095,6 +4172,7 @@
 
                 // Domain log management
                 async manageDomainLog(domainId) {
+                    console.log('manageDomainLog called for:', domainId);
                     this.logModalDomain = domainId;
                     this.logActionResult = '';
                     this.showLogModal = true;
@@ -5029,83 +5107,6 @@
             }
         }
     </script>
-
-    <!-- Domain Log Management Modal -->
-    <div x-show="showLogModal" style="display: none;" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-        <div class="glass rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto" @click.away="showLogModal = false">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold flex items-center gap-2">
-                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Domain Log: <span class="text-blue-400" x-text="logModalDomain"></span>
-                </h2>
-                <button @click="showLogModal = false" class="text-gray-400 hover:text-gray-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Log Stats -->
-            <div class="mb-6 p-4 rounded-lg bg-gray-800/50 border border-gray-700">
-                <div class="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                        <p class="text-2xl font-bold text-blue-400" x-text="logInfo.size_bytes ? (logInfo.size_bytes / 1024).toFixed(1) + ' KB' : 'N/A'"></p>
-                        <p class="text-xs text-gray-400">File Size</p>
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-emerald-400" x-text="logInfo.line_count || 0"></p>
-                        <p class="text-xs text-gray-400">Lines</p>
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-purple-400" x-text="logInfo.exists ? 'Active' : 'Empty'"></p>
-                        <p class="text-xs text-gray-400">Status</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="mb-6 p-4 rounded-lg bg-blue-900/10 border border-blue-500/30">
-                <h3 class="font-semibold text-blue-400 mb-3">Log Management Actions</h3>
-                <div class="flex gap-3">
-                    <button @click="archiveDomainLog()"
-                            :disabled="loading || !logInfo.exists"
-                            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                        </svg>
-                        <span>Archive Log</span>
-                    </button>
-                    <button @click="clearDomainLog()"
-                            :disabled="loading || !logInfo.exists"
-                            class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                        <span>Clear Log</span>
-                    </button>
-                </div>
-                <p class="text-xs text-gray-400 mt-2">
-                    <strong>Archive:</strong> Saves copy to <code class="bg-gray-800 px-1 rounded">logs/archived/domain_YYYYMMDD_HHMMSS.md</code><br>
-                    <strong>Clear:</strong> Deletes current log and starts fresh (archive first!)
-                </p>
-            </div>
-
-            <!-- Last Action Result -->
-            <div x-show="logActionResult" x-transition class="mb-4 p-3 rounded-lg" :class="logActionSuccess ? 'bg-emerald-900/20 border border-emerald-500/30' : 'bg-red-900/20 border border-red-500/30'">
-                <p class="text-sm" :class="logActionSuccess ? 'text-emerald-400' : 'text-red-400'" x-text="logActionResult"></p>
-            </div>
-
-            <!-- Close Button -->
-            <div class="flex justify-end">
-                <button @click="showLogModal = false"
-                        class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
