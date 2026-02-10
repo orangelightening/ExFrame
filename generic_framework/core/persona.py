@@ -317,38 +317,10 @@ class Persona:
                 ]
             }
 
-            # Enable GLM web search for // prefix (not simple greetings)
+            # Note: GLM-4.7 has built-in web search when it detects need for current info
+            # Don't use explicit tools parameter to avoid multi-turn tool call complexity
             if model.startswith("glm-") and "//" in prompt:
-                # Only enable tools for queries that actually need web search
-                # Simple greetings like "// hello" don't need tools
-                query_lower = prompt.lower()
-                needs_web_search = any(word in query_lower for word in [
-                    "weather", "news", "current", "latest", "price", "stock",
-                    "temperature", "forecast", "today", "now", "recent"
-                ])
-
-                if needs_web_search:
-                    self.logger.info(f"GLM model - enabling web_search for query needing current info")
-                    payload["tools"] = [{
-                        "type": "function",
-                        "name": "web_search",
-                        "function": {
-                            "name": "web_search",
-                            "description": "Search the web for current information",
-                            "parameters": {
-                                "type": "object",
-                                "properties": {
-                                    "query": {
-                                        "type": "string",
-                                        "description": "Search query"
-                                    }
-                                },
-                                "required": ["query"]
-                            }
-                        }
-                    }]
-                else:
-                    self.logger.info(f"GLM model - simple query, no tools needed")
+                self.logger.info(f"GLM model detected - relying on automatic web search")
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
