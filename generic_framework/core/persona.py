@@ -470,7 +470,8 @@ class Persona:
 
                                     self.logger.info(f"Fetching full content for top {fetch_limit} results...")
 
-                                    async with httpx.AsyncClient(timeout=15.0) as client:
+                                    # Create a separate client for web page fetching (different from LLM client)
+                                    async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as web_client:
                                         for i, result in enumerate(search_results[:fetch_limit], 1):
                                             title = result.metadata.get('title', 'Untitled')
                                             url = result.metadata.get('url', '')
@@ -479,7 +480,7 @@ class Persona:
                                             # Try to fetch full page content
                                             try:
                                                 self.logger.info(f"Fetching page {i}: {url}")
-                                                response = await client.get(url, headers={
+                                                response = await web_client.get(url, headers={
                                                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                                                 })
                                                 response.raise_for_status()
