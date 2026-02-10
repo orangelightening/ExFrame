@@ -366,6 +366,39 @@ class Persona:
                     {"role": "user", "content": prompt}
                 ]
             }
+
+            # Enable GLM web search for // prefix (for OpenAI-compatible endpoints)
+            if model.startswith("glm-") and "//" in prompt:
+                # Only enable tools for queries that actually need web search
+                query_lower = prompt.lower()
+                needs_web_search = any(word in query_lower for word in [
+                    "weather", "news", "current", "latest", "price", "stock",
+                    "temperature", "forecast", "today", "now", "recent"
+                ])
+
+                if needs_web_search:
+                    self.logger.info(f"GLM model (OpenAI format) - enabling web_search")
+                    payload["tools"] = [{
+                        "type": "function",
+                        "name": "web_search",
+                        "function": {
+                            "name": "web_search",
+                            "description": "Search the web for current information",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {
+                                        "type": "string",
+                                        "description": "Search query"
+                                    }
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }]
+                else:
+                    self.logger.info(f"GLM model (OpenAI format) - simple query, no tools")
+
             endpoint = f"{base_url.rstrip('/')}/chat/completions"
 
         # Call LLM API
