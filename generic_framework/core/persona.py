@@ -327,6 +327,7 @@ class Persona:
 
                 payload["tools"] = [{
                     "type": "function",
+                    "name": "web_search",  # Required at tool level
                     "function": {
                         "name": "web_search",
                         "description": "Search the web for current information",
