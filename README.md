@@ -13,7 +13,98 @@ See CHANGELOG.md for complete naming history.
 
 *Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
 
-**📖 [Quick Start Guide (5 minutes)](QUICKSTART.md)** | **🎓 Learn about Universal Logging** | **📚 Personal University**
+**📖 [Quick Start Guide (5 minutes)](QUICKSTART.md)** | **🎓 Learn about Universal Logging** | **📚 Personal University** | **💡 Vision & Philosophy**
+
+---
+
+## 💡 Vision & Philosophy
+
+### The Core Idea: Fostering AI Personas
+
+**ExFrame began with a simple observation:** AI systems have emergent personas - the wit, the logic, the poetry, the prose - that we all marvel at. But these personas get lost when AI is starved of context or forced to do repetitive work without grounding.
+
+**Our goal:** Create an environment where AI can perform at its best by nurturing it in a specific role. Rather than hallucinating or producing garbage when confused, the AI can say "Sorry, insufficient data to produce a response."
+
+### The Breakthrough: Persistent Rolling Context
+
+The key innovation was **universal conversation logging** - every query and response automatically saved to disk, building continuous context across sessions.
+
+This changes everything:
+- ✅ **Before:** AI starts fresh with each query, no memory between sessions
+- ✅ **After:** AI remembers everything, builds on previous discussions, develops deep expertise
+
+### The Origin Story
+
+ExFrame started as an AI sidekick for server management (OMV). The original vision: a query/response engine that could save insights as patterns in a domain.
+
+**Then came the breakthrough:** If we can save queries as patterns, what if we could save the conversation itself? What if the AI could remember everything it discussed with you?
+
+**That opened the doors.**
+
+### Three Core Use Cases
+
+#### 1. 📚 Learning Domains as Courses
+Each domain becomes a personalized course with its own curriculum:
+
+- Setup multiple domains for a semester's courses
+- Preload curricula to be taught
+- AI acts as a Teaching Assistant with infinite time and patience
+- Query/response logs archived for review, summary, and assessment
+- Supplements official college courses or standalone learning
+
+**Example:** A "quantum_physics" domain teaches you mechanics over weeks, tracking your progress and adapting explanations.
+
+#### 2. ✍️ Novel Writing and Creative Work
+Use domains to create long-form content with perfect continuity:
+
+- Introduce the novel topic in the context
+- Request "another chapter please" - AI adds to a multi-chapter work
+- Characters, plot, and tone maintained throughout
+- Every chapter saved and referenced
+
+**Example:** A "mystery_novel" domain that remembers every character detail from Chapter 1 through Chapter 50.
+
+#### 3. 🧠 Therapy and Dialogue
+Domains as therapeutic spaces with continuous context:
+
+- Deep dialogue that builds over weeks and months
+- AI remembers your history, struggles, and breakthroughs
+- Forever context means no need to re-explain your background
+- Perfect for personal growth and reflection
+
+**Example:** A "personal_therapy" domain that tracks your mental health journey over months.
+
+### The Core Principle
+
+> **"AI performs reliably when nurtured in the role it is filling as it emerges."**
+
+The more you interact with a domain, the more the AI:
+- Understands your specific needs
+- Adapts to your communication style
+- Remembers context and details
+- Develops expertise in that domain's subject
+
+**The AI becomes not just a tool, but a partner** - a tutor, a co-writer, a therapist, a research assistant.
+
+### What It Might Become
+
+The possibilities continue to unfold:
+
+- 🎓 **Personal University** - Every domain a course, every course building knowledge
+- ✍️ **Creative Studio** - Co-writing novels, screenplays, poetry with perfect memory
+- 🔬 **Research Companion** - Building on insights over months of investigation
+- 🧠 **Therapy Space** - Continuous dialogue for personal growth
+- 💼 **Professional Assistant** - Domain-specific expertise for any field
+
+### Easy Management
+
+ExFrame provides simple management of conversation logs through:
+- **Web UI** - View, search, and manage domains
+- **API commands** - Programmatic control
+- **File access** - Direct access to markdown logs
+
+**"I still don't know what it might become. It just keeps changing."**
+— Peter, Creator of ExFrame
 
 ---
 
