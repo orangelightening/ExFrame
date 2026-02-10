@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_053809.md",
+                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "sidekick_20260210_053809"
+              "title": "sidekick_20260210_055811"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_053809.md",
+                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for sidekick_20260210_053809"
+              "title": "Backlinks for sidekick_20260210_055811"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_053809.md",
+                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from sidekick_20260210_053809"
+              "title": "Outgoing links from sidekick_20260210_055811"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_053809.md",
+                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of sidekick_20260210_053809"
+              "title": "Outline of sidekick_20260210_055811"
             }
           }
         ]
@@ -185,8 +185,12 @@
   },
   "active": "f5f5336008d771fc",
   "lastOpenFiles": [
-    "universes/MINE/logs/archived/sidekick_20260210_045758.md",
+    "universes/MINE/domains/cooking/domain_log.md",
+    "universes/MINE/logs/archived/sidekick_20260210_055524.md",
+    "universes/MINE/logs/archived/sidekick_20260210_055811.md",
+    "universes/MINE/logs/archived/sidekick_20260210_055457.md",
     "universes/MINE/logs/archived/sidekick_20260210_053809.md",
+    "universes/MINE/logs/archived/sidekick_20260210_045758.md",
     "generic_framework/frontend/index.html.tmp.1478318.1770701525645",
     "universes/MINE/logs/archived/sidekick_20260210_052506.md",
     "README.md",

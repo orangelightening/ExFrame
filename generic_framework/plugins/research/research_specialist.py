@@ -122,9 +122,9 @@ class ResearchSpecialistPlugin(SpecialistPlugin):
             confidence += 0.4  # Boost for having local patterns
         confidence = min(confidence, 0.8)  # Max 0.8 without web search
 
-        # Stage 2: Web search (only if confirmed or if this is initial query with web enabled)
+        # Stage 2: Web search (perform if web_search_confirmed OR if enable_web_search is true in config)
         research_results = []
-        if web_search_confirmed and self.research_strategy:
+        if (web_search_confirmed or self.enable_web_search) and self.research_strategy:
             try:
                 logger.info(f"[RESEARCH_SPEC] Performing web search for: {query}")
                 await self.research_strategy.initialize()
@@ -185,11 +185,8 @@ class ResearchSpecialistPlugin(SpecialistPlugin):
             "web_search_enabled": self.enable_web_search
         }
 
-        # If web search is enabled but not yet performed, flag for extension
-        if self.enable_web_search and not web_search_confirmed:
-            response["can_extend_with_web_search"] = True
-        else:
-            response["can_extend_with_web_search"] = False
+        # Flag can_extend_with_web_search - now always False since we auto-search when enabled
+        response["can_extend_with_web_search"] = False
 
         # Include research results if we did web search
         if research_results:
