@@ -225,9 +225,12 @@ class LLMEnricher(EnrichmentPlugin):
 
         # Build prompt based on mode and available patterns
         if has_web_search:
-            # Use web search results as context
-            print(f"  [LLMEnricher] Using web search results ({len(research_results)} results)")
-            prompt = self._build_web_search_prompt(query, research_results, patterns, context)
+            # Enable GLM's native web search instead of using snippets
+            # DuckDuckGo snippets don't contain actual data, so let GLM browse
+            print(f"  [LLMEnricher] Enabling GLM native web search (ignoring {len(research_results)} useless snippets)")
+            prompt = self._build_direct_prompt(query, context)
+            # Override: force web search enable regardless of model
+            # The _call_llm will check is_glm and enable the tool
         elif is_type3_domain and patterns:
             # Use document-context prompt for Type 3 document search results
             print(f"  [LLMEnricher] Using Type 3 document context prompt ({len(patterns)} documents)")
@@ -262,7 +265,9 @@ class LLMEnricher(EnrichmentPlugin):
         # Call LLM API
         try:
             show_thinking = getattr(context, 'show_thinking', False)
-            response = await self._call_llm(prompt, show_thinking)
+            # Enable GLM's native web_search when we have web search results
+            # This gives GLM actual browsing capability instead of just snippets
+            response = await self._call_llm(prompt, show_thinking, enable_web_search=has_web_search)
 
             # Add plugin identifier to response
             # This helps users identify which plugin generated the output
@@ -685,7 +690,7 @@ Your response:"""
 
         return prompt
 
-    async def _call_llm(self, prompt: str, show_thinking: bool = False) -> str:
+    async def _call_llm(self, prompt: str, show_thinking: bool = False, enable_web_search: bool = False) -> str:
         """Call LLM API."""
         if not self.api_key:
             return "[LLM not configured: No API key]"
@@ -700,9 +705,10 @@ Your response:"""
 
         # Determine if this is OpenAI or Anthropic-compatible API
         is_anthropic = "anthropic" in self.base_url.lower()
+        is_glm = self.model.startswith("glm-")
 
         # Debug: Log temperature being used
-        print(f"  [LLMEnricher] Using model={self.model}, temperature={self.temperature}")
+        print(f"  [LLMEnricher] Using model={self.model}, temperature={self.temperature}, web_search={enable_web_search}")
 
         if is_anthropic:
             # Anthropic/GLM API format (uses user role only)
@@ -716,6 +722,16 @@ Your response:"""
                     {"role": "user", "content": prompt}
                 ]
             }
+
+            # Enable GLM's native web_search tool if requested
+            if is_glm and enable_web_search:
+                payload["tools"] = [{
+                    "type": "web_search",
+                    "web_search": {
+                        "search_query": prompt  # GLM will search the web for this context
+                    }
+                }]
+                print(f"  [LLMEnricher] Enabled GLM native web_search tool")
         else:
             # OpenAI API format - conditional system message
             system_message = "You are a helpful assistant."
