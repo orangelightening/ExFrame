@@ -340,14 +340,27 @@ class Persona:
                 "stream": False  # We don't use streaming currently
             }
 
-            # Enable GLM web search for // prefix (single-turn embedded format)
-            if model.startswith("glm-") and "//" in prompt:
-                # Only enable tools for queries that actually need web search
-                query_lower = prompt.lower()
-                needs_web_search = any(word in query_lower for word in [
-                    "weather", "news", "current", "latest", "price", "stock",
-                    "temperature", "forecast", "today", "now", "recent", "breaking"
-                ])
+            # Enable GLM web search for:
+            # 1. Queries with // prefix (explicit web search request)
+            # 2. Researcher persona with internet data source (always search)
+            if model.startswith("glm-"):
+                # Check if this is a researcher persona that needs web search
+                needs_web_search = False
+
+                # Case 1: Explicit // prefix with keywords
+                if "//" in prompt:
+                    query_lower = prompt.lower()
+                    needs_web_search = any(word in query_lower for word in [
+                        "weather", "news", "current", "latest", "price", "stock",
+                        "temperature", "forecast", "today", "now", "recent", "breaking",
+                        "recipe", "how to", "tutorial", "guide", "instructions"
+                    ])
+                    self.logger.info(f"GLM model - // prefix detected, needs_web_search={needs_web_search}")
+
+                # Case 2: Researcher persona (internet data source) - always enable web search
+                elif self.data_source == "internet":
+                    needs_web_search = True
+                    self.logger.info(f"GLM model - researcher persona with internet data source, enabling web search")
 
                 if needs_web_search:
                     self.logger.info(f"GLM model (OpenAI format) - enabling web_search via function calling")
@@ -355,7 +368,7 @@ class Persona:
                         "type": "function",
                         "function": {
                             "name": "web_search",
-                            "description": "Search the web for current information including weather, news, prices, etc.",
+                            "description": "Search the web for current information including weather, news, prices, recipes, how-to guides, etc.",
                             "parameters": {
                                 "type": "object",
                                 "properties": {
