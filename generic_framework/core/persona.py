@@ -350,17 +350,22 @@ class Persona:
                 ])
 
                 if needs_web_search:
-                    self.logger.info(f"GLM model (OpenAI format) - enabling embedded web_search tool")
+                    self.logger.info(f"GLM model (OpenAI format) - enabling web_search via function calling")
                     payload["tools"] = [{
-                        "type": "web_search",
-                        "web_search": {
-                            "enable": "True",
-                            "search_result": "True",  # CRITICAL: Include actual search results
-                            "search_engine": "search_pro",
-                            "search_prompt": "You are a helpful assistant. Use the search results to provide accurate, current information. Include citations with your answers.",
-                            "count": "10",
-                            "search_recency_filter": "noLimit",
-                            "content_size": "high"
+                        "type": "function",
+                        "function": {
+                            "name": "web_search",
+                            "description": "Search the web for current information including weather, news, prices, etc.",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {
+                                        "type": "string",
+                                        "description": "The search query to execute"
+                                    }
+                                },
+                                "required": ["query"]
+                            }
                         }
                     }]
                     payload["tool_choice"] = "auto"  # Let GLM decide when to use tools
@@ -429,10 +434,54 @@ class Persona:
                     message = data["choices"][0]["message"]
                     # Check for tool_calls in OpenAI format
                     if "tool_calls" in message and message["tool_calls"]:
-                        self.logger.warning(f"GLM returned tool_calls (not implemented): {message['tool_calls']}")
-                        self.logger.info(f"Message content: {message.get('content', 'no content')}")
-                        # For now, return content even if tool_calls present
-                        return message.get("content", "[GLM requested tool calls but not handled]")
+                        self.logger.info(f"GLM returned {len(message['tool_calls'])} tool_calls - implementing multi-turn")
+                        # Extract tool call details
+                        tool_call = message["tool_calls"][0]
+                        function_name = tool_call["function"]["name"]
+                        function_args = tool_call["function"]["arguments"]
+
+                        self.logger.info(f"Tool call: {function_name}({function_args})")
+
+                        # For web_search, we need to send back a tool response message
+                        # The search_result parameter tells GLM to include actual search results
+                        if function_name == "web_search":
+                            self.logger.info("Processing web_search tool call - sending confirmation")
+
+                            # Build the multi-turn request
+                            messages_with_tool = payload["messages"].copy()
+                            messages_with_tool.append({
+                                "role": "assistant",
+                                "content": message.get("content", ""),
+                                "tool_calls": message["tool_calls"]
+                            })
+
+                            # Send back tool response (for web_search, GLM executes it server-side)
+                            messages_with_tool.append({
+                                "role": "tool",
+                                "tool_call_id": tool_call["id"],
+                                "content": function_args  # The search query GLM should use
+                            })
+
+                            # Make second request to get actual search results
+                            self.logger.info("Sending second request with tool confirmation")
+                            payload["messages"] = messages_with_tool
+                            # Remove tools from second request
+                            if "tools" in payload:
+                                del payload["tools"]
+                            if "tool_choice" in payload:
+                                del payload["tool_choice"]
+
+                            response2 = await client.post(endpoint, headers=headers, json=payload)
+                            response2.raise_for_status()
+                            data2 = response2.json()
+
+                            if "choices" in data2:
+                                return data2["choices"][0]["message"]["content"]
+                            else:
+                                self.logger.error(f"Second response format unexpected: {list(data2.keys())}")
+                                return message.get("content", "[Tool call executed but response format unknown]")
+
+                        return message.get("content", "[GLM requested unknown tool]")
                     return message["content"]
 
                 # Anthropic format
