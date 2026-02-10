@@ -284,7 +284,8 @@ class Persona:
         # Get API credentials from environment
         api_key = os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-        model = os.getenv("LLM_MODEL", "deepseek-chat")
+        # Use AllTools variant for web search capability
+        model = os.getenv("LLM_MODEL", "glm-4-alltools")  # Changed from deepseek-chat
 
         if not api_key:
             self.logger.warning("LLM not configured: No API key")
