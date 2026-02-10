@@ -336,7 +336,8 @@ class Persona:
                 "messages": [
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                "stream": False  # We don't use streaming currently
             }
 
             # Enable GLM web search for // prefix (single-turn embedded format)
@@ -362,6 +363,7 @@ class Persona:
                             "content_size": "high"
                         }
                     }]
+                    payload["tool_choice"] = "auto"  # Let GLM decide when to use tools
                 else:
                     self.logger.info(f"GLM model (OpenAI format) - simple query, no web search needed")
 

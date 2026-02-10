@@ -419,3 +419,98 @@ Previous attempts (all using wrong format):
 
 **Estimated implementation time:** 15 minutes (single file change)
 **Risk:** Low (can easily revert if issues)
+
+---
+
+## Endpoint Configuration
+
+### Z.AI API Endpoints
+
+**Option 1: Coding Endpoint (Current)**
+```bash
+OPENAI_BASE_URL=https://api.z.ai/api/coding/paas/v4
+```
+- Optimized for code-related tasks
+- May have different tool handling behavior
+- Currently in use
+
+**Option 2: General Purpose Endpoint**
+```bash
+OPENAI_BASE_URL=https://api.z.ai/api/paas/v4
+```
+- General-purpose LLM tasks
+- May handle web_search tool differently
+- Try this if coding endpoint doesn't work
+
+### Switching Endpoints
+
+If web search isn't working on coding endpoint, try general purpose:
+
+1. Edit `.env` file:
+```bash
+OPENAI_BASE_URL=https://api.z.ai/api/paas/v4
+```
+
+2. Restart container:
+```bash
+docker-compose restart eeframe-app
+```
+
+3. Test with: `// what's the weather in Nanaimo?`
+
+---
+
+## Troubleshooting
+
+### Issue: Response Shows Reasoning Instead of Data
+
+**Symptom:**
+- Response includes "Action: Execute browser search" or similar
+- Shows thinking process instead of actual data
+- Weather data looks like training knowledge (old dates)
+
+**Possible Causes:**
+
+1. **Wrong endpoint for tools**
+   - Coding endpoint may handle tools differently
+   - Try general purpose endpoint
+
+2. **Missing tool_stream parameter**
+   - GLM may need `tool_stream: true` for proper tool responses
+   - Check SDK examples for streaming setup
+
+3. **search_result not working**
+   - The `"search_result": "True"` parameter may not be supported
+   - Try removing it or setting to different value
+
+4. **Model limitation**
+   - GLM-4.7 may have different tool support per endpoint
+   - Contact Z.AI support for endpoint-specific tool capabilities
+
+### Debugging Steps
+
+1. **Check logs for tool activation:**
+```bash
+docker logs eeframe-app 2>&1 | grep -i "web_search"
+```
+Should see: "GLM model (OpenAI format) - enabling embedded web_search tool"
+
+2. **Verify request format:**
+Add temporary logging to persona.py to print payload before sending
+
+3. **Test with direct API:**
+Use curl to test endpoint directly:
+```bash
+curl -X POST https://api.z.ai/api/paas/v4/chat/completions \
+  -H "Authorization: Bearer YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "glm-4.7",
+    "messages": [{"role": "user", "content": "What'\''s the weather in Nanaimo?"}],
+    "tools": [{"type": "web_search", "web_search": {"enable": "True", "search_result": "True"}}]
+  }'
+```
+
+4. **Compare SDK example:**
+Run `glm4_example.py` from SDK to confirm format works
+
