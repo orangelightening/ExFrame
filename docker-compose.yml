@@ -29,7 +29,7 @@ services:
       # LLM API Configuration (set these in .env or override here)
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
-      - LLM_MODEL=${LLM_MODEL:-glm-4-flash}
+      - LLM_MODEL=${LLM_MODEL:-glm-4.7}
 
       # Path configuration (optional, defaults shown)
       - PATTERN_STORAGE_BASE=/app/data/patterns

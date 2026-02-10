@@ -317,10 +317,10 @@ class Persona:
                 ]
             }
 
-            # Note: GLM-4.x has automatic web search built-in
-            # No tools parameter needed - GLM decides when to search based on query
+            # Enable GLM web search for internet queries or // prefix
             if model.startswith("glm-") and (self.data_source == "internet" or "//" in prompt):
-                self.logger.info(f"GLM model with internet query - GLM will use automatic web search")
+                self.logger.info(f"GLM model detected - enabling web_search tool")
+                payload["tools"] = [{"type": "web_search"}]
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
