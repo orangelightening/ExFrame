@@ -446,6 +446,8 @@ class Persona:
                         # The search_result parameter tells GLM to include actual search results
                         if function_name == "web_search":
                             self.logger.info("Processing web_search tool call - sending confirmation")
+                            self.logger.info(f"Tool call ID: {tool_call['id']}")
+                            self.logger.info(f"Function args: {function_args}")
 
                             # Build the multi-turn request
                             messages_with_tool = payload["messages"].copy()
@@ -456,11 +458,21 @@ class Persona:
                             })
 
                             # Send back tool response (for web_search, GLM executes it server-side)
-                            messages_with_tool.append({
+                            # Parse the function args as JSON to get the query
+                            import json
+                            try:
+                                args_dict = json.loads(function_args)
+                                search_query = args_dict.get("query", function_args)
+                            except:
+                                search_query = function_args
+
+                            tool_response = {
                                 "role": "tool",
                                 "tool_call_id": tool_call["id"],
-                                "content": function_args  # The search query GLM should use
-                            })
+                                "content": search_query  # The search query GLM should use
+                            }
+                            self.logger.info(f"Tool response: {tool_response}")
+                            messages_with_tool.append(tool_response)
 
                             # Make second request to get actual search results
                             self.logger.info("Sending second request with tool confirmation")
@@ -475,8 +487,15 @@ class Persona:
                             response2.raise_for_status()
                             data2 = response2.json()
 
+                            # Log the second response for debugging
+                            self.logger.info(f"Second response received - keys: {list(data2.keys())}")
                             if "choices" in data2:
-                                return data2["choices"][0]["message"]["content"]
+                                msg2 = data2["choices"][0]["message"]
+                                self.logger.info(f"Second message keys: {list(msg2.keys())}")
+                                self.logger.info(f"Second response content preview: {msg2.get('content', 'NO CONTENT')[:200]}")
+                                if "tool_calls" in msg2 and msg2["tool_calls"]:
+                                    self.logger.warning(f"Second response STILL has tool_calls: {len(msg2['tool_calls'])}")
+                                return msg2["content"]
                             else:
                                 self.logger.error(f"Second response format unexpected: {list(data2.keys())}")
                                 return message.get("content", "[Tool call executed but response format unknown]")
