@@ -13,7 +13,7 @@
   "tags": [
     "open"
   ],
-  "domain_type": "",
+  "domain_type": "4",
   "pattern_schema": {
     "required_fields": [
       "id",
