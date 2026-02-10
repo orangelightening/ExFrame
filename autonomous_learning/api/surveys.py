@@ -74,7 +74,7 @@ class SurveyMetrics(BaseModel):
 
 
 # Router
-router = APIRouter(prefix="/api/surveys", tags=["surveys"])
+router = APIRouter(prefix="/surveys", tags=["surveys"])
 
 # In-memory storage (stubs)
 _surveys: dict = {}

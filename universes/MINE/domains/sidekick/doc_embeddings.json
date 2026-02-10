@@ -1,7 +1,7 @@
 {
   "metadata": {
     "model": "all-MiniLM-L6-v2",
-    "generated": "2026-02-10T03:49:38.877759",
+    "generated": "2026-02-10T04:14:23.813929",
     "document_count": 43
   },
   "documents": {
@@ -14468,9 +14468,9 @@
         -0.11803440749645233,
         -0.005216679535806179
       ],
-      "hash": "12a2bb81029efcc542823103eaede91258464286e5b9a4588c6dbab79375937c",
-      "size": 5672,
-      "modified": 1770695156.751367
+      "hash": "49778f111be9dc3e24970f9be69dc30bf248517feec13e35214af916320fa654",
+      "size": 10722,
+      "modified": 1770695417.7644367
     },
     "/app/project/universes/MINE/domains/sidekick/domain_log.md": {
       "code": [
@@ -14859,9 +14859,9 @@
         -0.10791803896427155,
         0.010990212671458721
       ],
-      "hash": "806a58298b6e3056c9f808d1212d228ab03c499b782671e8b25c8764c49f2983",
-      "size": 14140,
-      "modified": 1770695156.7503672
+      "hash": "cd732a34b98b22e4aa4db2656fccc08addef9a2d0377fc95ad9d14c00c443d27",
+      "size": 21687,
+      "modified": 1770696863.6889894
     },
     "/app/project/universes/MINE/domains/prose/stories/active_story.md": {
       "code": [

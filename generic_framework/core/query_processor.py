@@ -55,40 +55,40 @@ async def process_query(
 
     logger.info(f"Using persona: {persona_type}")
 
-    # ==================== ACCUMULATOR CHECK (Memory/Context Loading) ====================
-    # Accumulator: Load previous content into LLM context for memory/learning
-    accumulator_content = None
-    accumulator_config = domain_config.get("accumulator", {})
+    # ==================== CONVERSATION MEMORY (Load from domain_log.md) ====================
+    # Conversation Memory: Load previous conversations from domain_log.md into LLM context
+    # This gives the AI memory of past conversations without a separate file
+    memory_content = None
+    memory_config = domain_config.get("conversation_memory", {})
 
-    if accumulator_config.get("enabled", False):
-        mode = accumulator_config.get("mode", "triggers")
-        output_file = accumulator_config.get("output_file", "stories/active_story.md")
-        max_chars = accumulator_config.get("max_context_chars", 15000)
+    if memory_config.get("enabled", False):
+        mode = memory_config.get("mode", "all")
+        max_chars = memory_config.get("max_context_chars", 5000)
 
-        should_load_context = False
+        should_load_memory = False
 
         if mode == "all":
-            # Load all content as context
-            should_load_context = True
-            logger.info(f"Accumulator mode 'all': loading context from {output_file}")
+            # Load conversation history for all queries
+            should_load_memory = True
+            logger.info(f"Conversation memory mode 'all': loading context from domain_log.md")
         elif mode == "triggers":
             # Only load context on trigger phrases
-            trigger_phrases = accumulator_config.get("trigger_phrases", [])
-            if trigger_phrases and _check_accumulator_trigger(query, trigger_phrases):
-                should_load_context = True
-                logger.info(f"Accumulator mode 'triggers': triggered by query, loading context from {output_file}")
+            trigger_phrases = memory_config.get("trigger_phrases", [])
+            if trigger_phrases and _check_memory_trigger(query, trigger_phrases):
+                should_load_memory = True
+                logger.info(f"Conversation memory mode 'triggers': triggered by query, loading context from domain_log.md")
 
-        if should_load_context:
-            accumulator_content = _load_accumulator_content(domain_name, output_file, max_chars)
+        if should_load_memory:
+            memory_content = _load_conversation_memory(domain_name, max_chars)
 
-            if accumulator_content:
-                # Prepend accumulator content to context
+            if memory_content:
+                # Prepend memory content to context
                 context = context or {}
-                context["accumulator_content"] = accumulator_content
-                context["accumulator_used"] = True
-                context["accumulator_mode"] = mode
-                logger.info(f"Loaded {len(accumulator_content)} chars of accumulator context")
-    # ==================== END ACCUMULATOR CHECK ====================
+                context["memory_content"] = memory_content
+                context["conversation_memory_used"] = True
+                context["conversation_memory_mode"] = mode
+                logger.info(f"Loaded {len(memory_content)} chars of conversation memory from domain_log.md")
+    # ==================== END CONVERSATION MEMORY ====================
 
     # THE SWITCH: Determine if we should search patterns
     # Priority: explicit flag > context flag > domain config > default True
@@ -122,11 +122,11 @@ async def process_query(
     context = context or {}
     context["show_thinking"] = show_thinking
 
-    # If accumulator content exists, inject it into the prompt
-    if accumulator_content:
-        # Add accumulator content as a prefix to the context
-        context["accumulator_prefix"] = f"Story so far:\n\n{accumulator_content}\n\n---\n\n"
-        logger.info("Injected accumulator content into prompt")
+    # If memory content exists, inject it into the prompt
+    if memory_content:
+        # Add memory content as a prefix to the context
+        context["memory_prefix"] = f"Previous conversation:\n\n{memory_content}\n\n---\n\n"
+        logger.info("Injected conversation memory into prompt")
 
     if patterns and len(patterns) > 0:
         # Use patterns (override)
@@ -147,12 +147,10 @@ async def process_query(
 
         response = await persona.respond(query, context=context)
 
-    # ==================== LOGGING & ACCUMULATOR APPEND ====================
-    # Two separate append operations:
-    # 1. Universal Logging: Always append to log if logging.enabled (default: true)
-    # 2. Accumulator: Append to accumulator if enabled and mode matches
+    # ==================== LOGGING (Single Log File) ====================
+    # Universal Logging: Always append query/response to domain_log.md
+    # If conversation memory is enabled, this same file is loaded as context before next query
 
-    # 1. Universal Logging (append to domain log)
     logging_config = domain_config.get("logging", {"enabled": True})
     if logging_config.get("enabled", True):
         log_file = logging_config.get("output_file", "domain_log.md")
@@ -173,43 +171,7 @@ async def process_query(
         else:
             response["logging_updated"] = False
             logger.warning("Failed to append response to domain log")
-
-    # 2. Accumulator (append for memory/context)
-    if accumulator_config.get("enabled", False):
-        mode = accumulator_config.get("mode", "triggers")
-        should_append = False
-
-        if mode == "all":
-            # Append all queries/responses to accumulator
-            should_append = True
-            logger.info(f"Accumulator mode 'all': appending response")
-        elif mode == "triggers":
-            # Only append on trigger phrases
-            trigger_phrases = accumulator_config.get("trigger_phrases", [])
-            if trigger_phrases and _check_accumulator_trigger(query, trigger_phrases):
-                should_append = True
-                logger.info(f"Accumulator mode 'triggers': triggered, appending response")
-
-        if should_append:
-            output_file = accumulator_config.get("output_file", "stories/active_story.md")
-            format_type = accumulator_config.get("format", "markdown")
-
-            success = _append_to_accumulator(
-                domain_name,
-                output_file,
-                query,
-                response.get("answer", ""),
-                format_type
-            )
-
-            if success:
-                response["accumulator_updated"] = True
-                response["accumulator_file"] = output_file
-                logger.info(f"Response appended to accumulator: {output_file}")
-            else:
-                response["accumulator_updated"] = False
-                logger.warning("Failed to append response to accumulator")
-    # ==================== END LOGGING & ACCUMULATOR APPEND ====================
+    # ==================== END LOGGING ====================
 
     # Add domain metadata
     response["domain"] = domain_name
@@ -217,9 +179,9 @@ async def process_query(
     response["persona_type"] = persona_type
     response["search_patterns_enabled"] = should_search_patterns
 
-    # Add accumulator metadata
-    if accumulator_content is not None:
-        response["accumulator_used"] = True
+    # Add conversation memory metadata
+    if memory_content is not None:
+        response["conversation_memory_used"] = True
 
     return response
 
@@ -757,11 +719,11 @@ def _append_to_log(domain_name: str, output_file: str, query: str, response: str
         return False
 
 
-# ==================== ACCUMULATOR FUNCTIONS ====================
+# ==================== CONVERSATION MEMORY FUNCTIONS ====================
 
-def _check_accumulator_trigger(query: str, trigger_phrases: List[str]) -> bool:
+def _check_memory_trigger(query: str, trigger_phrases: List[str]) -> bool:
     """
-    Check if query contains any accumulator trigger phrases.
+    Check if query contains any memory trigger phrases.
 
     Args:
         query: User query string
@@ -774,104 +736,47 @@ def _check_accumulator_trigger(query: str, trigger_phrases: List[str]) -> bool:
     return any(phrase.lower() in query_lower for phrase in trigger_phrases)
 
 
-def _load_accumulator_content(domain_name: str, output_file: str, max_chars: int = 15000) -> Optional[str]:
+def _load_conversation_memory(domain_name: str, max_chars: int = 5000) -> Optional[str]:
     """
-    Load accumulated content from file.
+    Load conversation history from domain_log.md for memory.
+
+    This reads the last N characters from the domain log file,
+    giving the AI memory of past conversations.
 
     Args:
         domain_name: Domain name
-        output_file: Relative path to accumulator file
-        max_chars: Maximum characters to load
+        max_chars: Maximum characters to load (default: 5000)
 
     Returns:
-        Accumulated content string or None if file doesn't exist
+        Conversation history string or None if file doesn't exist
     """
     from pathlib import Path
 
     domain_path = _get_domain_path(domain_name)
     if not domain_path:
-        logger.warning(f"Cannot load accumulator: domain path not found for {domain_name}")
+        logger.warning(f"Cannot load conversation memory: domain path not found for {domain_name}")
         return None
 
-    accumulator_path = domain_path / output_file
+    # Load from domain_log.md (same file used for universal logging)
+    log_path = domain_path / "domain_log.md"
 
-    if not accumulator_path.exists():
-        logger.info(f"Accumulator file not found: {accumulator_path}")
+    if not log_path.exists():
+        logger.info(f"domain_log.md not found: {log_path}")
         return None
 
     try:
-        with open(accumulator_path, 'r', encoding='utf-8') as f:
+        with open(log_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        # Truncate if too long
+        # Take last N chars (most recent conversations)
         if len(content) > max_chars:
             content = content[-max_chars:]
-            logger.info(f"Accumulator content truncated to {max_chars} chars")
+            logger.info(f"Conversation memory truncated to {max_chars} chars (most recent)")
 
-        logger.info(f"Loaded {len(content)} chars from accumulator: {accumulator_path}")
+        logger.info(f"Loaded {len(content)} chars from domain_log.md for conversation memory")
         return content
 
     except Exception as e:
-        logger.error(f"Failed to load accumulator: {e}")
+        logger.error(f"Failed to load conversation memory from domain_log.md: {e}")
         return None
-
-
-def _append_to_accumulator(domain_name: str, output_file: str, query: str, response: str, format_type: str = "markdown") -> bool:
-    """
-    Append new query/response to accumulator file.
-
-    Args:
-        domain_name: Domain name
-        output_file: Relative path to accumulator file
-        query: User query
-        response: LLM response
-        format_type: Format type (markdown, plain, etc.)
-
-    Returns:
-        True if successful, False otherwise
-    """
-    from pathlib import Path
-    from datetime import datetime
-
-    domain_path = _get_domain_path(domain_name)
-    if not domain_path:
-        logger.warning(f"Cannot append to accumulator: domain path not found for {domain_name}")
-        return False
-
-    accumulator_path = domain_path / output_file
-
-    # Create directory if it doesn't exist
-    accumulator_path.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        # Check if file exists to determine if we need a header
-        file_exists = accumulator_path.exists()
-
-        with open(accumulator_path, 'a', encoding='utf-8') as f:
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            if format_type == "markdown":
-                if not file_exists:
-                    f.write(f"# Story Accumulator\nStarted: {timestamp}\n\n")
-
-                f.write(f"## {timestamp}\n\n")
-                f.write(f"**Query:** {query}\n\n")
-                f.write(f"{response}\n\n")
-                f.write("---\n\n")
-            else:
-                # Plain text format
-                if not file_exists:
-                    f.write(f"Story Accumulator - Started: {timestamp}\n\n")
-
-                f.write(f"[{timestamp}]\n")
-                f.write(f"Query: {query}\n")
-                f.write(f"Response: {response}\n")
-                f.write("\n" + "-"*80 + "\n\n")
-
-        logger.info(f"Appended to accumulator: {accumulator_path}")
-        return True
-
-    except Exception as e:
-        logger.error(f"Failed to append to accumulator: {e}")
-        return False
 

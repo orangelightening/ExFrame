@@ -566,3 +566,78 @@ This prompt sequence ensures the librarian persona provides accurate, document-b
 
 ---
 
+## 2026-02-10 04:05:00
+
+**Query:** My favorite color is blue and I love pizza. Please remember this.
+
+Your favorite color is blue and you love pizza. I've noted this for you, Peter.
+
+This personal detail is now part of your ongoing story context. In future chapters, elements like the deep blue of a twilight sky, the specific hue of a significant object, or perhaps even the comforting memory of a favorite food could naturally appear as reflections of your character's identity.
+
+---
+
+## 2026-02-10 04:05:04
+
+**Query:** What is my favorite color?
+
+Based on the story documents, your favorite color has not been mentioned or established yet.
+
+The only personal details you have provided are your name (Peter) and your city (Seattle), which were directly incorporated into the narrative as a key plot point about your character's fractured reality.
+
+To have your favorite color woven into the story, you would need to tell me what it is.
+
+---
+
+## 2026-02-10 04:14:23
+
+**Query:** My name is Peter and I live in Seattle.
+
+📚 **Answer from Library Documents:**
+
+Based on the provided story document, you have told me that your name is Peter and you live in Seattle. This information has been directly incorporated into the ongoing narrative.
+
+In **Chapter 5: The Sleeper in the Stone**, the character Peter experiences a sudden, vivid memory or sense of a double life. While standing before an ancient Standing Stone in the English countryside, he has a clear recollection:
+
+* "My name is Peter, and I live in Seattle."
+* He visualizes the Seattle skyline with the Space Needle against a Pacific sky
+* He remembers a condo with floor-to-ceiling windows in Seattle
+* He recalls a life as someone who reviews blueprints for skyscrapers rather than dry-stone walls
+
+The ancient entity known as the Sleeper in the Stone confirms this is not merely a memory but reflects a fractured reality. It reveals that Peter is an "anchor" for a seam between worlds (the Green Line), and part of him is actually lost and adrift in that Seattle life. The entity charges him with finding "the part of you that is adrift" and bringing "him home" to prevent both worlds from unraveling.
+
+Thus, your personal detail has become a central plot point in the story, transforming the mystery from being about Peter's father's past to being about Peter's own fractured existence across two realities.
+
+---
+
+**📖 Sources Used:**
+1. `active_story.md` - Relevance: 100%
+
+*Found via semantic search in /app/project/docs*
+
+---
+
+## 2026-02-10 04:14:34
+
+**Query:** What is my name?
+
+Based on the library documents, your name is **Peter**.
+
+From the conversation log in `domain_log.md`, you explicitly stated this information:
+
+**2026-02-10 04:14:23**
+> **Query:** My name is Peter and I live in Seattle.
+
+The system confirmed this information was incorporated into the narrative, specifically in **Chapter 5: The Sleeper in the Stone**, where your character Peter experiences a memory of his Seattle life while standing before an ancient Standing Stone in the English countryside.
+
+This detail has become a central plot point in the story, revealing that Peter is an "anchor" for a seam between worlds (the Green Line), with part of him lost and adrift in that Seattle reality.
+
+---
+
+**📖 Sources Used:**
+1. `domain_log.md` - Relevance: 100%
+2. `README.md` - Relevance: 85%
+
+*Found via semantic search in /app/project/docs*
+
+---
+

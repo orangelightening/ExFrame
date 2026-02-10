@@ -1,0 +1,65 @@
+{
+  "_comment": "WiseMan configuration templates for different execution modes",
+
+  "templates": {
+    "poet": {
+      "_description": "Pure generation mode - no external sources, creative output",
+      "trace": true,
+      "verbose": false,
+      "show_thinking": false,
+      "use_void": true,
+      "use_library": false,
+      "use_internet": false,
+      "temperature": 0.9,
+      "max_tokens": 2000
+    },
+
+    "librarian": {
+      "_description": "Document search mode - searches local library, shows reasoning",
+      "trace": true,
+      "verbose": false,
+      "show_thinking": true,
+      "use_void": false,
+      "use_library": true,
+      "use_internet": false,
+      "temperature": 0.5,
+      "max_tokens": 2000
+    },
+
+    "researcher": {
+      "_description": "Web search mode - searches internet, shows reasoning, verbose logging",
+      "trace": true,
+      "verbose": true,
+      "show_thinking": true,
+      "use_void": false,
+      "use_library": false,
+      "use_internet": true,
+      "temperature": 0.5,
+      "max_tokens": 3000
+    },
+
+    "hybrid": {
+      "_description": "Hybrid mode - try library first, fall back to internet",
+      "trace": true,
+      "verbose": false,
+      "show_thinking": true,
+      "use_void": false,
+      "use_library": true,
+      "use_internet": true,
+      "temperature": 0.6,
+      "max_tokens": 2500
+    },
+
+    "debug": {
+      "_description": "Debug mode - full verbosity, all sources enabled",
+      "trace": true,
+      "verbose": true,
+      "show_thinking": true,
+      "use_void": true,
+      "use_library": true,
+      "use_internet": true,
+      "temperature": 0.7,
+      "max_tokens": 2000
+    }
+  }
+}

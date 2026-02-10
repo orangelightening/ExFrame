@@ -6124,5 +6124,31 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-02-08T21:00:25.132225"
+  },
+  {
+    "id": "cooking_e690e289",
+    "pattern_id": "cooking_e690e289",
+    "name": "Can you eat haggis",
+    "domain": "cooking",
+    "problem": "Can you eat haggis",
+    "solution": "Yes, you can absolutely eat haggis. It is a traditional Scottish dish and is considered a national dish of Scotland.\n\nHere are some key points about haggis:\n\n*   **What it is:** Haggis is a savory pudding. Its traditional recipe consists of a sheep's **heart, liver, and lungs** (collectively called \"offal\" or \"pluck\"), which are minced and mixed with **onions, oatmeal, suet (beef fat), spices (like pepper, coriander, and nutmeg), and salt**. This mixture is then packed into a **sheep's stomach** and boiled for several hours.\n*   **Modern Variations:** Today, it's more common to find haggis cooked in a synthetic sausage casing or other artificial casings rather than a stomach. You can also buy **vegetarian haggis**, which substitutes the offal and suet with pulses, nuts, and vegetables.\n*   **How it's Eaten:** It is traditionally served as the centerpiece of a **Burns Supper** on January 25th, celebrating the poet Robert Burns. It is typically served with **\"neeps and tatties\"** (mashed swedes/rutabagas and mashed potatoes), and often accompanied by a dram of Scotch whisky.\n*   **Taste and Texture:** It has a rich, savory, peppery, and slightly nutty flavor from the oatmeal. The texture is crumbly and dense.\n*   **Important Note:** The import of traditional haggis containing sheep lungs into the **United States has been banned since 1971** due to USDA regulations on livestock lungs. However, you can find American-made versions that omit the lungs to comply with regulations, as well as canned and vegetarian versions.\n\nSo, while it might sound unusual based on its ingredients, haggis is a celebrated and edible dish enjoyed by many.",
+    "description": "AI-generated from query: Can you eat haggis",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Can you eat haggis",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-09T02:03:09.110Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-09T02:03:09.427682",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-09T02:03:09.427682"
   }
 ]

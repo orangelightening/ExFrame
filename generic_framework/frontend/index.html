@@ -1409,13 +1409,13 @@
                             </div>
                         </div>
 
-                        <!-- Accumulator (Memory) -->
+                        <!-- Conversation Memory -->
                         <div x-show="domainForm.persona" class="p-4 rounded-lg bg-blue-900/10 border border-blue-500/30">
                             <div class="flex items-center gap-2 mb-4">
                                 <span class="text-blue-400">🧠</span>
                                 <h3 class="font-semibold text-blue-400">Conversation Memory</h3>
                             </div>
-                            <p class="text-xs text-gray-400 mb-4">Load previous conversations into AI context. The AI remembers everything discussed.</p>
+                            <p class="text-xs text-gray-400 mb-4">Load previous conversations from domain_log.md into AI context before each query. The AI remembers what was discussed.</p>
 
                             <div class="space-y-4">
                                 <div class="flex items-center gap-3">
@@ -1428,12 +1428,12 @@
                                         <label class="block text-xs text-gray-400 mb-2">Mode</label>
                                         <select x-model="domainForm.memory_mode"
                                                 class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none">
-                                            <option value="all">All - Remember everything (learning, research, projects)</option>
-                                            <option value="triggers">Triggers - Only on specific phrases (novels, stories)</option>
+                                            <option value="all">All - Load conversation history for every query</option>
+                                            <option value="triggers">Triggers - Only load on specific phrases</option>
                                         </select>
                                         <p class="text-xs text-gray-500 mt-1">
-                                            <span x-show="domainForm.memory_mode === 'all'">Every query/response is logged to memory. Perfect for learning and research.</span>
-                                            <span x-show="domainForm.memory_mode === 'triggers'">Only logs to memory when trigger phrases detected. Good for sequential stories.</span>
+                                            <span x-show="domainForm.memory_mode === 'all'">AI has full context of all previous conversations. Perfect for learning and projects.</span>
+                                            <span x-show="domainForm.memory_mode === 'triggers'">Only loads conversation history when trigger phrases detected. Good for focused sessions.</span>
                                         </p>
                                     </div>
 
@@ -1442,23 +1442,15 @@
                                         <input type="text" x-model="domainForm.memory_triggers"
                                                class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none"
                                                placeholder="chapter, continue, next, part">
-                                        <p class="text-xs text-gray-500 mt-1">Comma-separated phrases that trigger memory (e.g., "chapter, continue, next")</p>
-                                    </div>
-
-                                    <div class="mb-4">
-                                        <label class="block text-xs text-gray-400 mb-2">Memory File</label>
-                                        <input type="text" x-model="domainForm.memory_file"
-                                               class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none"
-                                               placeholder="learning_log.md or stories/active_story.md">
-                                        <p class="text-xs text-gray-500 mt-1">Separate file for conversation memory (e.g., "learning_log.md")</p>
+                                        <p class="text-xs text-gray-500 mt-1">Comma-separated phrases that trigger memory loading (e.g., "chapter, continue, next")</p>
                                     </div>
 
                                     <div>
                                         <label class="block text-xs text-gray-400 mb-2">Max Context Length</label>
                                         <input type="number" x-model.number="domainForm.memory_max_chars" min="1000" max="100000" step="1000"
                                                class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:border-blue-500 outline-none"
-                                               placeholder="15000">
-                                        <p class="text-xs text-gray-500 mt-1">Maximum characters to load from memory (higher = more context, but slower)</p>
+                                               placeholder="5000">
+                                        <p class="text-xs text-gray-500 mt-1">Maximum characters to load from domain_log.md (default: 5000, higher = more context but may exceed token limits)</p>
                                     </div>
                                 </div>
                             </div>
@@ -3756,12 +3748,11 @@
                         // Logging (Universal)
                         logging_enabled: true,
                         logging_file: 'domain_log.md',
-                        // Memory (Accumulator)
+                        // Conversation Memory (load from domain_log.md)
                         memory_enabled: false,
                         memory_mode: 'all',
                         memory_triggers: 'chapter, continue, next, part',
-                        memory_file: 'learning_log.md',
-                        memory_max_chars: 15000
+                        memory_max_chars: 5000
                     };
                     this.newCategory = '';
                     this.newTag = '';
@@ -3861,12 +3852,11 @@
                             // Logging (Universal)
                             logging_enabled: data.logging?.enabled !== undefined ? data.logging.enabled : true,
                             logging_file: data.logging?.output_file || 'domain_log.md',
-                            // Memory (Accumulator)
-                            memory_enabled: data.accumulator?.enabled || false,
-                            memory_mode: data.accumulator?.mode || 'all',
-                            memory_triggers: data.accumulator?.trigger_phrases ? data.accumulator.trigger_phrases.join(', ') : 'chapter, continue, next, part',
-                            memory_file: data.accumulator?.output_file || 'learning_log.md',
-                            memory_max_chars: data.accumulator?.max_context_chars || 15000
+                            // Conversation Memory (load from domain_log.md)
+                            memory_enabled: data.conversation_memory?.enabled || false,
+                            memory_mode: data.conversation_memory?.mode || 'all',
+                            memory_triggers: data.conversation_memory?.trigger_phrases ? data.conversation_memory.trigger_phrases.join(', ') : 'chapter, continue, next, part',
+                            memory_max_chars: data.conversation_memory?.max_context_chars || 5000
                         };
                         this.newCategory = '';
                         this.newTag = '';
@@ -3957,15 +3947,12 @@
                             // Logging (Universal)
                             logging_enabled: this.domainForm.logging_enabled,
                             logging_output_file: this.domainForm.logging_file || 'domain_log.md',
-                            // Memory (Accumulator)
-                            accumulator: this.domainForm.memory_enabled ? {
+                            // Conversation Memory (load from domain_log.md)
+                            conversation_memory: this.domainForm.memory_enabled ? {
                                 enabled: true,
                                 mode: this.domainForm.memory_mode || 'all',
-                                output_file: this.domainForm.memory_file || 'learning_log.md',
                                 trigger_phrases: this.domainForm.memory_triggers ? this.domainForm.memory_triggers.split(',').map(t => t.trim()) : [],
-                                max_context_chars: parseInt(this.domainForm.memory_max_chars) || 15000,
-                                include_query_history: true,
-                                format: 'markdown'
+                                max_context_chars: parseInt(this.domainForm.memory_max_chars) || 5000
                             } : null
                         };
 

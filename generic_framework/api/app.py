@@ -119,8 +119,8 @@ class DomainCreate(BaseModel):
     # Universal Logging (all domains)
     logging_enabled: Optional[bool] = True
     logging_output_file: Optional[str] = "domain_log.md"
-    # Accumulator (memory/context loading)
-    accumulator: Optional[Dict[str, Any]] = None
+    # Conversation Memory (load domain_log.md as context)
+    conversation_memory: Optional[Dict[str, Any]] = None
 
 
 class DomainUpdate(BaseModel):
@@ -160,8 +160,8 @@ class DomainUpdate(BaseModel):
     # Universal Logging (all domains)
     logging_enabled: Optional[bool] = None
     logging_output_file: Optional[str] = None
-    # Accumulator (memory/context loading)
-    accumulator: Optional[Dict[str, Any]] = None
+    # Conversation Memory (load domain_log.md as context)
+    conversation_memory: Optional[Dict[str, Any]] = None
 
 
 class QueryResponse(BaseModel):
@@ -1907,9 +1907,9 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
                 "format": "markdown"
             }
 
-        # Add accumulator config (memory/context loading) if provided
-        if request.accumulator:
-            domain_config["accumulator"] = request.accumulator
+        # Add conversation memory config if provided
+        if request.conversation_memory:
+            domain_config["conversation_memory"] = request.conversation_memory
 
     except Exception as e:
         print(f"Warning: Domain factory generation failed, using defaults: {e}")
@@ -1939,9 +1939,9 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
             "format": "markdown"
         }
 
-        # Add accumulator config to fallback if provided
-        if request.accumulator:
-            domain_config["accumulator"] = request.accumulator
+        # Add conversation memory config to fallback if provided
+        if request.conversation_memory:
+            domain_config["conversation_memory"] = request.conversation_memory
 
     # Create domain.json file in the universe structure
     try:
@@ -1975,23 +1975,6 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
                 f.write("*This log records all queries and responses for this domain.*\n\n")
 
             print(f"Created domain log file: {log_file_path}")
-
-        # Create accumulator file if enabled
-        accumulator_config = domain_config.get("accumulator", {})
-        if accumulator_config.get("enabled", False):
-            accumulator_file_path = domain_file.parent / accumulator_config.get("output_file", "accumulator.md")
-            accumulator_file_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Initialize accumulator file with header
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            with open(accumulator_file_path, 'w', encoding='utf-8') as f:
-                f.write(f"# Accumulator: {request.domain_name}\n")
-                f.write(f"Started: {timestamp}\n")
-                f.write(f"Mode: {accumulator_config.get('mode', 'all')}\n")
-                f.write("\n---\n\n")
-                f.write("*This accumulator stores conversation context for memory/learning.*\n\n")
-
-            print(f"Created accumulator file: {accumulator_file_path}")
 
         print(f"Created domain files: {domain_file}")
     except Exception as e:
@@ -2213,9 +2196,9 @@ async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]
 
             domain_config["logging"] = logging_config
 
-        # Accumulator config (memory/context loading)
-        if request.accumulator is not None:
-            domain_config["accumulator"] = request.accumulator
+        # Conversation Memory config (load domain_log.md as context)
+        if request.conversation_memory is not None:
+            domain_config["conversation_memory"] = request.conversation_memory
 
     domain_config["updated_at"] = datetime.utcnow().isoformat()
 

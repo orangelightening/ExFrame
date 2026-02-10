@@ -1,0 +1,54 @@
+[
+  {
+    "id": "funny_8ae88a0f",
+    "pattern_id": "funny_8ae88a0f",
+    "name": "Tell a joke about a kangaroo and an australian go into a bar..,.",
+    "domain": "funny",
+    "problem": "Tell a joke about a kangaroo and an australian go into a bar..,.",
+    "solution": "A kangaroo and an Australian walk into a bar.\n\nThe kangaroo hops up to the bartender and says, \"I'll have a beer, mate.\"\n\nThe bartender, unfazed, serves the kangaroo and says, \"You know, we don't get many kangaroos in here.\"\n\nThe kangaroo takes a sip and replies, \"At these prices, I'm not surprised. That's why I brought the Australian\u2014he's paying.\"",
+    "description": "AI-generated from query: Tell a joke about a kangaroo and an australian go into a bar..,.",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "Tell a joke about a kangaroo and an australian go into a bar..,.",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-09T06:45:16.623Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-09T06:45:16.631170",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-09T06:45:16.631170"
+  },
+  {
+    "id": "funny_cb52b159",
+    "pattern_id": "funny_cb52b159",
+    "name": "Tell a joke about my wife in th form of a riddle\n",
+    "domain": "funny",
+    "problem": "tell a joke about my wife in th form of a riddle\n",
+    "solution": "Of course. Here's a light-hearted riddle-joke:\n\nI am something your wife can hold,\nWithout a hand, and never sold.\nI\u2019m in her look, I\u2019m in her tone,\nBut if I\u2019m lost, she\u2019ll let it be known.\nWhat am I?\n\n**Answer:** A grudge.",
+    "description": "AI-generated from query: tell a joke about my wife in th form of a riddle\n",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "tell a joke about my wife in th form of a riddle\n",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-09T06:47:33.135Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-09T06:47:33.142422",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-09T06:47:33.142422"
+  }
+]

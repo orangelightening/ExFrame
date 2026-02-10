@@ -1,14 +1,14 @@
 {
   "main": {
-    "id": "53a514c783f05a05",
+    "id": "a23a2f3ac880eec7",
     "type": "split",
     "children": [
       {
-        "id": "a9b0537397bd11ca",
+        "id": "509a7f57c342cbcc",
         "type": "tabs",
         "children": [
           {
-            "id": "e7c93198faf3d8a6",
+            "id": "f5f5336008d771fc",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -20,51 +20,22 @@
               "icon": "lucide-file",
               "title": "README"
             }
-          },
-          {
-            "id": "a9fe5d38472ee925",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "statemachine-design.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "statemachine-design"
-            }
-          },
-          {
-            "id": "0766982d5ac91089",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Creation myth exframe style.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Creation myth exframe style"
-            }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
   },
   "left": {
-    "id": "79ac2a81b9c8fab6",
+    "id": "26edd5feeaefcdaf",
     "type": "split",
     "children": [
       {
-        "id": "a44858b577fc7600",
+        "id": "4beb725545411a19",
         "type": "tabs",
         "children": [
           {
-            "id": "4e09c859bbd49864",
+            "id": "e56c8afa64d84fd7",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -77,7 +48,7 @@
             }
           },
           {
-            "id": "7eb23b25b0161f15",
+            "id": "c6b89f0e6e23a8b7",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -94,7 +65,7 @@
             }
           },
           {
-            "id": "14e6526ae31a55c0",
+            "id": "5e9dd4bcdffd6ac8",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -110,20 +81,20 @@
     "width": 300
   },
   "right": {
-    "id": "c1b1e5cb484c5d09",
+    "id": "37b0552ae62d79fd",
     "type": "split",
     "children": [
       {
-        "id": "eb58f25a12d86cec",
+        "id": "b5d8b9aa4b6afd75",
         "type": "tabs",
         "children": [
           {
-            "id": "0c3a335fd068ecc3",
+            "id": "ea1ae61ed94be677",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "mimicry-proposed.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -133,25 +104,25 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for mimicry-proposed"
+              "title": "Backlinks for README"
             }
           },
           {
-            "id": "fb98515a6bce3154",
+            "id": "7a8c9ceb001475dd",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "mimicry-proposed.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from mimicry-proposed"
+              "title": "Outgoing links from README"
             }
           },
           {
-            "id": "6332142707710f87",
+            "id": "8a4a2c0d65f21f2e",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -166,7 +137,7 @@
             }
           },
           {
-            "id": "76eaf7c30b6d21e0",
+            "id": "edca00c08bc4e651",
             "type": "leaf",
             "state": {
               "type": "all-properties",
@@ -180,18 +151,18 @@
             }
           },
           {
-            "id": "e049c79d5423406b",
+            "id": "2b2d88afae922ffe",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "mimicry-proposed.md",
+                "file": "README.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of mimicry-proposed"
+              "title": "Outline of README"
             }
           }
         ]
@@ -212,45 +183,34 @@
       "bases:Create new base": false
     }
   },
-  "active": "0766982d5ac91089",
+  "active": "f5f5336008d771fc",
   "lastOpenFiles": [
-    "docs/PLUGIN_REFACTOR_DESIGN.md",
-    "dream_loom.md",
-    "Creation myth exframe style.md",
-    "statemachine-design.md",
-    "tests/run_statemachine_tests.sh",
-    "tests/test_statemachine.py",
-    "logviewer-design.md",
-    "generic_framework/state/__pycache__/state_machine.cpython-313.pyc",
-    "generic_framework/state/__pycache__",
-    "generic_framework/state/__init__.py",
-    "generic_framework/state/state_machine.py",
-    "generic_framework/state",
-    "README.md",
-    "state-log-ideas.md",
-    "docs/exframe_roles.md",
-    "roles.md",
-    "exframe_roles.md",
-    "curate_plan.md",
-    "DOCS_CLEANUP_PLAN.md",
-    "sedPzORSs",
-    "sedq2si4q",
-    "docs/reference/domain-config.md",
-    "docs/guides/domain-types.md",
-    "docs/architecture/overview.md",
-    "docs/README.md",
-    "docs/INDEX.md",
-    "docs/reference",
-    "PLAN.md",
-    "AI-to-AI Communication Protocol for Claude Code.md",
-    "which-way.md",
-    "needed.md",
-    "DOMAIN_TYPES_SIMPLIFIED.md",
-    "arch_domain_plan.md",
-    "DOMAIN_ARCHETYPES.md",
-    "DEPENDENCY_LICENSES.md",
-    "advert.md",
-    "frontend/node_modules/date-fns/docs/logotype.svg",
-    "frontend/node_modules/date-fns/docs/logo.svg"
+    "generic_framework/core/persona.py.tmp.1478318.1770696375445",
+    "generic_framework/core/query_processor.py.tmp.1478318.1770695936131",
+    "test_query1.json",
+    "universes/MINE/domains/sidekick/doc_embeddings.json",
+    "universes/MINE/domains/diy/domain_log.md",
+    "universes/MINE/domains/sidekick/embeddings.json",
+    "universes/MINE/domains/sidekick/learning_log.md",
+    "universes/MINE/domains/sidekick/patterns.json",
+    "universes/MINE/domains/sidekick/domain_log.md",
+    "universes/MINE/domains/sidekick/domain.json",
+    "universes/MINE/domains/sidekick",
+    "Notes from the Originator.md",
+    "titled.md",
+    "easy-recipe.md",
+    "entice.md",
+    "QUICKSTART.md",
+    "university.md",
+    "aged.md",
+    "docs/ACCUMULATOR_DESIGN.md",
+    "docs/UNIVERSAL_LOGGING_DESIGN.md",
+    "universes/MINE/domains/test_logging/test_memory.md",
+    "universes/MINE/domains/test_logging/test_log.md",
+    "universes/MINE/domains/test_logging/patterns.json",
+    "universes/MINE/domains/test_logging/domain.json",
+    "universes/MINE/domains/test_logging",
+    "universes/MINE/domains/prose/stories/active_story.md",
+    "SURVEYOR_STATUS.md"
   ]
 }

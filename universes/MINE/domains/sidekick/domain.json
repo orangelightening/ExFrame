@@ -98,18 +98,15 @@
     "auto_generate_embeddings": true,
     "cache_embeddings": true
   },
-  "accumulator": {
+  "conversation_memory": {
     "enabled": true,
     "mode": "all",
-    "output_file": "learning_log.md",
+    "max_context_chars": 5000,
     "trigger_phrases": [
       "chapter",
       "continue",
       "next",
       "part"
-    ],
-    "max_context_chars": 5000,
-    "include_query_history": true,
-    "format": "markdown"
+    ]
   }
 }
