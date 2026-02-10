@@ -2007,8 +2007,18 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
             # Get the MINE universe (default)
             current_universe = await universe_manager.get_universe("MINE")
             if current_universe:
+                # Import DomainUniverseConfig
+                from core.universe import DomainUniverseConfig
+
+                # Create minimal config for domain loading
+                domain_universe_config = DomainUniverseConfig(
+                    domain_id=request.domain_id,
+                    enabled=True,
+                    priority=0
+                )
+
                 # Try to load this specific domain
-                domain = await current_universe._load_domain(request.domain_id)
+                domain = await current_universe._load_domain(request.domain_id, domain_universe_config)
                 if domain:
                     engines[request.domain_id] = current_universe.engines[request.domain_id]
                     logger.info(f"✓ Auto-loaded domain: {request.domain_id}")
