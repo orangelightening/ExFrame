@@ -355,3 +355,162 @@ Currently, the weather in Nanaimo is **4°C** with **partly cloudy** skies, thou
 
 ---
 
+## 2026-02-10 18:34:36
+
+[WEB_SEARCH - 2026-02-10 18:34:36]
+
+Query: // Chicken shawarma recipe
+
+
+
+
+
+Based on the search results from top recipe sites, here is a comprehensive recipe for **Chicken Shawarma** that combines the best elements for authentic flavor and ease of cooking at home.
+
+### **Chicken Shawarma**
+
+**Prep time:** 15 minutes  
+**Cook time:** 20 minutes  
+**Marinating time:** 1 hour (or overnight for best results)  
+**Servings:** 4
+
+---
+
+### **Ingredients**
+
+**The Chicken:**
+*   **1.5 kg (3 lbs)** Chicken thighs (boneless, skinless). *Thighs are preferred for juiciness, but breast works too.*
+*   **2 tbsp** Olive oil
+
+**The Marinade:**
+*   **4 cloves** Garlic, minced
+*   **1 tbsp** Lemon juice (fresh)
+*   **1 tbsp** Olive oil
+*   **1 tbsp** Yogurt (plain, Greek or regular) - *helps tenderize and bind spices*
+*   **1.5 tsp** Cumin
+*   **1 tsp** Coriander powder
+*   **1 tsp** Paprika (smoked paprika adds a nice "grilled" flavor)
+*   **½ tsp** Turmeric
+*   **½ tsp** Cinnamon
+*   **¼ tsp** Cardamom (ground) or **¼ tsp** Allspice
+*   **½ tsp** Cayenne pepper (adjust to desired spice level)
+*   **1.5 tsp** Salt
+*   **½ tsp** Black pepper
+
+**Optional Garlic Sauce:**
+*   **½ cup** Greek yogurt
+*   **1-2 cloves** Garlic, minced
+*   **1 tbsp** Lemon juice
+*   **Salt to taste**
+
+---
+
+### **Instructions**
+
+#### **Step 1: Make the Marinade**
+In a small bowl, whisk together the minced garlic, lemon juice, 1 tbsp olive oil, yogurt, and all the spices (cumin, coriander, paprika, turmeric, cinnamon, cardamom/cloves, cayenne, salt, and pepper).
+
+#### **Step 2: Marinate the Chicken**
+Place the chicken thighs in a large bowl or a zip-lock bag. Pour the marinade over the chicken, ensuring each piece is thoroughly coated. Massage the marinade into the meat.
+*   **Tip:** For the best flavor, let it marinate in the refrigerator for at least **1 hour**, but preferably **overnight**.
+
+#### **Step 3: Cook the Chicken**
+You can use a skillet, cast iron pan, or grill.
+
+*   **Stovetop (Skillet/Cast Iron):**
+    1.  Heat 1 tbsp olive oil in a large skillet over medium-high heat.
+    2.  Add the chicken in a single layer (do this in batches if necessary so you don't crowd the pan).
+    3.  Cook for about **4-5 minutes per side** until deep golden brown and cooked through (internal temp of 165°F/74°C).
+    4.  Remove and let rest for 5 minutes before slicing.
+
+*   **Oven Method (Sheet Pan):**
+    1.  Preheat oven to **425°F (220°C)**.
+    2.  Spread marinated chicken on a baking sheet lined with foil or parchment paper.
+    3.  Bake for **20-25 minutes**, or until cooked through and edges are crispy.
+    4.  Optional: Turn on the broiler for the last 2-3 minutes to char the edges.
+
+#### **Step 4: Slice**
+Once the chicken has rested, slice it into thin strips. To mimic the texture of street-style shawarma, you can throw the sliced chicken back into the hot pan for 1-2 minutes to crisp up the edges further.
+
+---
+
+### **Serving Suggestions**
+Serve your Chicken Shawarma in:
+*   **Wraps:** Warm pita bread or flatbread with garlic sauce, pickles, tomatoes, cucumbers, and thinly sliced red onion.
+*   **Bowls:** Over rice or salad greens with hummus and tzatziki.
+*   **Plates:** Alongside roasted vegetables and flatbread.
+
+### **Quick Garlic White Sauce**
+While the chicken cooks, mix **½ cup Greek yogurt**, **1-2 cloves minced garlic**, **1 tbsp lemon juice**, and a pinch of salt. Drizzle this over the chicken or wrap for an authentic finish.
+
+
+---
+
+## 2026-02-10 18:35:35
+
+[WEB_SEARCH - 2026-02-10 18:35:35]
+
+Query: // Chicken shawarma recipe citations please
+
+
+
+
+
+# Chicken Shawarma Recipe with Citations
+
+Based on my research, here's a comprehensive chicken shawarma recipe with citations from reputable food websites:
+
+## Chicken Shawarma Recipe
+
+### Ingredients:
+
+**Marinade:**
+- 2 lbs chicken thighs (boneless, skinless) [1][2][3]
+- 1/4 cup olive oil [1][2]
+- 1/4 cup lemon juice, fresh [1][2][3]
+- 6-8 garlic cloves, minced [1][2]
+- 2 teaspoons paprika [1][2]
+- 1 teaspoon cumin [1][2][3]
+- 1 teaspoon salt [1][2]
+- 1/2 teaspoon cardamom [1]
+- 1/2 teaspoon cinnamon [1][3]
+- 1/2 teaspoon crushed red pepper [1]
+- 1/4 teaspoon turmeric [5]
+- 1/4 teaspoon black pepper [2]
+
+**For Serving:**
+- Pita bread or flatbread [2]
+- Tahini sauce or garlic sauce [2][5]
+- Pickles [2]
+- Diced tomatoes and cucumbers [2]
+- Sumac-dusted onions [2]
+
+### Instructions:
+
+1. **Prepare the Marinade:**
+   - In a large bowl, whisk together the olive oil, lemon juice, minced garlic, and all spices [1][2][3]
+   - Add the chicken thighs to the bowl and toss to coat thoroughly [1]
+   - Marinate for at least 30 minutes (up to 24 hours) [1][2]
+
+2. **Cook the Chicken:**
+   - **Stovetop method:** Heat a large skillet over medium-high heat. Cook chicken for 6-7 minutes per side until cooked through [1]
+   - **Oven method:** Preheat oven to 425°F (220°C). Arrange marinated chicken on a baking sheet and bake for 25-30 minutes [3]
+   - **Grill method:** Grill over medium-high heat for 6-7 minutes per side [5]
+
+3. **Slice and Serve:**
+   - Remove chicken from heat and let rest for 5 minutes [2]
+   - Slice chicken into thin strips against the grain [2]
+   - Serve in pita bread with tahini sauce, pickles, and vegetables [2]
+
+### Sources:
+1. Feel Good Foodie - "Authentic Middle Eastern Chicken Shawarma Recipe" (https://feelgoodfoodie.net/recipe/chicken-shawarma/)
+2. Palestine In A Dish - "Authentic Chicken Shawarma Recipe" (https://palestineinadish.com/recipes/authentic-chicken-shawarma-recipe/)
+3. Hungry Paprikas - "20-Minute Authentic Arabic Chicken Shawarma" (https://www.hungrypaprikas.com/chicken-shawarma/)
+4. Amira's Pantry - "Chicken Shawarma Recipe" (https://amiraspantry.com/chicken-shawarma-recipe/)
+5. Recipes by Lena - "Authentic Chicken Shawarma with Creamy Garlic Sauce" (https://recipesbylena.com/recipes/chicken-shawarma-garlic-sauce)
+
+This recipe combines the most common elements from these authentic sources to provide a well-rounded chicken shawarma recipe with proper citations for each component.
+
+
+---
+

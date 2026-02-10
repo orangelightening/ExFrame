@@ -405,7 +405,15 @@ class Persona:
                             }
                         }
                     }]
-                    payload["tool_choice"] = "auto"  # Let GLM decide when to use tools
+
+                    # For researcher persona, FORCE tool use (GLM must search)
+                    # For casual queries with //, let GLM decide
+                    if self.data_source == "internet":
+                        payload["tool_choice"] = "required"  # MUST use web search
+                        self.logger.info("Researcher persona - FORCING web search (tool_choice=required)")
+                    else:
+                        payload["tool_choice"] = "auto"  # GLM can decide
+                        self.logger.info("Casual query - tool_choice=auto")
                 else:
                     self.logger.info(f"GLM model (OpenAI format) - simple query, no web search needed")
 
