@@ -888,6 +888,16 @@ Question: {actual_query}"""
                     {"role": "user", "content": reasoning_query}
                 ]
             }
+
+            # Enable GLM native web_search tool for direct prompts
+            if model_name.startswith("glm-"):
+                payload["tools"] = [{
+                    "type": "web_search",
+                    "web_search": {
+                        "search_query": actual_query
+                    }
+                }]
+                logger.info(f"[DirectPrompt] Enabled GLM native web_search for: {actual_query}")
         else:
             # OpenAI API format
             system_message = "You are a helpful assistant."
