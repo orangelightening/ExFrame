@@ -107,16 +107,40 @@ class Persona:
         prompt = self._build_prompt(query, content, show_thinking)
 
         # Call LLM (async)
-        answer = await self._call_llm(prompt, context)
+        llm_result = await self._call_llm(prompt, context)
 
-        return {
-            "answer": answer,
-            "source": source,
-            "persona": self.name,
-            "query": query,
-            "show_thinking": show_thinking,
-            "pattern_count": len(override_patterns) if override_patterns else 0
-        }
+        # Handle both string answers and dict results (with web search sources)
+        if isinstance(llm_result, dict):
+            # Web search result with sources
+            answer = llm_result.get("content", "")
+            sources = llm_result.get("sources", [])
+            web_search_used = llm_result.get("web_search_used", False)
+
+            response = {
+                "answer": answer,
+                "source": source,
+                "persona": self.name,
+                "query": query,
+                "show_thinking": show_thinking,
+                "pattern_count": len(override_patterns) if override_patterns else 0
+            }
+
+            # Add web search metadata if available
+            if web_search_used:
+                response["web_search_used"] = True
+                response["sources"] = sources
+
+            return response
+        else:
+            # Regular string answer
+            return {
+                "answer": llm_result,
+                "source": source,
+                "persona": self.name,
+                "query": query,
+                "show_thinking": show_thinking,
+                "pattern_count": len(override_patterns) if override_patterns else 0
+            }
 
     def _get_data_source_content(self, query: str, context: Optional[Dict] = None) -> Optional[str]:
         """
@@ -578,7 +602,24 @@ class Persona:
                                 msg2 = data2["choices"][0]["message"]
                                 if "tool_calls" in msg2 and msg2["tool_calls"]:
                                     self.logger.warning(f"Second response still has tool_calls - may need another round")
-                                return msg2["content"]
+
+                                # Extract sources from search results for verification
+                                sources = []
+                                if search_results:
+                                    for result in search_results[:fetch_limit]:
+                                        url = result.metadata.get('url', '')
+                                        title = result.metadata.get('title', '')
+                                        if url:
+                                            sources.append({
+                                                "title": title,
+                                                "url": url
+                                            })
+
+                                return {
+                                    "content": msg2["content"],
+                                    "sources": sources,
+                                    "web_search_used": True
+                                }
                             else:
                                 self.logger.error(f"Second response format unexpected: {list(data2.keys())}")
                                 return message.get("content", "[Tool call executed but response format unknown]")

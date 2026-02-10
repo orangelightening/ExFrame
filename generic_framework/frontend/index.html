@@ -285,6 +285,23 @@
 
                         <div class="prose prose-invert max-w-none response-content text-gray-200" x-html="renderedResponse"></div>
 
+                        <!-- Web Search Sources (shows when web search was used) -->
+                        <div x-show="response && webSearchUsed && sources.length > 0" x-transition class="mt-4 pt-4 border-t border-gray-700">
+                            <div class="text-sm">
+                                <p class="text-blue-400 font-semibold mb-2">📚 Sources (verify at these URLs):</p>
+                                <ul class="space-y-1">
+                                    <template x-for="source in sources">
+                                        <li class="flex items-start gap-2">
+                                            <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2a2 2 0 012 2v-6.5a2.5 2.5 0 015-5.5V3.055"></path>
+                                            </svg>
+                                            <a :href="source.url" target="_blank" class="text-blue-300 hover:text-blue-200 underline break-all" x-text="source.title + ' - ' + source.url"></a>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+
                         <!-- Save as Pattern Button (always available after any response) -->
                         <div x-show="response && !loading" x-transition class="mt-6 pt-4 border-t border-gray-700">
                             <div class="flex items-center justify-between">
@@ -2476,6 +2493,10 @@
                 historicalTraces: [],
                 currentView: 'assistant',
 
+                // Web search sources verification
+                webSearchUsed: false,
+                sources: [],
+
                 // Domain log management modal
                 showLogModal: false,
                 logModalDomain: '',
@@ -3332,6 +3353,10 @@
                         this.ai_generated = data.ai_generated || false;
                         this.direct_prompt = data.direct_prompt || false;
                         this.canExtendWithAI = false;  // Reset for normal responses
+
+                        // Extract web search sources if available
+                        this.webSearchUsed = data.web_search_used || false;
+                        this.sources = data.sources || [];
 
                         // Check if web search extension is available
                         if (data.can_extend_with_web_search) {
