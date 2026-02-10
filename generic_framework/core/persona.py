@@ -386,15 +386,6 @@ class Persona:
                 response.raise_for_status()
                 data = response.json()
 
-                # Log the full response for debugging web search
-                if self.trace or model.startswith("glm-"):
-                    self.logger.info(f"GLM response keys: {list(data.keys())}")
-                    if "choices" in data:
-                        msg = data["choices"][0].get("message", {})
-                        self.logger.info(f"Message keys: {list(msg.keys())}")
-                        if "tool_calls" in msg:
-                            self.logger.info(f"Has tool_calls: {len(msg['tool_calls'])}")
-
                 # Check for tool calls (GLM web_search)
                 if "content" in data and isinstance(data["content"], list):
                     for block in data["content"]:
@@ -446,8 +437,6 @@ class Persona:
                         # The search_result parameter tells GLM to include actual search results
                         if function_name == "web_search":
                             self.logger.info("Processing web_search tool call - sending confirmation")
-                            self.logger.info(f"Tool call ID: {tool_call['id']}")
-                            self.logger.info(f"Function args: {function_args}")
 
                             # Build the multi-turn request
                             messages_with_tool = payload["messages"].copy()
@@ -471,7 +460,6 @@ class Persona:
                                 "tool_call_id": tool_call["id"],
                                 "content": search_query  # The search query GLM should use
                             }
-                            self.logger.info(f"Tool response: {tool_response}")
                             messages_with_tool.append(tool_response)
 
                             # Make second request to get actual search results
@@ -487,14 +475,10 @@ class Persona:
                             response2.raise_for_status()
                             data2 = response2.json()
 
-                            # Log the second response for debugging
-                            self.logger.info(f"Second response received - keys: {list(data2.keys())}")
                             if "choices" in data2:
                                 msg2 = data2["choices"][0]["message"]
-                                self.logger.info(f"Second message keys: {list(msg2.keys())}")
-                                self.logger.info(f"Second response content preview: {msg2.get('content', 'NO CONTENT')[:200]}")
                                 if "tool_calls" in msg2 and msg2["tool_calls"]:
-                                    self.logger.warning(f"Second response STILL has tool_calls: {len(msg2['tool_calls'])}")
+                                    self.logger.warning(f"Second response still has tool_calls - may need another round")
                                 return msg2["content"]
                             else:
                                 self.logger.error(f"Second response format unexpected: {list(data2.keys())}")
