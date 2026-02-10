@@ -317,32 +317,38 @@ class Persona:
                 ]
             }
 
-            # Enable GLM web search for internet queries or // prefix
-            if model.startswith("glm-") and (self.data_source == "internet" or "//" in prompt):
-                self.logger.info(f"GLM model detected - enabling web_search tool")
-                # Extract query for search
-                search_query = prompt
-                if "Query:" in prompt:
-                    search_query = prompt.split("Query:")[-1].strip()
+            # Enable GLM web search for // prefix (not simple greetings)
+            if model.startswith("glm-") and "//" in prompt:
+                # Only enable tools for queries that actually need web search
+                # Simple greetings like "// hello" don't need tools
+                query_lower = prompt.lower()
+                needs_web_search = any(word in query_lower for word in [
+                    "weather", "news", "current", "latest", "price", "stock",
+                    "temperature", "forecast", "today", "now", "recent"
+                ])
 
-                payload["tools"] = [{
-                    "type": "function",
-                    "name": "web_search",
-                    "function": {
+                if needs_web_search:
+                    self.logger.info(f"GLM model - enabling web_search for query needing current info")
+                    payload["tools"] = [{
+                        "type": "function",
                         "name": "web_search",
-                        "description": "Search the web for current information",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "query": {
-                                    "type": "string",
-                                    "description": "Search query"
-                                }
-                            },
-                            "required": ["query"]
+                        "function": {
+                            "name": "web_search",
+                            "description": "Search the web for current information",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {
+                                        "type": "string",
+                                        "description": "Search query"
+                                    }
+                                },
+                                "required": ["query"]
+                            }
                         }
-                    }
-                }]
+                    }]
+                else:
+                    self.logger.info(f"GLM model - simple query, no tools needed")
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
@@ -363,7 +369,7 @@ class Persona:
             endpoint = f"{base_url.rstrip('/')}/chat/completions"
 
         # Call LLM API
-        timeout = httpx.Timeout(timeout=120.0, connect=30.0, pool=30.0)
+        timeout = httpx.Timeout(timeout=180.0, connect=60.0, pool=60.0)  # Increased timeout
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 response = await client.post(
