@@ -433,10 +433,52 @@ class Persona:
 
                         self.logger.info(f"Tool call: {function_name}({function_args})")
 
-                        # For web_search, we need to send back a tool response message
-                        # The search_result parameter tells GLM to include actual search results
+                        # For web_search, we need to execute the search ourselves
+                        # Z.AI coding plan doesn't include server-side search execution
                         if function_name == "web_search":
-                            self.logger.info("Processing web_search tool call - sending confirmation")
+                            self.logger.info("Processing web_search tool call - executing DuckDuckGo search")
+
+                            # Parse the function args as JSON to get the query
+                            import json
+                            try:
+                                args_dict = json.loads(function_args)
+                                search_query = args_dict.get("query", function_args)
+                            except:
+                                search_query = function_args
+
+                            self.logger.info(f"Search query: {search_query}")
+
+                            # Execute actual web search using DuckDuckGo
+                            try:
+                                from .research.internet_strategy import InternetResearchStrategy
+
+                                # Create search strategy instance
+                                search_strategy = InternetResearchStrategy({})
+                                await search_strategy.initialize()
+
+                                # Execute search
+                                search_results = await search_strategy.search(search_query, limit=5)
+
+                                if search_results:
+                                    # Format results for GLM
+                                    formatted_results = []
+                                    for i, result in enumerate(search_results, 1):
+                                        title = result.metadata.get('title', 'Untitled')
+                                        url = result.metadata.get('url', '')
+                                        snippet = result.content
+                                        formatted_results.append(
+                                            f"[Result {i}] {title}\nURL: {url}\n{snippet}\n"
+                                        )
+
+                                    search_content = "\n".join(formatted_results)
+                                    self.logger.info(f"Found {len(search_results)} search results")
+                                else:
+                                    search_content = f"No search results found for query: {search_query}"
+                                    self.logger.warning("No search results returned")
+
+                            except Exception as e:
+                                self.logger.error(f"Web search execution failed: {e}", exc_info=True)
+                                search_content = f"Search failed: {str(e)}"
 
                             # Build the multi-turn request
                             messages_with_tool = payload["messages"].copy()
@@ -446,20 +488,13 @@ class Persona:
                                 "tool_calls": message["tool_calls"]
                             })
 
-                            # Send back tool response (for web_search, GLM executes it server-side)
-                            # Parse the function args as JSON to get the query
-                            import json
-                            try:
-                                args_dict = json.loads(function_args)
-                                search_query = args_dict.get("query", function_args)
-                            except:
-                                search_query = function_args
-
+                            # Send back search results in tool response
                             tool_response = {
                                 "role": "tool",
                                 "tool_call_id": tool_call["id"],
-                                "content": search_query  # The search query GLM should use
+                                "content": search_content  # Actual search results
                             }
+                            self.logger.info(f"Tool response length: {len(search_content)} chars")
                             messages_with_tool.append(tool_response)
 
                             # Make second request to get actual search results
