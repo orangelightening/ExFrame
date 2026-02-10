@@ -124,8 +124,15 @@ async def process_query(
 
     # If memory content exists, inject it into the prompt
     if memory_content:
+        # Add staleness warning if there are web search results
+        staleness_warning = ""
+        if "[WEB_SEARCH" in memory_content:
+            staleness_warning = "⚠️ IMPORTANT: Some previous responses include web search results with timestamps. "
+            staleness_warning += "If a web search result is more than a few hours old, consider it STALE and search again. "
+            staleness_warning += "Always prioritize current information over cached web search results.\n\n"
+
         # Add memory content as a prefix to the context
-        context["memory_prefix"] = f"Previous conversation:\n\n{memory_content}\n\n---\n\n"
+        context["memory_prefix"] = f"Previous conversation:\n\n{staleness_warning}{memory_content}\n\n---\n\n"
         logger.info("Injected conversation memory into prompt")
 
     if patterns and len(patterns) > 0:
@@ -148,40 +155,44 @@ async def process_query(
         response = await persona.respond(query, context=context)
 
     # ==================== LOGGING (Single Log File) ====================
-    # Universal Logging: Append query/response to domain_log.md
-    # EXCEPTION: Don't log web search results - they go stale and poison the cache
-    # Only log: patterns (saved knowledge), library results, void (generation)
+    # Universal Logging: Always append query/response to domain_log.md
+    # Web search results are logged WITH TIMESTAMP to indicate freshness
 
     logging_config = domain_config.get("logging", {"enabled": True})
     if logging_config.get("enabled", True):
-        # Check if this is web search (internet source) - don't log to prevent stale cache
+        log_file = logging_config.get("output_file", "domain_log.md")
+        format_type = logging_config.get("format", "markdown")
+
         response_source = response.get("source", "")
+        answer = response.get("answer", "")
 
+        # For web search, add timestamp to help AI know when data is stale
         if response_source == "internet":
-            # Web search results - don't log to prevent stale data in conversation memory
-            logger.info("Web search response - NOT logging to domain_log.md (prevents stale cache)")
-            response["logging_updated"] = False
-            response["log_skip_reason"] = "web_search"
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Add timestamp metadata to help identify stale results
+            log_entry = f"[WEB_SEARCH - {timestamp}]\n\nQuery: {query}\n\n{answer}\n"
+            logger.info(f"Web search response - logging with timestamp: {timestamp}")
         else:
-            # Log patterns, library results, and void (generation)
-            log_file = logging_config.get("output_file", "domain_log.md")
-            format_type = logging_config.get("format", "markdown")
+            # Patterns, library, generation - log normally
+            log_entry = f"Query: {query}\n\n{answer}\n"
 
-            success = _append_to_log(
-                domain_name,
-                log_file,
-                query,
-                response.get("answer", ""),
-                format_type
-            )
+        success = _append_to_log(
+            domain_name,
+            log_file,
+            query,
+            log_entry,  # Pass our formatted entry instead of just answer
+            format_type,
+            custom_entry=True  # Flag to indicate we're passing a pre-formatted entry
+        )
 
-            if success:
-                response["logging_updated"] = True
-                response["log_file"] = log_file
-                logger.info(f"Response appended to domain log: {log_file}")
-            else:
-                response["logging_updated"] = False
-                logger.warning("Failed to append response to domain log")
+        if success:
+            response["logging_updated"] = True
+            response["log_file"] = log_file
+            logger.info(f"Response appended to domain log: {log_file}")
+        else:
+            response["logging_updated"] = False
+            logger.warning("Failed to append response to domain log")
     # ==================== END LOGGING ====================
 
     # Add domain metadata
@@ -670,7 +681,7 @@ def _get_domain_path(domain_name: str) -> Optional[Path]:
 
 # ==================== LOGGING FUNCTIONS ====================
 
-def _append_to_log(domain_name: str, output_file: str, query: str, response: str, format_type: str = "markdown") -> bool:
+def _append_to_log(domain_name: str, output_file: str, query: str, response: str, format_type: str = "markdown", custom_entry: bool = False) -> bool:
     """
     Append new query/response to domain log file (universal logging).
 
@@ -678,8 +689,9 @@ def _append_to_log(domain_name: str, output_file: str, query: str, response: str
         domain_name: Domain name
         output_file: Relative path to log file
         query: User query
-        response: LLM response
+        response: LLM response OR pre-formatted log entry
         format_type: Format type (markdown, plain, etc.)
+        custom_entry: If True, response is a pre-formatted entry to write directly
 
     Returns:
         True if successful, False otherwise
@@ -708,10 +720,17 @@ def _append_to_log(domain_name: str, output_file: str, query: str, response: str
                 if not file_exists:
                     f.write(f"# Domain Log\nCreated: {timestamp}\n\n")
 
-                f.write(f"## {timestamp}\n\n")
-                f.write(f"**Query:** {query}\n\n")
-                f.write(f"{response}\n\n")
-                f.write("---\n\n")
+                if custom_entry:
+                    # Write pre-formatted entry directly (for web search with timestamp)
+                    f.write(f"## {timestamp}\n\n")
+                    f.write(f"{response}\n\n")
+                    f.write("---\n\n")
+                else:
+                    # Standard format: Query: ... Response: ...
+                    f.write(f"## {timestamp}\n\n")
+                    f.write(f"**Query:** {query}\n\n")
+                    f.write(f"{response}\n\n")
+                    f.write("---\n\n")
             else:
                 # Plain text format
                 if not file_exists:
@@ -778,6 +797,19 @@ def _load_conversation_memory(domain_name: str, max_chars: int = 5000) -> Option
     try:
         with open(log_path, 'r', encoding='utf-8') as f:
             content = f.read()
+
+        # Check for web search entries and warn about staleness
+        if "[WEB_SEARCH" in content:
+            from datetime import datetime
+            # Count web search entries
+            web_search_count = content.count("[WEB_SEARCH")
+            # Extract the most recent web search timestamp
+            import re
+            timestamps = re.findall(r'\[WEB_SEARCH - (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]', content)
+            if timestamps:
+                latest_search = timestamps[-1]  # Most recent
+                logger.warning(f"Conversation memory contains {web_search_count} web search results (latest: {latest_search})")
+                logger.warning("Web search results may be stale - AI will be informed of retrieval times")
 
         # Take last N chars (most recent conversations)
         if len(content) > max_chars:
