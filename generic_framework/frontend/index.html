@@ -285,12 +285,12 @@
 
                         <div class="prose prose-invert max-w-none response-content text-gray-200" x-html="renderedResponse"></div>
 
-                        <!-- Accept as New Pattern Button (shows after LLM results) -->
-                        <div x-show="llm_used" x-transition class="mt-6 pt-4 border-t border-gray-700">
+                        <!-- Save as Pattern Button (always available after any response) -->
+                        <div x-show="response && !loading" x-transition class="mt-6 pt-4 border-t border-gray-700">
                             <div class="flex items-center justify-between">
                                 <div class="text-sm text-gray-400">
-                                    <p>This content was generated from external sources.</p>
-                                    <p class="text-xs mt-1">Accept to add this knowledge to the domain.</p>
+                                    <p x-show="llm_used">This content was generated from external sources. Accept to add this knowledge to the domain.</p>
+                                    <p x-show="!llm_used">Save this response as a pattern for future reference.</p>
                                 </div>
                                 <div class="flex gap-3">
                                     <button @click="acceptAsPattern()"
@@ -299,7 +299,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Accept as New Pattern
+                                        <span x-text="llm_used ? 'Accept as New Pattern' : 'Save as Pattern'"></span>
                                     </button>
                                 </div>
                             </div>
@@ -3360,23 +3360,35 @@
                 },
 
                 async acceptAsPattern() {
-                    // Create a new pattern from the LLM response
+                    // Create a new pattern from the response
                     if (!this.response || !this.lastQuery) return;
 
                     try {
                         this.loading = true;
 
-                        // Generate pattern name from query (capitalize first letter)
-                        const patternName = this.lastQuery.charAt(0).toUpperCase() + this.lastQuery.slice(1);
+                        // Generate pattern name from query (capitalize first letter, limit length)
+                        const patternName = this.lastQuery.charAt(0).toUpperCase() + this.lastQuery.slice(1, 100);
 
-                        // Set origin and tags based on whether this was a direct prompt
-                        const origin = this.direct_prompt ? 'direct_prompt' : 'llm_external_search';
-                        const tags = this.direct_prompt
-                            ? ['direct_prompt', 'llm_generated']
-                            : ['external_search', 'llm_generated'];
-                        const description = this.direct_prompt
-                            ? 'Direct prompt accepted as knowledge: ' + this.lastQuery
-                            : 'AI-generated from query: ' + this.lastQuery;
+                        // Determine origin, tags, and description based on response type
+                        let origin, tags, description, llmGenerated;
+
+                        if (this.llm_used || this.ai_generated) {
+                            // External LLM or generated content
+                            origin = this.direct_prompt ? 'direct_prompt' : 'llm_external_search';
+                            tags = this.direct_prompt
+                                ? ['direct_prompt', 'llm_generated']
+                                : ['external_search', 'llm_generated'];
+                            description = this.direct_prompt
+                                ? 'Direct prompt accepted as knowledge: ' + this.lastQuery
+                                : 'AI-generated from query: ' + this.lastQuery;
+                            llmGenerated = true;
+                        } else {
+                            // Regular query response (note taking, design discussion, etc.)
+                            origin = 'user_conversation';
+                            tags = ['conversation', 'user_saved', 'note'];
+                            description = 'Saved from conversation: ' + this.lastQuery;
+                            llmGenerated = false;
+                        }
 
                         const res = await fetch('/api/patterns', {
                             method: 'POST',
@@ -3390,7 +3402,7 @@
                                 pattern_type: 'knowledge',
                                 origin: origin,
                                 origin_query: this.lastQuery,
-                                llm_generated: true,
+                                llm_generated: llmGenerated,
                                 confidence: this.confidence || 0.5,
                                 validated_by: 'current_user',
                                 validated_at: new Date().toISOString(),
@@ -3408,7 +3420,7 @@
                         const result = await res.json();
 
                         // Show success message
-                        alert(`Pattern "${patternName}" created successfully! It will appear in future queries.`);
+                        alert(`Pattern "${patternName}" saved successfully! It will appear in future queries.`);
 
                         // Reload domain info to include the new pattern
                         await this.loadDomainInfo();
