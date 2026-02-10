@@ -317,10 +317,32 @@ class Persona:
                 ]
             }
 
-            # Note: GLM web search requires specific model variants and tool handling
-            # For now, // prefix goes to LLM knowledge only
-            if "//" in prompt:
-                self.logger.info(f"Direct prompt detected - using LLM knowledge")
+            # Enable GLM web search for internet queries or // prefix
+            if model.startswith("glm-") and (self.data_source == "internet" or "//" in prompt):
+                self.logger.info(f"GLM model detected - enabling web_search tool")
+                # Extract query for search
+                search_query = prompt
+                if "Query:" in prompt:
+                    search_query = prompt.split("Query:")[-1].strip()
+
+                payload["tools"] = [{
+                    "type": "function",
+                    "name": "web_search",
+                    "function": {
+                        "name": "web_search",
+                        "description": "Search the web for current information",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "query": {
+                                    "type": "string",
+                                    "description": "Search query"
+                                }
+                            },
+                            "required": ["query"]
+                        }
+                    }
+                }]
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
