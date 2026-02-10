@@ -514,3 +514,48 @@ curl -X POST https://api.z.ai/api/paas/v4/chat/completions \
 4. **Compare SDK example:**
 Run `glm4_example.py` from SDK to confirm format works
 
+
+---
+
+## Endpoint Testing Results
+
+### Test Summary (2026-02-10)
+
+**Coding Endpoint:** `https://api.z.ai/api/coding/paas/v4`
+- **Tool Format:** Embedded web_search
+- **Result:** ❌ FAILED - Returns reasoning/hallucination
+- **Symptom:** Response shows "Action: Execute browser search" and fake weather data
+- **Conclusion:** Wrong endpoint for web search tools
+
+**General Purpose Endpoint:** `https://api.z.ai/api/paas/v4`
+- **Tool Format:** Embedded web_search with tool_choice: auto
+- **Result:** 🔄 TESTING
+- **Status:** Switched at 2026-02-10 08:42
+- **Next:** Test query to verify actual web search works
+
+### Current Configuration (.env)
+```bash
+OPENAI_BASE_URL=https://api.z.ai/api/paas/v4
+```
+
+### How to Switch Endpoints
+
+1. Edit `.env`:
+```bash
+# Coding endpoint (code optimization)
+OPENAI_BASE_URL=https://api.z.ai/api/coding/paas/v4
+
+# General purpose endpoint (current - testing)
+OPENAI_BASE_URL=https://api.z.ai/api/paas/v4
+```
+
+2. Restart container:
+```bash
+docker-compose restart eeframe-app
+```
+
+3. Wait for healthy status:
+```bash
+docker ps | grep eeframe
+```
+
