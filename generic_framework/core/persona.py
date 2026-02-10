@@ -311,6 +311,35 @@ class Persona:
                     {"role": "user", "content": prompt}
                 ]
             }
+
+            # Enable GLM native web_search for internet data source or // queries
+            is_glm = model.startswith("glm-")
+            has_direct_prompt = prompt.startswith("Query: //")
+            use_web_search = (self.data_source == "internet") or has_direct_prompt
+
+            if is_glm and use_web_search:
+                # Extract actual query from prompt (remove "Query: " prefix if present)
+                search_query = prompt
+                if prompt.startswith("Query: "):
+                    search_query = prompt[7:]  # Remove "Query: " prefix
+                elif prompt.startswith("Context:"):
+                    # Multi-line prompt, extract just the query line
+                    lines = prompt.split("\n")
+                    for line in lines:
+                        if line.startswith("Query: //"):
+                            search_query = line[7:]
+                            break
+                    if search_query == prompt:
+                        search_query = prompt.split("Query:")[-1].strip()
+
+                payload["tools"] = [{
+                    "type": "web_search",
+                    "web_search": {
+                        "search_query": search_query
+                    }
+                }]
+                self.logger.info(f"Enabled GLM native web_search for: {search_query[:50]}...")
+
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
         else:
             # OpenAI format - system + user messages
