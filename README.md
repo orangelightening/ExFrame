@@ -11,7 +11,7 @@ See CHANGELOG.md for complete naming history.
 
 **Domain-Agnostic AI-Powered Knowledge Management System**
 
-*Version: 1.6.0 (run `git describe --tags` for full version including build metadata)*
+*Version: 1.6.1 (run `git describe --tags` for full version including build metadata)*
 
 **📖 [Quick Start Guide (5 minutes)](QUICKSTART.md)** | **🎓 Learn about Universal Logging** | **📚 Personal University** | **💡 Vision & Philosophy**
 
@@ -429,13 +429,13 @@ ExFrame uses a **Phase1 Persona System** with three AI personas, each optimized 
 Query → Phase1 Engine → Persona Selection → Pattern Search → LLM Enrichment → Response
 ```
 
-### Phase1 Personas
+### Phase 1 Personas
 
-| Persona | Data Source | Use Case | Domain Types |
-|---------|-------------|----------|--------------|
-| **Poet** | Void/creative | Creative writing, poetry, abstract concepts | Type 1 (creative) |
-| **Librarian** | Library/docs | Technical documentation, code, structured knowledge | Type 2 (documentation) |
-| **Researcher** | Internet/web | Current information, research, web search | Type 4 (research) |
+| Persona | Data Source | Use Case |
+|---------|-------------|----------|
+| **Poet** | Void/creative | Creative writing, poetry, abstract concepts |
+| **Librarian** | Library/docs | Technical documentation, code, structured knowledge |
+| **Researcher** | Internet/web | Current information, research, web search |
 
 ### Pattern Override
 
@@ -790,10 +790,10 @@ ExFrame includes a **built-in contradiction detection system** that automaticall
 
 ### How It Works
 
-For **Type 3 (Document Store Search)** domains, the system performs post-response analysis:
+For **Librarian persona** domains, the system performs post-response analysis:
 
 1. **Query Processing** → User asks a question
-2. **Document Search** → System searches through all discovered documents (566+ files in ExFrame domain)
+2. **Document Search** → System searches through all discovered documents (56+ files in ExFrame domain)
 3. **Response Generation** → AI generates answer using document context
 4. **Contradiction Detection** → System analyzes all documents for inconsistencies
 5. **Logging** → Issues logged with severity levels (high/medium/low)
@@ -900,7 +900,7 @@ The HIGH and MEDIUM issues are **gone** because the pattern now provides context
 
 **For Documentation Maintenance:**
 
-1. **Run queries** on your Type 3 domains regularly
+1. **Run queries** on your Librarian persona domains regularly
 2. **Review contradiction logs** at `/app/logs/contradictions/`
 3. **Have AI explain** the contradictions
 4. **Save explanations** as patterns in the domain
@@ -908,7 +908,7 @@ The HIGH and MEDIUM issues are **gone** because the pattern now provides context
 
 **For Domain Owners:**
 
-- The contradiction detector runs **automatically** after every Type 3 query
+- The contradiction detector runs **automatically** after every Librarian persona query
 - No configuration needed - just query your domain normally
 - Logs are persistent and searchable
 - Patterns are immediately available for future queries
@@ -917,7 +917,7 @@ The HIGH and MEDIUM issues are **gone** because the pattern now provides context
 
 **Implementation:** `generic_framework/plugins/enrichers/llm_enricher.py`
 - Method: `_detect_and_log_contradictions()`
-- Triggered: After Type 3 query response generation
+- Triggered: After Librarian persona query response generation
 - Scope: Analyzes top 20 documents per query
 - Format: JSON + plain text logs
 

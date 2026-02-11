@@ -121,8 +121,8 @@
   "enable_pattern_override": true,
   "document_search": {
     "algorithm": "semantic",
-    "max_documents": 10,
-    "min_similarity": 0.3,
+    "max_documents": 100,
+    "min_similarity": 0.0,
     "auto_generate_embeddings": true,
     "cache_embeddings": true
   }

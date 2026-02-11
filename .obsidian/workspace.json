@@ -11,14 +11,10 @@
             "id": "f5f5336008d771fc",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "sidekick_20260210_055811"
+              "title": "New tab"
             }
           }
         ]
@@ -94,7 +90,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +99,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for sidekick_20260210_055811"
+              "title": "Backlinks"
             }
           },
           {
@@ -113,12 +108,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from sidekick_20260210_055811"
+              "title": "Outgoing links"
             }
           },
           {
@@ -156,13 +150,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "universes/MINE/logs/archived/sidekick_20260210_055811.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of sidekick_20260210_055811"
+              "title": "Outline"
             }
           }
         ]
@@ -185,6 +178,31 @@
   },
   "active": "f5f5336008d771fc",
   "lastOpenFiles": [
+    "design/UNIVERSAL_LOGGING_DESIGN.md",
+    "design/PLUGIN_REFACTOR_DESIGN.md",
+    "design",
+    "creative/narratives/notes-from-originator.md",
+    "creative/essays/easy-recipe.md",
+    "creative/essays/firstsite.md",
+    "creative/essays/university.md",
+    "creative/essays/entice.md",
+    "creative/narratives",
+    "creative/essays",
+    "creative",
+    "PATTERNS_CLEANUP.md.tmp",
+    "DOCUMENTATION_UPDATE.md.tmp",
+    "SYSTEM_RESTORED.md.tmp",
+    "CURRENT_STATE.md.tmp",
+    "SURVEYOR_USER_REDESIGN.md.tmp",
+    "SURVEYOR_STATUS_AND_PLAN.md.tmp",
+    "DOCUMENT_INDEX_MAINTENANCE.md",
+    "new-docs/development-plan.md",
+    "ARCHITECTURE.md",
+    "development-plan.md",
+    "new-docs/ARCHITECTURE.md",
+    "doc-fix.md",
+    "doc-stat.md",
+    "universes/MINE/logs/archived/sidekick_20260210_055811.md",
     "WEB_SEARCH_COMPLETE.md",
     "universes/MINE/domains/psycho/domain_log.md",
     "universes/MINE/domains/exframe/domain_log.md",
@@ -192,36 +210,11 @@
     "WEB_SEARCH_STATUS.md",
     "GLM_WEB_SEARCH_FINAL.md",
     "ZAI_CREDIT_ISSUE.md",
-    "zai-sdk-python/test_web_search.py",
     "ZAI_WEB_SEARCH_ARCHITECTURE.md",
     "zai-sdk-python/tests/integration_tests/img/MetaGLM.png",
-    "zai-sdk-python/tests/unit_tests/maybe/test_maybe_transform.py",
-    "zai-sdk-python/tests/unit_tests/sse_client/test_stream.py",
-    "zai-sdk-python/tests/unit_tests/sse_client/__init__.py",
-    "zai-sdk-python/tests/unit_tests/response_model/test_response.py",
-    "zai-sdk-python/tests/unit_tests/response_model/__init__.py",
-    "zai-sdk-python/tests/integration_tests/test_web_search.py",
-    "zai-sdk-python/tests/integration_tests/voice_clone_input.mp3",
-    "zai-sdk-python/tests/integration_tests/test_web_reader.py",
-    "zai-sdk-python/tests/integration_tests/test_voice_clone.py",
     "zai-sdk-python/examples/test_multi_modal.jpeg",
     "zai-sdk-python/Release-Note.md",
     "zai-sdk-python/README_CN.md",
-    "zai-sdk-python/README.md",
-    "zai-sdk-python/CONTRIBUTING.md",
-    "zai-sdk-python/CODE_OF_CONDUCT.md",
-    "MULTITURN.md",
-    "TRIED.md",
-    "universes/MINE/domains/cooking/domain_log.md",
-    "universes/MINE/logs/archived/sidekick_20260210_055524.md",
-    "universes/MINE/logs/archived/sidekick_20260210_055811.md",
-    "universes/MINE/logs/archived/sidekick_20260210_055457.md",
-    "universes/MINE/logs/archived/sidekick_20260210_053809.md",
-    "universes/MINE/logs/archived/sidekick_20260210_045758.md",
-    "universes/MINE/logs/archived/sidekick_20260210_052506.md",
-    "README.md",
-    "universes/MINE/domains/diy/domain_log.md",
-    "universes/MINE/domains/sidekick/learning_log.md",
-    "universes/MINE/domains/sidekick/domain_log.md"
+    "zai-sdk-python/README.md"
   ]
 }

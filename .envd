@@ -1,4 +1,0 @@
-OPENAI_API_KEY=sk-3cc5e18dffa54d5f9477011ed8fd8416
-OPENAI_BASE_URL=https://api.deepseek.com/anthropic
-LLM_MODEL=deepseek-chat
-LOG_LEVEL=INFO
