@@ -362,6 +362,30 @@ For developers, technical users, and knowledge management professionals:
 ### [university.md](university.md) - Your Personal AI University
 **"Learn anything. At any level. With a tutor who never forgets."**
 
+Comprehensive guide to using ExFrame for personalized learning across any subject:
+- 90-day learning journeys with adaptive teaching
+- Perfect continuity across sessions
+- Complete transcripts for review
+- Socratic method teaching
+
+**Best for:** Students, career changers, lifelong learners
+
+---
+
+### [marketing-foster.md](marketing-foster.md) - Foster: Grow Your AI Companions ⭐ NEW
+**"A system designed to nurture emergent AI personas that develop unique perspectives, deep expertise, and genuine relationships with you."**
+
+The profound reimagining of what ExFrame actually is:
+- **AI personas EMERGE and GROW** through relationship (not just features)
+- Like having a circle of brilliant friends, each specialized and unique
+- Each domain becomes a companion who learns YOUR communication style
+- From utility to relationship: Partners, not tools
+
+**Best for:** Users seeking long-term AI companionship and personalized collaboration
+
+**Read this first** - It will change how you think about AI.
+**"Learn anything. At any level. With a tutor who never forgets."**
+
 For learners, educators, writers, researchers, and lifelong learners:
 - Explore ExFrame as a personalized learning environment
 - See real learning journeys (90-day Rust programming example)
