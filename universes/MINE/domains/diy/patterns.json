@@ -678,5 +678,31 @@
     "times_accessed": 0,
     "code": null,
     "updated_at": "2026-02-06T02:32:12.558638"
+  },
+  {
+    "id": "diy_61ad6f79",
+    "pattern_id": "diy_61ad6f79",
+    "name": "// what version of AI are you. z.ai name please",
+    "domain": "diy",
+    "problem": "// what version of AI are you. z.ai name please",
+    "solution": "I am a large language model developed by Z.ai. My specific model version is GLM (General Language Model). I'm trained on a diverse range of text data to assist with various tasks including answering questions, writing, analysis, and creative work.\n\nIs there something specific about my capabilities or limitations you'd like to know more about? I'm happy to share more details about how I can assist you.",
+    "description": "AI-generated from query: // what version of AI are you. z.ai name please",
+    "pattern_type": "knowledge",
+    "confidence": 0.7,
+    "status": "validated",
+    "origin": "llm_external_search",
+    "origin_query": "// what version of AI are you. z.ai name please",
+    "llm_generated": true,
+    "validated_by": "current_user",
+    "validated_at": "2026-02-12T05:32:48.863Z",
+    "validation_method": "query_portal_acceptance",
+    "tags": [
+      "external_search",
+      "llm_generated"
+    ],
+    "created_at": "2026-02-12T05:32:48.868625",
+    "times_accessed": 0,
+    "code": null,
+    "updated_at": "2026-02-12T05:32:48.868625"
   }
 ]

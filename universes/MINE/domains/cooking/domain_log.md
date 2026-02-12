@@ -703,3 +703,49 @@ The recipe above is adapted from the specific article found on "The Mediterranea
 
 ---
 
+## 2026-02-12 04:44:44
+
+[WEB_SEARCH - 2026-02-12 04:44:44]
+
+Query: How do I bake chicken breast?
+
+Here is the step-by-step reasoning on how to bake chicken breast based on current culinary best practices:
+
+1.  **Determine the optimal temperature**: Most modern recipes suggest baking at **400°F (200°C)** or **375°F (190°C)**. A higher temperature (400°F) helps sear the outside slightly and cooks the chicken faster, reducing the time it has to dry out in the oven.
+2.  **Prepare the chicken**: To ensure even cooking, the chicken breasts should be of uniform thickness. If they are very thick, pounding them with a meat mallet is recommended. They should also be patted dry with paper towels to help the skin or seasoning crisp up rather than steam.
+3.  **Seasoning**: Rub the chicken with a small amount of oil (olive oil or melted butter) to help the seasonings stick and keep the meat moist. Season generously with salt, pepper, and optional herbs (like garlic powder, paprika, or thyme).
+4.  **Baking time and process**: Place the chicken in a single layer in a baking dish or on a rimmed baking sheet. Bake at 400°F for approximately **18 to 25 minutes**, depending on the thickness of the meat.
+5.  **Check for doneness**: The most reliable way to check is using a meat thermometer. The USDA recommends an internal temperature of **165°F (74°C)**. However, many chefs suggest removing it at **160°F (71°C)** and letting it rest, as the temperature will rise to 165°F while resting.
+6.  **Resting the meat**: Let the chicken rest for 5 to 10 minutes after removing it from the oven. This allows the juices to redistribute throughout the meat, preventing them from running out onto the cutting board and keeping the chicken tender.
+
+***
+
+### Final Answer: How to Bake Chicken Breast
+
+**Ingredients:**
+*   Boneless, skinless chicken breasts
+*   Olive oil or melted butter
+*   Salt and black pepper
+*   Optional seasonings: Garlic powder, paprika, dried herbs (oregano, thyme), or Italian seasoning.
+
+**Equipment:**
+*   Baking dish or rimmed baking sheet
+*   Meat thermometer (highly recommended)
+*   Small bowl
+*   Paper towels
+
+**Instructions:**
+
+1.  **Preheat the oven**: Set your oven to **400°F (200°C)**. Allow it to fully preheat while you prep the chicken.
+2.  **Prep the chicken**: Pat the chicken breasts dry with paper towels. If the breasts are very thick (uneven), place them in a zip-lock bag or between plastic wrap and gently pound them with a meat mallet or rolling pin until they are an even thickness (about ¾ to 1 inch thick).
+3.  **Season**: Rub the chicken breasts generously with olive oil. In a small bowl, mix your salt, pepper, and any other dried spices you prefer. Sprinkle the seasoning mix over the chicken, pressing it into the meat so it adheres well.
+4.  **Arrange for baking**: Place the seasoned chicken breasts in a single layer on a baking sheet lined with parchment paper or in a greased baking dish. Ensure there is a little space between each piece for heat circulation.
+5.  **Bake**: Place the chicken in the oven and bake for **18 to 25 minutes**. Start checking at the 18-minute mark.
+6.  **Check doneness**: Insert a meat thermometer into the thickest part of the breast.
+    *   **USDA Safe:** 165°F (74°C)
+    *   **Chef's Tip:** Remove at 160°F (71°C) and let it rest (it will continue cooking to 165°F).
+7.  **Rest**: Remove the chicken from the oven and tent it loosely with aluminum foil. Let it rest on the counter for **5 to 10 minutes** before slicing or serving. This step is crucial for juicy meat.
+
+
+---
+
