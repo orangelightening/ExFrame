@@ -495,7 +495,7 @@ Every interaction strengthens the relationship. The more you talk with your Libr
 ```bash
 git clone https://github.com/orangelightening/ExFrame.git
 cd ExFrame
-docker-compose up
+docker compose up -d
 ```
 
 ### Step 2: Create Your First Domain
