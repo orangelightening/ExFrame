@@ -36,8 +36,13 @@
    - ✅ Updated README.md to version 1.6.1
    - ✅ Fixed librarian file access (56 documents accessible)
 
-2. **Surveyor Feature** (planned)
-   - Status: Design phase
+2. **Marketing Experiment: Foster Positioning** 🧪 ACTIVE
+   - Created marketing-foster.md: "Grow Your AI Companions" perspective
+   - Reframes ExFrame from utility to relationship platform
+   - Posted to Reddit forums to test resonance
+   - Hypothesis: Document has novelty value even if unread
+   - **Goal:** See which framing (foster vs utility) resonates with people
+   - Status: Awaiting community feedback
    - See design/SURVEYOR_*.md (archived from planning phase)
 
 3. **WiseMan Experiment** (exploration)
