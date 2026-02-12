@@ -338,7 +338,7 @@ Day 15: "Connect to modern themes" → Builds on entire research journey
 **Step 4:** Choose mode: "All" or "Triggers"
 **Step 5:** Start building context!
 
-**Documentation**: See [Universal Logging Design](docs/UNIVERSAL_LOGGING_DESIGN.md) for complete details.
+**Documentation**: See [Universal Logging Design](design/UNIVERSAL_LOGGING_DESIGN.md) for complete details.
 
 ---
 
@@ -706,7 +706,7 @@ Patterns are encoded using **whole document embedding** (no chunking):
 3. **Token limit**: 256 tokens (all-MiniLM-L6-v2 constraint)
 4. **Truncation**: If exceeds limit, keeps name + solution[:1500] only
 
-For more details, see [rag-search-design.md](rag-search-design.md).
+For more details, see [ARCHITECTURE.md](ARCHITECTURE.md#semantic-document-search).
 
 ---
 
@@ -814,7 +814,7 @@ For **Librarian persona** domains, the system performs post-response analysis:
 | **LOW** | log_only | Minor terminology inconsistencies that don't affect accuracy |
 
 **Smart Context Detection:**
-- Reads `docs/INDEX.md` first to understand historical naming (EEFrame → ExFrame)
+- Reads `INDEX.md` first to understand historical naming (EEFrame → ExFrame)
 - Recognizes that internal infrastructure names (`eeframe-app`, `eeframe-*` volumes) are intentional
 - Distinguishes between user-facing names (ExFrame) and internal plumbing
 
@@ -883,7 +883,7 @@ Found: 2 issues
   "problem": "Confusion about Docker service names",
   "solution": "Service names like 'eeframe-app' are internal Docker infrastructure
   for data preservation. ExFrame is installed and run entirely via Docker Compose.
-  This is intentional and documented in docs/INDEX.md under Historical Nomenclature."
+  This is intentional and documented in INDEX.md under Historical Nomenclature."
 }
 ```
 
