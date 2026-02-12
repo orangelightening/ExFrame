@@ -122,7 +122,8 @@ class Persona:
                 "persona": self.name,
                 "query": query,
                 "show_thinking": show_thinking,
-                "pattern_count": len(override_patterns) if override_patterns else 0
+                "pattern_count": len(override_patterns) if override_patterns else 0,
+                "trace": self._extract_trace_data(llm_result) if self.trace else []
             }
 
             # Add web search metadata if available
@@ -139,7 +140,8 @@ class Persona:
                 "persona": self.name,
                 "query": query,
                 "show_thinking": show_thinking,
-                "pattern_count": len(override_patterns) if override_patterns else 0
+                "pattern_count": len(override_patterns) if override_patterns else 0,
+                "trace": self._extract_trace_data(llm_result) if self.trace else []
             }
 
     def _get_data_source_content(self, query: str, context: Optional[Dict] = None) -> Optional[str]:
@@ -290,6 +292,38 @@ class Persona:
             )
 
         return "\n".join(parts)
+
+    def _extract_trace_data(self, llm_result: Any) -> List[Dict]:
+        """
+        Extract trace/reasoning steps from LLM response.
+
+        Args:
+            llm_result: LLM response (dict or string)
+
+        Returns:
+            List of trace step dicts
+        """
+        from datetime import datetime
+
+        # Get text content
+        if isinstance(llm_result, dict):
+            text = llm_result.get("content", "")
+        else:
+            text = llm_result
+
+        if not text:
+            return []
+
+        # Create trace entry from LLM response
+        # LLM was instructed to "Always show your step-by-step reasoning"
+        # We capture the full response as trace data
+        trace_steps = [{
+            "step": "Step 1: LLM Response",
+            "action": text,
+            "timestamp": datetime.now().isoformat()
+        }]
+
+        return trace_steps
 
     async def _call_llm(self, prompt: str, context: Dict) -> str:
         """
