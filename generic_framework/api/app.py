@@ -1232,6 +1232,7 @@ async def process_query_phase1(request: QueryRequest) -> Response:
             "llm_used": True,  # Phase 1 always uses LLM
             "ai_generated": not result.get("pattern_override_used", False),  # True if no patterns used
             "processing_time_ms": result.get("processing_time_ms", 0),
+            "trace": result.get("trace", []),  # Include trace data from persona response
             # Keep Phase 1 metadata for debugging
             "phase1_metadata": {
                 "source": result.get("source"),

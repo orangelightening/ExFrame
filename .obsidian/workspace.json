@@ -185,6 +185,8 @@
   },
   "active": "2c9ae0da6341de75",
   "lastOpenFiles": [
+    "human-notes.md",
+    "TRACE_FIX.md",
     "docs/HUMAN_NOTES_IMPLEMENTATION.md",
     "docs",
     "universes/MINE/domains/peter/domain_log.md",
@@ -219,8 +221,6 @@
     "ARCHITECTURE.md",
     "development-plan.md",
     "new-docs/ARCHITECTURE.md",
-    "doc-fix.md",
-    "doc-stat.md",
     "zai-sdk-python/tests/integration_tests/img/MetaGLM.png",
     "zai-sdk-python/examples/test_multi_modal.jpeg"
   ]

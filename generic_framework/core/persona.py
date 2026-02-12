@@ -116,6 +116,12 @@ class Persona:
             sources = llm_result.get("sources", [])
             web_search_used = llm_result.get("web_search_used", False)
 
+            # Debug: Check trace status
+            trace_data = []
+            if self.trace:
+                trace_data = self._extract_trace_data(llm_result)
+                self.logger.info(f"[{self.name}] Trace data: {len(trace_data)} steps")
+
             response = {
                 "answer": answer,
                 "source": source,
@@ -123,7 +129,7 @@ class Persona:
                 "query": query,
                 "show_thinking": show_thinking,
                 "pattern_count": len(override_patterns) if override_patterns else 0,
-                "trace": self._extract_trace_data(llm_result) if self.trace else []
+                "trace": trace_data
             }
 
             # Add web search metadata if available
@@ -134,6 +140,12 @@ class Persona:
             return response
         else:
             # Regular string answer
+            # Debug: Check trace status
+            trace_data = []
+            if self.trace:
+                trace_data = self._extract_trace_data(llm_result)
+                self.logger.info(f"[{self.name}] Trace data: {len(trace_data)} steps (string path)")
+
             return {
                 "answer": llm_result,
                 "source": source,
@@ -141,7 +153,7 @@ class Persona:
                 "query": query,
                 "show_thinking": show_thinking,
                 "pattern_count": len(override_patterns) if override_patterns else 0,
-                "trace": self._extract_trace_data(llm_result) if self.trace else []
+                "trace": trace_data
             }
 
     def _get_data_source_content(self, query: str, context: Optional[Dict] = None) -> Optional[str]:
@@ -305,13 +317,19 @@ class Persona:
         """
         from datetime import datetime
 
+        # Debug: Log input type
+        self.logger.info(f"[{self.name}] _extract_trace_data called, type={type(llm_result).__name__}")
+
         # Get text content
         if isinstance(llm_result, dict):
             text = llm_result.get("content", "")
+            self.logger.info(f"[{self.name}] Extracted from dict: {len(text)} chars")
         else:
             text = llm_result
+            self.logger.info(f"[{self.name}] Extracted from string: {len(text) if text else 0} chars")
 
         if not text:
+            self.logger.warning(f"[{self.name}] No text to extract trace from")
             return []
 
         # Create trace entry from LLM response
@@ -323,6 +341,7 @@ class Persona:
             "timestamp": datetime.now().isoformat()
         }]
 
+        self.logger.info(f"[{self.name}] Returning {len(trace_steps)} trace steps")
         return trace_steps
 
     async def _call_llm(self, prompt: str, context: Dict) -> str:

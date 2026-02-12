@@ -15,12 +15,19 @@ Usage:
 from typing import Dict, Any, Optional
 import logging
 from datetime import datetime
+from pathlib import Path
+import json
 
 from .query_processor import process_query
 from .personas import get_persona, list_personas
 
 
 logger = logging.getLogger("phase1_engine")
+
+# Trace log path (same as old system)
+# In container: /app/generic_framework/logs/traces/queries.log
+# On host: /home/peter/development/eeframe/generic_framework/logs/traces/queries.log
+TRACE_LOG_PATH = Path("/app/generic_framework/logs/traces/queries.log")
 
 
 class Phase1Engine:
@@ -95,6 +102,9 @@ class Phase1Engine:
                     f"pattern_override={response.get('pattern_override_used')}"
                 )
 
+            # Write trace to log file (so Traces tab can read it)
+            self._write_trace_log(query, start_time, end_time, response)
+
             return response
 
         except Exception as e:
@@ -135,6 +145,42 @@ class Phase1Engine:
                 'error': True,
                 'message': str(e)
             }
+
+    def _write_trace_log(self, query: str, start_time: datetime, end_time: datetime, response: Dict[str, Any]):
+        """
+        Write trace entry to log file for Traces tab.
+
+        Uses same format as old system so /api/traces/log can read it.
+        """
+        try:
+            # Ensure log directory exists
+            TRACE_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+            # Build trace entry in old format
+            total_time_ms = int((end_time - start_time).total_seconds() * 1000)
+
+            trace_entry = {
+                "query": query,
+                "start_time": start_time.isoformat(),
+                "steps": response.get("trace", []),
+                "confidence": response.get("confidence", 0.7),
+                "processing_method": "phase1"
+            }
+
+            # Add end_time if available
+            if total_time_ms > 0:
+                trace_entry["end_time"] = end_time.isoformat()
+                trace_entry["total_time_ms"] = total_time_ms
+
+            # Write to log file
+            timestamp = start_time.strftime("%Y-%m-%d %H:%M:%S")
+            log_line = f"{timestamp},{total_time_ms} - {json.dumps(trace_entry)}\n"
+
+            with open(TRACE_LOG_PATH, 'a') as f:
+                f.write(log_line)
+
+        except Exception as e:
+            logger.error(f"[Phase1] Failed to write trace log: {e}")
 
 
 # Singleton instance for convenience
