@@ -35,22 +35,58 @@
 
 **Output File:** `/app/project/panel_decisions.md`
 
-## Test Query Topics
+## Validation Results
 
-### ExFrame-Related (Use Librarian with Expertise)
-1. "How does Phase 1 persona system work?"
-2. "What's the difference between pattern override and persona data source?"
-3. "Explain the plugin architecture"
-4. "Best practices for domain configuration"
-5. "How does semantic document search work?"
+### ✅ Web Search CONFIRMED WORKING
 
-### Other Topics (Use Researcher)
-1. "DIY: How to build a workbench"
-2. "Cooking: Best BBQ ribslow recipe"
-3. "Gardening: Companion planting for tomatoes"
-4. "Philosophy: Is free will compatible with determinism?"
+**Tested:** Cooking domain web search for "How do I bake chicken breast?"
+**Result:**
+- ✅ DuckDuckGo search + full page fetching working
+- ✅ Fetched 3 recipe pages
+- ✅ Detailed step-by-step baking guide with sources
+- ✅ Researcher persona functioning correctly
+- ✅ Confidence: 0.7 (moderate)
 
-## Panel Workflow
+**Conclusion:** Cooking and DIY domains (Researcher personas) have FULL web search capability. No new test domains needed!
+
+### Correct Test Approach: Use Existing Domains
+
+**✅ DON'T create empty test domains** (Panel, Panelist Alpha, Judge)
+- ❌ They have NO conversation history (empty domain_log.md)
+
+**✅ INSTEAD use EXISTING RICH domains:**
+1. **cooking** (Researcher) - Already has recipes, Q&A, techniques
+2. **diy** (Researcher) - Already has projects, troubleshooting
+3. **exframe** (Librarian) - Already has architecture, how-to guides
+
+**These domains have:**
+- ✅ Rich conversation logs (thousands of Q&A pairs)
+- ✅ Deep context and expertise
+- ✅ Emergent knowledge from real use
+
+**For panel discussion:**
+- Configure **Judge domain** to use these existing logs
+- Judge reads domain_log.md files
+- Synthesizes from ACTUAL multi-domain conversations
+- Output file: `/app/project/panel_decisions.md` (accessible to all)
+
+---
+
+## Test Plan: Multi-Domain Dinner Party
+
+### Setup (3 Existing Domains)
+
+1. **Panel** (Librarian) - Orchestrates: "Organize a discussion about [topic]"
+2. **Panelist Alpha** (Poet) - Receives: "What's your take on [topic]?"
+3. **Judge** (Dynamic) - Reads all responses, consolidates, decides
+
+### Test Topics
+
+**Via cooking domain (Researcher):**
+- "BBQ ribslow recipe" (will fetch actual recipes, cite sources)
+- "Internal cooking temperature: 400°F vs 375°F" (temperature debate)
+
+**Judge output:** `/app/project/panel_decisions.md`
 
 1. **Panel Domain** receives query topic
 2. **Panel** queries **Panelist Alpha**: "What's your take on [topic]?"
