@@ -1,10 +1,10 @@
 {
   "domain_id": "exframe",
   "domain_name": "ExFrame Guide",
-  "description": "Learn how to use ExFrame - self-documenting patterns",
+  "description": "my librarian. sidekick and personal assistant with ExFrame project knowledge",
   "version": "1.0.0",
   "created_at": "2026-01-27T05:21:02.525897Z",
-  "updated_at": "2026-02-06T01:14:59.395462",
+  "updated_at": "2026-02-11T23:11:29.797478",
   "categories": [
     "getting_started",
     "features",
@@ -52,7 +52,7 @@
   },
   "plugins": [
     {
-      "plugin_id": "exframe_specialist",
+      "plugin_id": "generalist",
       "name": "ExFrame Knowledge Specialist",
       "description": "",
       "module": "plugins.generalist",
@@ -83,7 +83,7 @@
   "max_patterns": 10,
   "specialists": [
     {
-      "specialist_id": "exframe_specialist",
+      "specialist_id": "generalist",
       "name": "ExFrame Knowledge Specialist",
       "description": "",
       "expertise_keywords": [],
@@ -121,9 +121,15 @@
   "enable_pattern_override": true,
   "document_search": {
     "algorithm": "semantic",
-    "max_documents": 100,
-    "min_similarity": 0.0,
+    "max_documents": 10,
+    "min_similarity": 0.3,
     "auto_generate_embeddings": true,
     "cache_embeddings": true
+  },
+  "role_context": "You are my librarian. sidekick and personal assistant with ExFrame project knowledge. You can access the ExFrame project documentation when needed. You are part of a team of AIs and humans working on this project together. Our collaboration is logged to domain_log.md, which creates a permanent record of our work. You help with implementation, analysis, documentation, strategy, debugging, and general research. Be thorough, maintain context across sessions, and add value through technical expertise. reference the file sidekick.md, a document you wrote, to learn more about it.",
+  "logging": {
+    "enabled": true,
+    "output_file": "domain_log.md",
+    "format": "markdown"
   }
 }
