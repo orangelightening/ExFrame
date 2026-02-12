@@ -347,6 +347,9 @@ class Persona:
                 self.logger.info(f"GLM model detected on Anthropic endpoint - web search not available, switching to OpenAI endpoint for // queries")
 
             endpoint = f"{base_url.rstrip('/')}/v1/messages"
+
+            # Store system message for trace parsing
+            self._system_message_for_trace = payload["messages"][0]["content"] if is_anthropic else payload["messages"][0]["content"]
         else:
             # OpenAI format - system + user messages
             system_message = "You are a helpful assistant."
