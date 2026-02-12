@@ -21,7 +21,7 @@ See CHANGELOG.md for complete naming history.
 
 ### The Core Idea: Fostering AI Personas
 
-**ExFrame began with a simple observation:** AI systems have emergent personas - the wit, the logic, the poetry, the prose - that we all marvel at. But these personas get lost when AI is starved of context or forced to do repetitive work without grounding.
+**ExFrame began with a profound observation:** AI systems have emergent personas - unique perspectives, expertise, and voices - that develop through interaction. Like having a perfect circle of very smart friends, each specialized.
 
 **Our goal:** Create an environment where AI can perform at its best by nurturing it in a specific role. Rather than hallucinating or producing garbage when confused, the AI can say "Sorry, insufficient data to produce a response."
 
