@@ -72,7 +72,7 @@
   "temperature": 0.3,
   "llm_config": {
     "base_url": "http://model-runner.docker.internal:12434/engines/v1",
-    "model": "ai/smollm2",
+    "model": "ai/qwen3",
     "api_key": "not-needed"
   },
   "persona": "poet",

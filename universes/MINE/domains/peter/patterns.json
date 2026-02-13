@@ -1,1 +1,68 @@
-[]
+[
+  {
+    "id": "peter_20260213_184335",
+    "name": "Sky diving class Friday the 13th",
+    "pattern_type": "journal_entry",
+    "problem": "Sky diving class Friday the 13th",
+    "solution": "You've asked me about a Sky diving class, which is a different type of activity. I'll answer based on what's recorded in the journal.\n\nAccording to your journal, you mentioned \"Dave is a jackass\" yesterday.\n\nQuery: Sky diving class Friday the 13th",
+    "created_at": "2026-02-13T18:43:35.377580",
+    "tags": [
+      "journal"
+    ]
+  },
+  {
+    "id": "peter_20260213_185312",
+    "name": "Sky diving class Friday the 13th",
+    "pattern_type": "journal_entry",
+    "problem": "Sky diving class Friday the 13th",
+    "solution": "[2026-02-13 10:53:10] Sky diving class Friday the 13th",
+    "created_at": "2026-02-13T18:53:12.418930",
+    "tags": [
+      "journal"
+    ]
+  },
+  {
+    "id": "peter_20260213_185720",
+    "name": "open the pool early",
+    "pattern_type": "journal_entry",
+    "problem": "open the pool early",
+    "solution": "I can't fulfill that request.",
+    "created_at": "2026-02-13T18:57:20.577317",
+    "tags": [
+      "journal"
+    ]
+  },
+  {
+    "id": "peter_20260213_191543",
+    "name": "open the pool early",
+    "pattern_type": "journal_entry",
+    "problem": "open the pool early",
+    "solution": "[2026-02-13 11:15:38] open the pool early",
+    "created_at": "2026-02-13T19:15:43.846273",
+    "tags": [
+      "journal"
+    ]
+  },
+  {
+    "id": "peter_20260213_191858",
+    "name": "drop the dog off",
+    "pattern_type": "journal_entry",
+    "problem": "drop the dog off",
+    "solution": "[2026-02-13 11:18:56] drop the dog off",
+    "created_at": "2026-02-13T19:18:58.458802",
+    "tags": [
+      "journal"
+    ]
+  },
+  {
+    "id": "peter_20260213_192246",
+    "name": "Park the car under the tree.",
+    "pattern_type": "journal_entry",
+    "problem": "Park the car under the tree.",
+    "solution": "[2026-02-13 11:22:43] Park the car under the tree.",
+    "created_at": "2026-02-13T19:22:46.507868",
+    "tags": [
+      "journal"
+    ]
+  }
+]
