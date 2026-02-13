@@ -77,6 +77,16 @@ async def process_query(
             if trigger_phrases and _check_memory_trigger(query, trigger_phrases):
                 should_load_memory = True
                 logger.info(f"Conversation memory mode 'triggers': triggered by query, loading context from domain_log.md")
+        elif mode == "question":
+            # Only load context when query starts with ** prefix
+            if query.strip().startswith("**"):
+                should_load_memory = True
+                logger.info(f"Conversation memory mode 'question': ** prefix detected, loading context from domain_log.md")
+            else:
+                logger.info(f"Conversation memory mode 'question': no ** prefix, skipping memory")
+        elif mode == "journal":
+            # Never load conversation memory — fast path for simple journal entries
+            logger.info(f"Conversation memory mode 'journal': skipping memory for fast entry")
 
         if should_load_memory:
             memory_content = _load_conversation_memory(domain_name, max_chars)

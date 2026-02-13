@@ -73,7 +73,7 @@
   "library_base_path": "/app/project",
   "conversation_memory": {
     "enabled": true,
-    "mode": "all",
+    "mode": "question",
     "trigger_phrases": ["**"],
     "max_context_chars": 5000
   },

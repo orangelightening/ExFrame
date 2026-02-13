@@ -24,10 +24,9 @@ from .personas import get_persona, list_personas
 
 logger = logging.getLogger("phase1_engine")
 
-# Trace log path (same as old system)
-# In container: /app/generic_framework/logs/traces/queries.log
-# On host: /home/peter/development/eeframe/generic_framework/logs/traces/queries.log
-TRACE_LOG_PATH = Path("/app/generic_framework/logs/traces/queries.log")
+# Trace log path (same as old system - MUST match GenericAssistantEngine path)
+# Both use: /app/logs/traces/queries.log
+TRACE_LOG_PATH = Path("/app/logs/traces/queries.log")
 
 
 class Phase1Engine:

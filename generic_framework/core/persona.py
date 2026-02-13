@@ -106,8 +106,11 @@ class Persona:
         # Build prompt
         prompt = self._build_prompt(query, content, show_thinking)
 
-        # Call LLM (async)
+        # Call LLM (async) - TIME THIS CALL
+        import time
+        llm_start = time.time()
         llm_result = await self._call_llm(prompt, context)
+        llm_time_ms = int((time.time() - llm_start) * 1000)
 
         # Handle both string answers and dict results (with web search sources)
         if isinstance(llm_result, dict):
@@ -119,7 +122,7 @@ class Persona:
             # Debug: Check trace status
             trace_data = []
             if self.trace:
-                trace_data = self._extract_trace_data(llm_result)
+                trace_data = self._extract_trace_data(llm_result, llm_time_ms)
                 self.logger.info(f"[{self.name}] Trace data: {len(trace_data)} steps")
 
             response = {
@@ -143,7 +146,7 @@ class Persona:
             # Debug: Check trace status
             trace_data = []
             if self.trace:
-                trace_data = self._extract_trace_data(llm_result)
+                trace_data = self._extract_trace_data(llm_result, llm_time_ms)
                 self.logger.info(f"[{self.name}] Trace data: {len(trace_data)} steps (string path)")
 
             return {
@@ -303,14 +306,21 @@ class Persona:
                 "\nBefore answering, briefly explain your reasoning process."
             )
 
-        return "\n".join(parts)
+        prompt_text = "\n".join(parts)
 
-    def _extract_trace_data(self, llm_result: Any) -> List[Dict]:
+        # Log the actual prompt being sent to LLM (for debugging)
+        if self.trace:
+            self.logger.info(f"[{self.name}] SENDING PROMPT TO LLM:\n{prompt_text}\n")
+
+        return prompt_text
+
+    def _extract_trace_data(self, llm_result: Any, llm_time_ms: int = None) -> List[Dict]:
         """
         Extract trace/reasoning steps from LLM response.
 
         Args:
             llm_result: LLM response (dict or string)
+            llm_time_ms: Time taken for LLM call in milliseconds
 
         Returns:
             List of trace step dicts
@@ -318,7 +328,7 @@ class Persona:
         from datetime import datetime
 
         # Debug: Log input type
-        self.logger.info(f"[{self.name}] _extract_trace_data called, type={type(llm_result).__name__}")
+        self.logger.info(f"[{self.name}] _extract_trace_data called, type={type(llm_result).__name__}, llm_time={llm_time_ms}ms")
 
         # Get text content
         if isinstance(llm_result, dict):
@@ -335,11 +345,22 @@ class Persona:
         # Create trace entry from LLM response
         # LLM was instructed to "Always show your step-by-step reasoning"
         # We capture the full response as trace data
-        trace_steps = [{
-            "step": "Step 1: LLM Response",
+        trace_steps = []
+
+        # Add timing info if provided
+        if llm_time_ms is not None:
+            trace_steps.append({
+                "step": f"Step 1: LLM Call ({llm_time_ms}ms)",
+                "action": f"LLM API call took {llm_time_ms}ms",
+                "timestamp": datetime.now().isoformat()
+            })
+
+        # Add the actual response
+        trace_steps.append({
+            "step": f"Step 2: LLM Response",
             "action": text,
             "timestamp": datetime.now().isoformat()
-        }]
+        })
 
         self.logger.info(f"[{self.name}] Returning {len(trace_steps)} trace steps")
         return trace_steps
