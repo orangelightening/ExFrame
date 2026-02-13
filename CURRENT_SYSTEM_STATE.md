@@ -99,6 +99,36 @@ Domain configs contain fields for both engines. Do NOT remove old-schema fields 
 - Fixed duplicate import and unused variable in `persona.py`
 - Implemented `role_context` as first-class domain config field — always sent as LLM system message
 - Added `.obsidian/` to `.gitignore` and removed from tracking
+- Injected current date/time (local timezone via APP_TIMEZONE) into all LLM system messages
+- Fixed trace toggle — trace log and response trace now respect `include_trace` flag
+- Implemented per-domain `llm_config` — each domain can use a different LLM provider/model
+
+### Per-Domain LLM Config
+**Location:** `domain.json` → `llm_config` field
+
+Allows each domain to override the global LLM provider. Domains without `llm_config` fall back to env vars (`OPENAI_API_KEY`, `OPENAI_BASE_URL`, `LLM_MODEL`).
+
+```json
+{
+  "llm_config": {
+    "base_url": "http://host.docker.internal:11434/v1",
+    "model": "mistral:7b",
+    "api_key": "ollama"
+  }
+}
+```
+
+**Flow:** `domain.json` → `query_processor` (injects into context) → `persona._call_llm` (reads from context, falls back to env vars)
+
+**Peter domain:** Configured with Ollama placeholder (needs Ollama running to test).
+
+### TODO — Testing and Next Steps
+1. **Install and run Ollama** on host with a small model (e.g., `ollama pull mistral:7b`)
+2. **Test Peter domain** with local Ollama — journal entries should respond in <2 seconds
+3. **Test other domains** still work on cloud LLM (no `llm_config` = env var fallback)
+4. **Run full test plan** from `testplan.md`
+5. **Evaluate local model quality** — does mistral:7b follow the role_context instructions correctly?
+6. **Try other local models** if needed (llama3:8b, phi3, gemma2:9b)
 
 ### Pending Optimizations
 1. **Separate persona from domain role**

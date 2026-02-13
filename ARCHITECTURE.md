@@ -283,6 +283,33 @@ Conversation memory loads previous interactions from `domain_log.md` into the LL
 
 **Important:** Conversation memory is separate from `role_context`. Role context always loads. Memory loading is optional and mode-dependent.
 
+### Per-Domain LLM Config
+
+**Location:** `domain.json` → `llm_config` field
+
+Each domain can override the global LLM provider/model. This enables running lightweight local models (e.g., Ollama) for simple domains while keeping cloud models for complex ones.
+
+```json
+{
+  "llm_config": {
+    "base_url": "http://host.docker.internal:11434/v1",
+    "model": "mistral:7b",
+    "api_key": "ollama"
+  }
+}
+```
+
+**Fields:**
+- **`base_url`** — LLM API endpoint (Ollama, OpenAI, z.ai, DeepSeek, etc.)
+- **`model`** — Model name
+- **`api_key`** — API key (Ollama uses "ollama" as placeholder)
+
+**Fallback:** Domains without `llm_config` use global env vars (`OPENAI_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`).
+
+**Flow:** `domain.json` → `query_processor` (injects into context) → `persona._call_llm` (reads from context before env vars)
+
+**Compatibility:** Ollama, OpenAI, z.ai (GLM), DeepSeek, and any OpenAI-compatible API.
+
 ---
 
 ## State Machine
@@ -530,6 +557,12 @@ Pass to LLM enricher
   "persona": "librarian",
   "library_base_path": "/app/project/docs",
   "enable_pattern_override": true,
+
+  "llm_config": {
+    "base_url": "https://api.openai.com/v1",
+    "model": "gpt-4",
+    "api_key": "sk-..."
+  },
 
   "conversation_memory": {
     "enabled": true,

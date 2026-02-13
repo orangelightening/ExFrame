@@ -65,6 +65,16 @@ async def process_query(
         logger.info(f"Loaded role_context from domain config ({len(role_context)} chars)")
     # ==================== END ROLE CONTEXT ====================
 
+    # ==================== LLM CONFIG (Per-domain LLM override) ====================
+    # Allows each domain to use a different LLM provider/model (e.g., local Ollama for journal,
+    # cloud GLM for research). Falls back to global env vars if not set.
+    llm_config = domain_config.get("llm_config")
+    if llm_config:
+        context = context or {}
+        context["llm_config"] = llm_config
+        logger.info(f"Loaded llm_config from domain config: model={llm_config.get('model', 'default')}, base_url={llm_config.get('base_url', 'default')}")
+    # ==================== END LLM CONFIG ====================
+
     # ==================== CONVERSATION MEMORY (Load from domain_log.md) ====================
     # Conversation Memory: Load previous conversations from domain_log.md into LLM context
     # This gives the AI memory of past conversations without a separate file

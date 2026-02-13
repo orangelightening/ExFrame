@@ -379,15 +379,15 @@ class Persona:
         import os
         import httpx
 
-        # Get API credentials from environment
-        api_key = os.getenv("OPENAI_API_KEY")
-        base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-        # Use AllTools variant for web search capability
-        model = os.getenv("LLM_MODEL", "glm-4.7")  # Standard model
+        # Get API credentials - per-domain llm_config overrides global env vars
+        llm_config = context.get("llm_config", {})
+        api_key = llm_config.get("api_key") or os.getenv("OPENAI_API_KEY")
+        base_url = llm_config.get("base_url") or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        model = llm_config.get("model") or os.getenv("LLM_MODEL", "glm-4.7")
 
         if not api_key:
             self.logger.warning("LLM not configured: No API key")
-            return "[LLM not configured: No API key. Set OPENAI_API_KEY environment variable.]"
+            return "[LLM not configured: No API key. Set OPENAI_API_KEY environment variable or add llm_config to domain.json.]"
 
         headers = {
             "Authorization": f"Bearer {api_key}",
