@@ -64,5 +64,16 @@
     "tags": [
       "journal"
     ]
+  },
+  {
+    "id": "peter_20260213_195750",
+    "name": "the troll has a bridge.",
+    "pattern_type": "journal_entry",
+    "problem": "the troll has a bridge.",
+    "solution": "[2026-02-13 11:57:45] the troll has a bridge.",
+    "created_at": "2026-02-13T19:57:50.437835",
+    "tags": [
+      "journal"
+    ]
   }
 ]
