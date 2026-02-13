@@ -107,6 +107,14 @@ async def process_query(
         elif mode == "journal":
             # Never load conversation memory — fast path for simple journal entries
             logger.info(f"Conversation memory mode 'journal': skipping memory for fast entry")
+        elif mode == "journal_patterns":
+            if query.strip().startswith("**"):
+                context = context or {}
+                context["journal_pattern_search"] = True
+                context["journal_query"] = query.strip()[2:].strip()
+                logger.info("Conversation memory mode 'journal_patterns': ** prefix, will search patterns")
+            else:
+                logger.info("Conversation memory mode 'journal_patterns': regular entry, skipping memory")
 
         if should_load_memory:
             memory_content = _load_conversation_memory(domain_name, max_chars)
@@ -146,6 +154,14 @@ async def process_query(
             logger.info("No patterns found, using persona data source")
     else:
         logger.info("Pattern search disabled, using persona data source directly")
+
+    # Journal pattern search: override patterns with semantic journal search
+    if context and context.get("journal_pattern_search"):
+        journal_query = context.get("journal_query", query)
+        journal_patterns = _search_journal_patterns(domain_name, journal_query)
+        if journal_patterns:
+            patterns = journal_patterns
+            logger.info(f"Journal pattern search found {len(patterns)} relevant entries")
 
     # THE DECISION: Override or not?
     # Prepare context with show_thinking flag
@@ -224,6 +240,11 @@ async def process_query(
             response["logging_updated"] = False
             logger.warning("Failed to append response to domain log")
     # ==================== END LOGGING ====================
+
+    # ==================== JOURNAL PATTERN CREATION ====================
+    if memory_config.get("mode") == "journal_patterns" and not query.strip().startswith("**"):
+        _create_journal_pattern(domain_name, query, answer)
+    # ==================== END JOURNAL PATTERN CREATION ====================
 
     # Add domain metadata
     response["domain"] = domain_name
@@ -851,5 +872,198 @@ def _load_conversation_memory(domain_name: str, max_chars: int = 5000) -> Option
 
     except Exception as e:
         logger.error(f"Failed to load conversation memory from domain_log.md: {e}")
+        return None
+
+
+# ==================== JOURNAL PATTERN FUNCTIONS ====================
+
+def _create_journal_pattern(domain_name: str, query: str, response: str) -> None:
+    """
+    Auto-create a pattern from a journal entry.
+
+    Creates a pattern with pattern_type "journal_entry" and generates
+    an embedding for semantic search.
+
+    Args:
+        domain_name: Domain name
+        query: The journal entry query
+        response: The LLM response (timestamped echo)
+    """
+    import json
+    from datetime import datetime
+
+    domain_path = _get_domain_path(domain_name)
+    if not domain_path:
+        logger.warning(f"Cannot create journal pattern: domain path not found for {domain_name}")
+        return
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    pattern_id = f"{domain_name}_{timestamp}"
+
+    pattern = {
+        "id": pattern_id,
+        "name": query[:80],
+        "pattern_type": "journal_entry",
+        "problem": query,
+        "solution": response,
+        "created_at": datetime.now().isoformat(),
+        "tags": ["journal"]
+    }
+
+    # Load existing patterns
+    patterns_path = domain_path / "patterns.json"
+    try:
+        if patterns_path.exists():
+            with open(patterns_path, 'r') as f:
+                data = json.load(f)
+        else:
+            data = {"patterns": []}
+
+        if isinstance(data, dict) and 'patterns' in data:
+            data['patterns'].append(pattern)
+        elif isinstance(data, list):
+            data.append(pattern)
+        else:
+            data = {"patterns": [pattern]}
+
+        with open(patterns_path, 'w') as f:
+            json.dump(data, f, indent=2)
+
+        logger.info(f"Created journal pattern: {pattern_id}")
+
+    except Exception as e:
+        logger.error(f"Failed to create journal pattern: {e}")
+        return
+
+    # Generate embedding for the new pattern
+    _generate_journal_embedding(domain_path, pattern_id, pattern)
+
+
+def _generate_journal_embedding(domain_path: Path, pattern_id: str, pattern: dict) -> None:
+    """
+    Generate and store an embedding for a journal pattern.
+
+    Args:
+        domain_path: Path to domain directory
+        pattern_id: Pattern ID
+        pattern: Pattern dictionary
+    """
+    from .embeddings import get_embedding_service, VectorStore
+
+    try:
+        service = get_embedding_service()
+        if not service or not service.is_available:
+            logger.info("Embedding service not available, skipping journal embedding")
+            return
+
+        store = VectorStore(domain_path)
+        store.load()
+
+        embedding = service.encode_pattern(pattern)
+        store.set(pattern_id, embedding)
+        store.save()
+
+        logger.info(f"Generated embedding for journal pattern: {pattern_id}")
+
+    except Exception as e:
+        logger.warning(f"Failed to generate journal embedding (non-fatal): {e}")
+
+
+def _search_journal_patterns(
+    domain_name: str,
+    query: str,
+    max_results: int = 10,
+    threshold: float = 0.1
+) -> Optional[list]:
+    """
+    Search journal patterns using semantic similarity.
+
+    Filters patterns to only journal_entry types, then uses
+    embedding similarity to find the most relevant entries.
+
+    Args:
+        domain_name: Domain name
+        query: Search query (with ** prefix already stripped)
+        max_results: Maximum patterns to return
+        threshold: Minimum similarity score (low to let LLM decide relevance)
+
+    Returns:
+        List of matching pattern dicts or None
+    """
+    import json
+    from .embeddings import get_embedding_service, VectorStore
+
+    domain_path = _get_domain_path(domain_name)
+    if not domain_path:
+        logger.warning(f"Cannot search journal patterns: domain path not found for {domain_name}")
+        return None
+
+    # Load patterns and filter to journal entries
+    patterns_path = domain_path / "patterns.json"
+    if not patterns_path.exists():
+        logger.info(f"No patterns.json found for {domain_name}")
+        return None
+
+    try:
+        with open(patterns_path, 'r') as f:
+            data = json.load(f)
+
+        if isinstance(data, dict) and 'patterns' in data:
+            all_patterns = data['patterns']
+        elif isinstance(data, list):
+            all_patterns = data
+        else:
+            return None
+
+        journal_patterns = [p for p in all_patterns if p.get("pattern_type") == "journal_entry"]
+
+        if not journal_patterns:
+            logger.info(f"No journal patterns found in {domain_name}")
+            return None
+
+        logger.info(f"Found {len(journal_patterns)} journal patterns, searching semantically")
+
+        # Build pattern lookup by ID
+        pattern_data = {p["id"]: p for p in journal_patterns}
+
+        # Try semantic search with embeddings
+        service = get_embedding_service()
+        if service and service.is_available:
+            store = VectorStore(domain_path)
+            store.load()
+
+            all_embeddings = store.get_all()
+
+            # Filter to only journal pattern embeddings
+            journal_embeddings = {
+                pid: emb for pid, emb in all_embeddings.items()
+                if pid in pattern_data
+            }
+
+            if journal_embeddings:
+                results = service.find_most_similar(
+                    query=query,
+                    pattern_embeddings=journal_embeddings,
+                    pattern_data=pattern_data,
+                    top_k=max_results,
+                    threshold=threshold
+                )
+
+                if results:
+                    matched = [pattern for pattern, score in results]
+                    for pattern, score in results:
+                        logger.info(f"  Journal match: {pattern.get('id')} (score: {score:.3f})")
+                    return matched
+
+                logger.info("Semantic search returned no results above threshold")
+            else:
+                logger.info("No embeddings found for journal patterns, falling back")
+
+        # Fallback: return most recent journal patterns (no embeddings available)
+        logger.info(f"Falling back to returning {max_results} most recent journal patterns")
+        return journal_patterns[-max_results:]
+
+    except Exception as e:
+        logger.error(f"Failed to search journal patterns: {e}")
         return None
 
