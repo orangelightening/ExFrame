@@ -101,8 +101,9 @@ class Phase1Engine:
                     f"pattern_override={response.get('pattern_override_used')}"
                 )
 
-            # Write trace to log file (so Traces tab can read it)
-            self._write_trace_log(query, start_time, end_time, response)
+            # Write trace to log file (so Traces tab can read it) - only when trace is enabled
+            if self.enable_trace:
+                self._write_trace_log(query, start_time, end_time, response)
 
             return response
 
