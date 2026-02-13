@@ -9,8 +9,8 @@
 >
 > **This file consolidates all architecture documentation.**
 
-**Version:** 1.6.1
-**Last Updated:** 2026-02-10
+**Version:** 1.7.0
+**Last Updated:** 2026-02-12
 **Status:** Production (Phase 1 Persona System)
 
 ---
@@ -236,6 +236,52 @@ LLM synthesis with web context
     ↓
 Response with clickable source URLs
 ```
+
+### Role Context
+
+The `role_context` field in `domain.json` is the **system message** sent to the LLM on every query. It defines how the AI behaves for a specific domain.
+
+- Stored in `domain.json` as a first-class config field
+- Always loaded by `query_processor.py` and injected into the context dict
+- Used as the OpenAI `system` message (or prepended to the prompt for Anthropic-format APIs)
+- Independent of conversation memory mode — never skipped
+- Falls back to `"You are a helpful assistant."` if not set
+
+**Example (Peter journal domain):**
+```json
+{
+  "role_context": "You are Peter's secretary. For queries starting with **, answer from the journal. For all other queries, timestamp and echo back.",
+  "persona": "poet"
+}
+```
+
+### Conversation Memory
+
+**Location:** `generic_framework/core/query_processor.py`
+
+Conversation memory loads previous interactions from `domain_log.md` into the LLM context. Loading is controlled per-domain by the `conversation_memory` config:
+
+```json
+{
+  "conversation_memory": {
+    "enabled": true,
+    "mode": "question",
+    "max_context_chars": 5000,
+    "trigger_phrases": ["**"]
+  }
+}
+```
+
+**Four modes available:**
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `"all"` | Load for every query | Domains needing full context always |
+| `"triggers"` | Load only when trigger phrases match | Selective context loading |
+| `"question"` | Load only when query starts with `**` | Journal domains with question support |
+| `"journal"` | Never load | Pure logging, maximum speed |
+
+**Important:** Conversation memory is separate from `role_context`. Role context always loads. Memory loading is optional and mode-dependent.
 
 ---
 
@@ -480,9 +526,17 @@ Pass to LLM enricher
   "created_at": "2026-01-09T00:00:00Z",
   "updated_at": "2026-01-09T00:00:00Z",
 
+  "role_context": "You are a helpful librarian...",
   "persona": "librarian",
   "library_base_path": "/app/project/docs",
   "enable_pattern_override": true,
+
+  "conversation_memory": {
+    "enabled": true,
+    "mode": "all",
+    "max_context_chars": 5000,
+    "trigger_phrases": []
+  },
 
   "accumulator": {
     "enabled": true,
@@ -590,9 +644,10 @@ generic_framework/
 ├── api/
 │   └── app.py                          # FastAPI, all endpoints
 ├── core/
+│   ├── phase1_engine.py                # Phase 1 engine wrapper
 │   ├── query_processor.py              # Phase 1 query processor
 │   ├── personas.py                     # POET, LIBRARIAN, RESEARCHER
-│   ├── persona.py                      # Persona dataclass
+│   ├── persona.py                      # Persona class (LLM calls, prompt building)
 │   ├── domain.py                       # GenericDomain orchestrator
 │   ├── domain_factory.py               # Legacy - Type 1-5 config
 │   ├── document_embeddings.py          # DocumentVectorStore

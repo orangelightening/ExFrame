@@ -43,11 +43,23 @@ Four modes available, configured per-domain in `conversation_memory.mode`:
 - **`"question"`** — Load only when query starts with `**` prefix
 - **`"journal"`** — Never load conversation memory (fast path)
 
+### Role Context
+**Location:** `domain.json` → `role_context` field
+
+The `role_context` field is the **system message** sent to the LLM on every query. It defines how the AI behaves for a domain. It is:
+- Stored in `domain.json` (persistent, version controlled)
+- Always injected as the LLM system message, independent of conversation memory mode
+- Editable via the domain editor UI
+- Falls back to `"You are a helpful assistant."` if not set
+
+This is the most critical config field — without it, the LLM has no domain-specific instructions.
+
 ### Domain Configuration (Peter Domain Example)
 **File:** `universes/MINE/domains/peter/domain.json`
-**Settings:**
+**Key settings:**
 ```json
 {
+  "role_context": "You are Peter's secretary. Your behavior depends on the query format: ...",
   "persona": "poet",
   "temperature": 0.3,
   "conversation_memory": {
@@ -64,7 +76,6 @@ Four modes available, configured per-domain in `conversation_memory.mode`:
 ```
 
 **Domain Log:** `universes/MINE/domains/peter/domain_log.md`
-- Contains "Role Context" section with persona instructions
 - Stores conversation history with timestamps
 - Used as conversation memory source (when mode allows)
 
@@ -86,6 +97,8 @@ Domain configs contain fields for both engines. Do NOT remove old-schema fields 
 - Changed Peter domain from `"mode": "all"` to `"mode": "question"` (fixes 10+ second simple query latency)
 - Deleted broken `query_processor_new.py` (consolidated into existing query_processor.py)
 - Fixed duplicate import and unused variable in `persona.py`
+- Implemented `role_context` as first-class domain config field — always sent as LLM system message
+- Added `.obsidian/` to `.gitignore` and removed from tracking
 
 ### Pending Optimizations
 1. **Separate persona from domain role**
