@@ -131,6 +131,8 @@ class PatternAnalyzer:
         'solution', 'failure_mode', 'technique', 'concept',
         # EEFrame-specific types
         'getting_started', 'knowledge', 'how_to', 'concepts', 'features',
+        # Journal types (patterns-as-journal)
+        'journal_entry',
         # Binary symmetry domain types
         'symmetry', 'algorithm', 'metric', 'encoding', 'transformation',
         'property', 'relationship', 'duality', 'computation', 'extraction',
