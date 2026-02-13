@@ -55,6 +55,16 @@ async def process_query(
 
     logger.info(f"Using persona: {persona_type}")
 
+    # ==================== ROLE CONTEXT (Always loaded, never skipped) ====================
+    # Role context defines how the AI behaves for this domain. It is stored in domain.json
+    # and always injected as the LLM system message, independent of conversation memory mode.
+    role_context = domain_config.get("role_context")
+    if role_context:
+        context = context or {}
+        context["role_context"] = role_context
+        logger.info(f"Loaded role_context from domain config ({len(role_context)} chars)")
+    # ==================== END ROLE CONTEXT ====================
+
     # ==================== CONVERSATION MEMORY (Load from domain_log.md) ====================
     # Conversation Memory: Load previous conversations from domain_log.md into LLM context
     # This gives the AI memory of past conversations without a separate file

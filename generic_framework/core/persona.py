@@ -406,12 +406,15 @@ class Persona:
         # Build payload based on API type
         if is_anthropic:
             # Anthropic/DeepSeek format - user role only
+            # Prepend role_context to the prompt if available
+            role_context = context.get("role_context", "")
+            anthropic_prompt = f"{role_context}\n\n{prompt}" if role_context else prompt
             payload = {
                 "model": model,
                 "max_tokens": 8192,
                 "temperature": temperature,
                 "messages": [
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": anthropic_prompt}
                 ]
             }
 
@@ -426,7 +429,8 @@ class Persona:
             self._system_message_for_trace = payload["messages"][0]["content"] if is_anthropic else payload["messages"][0]["content"]
         else:
             # OpenAI format - system + user messages
-            system_message = "You are a helpful assistant."
+            # Use domain role_context as system message if provided, otherwise generic fallback
+            system_message = context.get("role_context", "You are a helpful assistant.")
             if self.show_thinking:
                 system_message += " Always show your step-by-step reasoning before providing your final answer."
 
