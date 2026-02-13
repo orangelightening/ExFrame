@@ -1,5 +1,5 @@
 # Current System State - ExFrame
-**Date:** 2026-02-12
+**Date:** 2026-02-13
 **Status:** Operational
 
 ## Overview
@@ -37,11 +37,12 @@ ExFrame is a personal AI assistant framework using:
 ### Conversation Memory Modes
 **Location:** `generic_framework/core/query_processor.py`
 
-Four modes available, configured per-domain in `conversation_memory.mode`:
+Five modes available, configured per-domain in `conversation_memory.mode`:
 - **`"all"`** — Load conversation history for every query
 - **`"triggers"`** — Load only when trigger phrases match
-- **`"question"`** — Load only when query starts with `**` prefix
+- **`"question"`** — Load only when query starts with `**` prefix (loads raw domain_log.md)
 - **`"journal"`** — Never load conversation memory (fast path)
+- **`"journal_patterns"`** — Auto-create pattern + embedding per entry; `**` queries use semantic pattern search instead of raw log loading
 
 ### Role Context
 **Location:** `domain.json` → `role_context` field
@@ -62,11 +63,16 @@ This is the most critical config field — without it, the LLM has no domain-spe
   "role_context": "You are Peter's secretary. Your behavior depends on the query format: ...",
   "persona": "poet",
   "temperature": 0.3,
+  "llm_config": {
+    "base_url": "http://model-runner.docker.internal:12434/engines/v1",
+    "model": "ai/llama3.2",
+    "api_key": "not-needed"
+  },
   "conversation_memory": {
     "enabled": true,
-    "mode": "question",
-    "max_context_chars": 5000,
-    "trigger_phrases": ["**"]
+    "mode": "journal_patterns",
+    "trigger_phrases": ["**"],
+    "max_context_chars": 5000
   },
   "logging": {
     "enabled": true,
@@ -76,8 +82,10 @@ This is the most critical config field — without it, the LLM has no domain-spe
 ```
 
 **Domain Log:** `universes/MINE/domains/peter/domain_log.md`
-- Stores conversation history with timestamps
-- Used as conversation memory source (when mode allows)
+- Stores conversation history with timestamps (audit trail)
+- NOT used for retrieval in `journal_patterns` mode (patterns.json + embeddings.json used instead)
+
+**Journal Patterns:** Each journal entry auto-creates a pattern in `patterns.json` with `pattern_type: "journal_entry"` and a corresponding embedding in `embeddings.json`. Queries prefixed with `**` trigger semantic search over these patterns.
 
 ### Two Engines Coexisting
 - **Phase1Engine** (`core/phase1_engine.py`) — new simplified path via `/api/query/phase1`
@@ -88,9 +96,23 @@ This is the most critical config field — without it, the LLM has no domain-spe
 
 Domain configs contain fields for both engines. Do NOT remove old-schema fields (`plugins`, `specialists`, `knowledge_base`, etc.) until full migration to Phase 1 is complete.
 
-## Recent Changes (2026-02-12)
+## Recent Changes (2026-02-13)
 
 ### Completed
+- **Patterns-as-Journal** — New `journal_patterns` conversation memory mode:
+  - Auto-creates a pattern (`pattern_type: "journal_entry"`) for every journal entry
+  - Generates embedding via `EmbeddingService.encode_pattern()` + `VectorStore`
+  - `**` queries use semantic search over journal patterns instead of loading raw domain_log.md
+  - Three new functions in `query_processor.py`: `_create_journal_pattern()`, `_generate_journal_embedding()`, `_search_journal_patterns()`
+  - Low similarity threshold (0.1) — lets the LLM decide relevance from top 10 matches
+  - Fallback to most recent N entries if embeddings unavailable
+- **Docker Model Runner** — Peter domain switched from Ollama to Docker Desktop's built-in model runner
+  - Endpoint: `http://model-runner.docker.internal:12434/engines/v1`
+  - Tested with `ai/smollm2` (360M) and `ai/llama3.2` (3B)
+  - Managed via `docker model pull/ls/rm`
+- Peter domain conversation memory changed from `"question"` to `"journal_patterns"`
+
+### Previous Changes (2026-02-12)
 - Trace data capture with LLM timing breakdown
 - Phase1 traces written to `/app/logs/traces/queries.log`
 - Added `"question"` and `"journal"` conversation memory modes to `query_processor.py`
@@ -111,24 +133,22 @@ Allows each domain to override the global LLM provider. Domains without `llm_con
 ```json
 {
   "llm_config": {
-    "base_url": "http://host.docker.internal:11434/v1",
-    "model": "mistral:7b",
-    "api_key": "ollama"
+    "base_url": "http://model-runner.docker.internal:12434/engines/v1",
+    "model": "ai/llama3.2",
+    "api_key": "not-needed"
   }
 }
 ```
 
 **Flow:** `domain.json` → `query_processor` (injects into context) → `persona._call_llm` (reads from context, falls back to env vars)
 
-**Peter domain:** Configured with Ollama placeholder (needs Ollama running to test).
+**Peter domain:** Using Docker Model Runner with `ai/llama3.2`.
 
 ### TODO — Testing and Next Steps
-1. **Install and run Ollama** on host with a small model (e.g., `ollama pull mistral:7b`)
-2. **Test Peter domain** with local Ollama — journal entries should respond in <2 seconds
+1. **Find a better local model** for Peter domain — `smollm2` too weak (ignores instructions), `llama3.2` over-cautious (refuses benign queries). Try uncensored variants or larger models.
+2. **Test `**` query quality** — semantic search finds correct patterns, but LLM response quality depends on model. Larger models handle the role_context instructions better.
 3. **Test other domains** still work on cloud LLM (no `llm_config` = env var fallback)
 4. **Run full test plan** from `testplan.md`
-5. **Evaluate local model quality** — does mistral:7b follow the role_context instructions correctly?
-6. **Try other local models** if needed (llama3:8b, phi3, gemma2:9b)
 
 ### Pending Optimizations
 1. **Separate persona from domain role**

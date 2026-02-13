@@ -9,8 +9,8 @@
 >
 > **This file consolidates all architecture documentation.**
 
-**Version:** 1.7.0
-**Last Updated:** 2026-02-12
+**Version:** 1.8.0
+**Last Updated:** 2026-02-13
 **Status:** Production (Phase 1 Persona System)
 
 ---
@@ -20,13 +20,14 @@
 1. [System Overview](#system-overview)
 2. [Plugin Architecture](#plugin-architecture)
 3. [Persona System (Phase 1)](#persona-system-phase-1)
-4. [State Machine](#state-machine)
-5. [Multi-Turn API & Web Search](#multi-turn-api--web-search)
-6. [Semantic Document Search](#semantic-document-search)
-7. [Data Structures](#data-structures)
-8. [Request/Response Flow](#requestresponse-flow)
-9. [File Locations](#file-locations)
-10. [Extension Points](#extension-points)
+4. [Patterns-as-Journal](#patterns-as-journal)
+5. [State Machine](#state-machine)
+6. [Multi-Turn API & Web Search](#multi-turn-api--web-search)
+7. [Semantic Document Search](#semantic-document-search)
+8. [Data Structures](#data-structures)
+9. [Request/Response Flow](#requestresponse-flow)
+10. [File Locations](#file-locations)
+11. [Extension Points](#extension-points)
 
 ---
 
@@ -272,16 +273,19 @@ Conversation memory loads previous interactions from `domain_log.md` into the LL
 }
 ```
 
-**Four modes available:**
+**Five modes available:**
 
 | Mode | Behavior | Use Case |
 |------|----------|----------|
 | `"all"` | Load for every query | Domains needing full context always |
 | `"triggers"` | Load only when trigger phrases match | Selective context loading |
-| `"question"` | Load only when query starts with `**` | Journal domains with question support |
+| `"question"` | Load only when query starts with `**` | Journal domains with question support (loads raw domain_log.md) |
 | `"journal"` | Never load | Pure logging, maximum speed |
+| `"journal_patterns"` | Auto-create patterns; `**` queries use semantic pattern search | Journal with semantic retrieval (replaces raw log loading) |
 
 **Important:** Conversation memory is separate from `role_context`. Role context always loads. Memory loading is optional and mode-dependent.
+
+**`journal_patterns` vs `question`:** Both support `**` prefix queries. The difference is `question` loads the last N chars of raw `domain_log.md` into the LLM context (brute-force, truncates old entries, wastes tokens). `journal_patterns` creates a searchable pattern with embedding for every entry, then uses semantic similarity to find relevant entries on `**` queries (~10ms retrieval, no truncation, scales indefinitely).
 
 ### Per-Domain LLM Config
 
@@ -292,23 +296,96 @@ Each domain can override the global LLM provider/model. This enables running lig
 ```json
 {
   "llm_config": {
-    "base_url": "http://host.docker.internal:11434/v1",
-    "model": "mistral:7b",
-    "api_key": "ollama"
+    "base_url": "http://model-runner.docker.internal:12434/engines/v1",
+    "model": "ai/llama3.2",
+    "api_key": "not-needed"
   }
 }
 ```
 
 **Fields:**
-- **`base_url`** — LLM API endpoint (Ollama, OpenAI, z.ai, DeepSeek, etc.)
+- **`base_url`** — LLM API endpoint (Docker Model Runner, Ollama, OpenAI, z.ai, DeepSeek, etc.)
 - **`model`** — Model name
-- **`api_key`** — API key (Ollama uses "ollama" as placeholder)
+- **`api_key`** — API key (`"not-needed"` for Docker Model Runner, `"ollama"` for Ollama)
 
 **Fallback:** Domains without `llm_config` use global env vars (`OPENAI_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`).
 
 **Flow:** `domain.json` → `query_processor` (injects into context) → `persona._call_llm` (reads from context before env vars)
 
-**Compatibility:** Ollama, OpenAI, z.ai (GLM), DeepSeek, and any OpenAI-compatible API.
+**Compatibility:** Docker Model Runner (Docker Desktop), Ollama, OpenAI, z.ai (GLM), DeepSeek, and any OpenAI-compatible API.
+
+**Docker Model Runner:** Docker Desktop's built-in model inference. Models are managed with `docker model pull/ls/rm`. The endpoint is `http://model-runner.docker.internal:12434/engines/v1` (accessible from containers via `extra_hosts: model-runner.docker.internal:host-gateway` in docker-compose).
+
+---
+
+## Patterns-as-Journal
+
+### Overview
+
+The `journal_patterns` conversation memory mode auto-creates a pattern (with embedding) for every journal entry, then uses semantic search to retrieve relevant entries when the user asks a `**` question. This replaces the old approach of loading raw `domain_log.md` text into the LLM context.
+
+### How It Works
+
+**Regular entry** (no `**` prefix):
+```
+User: "dentist appointment Tuesday 3pm"
+  → LLM timestamps and echoes back (via role_context instructions)
+  → Entry logged to domain_log.md (audit trail)
+  → Pattern created in patterns.json with pattern_type: "journal_entry"
+  → Embedding generated and stored in embeddings.json
+```
+
+**Search query** (`**` prefix):
+```
+User: "** when is my dentist appointment?"
+  → query_processor strips ** prefix, sets journal_pattern_search flag
+  → _search_journal_patterns() loads patterns.json, filters to journal_entry type
+  → Semantic search via EmbeddingService.find_most_similar() (threshold: 0.1)
+  → Top 10 matching patterns passed to persona as override_patterns
+  → LLM answers the question using matched journal entries as context
+```
+
+### Key Functions
+
+**Location:** `generic_framework/core/query_processor.py`
+
+| Function | Purpose |
+|----------|---------|
+| `_create_journal_pattern()` | Creates pattern dict, appends to patterns.json, triggers embedding |
+| `_generate_journal_embedding()` | Uses `EmbeddingService.encode_pattern()` + `VectorStore` to store embedding |
+| `_search_journal_patterns()` | Filters to `journal_entry` patterns, semantic search, fallback to most recent N |
+
+### Pattern Structure
+
+```json
+{
+  "id": "peter_20260213_184335",
+  "name": "dentist appointment Tuesday 3pm",
+  "pattern_type": "journal_entry",
+  "problem": "dentist appointment Tuesday 3pm",
+  "solution": "[2026-02-13 18:43:35] dentist appointment Tuesday 3pm",
+  "created_at": "2026-02-13T18:43:35.123456",
+  "tags": ["journal"]
+}
+```
+
+### Configuration
+
+```json
+{
+  "conversation_memory": {
+    "enabled": true,
+    "mode": "journal_patterns"
+  }
+}
+```
+
+### What Stays the Same
+
+- `domain_log.md` continues to be written (audit trail, not used for retrieval)
+- Other domains using `mode: "question"` or `mode: "all"` are unaffected
+- Pattern CRUD API works with journal patterns like any other pattern
+- Embedding service unchanged — same `all-MiniLM-L6-v2` model
 
 ---
 
@@ -678,12 +755,13 @@ generic_framework/
 │   └── app.py                          # FastAPI, all endpoints
 ├── core/
 │   ├── phase1_engine.py                # Phase 1 engine wrapper
-│   ├── query_processor.py              # Phase 1 query processor
+│   ├── query_processor.py              # Phase 1 query processor + journal pattern logic
 │   ├── personas.py                     # POET, LIBRARIAN, RESEARCHER
 │   ├── persona.py                      # Persona class (LLM calls, prompt building)
+│   ├── embeddings.py                   # EmbeddingService + VectorStore (pattern embeddings)
 │   ├── domain.py                       # GenericDomain orchestrator
 │   ├── domain_factory.py               # Legacy - Type 1-5 config
-│   ├── document_embeddings.py          # DocumentVectorStore
+│   ├── document_embeddings.py          # DocumentVectorStore (document embeddings)
 │   └── research/
 │       ├── internet_strategy.py        # DuckDuckGo web search
 │       └── document_strategy.py        # Document discovery
@@ -695,8 +773,10 @@ generic_framework/
     └── index.html                      # Alpine.js SPA
 
 universes/MINE/domains/{domain_id}/
-├── domain.json       # Domain configuration
-├── patterns.json     # Pattern storage
+├── domain.json        # Domain configuration
+├── patterns.json      # Pattern storage (includes journal_entry patterns)
+├── embeddings.json    # Pattern embeddings (journal + regular patterns)
+├── domain_log.md      # Conversation log (audit trail)
 └── doc_embeddings.json # Document embeddings (librarian)
 ```
 
