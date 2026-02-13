@@ -408,7 +408,19 @@ class Persona:
             # Anthropic/DeepSeek format - user role only
             # Prepend role_context to the prompt if available
             role_context = context.get("role_context", "")
-            anthropic_prompt = f"{role_context}\n\n{prompt}" if role_context else prompt
+            from datetime import datetime, timezone
+            import zoneinfo
+            tz_name = os.getenv("APP_TIMEZONE", "America/Vancouver")
+            try:
+                tz = zoneinfo.ZoneInfo(tz_name)
+            except Exception:
+                tz = None
+            current_dt = datetime.now(tz=tz).strftime("%Y-%m-%d %H:%M:%S")
+            date_line = f"Current date and time: {current_dt}"
+            if role_context:
+                anthropic_prompt = f"{role_context}\n\n{date_line}\n\n{prompt}"
+            else:
+                anthropic_prompt = f"{date_line}\n\n{prompt}"
             payload = {
                 "model": model,
                 "max_tokens": 8192,
@@ -431,6 +443,16 @@ class Persona:
             # OpenAI format - system + user messages
             # Use domain role_context as system message if provided, otherwise generic fallback
             system_message = context.get("role_context", "You are a helpful assistant.")
+            # Inject current date/time so the LLM knows the real date
+            from datetime import datetime, timezone
+            import zoneinfo
+            tz_name = os.getenv("APP_TIMEZONE", "America/Vancouver")
+            try:
+                tz = zoneinfo.ZoneInfo(tz_name)
+            except Exception:
+                tz = None
+            current_dt = datetime.now(tz=tz).strftime("%Y-%m-%d %H:%M:%S")
+            system_message += f"\n\nCurrent date and time: {current_dt}"
             if self.show_thinking:
                 system_message += " Always show your step-by-step reasoning before providing your final answer."
 
