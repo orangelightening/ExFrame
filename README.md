@@ -1184,6 +1184,148 @@ nano universes/default/domains/{domain}/domain_config.json
 2. Domain config `model` field (per-domain override)
 3. Hardcoded default: `glm-4.7`
 
+#### Advanced: Local Models with DMR
+
+ExFrame supports running local LLM models through **DMR (Docker Model Runner)**, an alternative to Ollama that provides better integration with Docker environments.
+
+##### What is DMR?
+
+DMR (Docker Model Runner) is a local model server that:
+- Runs LLMs locally on your hardware (CPU or GPU)
+- Provides an OpenAI-compatible API endpoint
+- Supports multiple model formats (GGUF, etc.)
+- Better Docker networking than Ollama
+
+##### When to Use Local vs Remote Models
+
+| Scenario | Recommendation | Why |
+|----------|---------------|-----|
+| **Simple tasks** (journaling, formatting) | Local small models (llama3.2 3.2B) | Fast (~230ms), no API costs |
+| **Complex reasoning** (research, synthesis) | Remote models (GPT-4, Claude, GLM) | Better quality, no GPU needed |
+| **Mixed workload** | Dual-model routing (see below) | Best of both worlds |
+| **Privacy-critical** | Local models only | Data never leaves your server |
+| **Limited GPU memory** | Remote models | Avoid GPU out-of-memory errors |
+
+##### GPU Memory Considerations
+
+**CRITICAL**: Local models consume GPU VRAM. Running multiple models simultaneously can cause crashes.
+
+**Memory Requirements** (approximate):
+| Model Size | VRAM Needed | Example Models |
+|------------|-------------|----------------|
+| 3B params | ~2GB | llama3.2 |
+| 7-8B params | ~4.5GB | llama3 8B, qwen3 8B |
+| 13B params | ~8GB | llama2 13B |
+| 70B params | ~40GB | llama3 70B |
+
+**GPU Memory Strategy:**
+- **Single model only**: Keep one local model loaded at a time
+- **Use remote models** for complex tasks to free GPU memory
+- **Dual-model routing**: Use fast local for simple, remote for complex
+
+**Common Error:**
+```
+cudaMalloc failed: out of memory
+llama_model_load: error loading model
+```
+
+**Solution**: Use smaller models or switch to remote models for complex tasks.
+
+##### Configuring DMR in Domain
+
+To use a local DMR model for a specific domain, add `llm_config` to the domain's `domain.json`:
+
+```json
+{
+  "domain_id": "my_domain",
+  "domain_name": "My Domain",
+  "persona": "poet",
+  "llm_config": {
+    "base_url": "http://model-runner.docker.internal:12434/engines/v1",
+    "model": "ai/llama3.2",
+    "api_key": "not-needed"
+  }
+}
+```
+
+**DMR Model Names:**
+- `ai/llama3.2` - Fast 3.2B model (~230ms)
+- `ai/llama3` - Capable 8B model
+- `ai/qwen3` - Capable 8B model (Chinese/English)
+
+**Location**: `universes/{universe}/domains/{domain}/domain.json`
+
+##### Dual-Model Routing (Advanced)
+
+For domains that need **both fast responses and complex reasoning**, ExFrame supports automatic model routing based on query type.
+
+**Use Case**: Journal domain (poet persona)
+- Regular entries: "buy milk" → Fast local model (230ms)
+- Search queries: "** what did I buy?" → Smart remote model (synthesis capability)
+
+**How It Works:**
+1. Regular queries use the local model from `llm_config`
+2. Queries starting with `**` automatically use the remote model from `.env`
+3. Only one GPU model runs at a time (no memory conflicts)
+
+**Configuration:**
+```json
+{
+  "domain_id": "journal",
+  "persona": "poet",
+  "llm_config": {
+    "base_url": "http://model-runner.docker.internal:12434/engines/v1",
+    "model": "ai/llama3.2",
+    "api_key": "not-needed"
+  }
+}
+```
+
+With `.env` configured for remote model:
+```bash
+LLM_MODEL=glm-4.7
+OPENAI_API_KEY=your-api-key
+OPENAI_BASE_URL=https://api.z.ai/api/anthropic
+```
+
+**Result:**
+- Journal entries processed by fast local llama3.2 (~230ms)
+- Search queries processed by capable remote glm-4.7 (~4s)
+- No GPU memory conflicts (only one local model loaded)
+
+##### Troubleshooting Local Models
+
+**Problem**: Model loads slowly on first query
+
+**Solution**: This is normal. First query loads model into memory (~5-10s), subsequent queries are fast (~230ms).
+
+---
+
+**Problem**: `CUDA out of memory` error
+
+**Solution**:
+1. Check GPU memory: `nvidia-smi`
+2. Use smaller model (3.2B instead of 8B)
+3. Switch to remote model for that domain
+4. Close other GPU applications
+
+---
+
+**Problem**: DMR not responding
+
+**Solution**:
+```bash
+# Check if DMR is running
+curl http://model-runner.docker.internal:12434/v1/models
+
+# If not responding, check DMR container logs
+docker logs model-runner
+```
+
+---
+
+**For detailed model selection strategy**, see [MODEL_STRATEGY.md](MODEL_STRATEGY.md).
+
 ### Access the Application
 
 Once containers are running, access ExFrame at:

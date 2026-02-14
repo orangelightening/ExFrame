@@ -56,6 +56,15 @@ OPENAI_API_KEY=not-needed
 OPENAI_BASE_URL=http://host.docker.internal:11434/v1
 ```
 
+**DMR / Docker Model Runner (local/advanced):**
+```bash
+LLM_MODEL=ai/llama3.2
+OPENAI_API_KEY=not-needed
+OPENAI_BASE_URL=http://model-runner.docker.internal:12434/engines/v1
+```
+
+> **Note**: For advanced local model configuration including GPU memory management and dual-model routing, see the "Advanced: Local Models with DMR" section in [README.md](README.md#advanced-local-models-with-dmr).
+
 ### 3️⃣ Start ExFrame
 
 ```bash
