@@ -73,11 +73,21 @@ async def process_query(
     # ==================== LLM CONFIG (Per-domain LLM override) ====================
     # Allows each domain to use a different LLM provider/model (e.g., local Ollama for journal,
     # cloud GLM for research). Falls back to global env vars if not set.
+    # Supports dual-model routing: use fast local model for regular entries,
+    # global GLM model (from .env) for ** searches to avoid GPU memory conflicts
     llm_config = domain_config.get("llm_config")
     if llm_config:
         context = context or {}
-        context["llm_config"] = llm_config
-        logger.info(f"Loaded llm_config from domain config: model={llm_config.get('model', 'default')}, base_url={llm_config.get('base_url', 'default')}")
+        # For ** search queries: use global GLM (from .env) instead of local model
+        # This avoids loading multiple models into GPU memory simultaneously
+        if query.strip().startswith("**"):
+            logger.info(f"⏱ ** query detected: using global GLM from .env (not local model)")
+            # Don't pass llm_config - will fall back to global .env settings
+        else:
+            # Regular query: use fast local model from domain config
+            context["llm_config"] = llm_config
+            logger.info(f"⏱ Using local model: {llm_config.get('model', 'default')}")
+            logger.info(f"Loaded llm_config from domain config: model={llm_config.get('model', 'default')}, base_url={llm_config.get('base_url', 'default')}")
     # ==================== END LLM CONFIG ====================
 
     # ==================== CONVERSATION MEMORY (Load from domain_log.md) ====================

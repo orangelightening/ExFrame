@@ -10,18 +10,28 @@
 
 ## Current Configuration
 
-### 🎭 **Poet Persona** (Simple)
+### 🎭 **Poet Persona** (Dual-Model)
 - **Domain**: peter (journal)
-- **Model**: llama3.2 (3.2B, local via Docker AI)
-- **Performance**: ~231ms per query ⚡
-- **Task**: Timestamped echo of journal entries
-- **Rationale**: Simple text manipulation doesn't need advanced reasoning
+- **Models**:
+  - **Regular entries**: llama3.2 (3.2B, local via DMR) - ~231ms per query ⚡
+  - **Search queries (** prefix)**: glm-4.7 (remote API via .env) - ~3-19s per query
+- **Tasks**:
+  - Regular: Timestamped echo of journal entries
+  - Search: Answer questions by synthesizing from journal patterns
+- **Rationale**: Single GPU model at a time (llama3.2) avoids memory conflicts. GLM for searches provides capability without GPU constraints.
 
-**Example**:
+**Examples**:
 ```
-Query: "buy milk"
+Regular Query: "buy milk"
 Response: "[2026-02-14 12:25:06] buy milk"
+Model: llama3.2 (local, fast)
+
+Search Query: "** what do dogs love?"
+Response: "According to your journal, dogs love beef."
+Model: glm-4.7 (remote, capable)
 ```
+
+**GPU Memory Strategy**: Only llama3.2 loads into GPU memory. GLM runs remotely, avoiding "out of memory" errors when both models would need to be in VRAM simultaneously.
 
 ---
 
@@ -108,8 +118,9 @@ Actual: "[2026-02-14 12:25:06] Tuesday Weld is a great actress"
 
 ### Short Term
 1. ✅ Use llama3.2 for simple poet role (done)
-2. ⬜ Investigate glm cross-contamination issue
-3. ⬜ Test if larger local models (qwen3 8B) work for librarian
+2. ✅ Dual-model routing for poet: llama3.2 for entries, qwen3 for ** searches (done)
+3. ⬜ Investigate glm cross-contamination issue
+4. ⬜ Test if larger local models (qwen3 8B) work for librarian
 
 ### Long Term
 1. ⬜ Fine-tune llama3.2 specifically for poet role

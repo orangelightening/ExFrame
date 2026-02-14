@@ -5,6 +5,8 @@
 ### ✅ Performance Optimization - COMPLETED
 - Embeddings load in 0.2s (singleton pattern working)
 - LLM queries: 231ms with llama3.2 (12.5x faster than qwen3)
+- Dual-model routing: llama3.2 (local) for entries, glm-4.7 (remote) for ** searches
+- Single GPU model strategy: avoids CUDA out-of-memory errors
 - Semantic search: ~11ms for 28 patterns
 - Pattern autogeneration: working (~25ms async)
 - Comprehensive timing logs with ⏱ markers
