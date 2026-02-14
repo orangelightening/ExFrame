@@ -44,10 +44,15 @@ async def process_query(
     Returns:
         Response dict with answer and metadata
     """
+    import time
+    t_start = time.time()
+
     logger.info(f"Processing query for domain: {domain_name}")
 
     # Load domain config
+    t0 = time.time()
     domain_config = _load_domain_config(domain_name)
+    logger.info(f"⏱ Config load: {(time.time()-t0)*1000:.1f}ms")
 
     # Get persona
     persona_type = domain_config.get("persona", "librarian")
@@ -144,6 +149,7 @@ async def process_query(
         logger.info(f"Pattern search from config: {should_search_patterns}")
 
     # Search domain patterns (if enabled)
+    t1 = time.time()
     patterns = None
     if should_search_patterns:
         patterns = _search_domain_patterns(domain_name, query)
@@ -154,11 +160,13 @@ async def process_query(
             logger.info("No patterns found, using persona data source")
     else:
         logger.info("Pattern search disabled, using persona data source directly")
+    logger.info(f"⏱ Pattern search: {(time.time()-t1)*1000:.1f}ms")
 
     # Journal pattern search: override patterns with semantic journal search
     if context and context.get("journal_pattern_search"):
         journal_query = context.get("journal_query", query)
-        journal_patterns = _search_journal_patterns(domain_name, journal_query)
+        # Limit to 5 patterns for faster processing with qwen3
+        journal_patterns = _search_journal_patterns(domain_name, journal_query, max_results=5)
         if journal_patterns:
             patterns = journal_patterns
             logger.info(f"Journal pattern search found {len(patterns)} relevant entries")
@@ -181,6 +189,7 @@ async def process_query(
         context["memory_prefix"] = f"Previous conversation:\n\n{staleness_warning}{memory_content}\n\n---\n\n"
         logger.info("Injected conversation memory into prompt")
 
+    t2 = time.time()
     if patterns and len(patterns) > 0:
         # Use patterns (override)
         response = await persona.respond(
@@ -192,18 +201,22 @@ async def process_query(
         # Use persona's data source
         # For librarian persona, try to load documents if available
         if persona_type == "librarian":
+            t_doc = time.time()
             documents = _search_domain_documents(domain_name, domain_config, query)
             if documents:
                 logger.info(f"Found {len(documents)} documents for library search")
+                logger.info(f"⏱ Document search: {(time.time()-t_doc)*1000:.1f}ms")
                 # Pass documents in context for persona to use
                 context["library_documents"] = documents
 
         response = await persona.respond(query, context=context)
+    logger.info(f"⏱ LLM call (persona.respond): {(time.time()-t2)*1000:.1f}ms")
 
     # ==================== LOGGING (Single Log File) ====================
     # Universal Logging: Always append query/response to domain_log.md
     # Web search results are logged WITH TIMESTAMP to indicate freshness
 
+    t3 = time.time()
     logging_config = domain_config.get("logging", {"enabled": True})
     if logging_config.get("enabled", True):
         log_file = logging_config.get("output_file", "domain_log.md")
@@ -239,12 +252,24 @@ async def process_query(
         else:
             response["logging_updated"] = False
             logger.warning("Failed to append response to domain log")
+    logger.info(f"⏱ Logging: {(time.time()-t3)*1000:.1f}ms")
     # ==================== END LOGGING ====================
 
-    # ==================== JOURNAL PATTERN CREATION ====================
-    if memory_config.get("mode") == "journal_patterns" and not query.strip().startswith("**"):
-        _create_journal_pattern(domain_name, query, answer)
-    # ==================== END JOURNAL PATTERN CREATION ====================
+    # ==================== PATTERN AUTOGENERATION ====================
+    # Auto-create patterns from queries if enabled (configurable per domain)
+    # Excludes ** queries (those are for searching, not creating)
+    auto_create_enabled = domain_config.get("auto_create_patterns", False)
+
+    # Legacy support: journal_patterns mode also enables auto-creation
+    if memory_config.get("mode") == "journal_patterns":
+        auto_create_enabled = True
+
+    if auto_create_enabled and not query.strip().startswith("**"):
+        import asyncio
+        answer_text = response.get("answer", "")
+        asyncio.create_task(_create_journal_pattern_async(domain_name, query, answer_text))
+        logger.info(f"Pattern autogeneration triggered for domain: {domain_name}")
+    # ==================== END PATTERN AUTOGENERATION ====================
 
     # Add domain metadata
     response["domain"] = domain_name
@@ -255,6 +280,11 @@ async def process_query(
     # Add conversation memory metadata
     if memory_content is not None:
         response["conversation_memory_used"] = True
+
+    # Add timing metadata
+    total_time = (time.time() - t_start) * 1000
+    response["query_time_ms"] = total_time
+    logger.info(f"⏱ TOTAL QUERY TIME: {total_time:.1f}ms")
 
     return response
 
@@ -969,6 +999,17 @@ def _generate_journal_embedding(domain_path: Path, pattern_id: str, pattern: dic
         logger.warning(f"Failed to generate journal embedding (non-fatal): {e}")
 
 
+async def _create_journal_pattern_async(domain_name: str, query: str, response: str) -> None:
+    """
+    Async wrapper for _create_journal_pattern to run in background.
+
+    This prevents blocking the response while generating embeddings.
+    """
+    import asyncio
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, _create_journal_pattern, domain_name, query, response)
+
+
 def _search_journal_patterns(
     domain_name: str,
     query: str,
@@ -1026,9 +1067,9 @@ def _search_journal_patterns(
         # Build pattern lookup by ID
         pattern_data = {p["id"]: p for p in journal_patterns}
 
-        # Try semantic search with embeddings
+        # Try semantic search with embeddings (should be pre-loaded at startup)
         service = get_embedding_service()
-        if service and service.is_available:
+        if service and service.is_available and service.is_loaded:
             store = VectorStore(domain_path)
             store.load()
 
@@ -1058,9 +1099,11 @@ def _search_journal_patterns(
                 logger.info("Semantic search returned no results above threshold")
             else:
                 logger.info("No embeddings found for journal patterns, falling back")
+        else:
+            logger.info("Embedding model not loaded, using recent patterns fallback")
 
-        # Fallback: return most recent journal patterns (no embeddings available)
-        logger.info(f"Falling back to returning {max_results} most recent journal patterns")
+        # Fallback: return most recent journal patterns
+        logger.info(f"Returning {max_results} most recent journal patterns")
         return journal_patterns[-max_results:]
 
     except Exception as e:

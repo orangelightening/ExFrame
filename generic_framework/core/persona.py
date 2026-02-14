@@ -427,7 +427,8 @@ class Persona:
                 "temperature": temperature,
                 "messages": [
                     {"role": "user", "content": anthropic_prompt}
-                ]
+                ],
+                "keep_alive": -1  # Keep model loaded indefinitely (Docker AI / Ollama)
             }
 
             # Note: For Anthropic-compatible endpoints, GLM web search tools aren't supported
@@ -464,7 +465,8 @@ class Persona:
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": prompt}
                 ],
-                "stream": False  # We don't use streaming currently
+                "stream": False,  # We don't use streaming currently
+                "keep_alive": -1  # Keep model loaded indefinitely (Docker AI / Ollama)
             }
 
             # Enable GLM web search for:
@@ -523,20 +525,27 @@ class Persona:
             endpoint = f"{base_url.rstrip('/')}/chat/completions"
 
         # Call LLM API
+        import time
+        t_http_start = time.time()
         timeout = httpx.Timeout(timeout=180.0, connect=60.0, pool=60.0)  # Increased timeout
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
+                self.logger.info(f"⏱ Starting HTTP request to {endpoint}")
                 response = await client.post(
                     endpoint,
                     headers=headers,
                     json=payload
                 )
+                http_time = (time.time() - t_http_start) * 1000
+                self.logger.info(f"⏱ HTTP request completed: {http_time:.1f}ms")
                 response.raise_for_status()
                 data = response.json()
 
                 # Check for tool calls (GLM web_search)
                 if "content" in data and isinstance(data["content"], list):
                     for block in data["content"]:
+                        return data["content"][0]["text"]
+                # Fallback: return content as-is if no tool calls
                         if block.get("type") == "tool_calls":
                             # GLM wants to use tools - send back confirmation to execute
                             tool_id = block.get("id", "")
