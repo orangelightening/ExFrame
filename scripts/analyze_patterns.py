@@ -70,10 +70,14 @@ def analyze_pattern_quality(pattern):
 
 
 def find_similar_patterns(patterns, similarity_threshold=0.8):
-    """Find potentially duplicate patterns using simple text similarity."""
+    """Find potentially duplicate patterns using simple text similarity.
+
+    Returns both duplicate pairs and affected pattern IDs.
+    """
     from difflib import SequenceMatcher
 
-    duplicates = []
+    duplicate_pairs = []
+    affected_patterns = set()
     checked = set()
 
     for i, p1 in enumerate(patterns):
@@ -94,15 +98,17 @@ def find_similar_patterns(patterns, similarity_threshold=0.8):
 
             # If either is very similar, flag as potential duplicate
             if name_sim > similarity_threshold or problem_sim > similarity_threshold:
-                duplicates.append({
-                    'pattern1': {'id': p1.get('id'), 'name': p1.get('name')},
-                    'pattern2': {'id': p2.get('id'), 'name': p2.get('name')},
+                duplicate_pairs.append({
+                    'pattern1': {'id': p1.get('id'), 'name': p1.get('name'), 'index': i},
+                    'pattern2': {'id': p2.get('id'), 'name': p2.get('name'), 'index': j},
                     'name_similarity': name_sim,
                     'problem_similarity': problem_sim
                 })
+                affected_patterns.add(i)
+                affected_patterns.add(j)
                 checked.add((i, j))
 
-    return duplicates
+    return duplicate_pairs, affected_patterns
 
 
 def analyze_domains(universes_path):
@@ -202,17 +208,36 @@ def analyze_domains(universes_path):
     print()
 
     # Group by domain and check within domains
-    for domain_name, stats in domain_stats.items():
-        duplicates = find_similar_patterns(stats['patterns'], similarity_threshold=0.75)
+    total_affected = 0
+    total_pairs = 0
 
-        if duplicates:
-            print(f"⚠️  {domain_name} - Found {len(duplicates)} potential duplicates:")
-            for dup in duplicates[:5]:  # Show top 5
-                print(f"  • '{dup['pattern1']['name']}' ≈ '{dup['pattern2']['name']}'")
-                print(f"    Similarity: name={dup['name_similarity']:.2f}, problem={dup['problem_similarity']:.2f}")
-            if len(duplicates) > 5:
-                print(f"  ... and {len(duplicates) - 5} more")
+    for domain_name, stats in domain_stats.items():
+        duplicate_pairs, affected_patterns = find_similar_patterns(stats['patterns'], similarity_threshold=0.75)
+
+        if duplicate_pairs:
+            pattern_count = len(stats['patterns'])
+            affected_count = len(affected_patterns)
+            pair_count = len(duplicate_pairs)
+
+            total_affected += affected_count
+            total_pairs += pair_count
+
+            print(f"⚠️  {domain_name}:")
+            print(f"     Total patterns: {pattern_count}")
+            print(f"     Patterns involved in duplicates: {affected_count} ({affected_count/pattern_count*100:.1f}%)")
+            print(f"     Duplicate pairs found: {pair_count}")
             print()
+            print(f"     Top duplicate pairs:")
+            for dup in duplicate_pairs[:5]:  # Show top 5
+                print(f"       • '{dup['pattern1']['name'][:50]}...' ≈ '{dup['pattern2']['name'][:50]}...'")
+                print(f"         Similarity: name={dup['name_similarity']:.2f}, problem={dup['problem_similarity']:.2f}")
+            if len(duplicate_pairs) > 5:
+                print(f"       ... and {len(duplicate_pairs) - 5} more pairs")
+            print()
+
+    if total_pairs > 0:
+        print(f"📊 Summary: {total_affected} patterns involved in {total_pairs} duplicate pairs")
+        print()
 
     # Low quality patterns
     print("=" * 70)
