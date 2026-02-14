@@ -16,6 +16,51 @@
 
 ---
 
+## Minor Bugs / Enhancements
+
+### Poet Response Format (Priority: Low)
+**Issue**: Poet now includes "Query:" prefix in timestamped responses
+
+**Current Behavior**:
+```
+Input: "dogs love beef"
+Output: "[2026-02-14 13:04:38] Query: dogs love beef"
+```
+
+**Expected Behavior**:
+```
+Input: "dogs love beef"
+Output: "[2026-02-14 13:04:38] dogs love beef"
+```
+
+**Notes**:
+- Not critical - system works fine
+- User doesn't want to mess with working prompt
+- Fix when doing broader poet/journal improvements
+
+**Workaround**: None needed, cosmetic issue only
+
+---
+
+### Duplicate Pattern Creation (Priority: Low - WORKING AS DESIGNED)
+**Status**: Duplicates ARE created but analytics detects them
+
+**Current Behavior**:
+- Making same journal entry multiple times creates duplicate patterns
+- Analytics script identifies duplicates (100% match)
+- User can easily see and delete duplicates manually
+
+**Example**: peter domain has 5 exact duplicate pairs (detected by analytics)
+
+**Notes**:
+- Manual cleanup works fine
+- Not blocking for production
+- Could add automatic deduplication later
+
+**Workaround**: Run `python3 scripts/analyze_patterns.py` periodically and manually clean up duplicates
+
+---
+
 ## Future Enhancements
 
 ### Cross-Domain Semantic Search (Priority: Medium)
