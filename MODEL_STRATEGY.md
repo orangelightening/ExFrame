@@ -14,11 +14,11 @@
 - **Domain**: peter (journal)
 - **Models**:
   - **Regular entries**: llama3.2 (3.2B, local via DMR) - ~231ms per query ⚡
-  - **Search queries (** prefix)**: glm-4.7 (remote API via .env) - ~3-19s per query
+  - **Search queries (** prefix)**: remote model (configured via .env) - ~3-19s per query
 - **Tasks**:
   - Regular: Timestamped echo of journal entries
   - Search: Answer questions by synthesizing from journal patterns
-- **Rationale**: Single GPU model at a time (llama3.2) avoids memory conflicts. GLM for searches provides capability without GPU constraints.
+- **Rationale**: Single GPU model at a time (llama3.2) avoids memory conflicts. Remote model for searches provides capability without GPU constraints.
 
 **Examples**:
 ```
@@ -28,16 +28,16 @@ Model: llama3.2 (local, fast)
 
 Search Query: "** what do dogs love?"
 Response: "According to your journal, dogs love beef."
-Model: glm-4.7 (remote, capable)
+Model: remote model (e.g., glm-4.7, deepseek, etc. via .env)
 ```
 
-**GPU Memory Strategy**: Only llama3.2 loads into GPU memory. GLM runs remotely, avoiding "out of memory" errors when both models would need to be in VRAM simultaneously.
+**GPU Memory Strategy**: Only llama3.2 loads into GPU memory. Remote model runs via API (configured in .env), avoiding "out of memory" errors when both models would need to be in VRAM simultaneously.
 
 ---
 
 ### 📚 **Librarian Persona** (Complex)
 - **Domain**: exframe, cooking, etc.
-- **Model**: glm-4.7 (larger, via api.z.ai)
+- **Model**: remote model (configured via .env, e.g., glm-4.7)
 - **Performance**: ~3-19s per query 🐌
 - **Tasks**:
   - Pattern synthesis
@@ -56,7 +56,7 @@ Response: [Detailed explanation synthesized from patterns and docs]
 
 ### 🔬 **Researcher Persona** (Complex)
 - **Domains**: Research domains
-- **Model**: glm-4.7 (larger, via api.z.ai)
+- **Model**: remote model (configured via .env, e.g., glm-4.7)
 - **Performance**: ~3-19s per query
 - **Tasks**:
   - Multi-step research
@@ -138,7 +138,7 @@ Actual: "[2026-02-14 12:25:06] Tuesday Weld is a great actress"
 - ✅ No complex reasoning needed
 - ✅ Deterministic behavior expected
 
-### Use **Remote glm-4.7+** when:
+### Use **Remote model (via .env)** when:
 - ✅ Complex reasoning required
 - ✅ Multi-step processing
 - ✅ Context understanding critical
@@ -151,9 +151,9 @@ Actual: "[2026-02-14 12:25:06] Tuesday Weld is a great actress"
 
 | Persona | Model | Target | Current | Status |
 |---------|-------|--------|---------|--------|
-| Poet | llama3.2 | < 500ms | 231ms | ✅ |
-| Librarian | glm-4.7 | < 5s | 3-19s | ⚠️ Variable |
-| Researcher | glm-4.7 | < 10s | Not tested | ⬜ |
+| Poet | llama3.2 / remote | < 500ms / < 10s | 231ms / 3-19s | ✅ |
+| Librarian | remote (.env) | < 5s | 3-19s | ⚠️ Variable |
+| Researcher | remote (.env) | < 10s | Not tested | ⬜ |
 
 ---
 
@@ -165,7 +165,7 @@ Actual: "[2026-02-14 12:25:06] Tuesday Weld is a great actress"
 - Combine results for best of both worlds
 
 ### Model Upgrade Path
-1. **Current**: llama3.2 (3.2B) + glm-4.7 (remote)
+1. **Current**: llama3.2 (3.2B local) + remote model (via .env)
 2. **Next**: Add qwen3 (8B) local for mid-complexity tasks
 3. **Future**: Deploy llama3 70B or similar for full local capability
 
@@ -175,8 +175,8 @@ Actual: "[2026-02-14 12:25:06] Tuesday Weld is a great actress"
 
 - [x] Poet with llama3.2
 - [x] Librarian with llama3.2 (failed)
-- [x] Librarian with glm-4.7 (works)
-- [ ] Researcher with glm-4.7
+- [x] Librarian with remote model (works)
+- [ ] Researcher with remote model
 - [ ] Investigate glm cross-contamination
 - [ ] Test qwen3 (8B) for librarian role
 - [ ] Benchmark end-to-end query performance

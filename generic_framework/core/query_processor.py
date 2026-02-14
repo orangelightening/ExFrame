@@ -71,17 +71,17 @@ async def process_query(
     # ==================== END ROLE CONTEXT ====================
 
     # ==================== LLM CONFIG (Per-domain LLM override) ====================
-    # Allows each domain to use a different LLM provider/model (e.g., local Ollama for journal,
-    # cloud GLM for research). Falls back to global env vars if not set.
+    # Allows each domain to use a different LLM provider/model (e.g., local DMR for journal,
+    # remote model for research). Falls back to global env vars if not set.
     # Supports dual-model routing: use fast local model for regular entries,
-    # global GLM model (from .env) for ** searches to avoid GPU memory conflicts
+    # remote model (from .env) for ** searches to avoid GPU memory conflicts
     llm_config = domain_config.get("llm_config")
     if llm_config:
         context = context or {}
-        # For ** search queries: use global GLM (from .env) instead of local model
+        # For ** search queries: use remote model (from .env) instead of local model
         # This avoids loading multiple models into GPU memory simultaneously
         if query.strip().startswith("**"):
-            logger.info(f"⏱ ** query detected: using global GLM from .env (not local model)")
+            logger.info(f"⏱ ** query detected: using remote model from .env (not local model)")
             # Don't pass llm_config - will fall back to global .env settings
         else:
             # Regular query: use fast local model from domain config
