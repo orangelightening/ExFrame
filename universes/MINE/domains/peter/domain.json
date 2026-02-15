@@ -106,5 +106,13 @@
       "**"
     ],
     "max_context_chars": 5000
+  },
+  "query_history": {
+    "enabled": true,
+    "compression": "gzip",
+    "context_window": 20,
+    "max_entries": null,
+    "store_evoked_questions": true,
+    "extract_concepts": false
   }
 }

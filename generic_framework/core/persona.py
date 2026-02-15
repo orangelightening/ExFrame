@@ -471,13 +471,27 @@ class Persona:
                 anthropic_prompt = f"{role_context}\n\n{date_line}\n\n{prompt}"
             else:
                 anthropic_prompt = f"{date_line}\n\n{prompt}"
+            # Build messages list
+            messages = []
+
+            # Add KCart conversation history if available
+            kcart_history = context.get("kcart_history", [])
+            if kcart_history:
+                # For Anthropic format, all messages must be user role
+                # Prepend history to prompt instead
+                history_text = "\n\n".join([
+                    f"Previous: {msg['content']}" for msg in kcart_history
+                ])
+                anthropic_prompt = f"Conversation history:\n{history_text}\n\n---\n\n{anthropic_prompt}"
+                self.logger.info(f"Injected {len(kcart_history)} KCart messages into Anthropic prompt")
+
+            messages.append({"role": "user", "content": anthropic_prompt})
+
             payload = {
                 "model": model,
                 "max_tokens": 8192,
                 "temperature": temperature,
-                "messages": [
-                    {"role": "user", "content": anthropic_prompt}
-                ],
+                "messages": messages,
                 "keep_alive": -1  # Keep model loaded indefinitely (Docker AI / Ollama)
             }
 
@@ -507,14 +521,23 @@ class Persona:
             if self.show_thinking:
                 system_message += " Always show your step-by-step reasoning before providing your final answer."
 
+            # Build messages list
+            messages = [{"role": "system", "content": system_message}]
+
+            # Add KCart conversation history if available
+            kcart_history = context.get("kcart_history", [])
+            if kcart_history:
+                messages.extend(kcart_history)
+                self.logger.info(f"Injected {len(kcart_history)} KCart messages into OpenAI format")
+
+            # Add current query
+            messages.append({"role": "user", "content": prompt})
+
             payload = {
                 "model": model,
                 "max_tokens": 8192,
                 "temperature": temperature,
-                "messages": [
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": prompt}
-                ],
+                "messages": messages,
                 "stream": False,  # We don't use streaming currently
                 "keep_alive": -1  # Keep model loaded indefinitely (Docker AI / Ollama)
             }

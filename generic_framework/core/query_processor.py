@@ -11,6 +11,7 @@ from typing import Dict, Any, Optional, List
 import logging
 from pathlib import Path
 from .personas import get_persona
+from .knowledge_cartography import get_kcart
 
 
 logger = logging.getLogger("query_processor")
@@ -59,6 +60,14 @@ async def process_query(
     persona = get_persona(persona_type)
 
     logger.info(f"Using persona: {persona_type}")
+
+    # ==================== KNOWLEDGE CARTOGRAPHY (Query/Response History) ====================
+    # Initialize KCart for this domain to track all query/response pairs
+    # This enables dialectical knowledge mapping and conversational context
+    from pathlib import Path as PathlibPath
+    domain_path = PathlibPath("/app/universes/MINE/domains") / domain_name
+    kcart = get_kcart(str(domain_path), domain_config)
+    # ==================== END KCART INIT ====================
 
     # ==================== ROLE CONTEXT (Always loaded, never skipped) ====================
     # Role context defines how the AI behaves for this domain. It is stored in domain.json
@@ -247,12 +256,35 @@ async def process_query(
             asyncio.create_task(_create_journal_pattern_async(domain_name, query, simple_response))
             logger.info(f"Pattern autogeneration triggered for domain: {domain_name}")
 
+        # Save to KCart (simple echo path)
+        kcart.save_query_response(
+            query=query,
+            response=simple_response,
+            metadata={
+                "source": "simple_echo",
+                "confidence": 1.0,
+                "patterns_used": []
+            }
+        )
+
         total_time = (time.time() - t_start) * 1000
         response["query_time_ms"] = total_time
         logger.info(f"⏱ TOTAL QUERY TIME: {total_time:.1f}ms")
 
         return response
     # ==================== END SIMPLE ECHO ====================
+
+    # ==================== KCART CONVERSATIONAL CONTEXT ====================
+    # Load recent query/response pairs for conversational memory
+    # This gives personas context of recent interactions (last 20 turns by default)
+    t_kcart = time.time()
+    kcart_context = kcart.load_recent_context()
+    if kcart_context:
+        context = context or {}
+        context["kcart_history"] = kcart_context
+        logger.info(f"Loaded {len(kcart_context)} messages from KCart for conversational context")
+    logger.info(f"⏱ KCart context load: {(time.time()-t_kcart)*1000:.1f}ms")
+    # ==================== END KCART CONTEXT ====================
 
     # THE DECISION: Override or not?
     # Prepare context with show_thinking flag
@@ -363,6 +395,20 @@ async def process_query(
     # Add conversation memory metadata
     if memory_content is not None:
         response["conversation_memory_used"] = True
+
+    # ==================== SAVE TO KCART ====================
+    # Save query/response pair to compressed history for knowledge cartography
+    kcart.save_query_response(
+        query=query,
+        response=response.get("answer", ""),
+        metadata={
+            "source": response.get("source", "unknown"),
+            "confidence": response.get("confidence", 0.0),
+            "patterns_used": response.get("patterns_used", []),
+            "evoked_questions": response.get("evoked_questions", [])
+        }
+    )
+    # ==================== END KCART SAVE ====================
 
     # Add timing metadata
     total_time = (time.time() - t_start) * 1000
