@@ -63,6 +63,56 @@ Output: "[2026-02-14 13:04:38] dogs love beef"
 
 ---
 
+## Performance Optimizations
+
+### Smart Pattern Filtering for ** Searches (Priority: High)
+**Goal**: Reduce LLM synthesis time from 8s to 5-6s
+
+**Current behavior:**
+- Sends top 10 patterns with 0.3 threshold
+- LLM processes all patterns regardless of relevance
+- Takes ~8s for synthesis
+
+**Proposed improvements:**
+1. **Increase threshold**: 0.3 → 0.5 (only highly relevant patterns)
+2. **Reduce pattern count**: 10 → 5 (less context to process)
+3. **Keyword boosting**: Boost patterns with exact query term matches
+4. **Recency boost**: Recent entries rank higher
+5. **Smarter prompting**: Minimal, focused prompts (fewer tokens)
+
+**Expected impact:**
+- Speed: 8s → 5-6s (30-40% faster)
+- Accuracy: Better (only send relevant patterns)
+- Cost: Lower (fewer tokens processed)
+
+**Implementation notes:**
+- query_processor.py: Adjust similarity_threshold for ** queries
+- Add keyword matching boost to semantic search
+- Optimize LLM prompt length
+
+---
+
+### Internet Search Integration (Priority: High - BLOCKED)
+**Status**: Needs research and budget approval
+
+**Current situation:**
+- Web search functionality exists but not reliable
+- Need better search API integration
+
+**Options to evaluate:**
+- Brave MCP Search toolkit (offers interesting options)
+- Rates/pricing TBD - user checking
+
+**Next steps:**
+- [ ] User checks Brave MCP pricing
+- [ ] Evaluate search quality vs cost
+- [ ] Budget approval for search API
+- [ ] Implementation if approved
+
+**Notes**: User willing to pay for reliable search if rates are reasonable.
+
+---
+
 ## Future Enhancements
 
 ### Cross-Domain Semantic Search (Priority: Medium)
