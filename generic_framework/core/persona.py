@@ -628,6 +628,7 @@ class Persona:
                             search_results = None
                             search_content = None
                             fetch_limit = 0
+                            brave_search_used = False  # Track if Brave was used
 
                             # Try Brave Search first (fast, ~7-9s with citations)
                             import os
@@ -646,6 +647,7 @@ class Persona:
                                     time_ms = result.get('time_ms', 0)
 
                                     self.logger.info(f"✅ Brave search complete: {tokens} tokens, {time_ms:.0f}ms")
+                                    brave_search_used = True  # Mark that Brave was used successfully
 
                                 except Exception as e:
                                     self.logger.error(f"❌ Brave Search failed: {e}, falling back to DuckDuckGo")
@@ -754,6 +756,16 @@ class Persona:
                             }
                             self.logger.info(f"Tool response length: {len(search_content)} chars")
                             messages_with_tool.append(tool_response)
+
+                            # If Brave Search was used, return directly (skip GLM synthesis)
+                            if brave_search_used:
+                                self.logger.info("⚡ Returning Brave Search results directly (skipping GLM synthesis)")
+                                return {
+                                    "content": search_content,
+                                    "sources": [],  # Brave includes citations inline
+                                    "web_search_used": True,
+                                    "search_provider": "brave"
+                                }
 
                             # Make second request to get actual search results
                             self.logger.info("Sending second request with tool confirmation")
