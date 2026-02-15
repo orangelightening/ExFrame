@@ -192,14 +192,31 @@ class Persona:
             return "Using library of knowledge (documents not available)"
 
         elif self.data_source == "internet":
-            # Search the web - use LLM knowledge for now
-            # Web search integration will be added in future updates
+            # Search the web using Brave Search API if available
             try:
-                self.logger.info("Web search requested - using LLM knowledge with research capabilities")
-                # Return None to let LLM use its training data with research approach
-                return None
+                # Try Brave Search first (fast, cited answers)
+                import os
+                if os.getenv("BRAVE_API_KEY"):
+                    self.logger.info("Using Brave Search for web research")
+                    import asyncio
+                    from integrations.brave_search import brave_search
+
+                    # Execute Brave search
+                    mode = os.getenv("BRAVE_SEARCH_MODE", "single")
+                    result = asyncio.run(brave_search(query, mode=mode))
+
+                    # Return Brave's answer as context
+                    answer = result.get("answer", "")
+                    self.logger.info(f"Brave search complete: {result.get('tokens', {}).get('total', 0)} tokens, {result.get('time_ms', 0):.0f}ms")
+
+                    return f"Web search results (Brave Search):\n\n{answer}"
+                else:
+                    # Fallback to LLM knowledge
+                    self.logger.info("Brave Search not configured - using LLM knowledge")
+                    return None
+
             except Exception as e:
-                self.logger.error(f"Internet search failed: {e}")
+                self.logger.error(f"Brave Search failed: {e}, falling back to LLM knowledge")
                 return None
 
         else:
