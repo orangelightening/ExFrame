@@ -1329,3 +1329,129 @@ Query: A recipe for german apple pie
 
 ---
 
+## 2026-02-15 05:03:55
+
+[WEB_SEARCH - 2026-02-15 05:03:55]
+
+Query: A recipe for german apple pie"
+
+German Apple Pie, known as *Gedeckter Apfelkuchen* in Germany, is a beloved traditional dessert featuring a buttery shortcrust pastry enclosing a spiced apple filling, often enhanced with raisins, almonds, and a hint of rum. The result is a moist, aromatic pie with a flaky crust, typically finished with a glossy lemon glaze.
+
+Below is a refined recipe combining the best techniques and ingredients from authentic sources:
+
+---
+
+* Prep Time: $$40$$ minutes  
+* Cook Time: $$50-60$$ minutes  
+* Servings: $$12$$  
+* Temperature: $$180°C$$ ($$350°F$$) top-to-bottom heat, or $$160°C$$ ($$320°F$$) convection
+
+---
+
+### **Ingredients**
+
+#### **For the Dough**:
+* **All-purpose flour**: $$450$$ g ($$3\frac{1}{2}$$ cups)  
+* **Granulated sugar**: $$150$$ g ($$\frac{3}{4}$$ cup)  
+* **Cold butter**: $$300$$ g ($$1\frac{1}{4}$$ cups / $$2\frac{1}{2}$$ sticks)  
+* **Egg (large)**: $$1$$  
+* **Vanilla paste or extract**: $$1$$ tbsp ($$15$$ ml)  
+* **Lemon zest**: from $$1$$ lemon  
+* **Baking powder**: $$2$$ tsp  
+* **Salt**: $$1$$ pinch  
+
+#### **For the Filling**:
+* **Tart apples (e.g., Granny Smith)**: $$1.5$$ kg ($$3\frac{1}{4}$$ lbs), peeled and thinly sliced  
+* **Granulated sugar**: $$70$$ g ($$\frac{1}{3}$$ cup)  
+* **Cinnamon**: $$1$$ tsp  
+* **Cornstarch or breadcrumbs**: $$2$$ tbsp  
+* **Lemon juice**: juice of $$1$$ lemon ($$\sim 3$$ tbsp)  
+* **Rum-soaked raisins**: $$75$$ g ($$\frac{1}{3}$$ cup), plus $$1-2$$ tbsp soaking rum (optional)  
+* **Roasted almonds, chopped**: $$75$$ g ($$\frac{1}{3}$$ cup)  
+
+#### **For the Glaze**:
+* **Powdered sugar (icing sugar)**: $$1\frac{1}{4}$$ cups ($$150$$ g)  
+* **Lemon juice**: $$3$$ tbsp ($$45$$ ml)  
+* **Slivered almonds**: for garnish (optional)
+
+---
+
+### **Equipment Needed**
+* $$23$$ cm ($$9$$-inch) springform pan  
+* Rolling pin  
+* Parchment paper  
+* Mixing bowls  
+* Apple peeler (optional, for speed)  
+* Pastry brush (for glaze)  
+* Plastic wrap  
+
+---
+
+### **Instructions**
+
+1. **Prepare the dough**: Sift flour, baking powder, sugar, and salt into a large bowl. Add cold butter in cubes, lemon zest, vanilla, and egg. Mix until a smooth dough forms. Do not overwork.  
+2. **Chill the dough**: Divide into three equal parts—two disks and one roll (for the sides). Wrap in plastic and refrigerate for at least $$30$$ minutes (up to $$2$$ hours).  
+3. **Preheat oven**: Set to $$180°C$$ ($$350°F$$) with top-to-bottom heat, or $$160°C$$ ($$320°F$$) convection.  
+4. **Prepare the filling**: In a bowl, combine sliced apples with lemon juice. Add sugar, cinnamon, cornstarch, rum-soaked raisins (with some rum), and chopped almonds. Mix gently and set aside.  
+5. **Assemble the pie**:  
+   - Roll one dough disk to fit the bottom of the springform. Line with parchment, press in, and prick with a fork.  
+   - Roll the dough "snake" into a rope and press around the edge to form a crust wall ($$\sim 5$$ cm high).  
+   - Sprinkle bottom with breadcrumbs or ground nuts (to prevent sogginess).  
+   - Fill with apple mixture, mounding slightly in the center.  
+   - Roll out the second disk and place over the filling. Seal edges by pressing or crimping.  
+6. **Bake**: Place on a parchment-lined baking sheet. Bake for $$50-60$$ minutes, until the crust is golden brown. Cover with foil if browning too quickly after $$30$$ minutes.  
+7. **Cool completely**: Let cool on a wire rack for at least $$2$$ hours. For cleaner slices, chill in the fridge overnight.  
+8. **Glaze and serve**: Mix powdered sugar with lemon juice to form a smooth glaze. Brush over the top and sprinkle with slivered almonds. Let set in the fridge for $$15-20$$ minutes before slicing.
+
+---
+
+### **Safety Notes**
+* Ensure apples are fully cooked—internal temperature should reach at least $$82°C$$ ($$180°F$$).  
+* Chill pie completely before serving to prevent filling leakage and ensure food safety with dairy-free glaze.
+
+---
+
+### **Substitutions**
+* **Gluten-free**: Use $$1:1$$ gluten-free flour blend and xanthan gum ($$1/2$$ tsp).  
+* **Dairy-free**: Substitute butter with cold vegan shortening or margarine.  
+* **Raisins**: Omit or replace with dried cranberries or chopped dates.  
+* **Rum**: Replace with rum extract ($$1$$ tsp) or apple juice.  
+* **Almonds**: Use walnuts or pecans, or omit for nut-free.
+
+---
+
+### **Storage**
+* **Room temperature**: Store covered for up to $$1$$ day.  
+* **Refrigerator**: Keep in an airtight container for up to $$4$$ days.  
+* **Freezer**: Wrap tightly and freeze for up to $$3$$ months. Thaw in fridge overnight before glazing.
+
+---
+
+### **Pro Tips**
+* Use **tart apples** like Granny Smith for balanced sweetness and structure.  
+* **Chill the dough thoroughly**—this prevents shrinkage and ensures a flaky crust.  
+* **Let the pie cool completely**—this allows the filling to set and prevents a runny slice.  
+* For a **shinier glaze**, add $$1$$ tsp of light corn syrup to the powdered sugar mixture.
+
+This pie is perfect for autumn gatherings or holiday desserts and can be made a day ahead for stress-free serving. Skill level: Intermediate
+
+---
+
+**Sources:** This answer was generated by Brave Search AI, which synthesizes information from current web sources. Source attributions are mentioned inline in the text above.
+
+🔍 *Powered by [Brave Search](https://search.brave.com/) - Fast web research with AI synthesis (Query time: 23.4s)*
+
+
+---
+
+## 2026-02-15 05:10:06
+
+[WEB_SEARCH - 2026-02-15 05:10:06]
+
+Query: give me 3 recipes for duck soup
+
+[LLM Error: HTTP 500]
+
+
+---
+
