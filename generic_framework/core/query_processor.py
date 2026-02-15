@@ -188,8 +188,19 @@ async def process_query(
     use_simple_echo = domain_config.get("use_simple_echo", persona_type == "poet")
 
     if use_simple_echo and persona_type == "poet" and not query.strip().startswith("**"):
+        import os
         from datetime import datetime
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        import zoneinfo
+
+        # Use configured timezone (default: America/Vancouver)
+        tz_name = os.getenv("APP_TIMEZONE", "America/Vancouver")
+        try:
+            tz = zoneinfo.ZoneInfo(tz_name)
+            timestamp = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
+        except Exception as e:
+            logger.warning(f"Invalid timezone '{tz_name}', falling back to UTC: {e}")
+            timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
         simple_response = f"[{timestamp}] {query}"
 
         logger.info(f"⏱ Simple echo (no AI): 0.0ms - instant response")
