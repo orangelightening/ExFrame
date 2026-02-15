@@ -198,16 +198,18 @@ class Persona:
                 import os
                 if os.getenv("BRAVE_API_KEY"):
                     self.logger.info("Using Brave Search for web research")
-                    import asyncio
                     from integrations.brave_search import brave_search
 
-                    # Execute Brave search
+                    # Execute Brave search (use await, not asyncio.run)
                     mode = os.getenv("BRAVE_SEARCH_MODE", "single")
-                    result = asyncio.run(brave_search(query, mode=mode))
+                    result = await brave_search(query, mode=mode)
 
                     # Return Brave's answer as context
                     answer = result.get("answer", "")
-                    self.logger.info(f"Brave search complete: {result.get('tokens', {}).get('total', 0)} tokens, {result.get('time_ms', 0):.0f}ms")
+                    tokens = result.get('tokens', {}).get('total', 0)
+                    time_ms = result.get('time_ms', 0)
+
+                    self.logger.info(f"✅ Brave search complete: {tokens} tokens, {time_ms:.0f}ms")
 
                     return f"Web search results (Brave Search):\n\n{answer}"
                 else:
@@ -216,7 +218,9 @@ class Persona:
                     return None
 
             except Exception as e:
-                self.logger.error(f"Brave Search failed: {e}, falling back to LLM knowledge")
+                self.logger.error(f"❌ Brave Search failed: {e}, falling back to LLM knowledge")
+                import traceback
+                self.logger.error(traceback.format_exc())
                 return None
 
         else:
