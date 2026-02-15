@@ -78,15 +78,12 @@ class BraveSearch:
             if search_mode == "research":
                 extra_body["enable_research"] = True
 
-            # Append URL request to ensure sources are included
-            query_with_sources = f"{query}. Include all source URLs."
-
             logger.info(f"Brave search: query='{query[:50]}...', mode={search_mode}, stream={stream}")
 
-            # Execute search
+            # Execute search - query passed as-is, user controls prompt
             response = self.client.chat.completions.create(
                 model="brave",
-                messages=[{"role": "user", "content": query_with_sources}],
+                messages=[{"role": "user", "content": query}],
                 stream=stream,
                 **({"extra_body": extra_body} if extra_body else {})
             )
