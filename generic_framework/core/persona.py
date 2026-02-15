@@ -85,7 +85,7 @@ class Persona:
         else:
             if self.trace:
                 self.logger.info(f"[{self.name}] Using data source: {self.data_source}")
-            content = self._get_data_source_content(query, context)
+            content = await self._get_data_source_content(query, context)
             source = self.data_source
 
         # Determine show_thinking: context value overrides persona default
@@ -159,7 +159,7 @@ class Persona:
                 "trace": trace_data
             }
 
-    def _get_data_source_content(self, query: str, context: Optional[Dict] = None) -> Optional[str]:
+    async def _get_data_source_content(self, query: str, context: Optional[Dict] = None) -> Optional[str]:
         """
         Get content from persona's configured data source.
 
