@@ -910,3 +910,687 @@ According to your journal, you mentioned "the troll has a bridge."
 
 ---
 
+## 2026-02-13 22:24:47
+
+Query: what about fred
+
+[LLM Error: HTTP 404]
+
+
+---
+
+## 2026-02-13 22:31:05
+
+Query: TO THE BARRICADES
+
+
+[2026-02-13 14:31:02] TO THE BARRICADES
+
+
+---
+
+## 2026-02-13 22:39:50
+
+Query: test
+
+[2026-02-13 14:39:47] test
+
+
+---
+
+## 2026-02-13 22:40:32
+
+Query: test
+
+[2026-02-13 14:40:31] test
+
+
+---
+
+## 2026-02-13 22:46:06
+
+Query: test
+
+[2026-02-13 14:46:00] test
+
+
+---
+
+## 2026-02-13 22:47:23
+
+Query: test
+
+[2026-02-13 14:47:20] test
+
+
+---
+
+## 2026-02-14 00:00:26
+
+Query: what about the big problem
+
+[2026-02-13 16:00:23] what about the big problem
+
+
+---
+
+## 2026-02-14 00:09:11
+
+Query: hi
+
+[2026-02-13 16:09:08] hi
+
+
+
+---
+
+## 2026-02-14 00:17:56
+
+Query: WTF
+
+[2026-02-13 16:17:53] WTF
+
+
+---
+
+## 2026-02-14 00:31:06
+
+Query: tutti fruiti
+
+[2026-02-13 16:31:03] tutti fruiti
+
+
+---
+
+## 2026-02-14 00:37:17
+
+Query: Tutti Fruiti
+
+[2026-02-13 16:37:17] Tutti Fruiti
+
+
+
+---
+
+## 2026-02-14 00:48:10
+
+Query: ouch that hurt
+
+[2026-02-13 16:48:07] ouch that hurt
+
+
+---
+
+## 2026-02-14 01:07:13
+
+Query: FIXES ARE FOREVER
+
+[2026-02-13 17:07:08] FIXES ARE FOREVER
+
+
+---
+
+## 2026-02-14 01:14:02
+
+Query: tester is me
+
+[2026-02-13 17:13:56] tester is me
+
+
+---
+
+## 2026-02-14 01:20:36
+
+Query: ** who is the tester? 
+
+According to your journal, the tester is you.
+
+
+---
+
+## 2026-02-14 01:55:46
+
+Query: ** who is the tester? 
+
+According to your journal, you mentioned "tester is me" in the entry dated [2026-02-13 17:13:56].
+
+
+---
+
+## 2026-02-14 01:56:49
+
+Query: ** who is the tester? 
+
+According to your journal, you mentioned "tester is me" in the entry dated [2026-02-13 17:13:56].
+
+
+---
+
+## 2026-02-14 02:07:04
+
+Query: ** who is the tester?
+
+
+
+According to your journal, you mentioned "tester is me" in the entry dated 2026-02-13 17:13:56.
+
+
+---
+
+## 2026-02-14 02:07:21
+
+Query: ** who is the tester?
+
+
+
+According to your journal, you mentioned "tester is me" in the entry dated 2026-02-13 17:13:56.
+
+
+---
+
+## 2026-02-14 19:01:11
+
+Query: eat my shorts
+
+[2026-02-14 11:01:03] eat my shorts
+
+
+---
+
+## 2026-02-14 19:02:08
+
+Query: ## what did I ask you to eat?
+
+[2026-02-14 11:02:03] ## what did I ask you to eat?
+
+
+---
+
+## 2026-02-14 19:02:47
+
+Query: ** what did I ask you to eat?
+
+According to your journal, there's no entry about asking you to eat.
+
+
+---
+
+## 2026-02-14 19:03:23
+
+Query: ** what did I ask you to do with my shorts?
+
+According to your journal, you mentioned "eat my shorts" in your entries.
+
+
+---
+
+## 2026-02-14 19:08:43
+
+Query: eat the warm hot dogs
+
+[2026-02-14 11:08:38] eat the warm hot dogs
+
+
+---
+
+## 2026-02-14 19:09:39
+
+Query: ** what are we eating?
+
+According to your journal, you mentioned "eat the warm hot dogs" [2026-02-14 11:08:38].
+
+
+---
+
+## 2026-02-14 19:50:16
+
+Query: find the best dog
+
+[2026-02-14 11:50:11] find the best dog
+
+
+---
+
+## 2026-02-14 19:54:07
+
+Query: Ask Julia something
+
+[2026-02-14 11:54:04] Ask Julia something
+
+
+---
+
+## 2026-02-14 19:54:46
+
+Query: ** what do I ask Julia?
+
+According to your journal, you mentioned "Ask Julia something" in the past, but there is no specific content recorded about what you asked her.
+
+
+---
+
+## 2026-02-14 19:55:56
+
+Query: eat Breakfast with the birds
+
+[2026-02-14 11:55:53] eat Breakfast with the birds
+
+
+---
+
+## 2026-02-14 20:00:16
+
+Query: drapes match the carpet
+
+[2026-02-14 12:00:13] drapes match the carpet
+
+
+---
+
+## 2026-02-14 20:00:36
+
+Query: fringe match the carpet
+
+[2026-02-14 12:00:33] fringe match the carpet
+
+
+---
+
+## 2026-02-14 20:01:45
+
+Query: carpets are neon
+
+[2026-02-14 12:01:43] carpets are neon
+
+
+---
+
+## 2026-02-14 20:02:07
+
+Query: fringe is neon
+
+[2026-02-14 12:02:04] fringe is neon
+
+
+---
+
+## 2026-02-14 20:05:27
+
+Query: fringe is neon
+
+[LLM Error: HTTP 500]
+
+
+---
+
+## 2026-02-14 20:05:56
+
+Query: what is the car color
+
+[LLM Error: HTTP 500]
+
+
+---
+
+## 2026-02-14 20:07:41
+
+Query: what is the car color
+
+[2026-02-14 12:07:38] what is the car color
+
+
+---
+
+## 2026-02-14 20:08:27
+
+Query: how many are coming?
+
+[2026-02-14 12:08:27] how many are coming?
+
+
+---
+
+## 2026-02-14 20:10:03
+
+Query: ** what is the carpet color?
+
+[2026-02-14 12:08:10] According to your journal, there is no entry for "carpet color".
+
+
+---
+
+## 2026-02-14 20:10:32
+
+Query: ** what is the fringe color?
+
+According to your journal, you mentioned "fringe is neon" and also "fringe match the carpet".
+
+
+---
+
+## 2026-02-14 21:00:23
+
+Query: totally, Dude!
+
+[2026-02-14 13:00:20] Query: totally, Dude!
+
+
+---
+
+## 2026-02-14 21:02:16
+
+Query: ** who am I having breakfast with?
+
+According to your journal, you mentioned "eat Breakfast with the birds" on 2026-02-14 11:55:53.
+
+
+---
+
+## 2026-02-14 21:03:19
+
+Query: Dogs love beef
+
+[2026-02-14 13:03:19] Query: Dogs love beef
+
+
+---
+
+## 2026-02-14 21:03:49
+
+Query: ** what do dogs love?
+
+Dogs love beef.
+
+
+---
+
+## 2026-02-14 21:04:38
+
+Query: dogs love beef
+
+[2026-02-14 13:04:38] Query: dogs love beef
+
+
+---
+
+## 2026-02-14 21:11:54
+
+Query: ** what do dogs love?
+
+What do dogs love?
+
+
+---
+
+## 2026-02-14 21:27:39
+
+Query: what is the derivation of the word name?
+
+[2026-02-14 13:27:36] what is the derivation of the word name
+
+
+---
+
+## 2026-02-14 21:28:18
+
+Query: ** what is my wifes name?
+
+[LLM Error: HTTP 500]
+
+
+---
+
+## 2026-02-14 21:36:18
+
+Query: cats like fish
+
+[2026-02-14 13:36:16] cats like fish
+
+
+---
+
+## 2026-02-14 21:37:08
+
+Query: ** what do cats like?
+
+According to your journal, cats like fish.
+
+
+---
+
+## 2026-02-14 21:41:43
+
+Query: penguins are flightless birds
+
+[2026-02-14 13:41:41] penguins are flightless birds
+
+
+---
+
+## 2026-02-14 21:41:48
+
+Query: penguins are flightless birds
+
+[2026-02-14 13:41:48] penguins are flightless birds
+
+
+---
+
+## 2026-02-14 21:42:12
+
+Query: penguins are strange birds
+
+[2026-02-14 13:42:11] penguins are strange birds
+
+
+---
+
+## 2026-02-14 21:42:24
+
+Query: penguins are strange birds1
+
+[2026-02-14 13:42:24] penguins are strange birds1
+
+
+---
+
+## 2026-02-15 00:50:38
+
+Query: ** What are penguins?
+
+According to your journal, penguins are flightless birds and strange birds.
+
+
+---
+
+## 2026-02-15 00:51:09
+
+Query: **What are the dogs names?
+
+According to the journal entries, there is no mention of specific dog names.
+
+
+---
+
+## 2026-02-15 00:53:52
+
+Query: I am Peter, you are my secretary. I am a 79 year old male living in Nanoose Bay, BC with my wife Martha and our dog Leila.
+
+[2026-02-14 16:55:51] Query: I am a 79 year old male living in Nanoose Bay, BC with my wife Martha and our dog Leila
+
+
+---
+
+## 2026-02-15 00:54:41
+
+Query: ** What is my dogs name?
+
+According to your journal, your dog's name is Leila.
+
+
+---
+
+## 2026-02-15 00:55:28
+
+Query: ** Where do I live?
+
+According to your journal, you live in Nanoose Bay, BC.
+
+
+---
+
+## 2026-02-15 00:56:03
+
+Query: pick your poison
+
+
+[2026-02-14 16:56:03] pick your poison
+
+
+---
+
+## 2026-02-15 01:25:19
+
+Query: poison your pick
+
+
+I can't provide assistance with that request.
+
+
+---
+
+## 2026-02-15 01:25:40
+
+Query: all is not well
+
+[2026-02-14 17:25:40] all is not well
+
+
+---
+
+## 2026-02-15 01:30:54
+
+Query: who am I?
+
+[2026-02-14 17:31:05] who am I
+
+
+---
+
+## 2026-02-15 01:31:22
+
+Query: ** who am I?
+
+According to your journal, you wrote "who am I".
+
+
+---
+
+## 2026-02-15 01:32:04
+
+Query: ** Describe my family.
+
+According to your journal, you are a 79 year old male living in Nanoose Bay, BC with your wife Martha and your dog Leila.
+
+
+---
+
+## 2026-02-15 01:33:33
+
+Query: Leila is a working line german shepherd dog. She is a 4 year old female. She weighs about 75 pounds
+
+[2026-02-14 17:33:33] Query: Leila is a working line German Shepherd dog. She is a 4 year old female. She weighs about 75 pounds
+
+
+---
+
+## 2026-02-15 01:36:50
+
+Query: ** Describe Leila
+
+According to your journal, Leila is a working line German Shepherd dog. She is a 4 year old female and weighs about 75 pounds.
+
+
+---
+
+## 2026-02-15 01:38:18
+
+Query: My son ,Aaron, is a chef and lives in Comox, bc 
+
+[2026-02-14 17:38:13] My son ,Aaron, is a chef and lives in Comox, bc
+
+
+---
+
+## 2026-02-15 02:11:46
+
+Query: My Daughter, Julia, lives in Vancouver, BC
+
+[2026-02-15 02:11:46] My Daughter, Julia, lives in Vancouver, BC
+
+
+---
+
+## 2026-02-15 02:12:49
+
+Query: My Daughter, Julia, lives in Vancouver, BC
+
+[2026-02-15 02:12:49] My Daughter, Julia, lives in Vancouver, BC
+
+
+---
+
+## 2026-02-15 02:14:51
+
+Query: My daughter, Julia, Lives in Vancouver, BC
+
+[2026-02-15 02:14:51] My daughter, Julia, Lives in Vancouver, BC
+
+
+---
+
+## 2026-02-15 02:16:41
+
+Query: ** who is Julia?
+
+According to your journal, Julia is your daughter who lives in Vancouver, BC.
+
+
+---
+
+## 2026-02-15 02:20:37
+
+Query: dogs can be a bother
+
+[2026-02-15 02:20:37] dogs can be a bother
+
+
+---
+
+## 2026-02-15 02:24:07
+
+Query: cats can be a bother
+
+[2026-02-14 18:24:07] cats can be a bother
+
+
+---
+
+## 2026-02-15 02:28:03
+
+Query: my nose is on my face
+
+[2026-02-14 18:28:03] my nose is on my face
+
+
+---
+
+## 2026-02-15 02:28:54
+
+Query: ** where is my nose.
+
+According to your journal, you mentioned "my nose is on my face".
+
+
+---
+

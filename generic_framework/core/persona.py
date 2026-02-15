@@ -614,8 +614,6 @@ class Persona:
                         # For web_search, we need to execute the search ourselves
                         # Z.AI coding plan doesn't include server-side search execution
                         if function_name == "web_search":
-                            self.logger.info("Processing web_search tool call - executing DuckDuckGo search")
-
                             # Parse the function args as JSON to get the query
                             import json
                             try:
@@ -626,88 +624,114 @@ class Persona:
 
                             self.logger.info(f"Search query: {search_query}")
 
-                            # Execute actual web search using DuckDuckGo
-                            try:
-                                from .research.internet_strategy import InternetResearchStrategy
-                                import httpx
-                                from html import unescape
-                                import re
-                                import html as html_module
+                            # Try Brave Search first (fast, ~7-9s with citations)
+                            import os
+                            brave_api_key = os.getenv("BRAVE_API_KEY")
 
-                                # Create search strategy instance
-                                search_strategy = InternetResearchStrategy({})
-                                await search_strategy.initialize()
+                            if brave_api_key:
+                                self.logger.info("Using Brave Search API for web research")
+                                try:
+                                    from integrations.brave_search import brave_search
 
-                                # Execute search
-                                search_results = await search_strategy.search(search_query, limit=5)
+                                    mode = os.getenv("BRAVE_SEARCH_MODE", "single")
+                                    result = await brave_search(search_query, mode=mode)
 
-                                if search_results:
-                                    # Fetch full page content for top 3 results to get actual data
-                                    formatted_results = []
-                                    fetch_limit = min(3, len(search_results))  # Only fetch first 3 to save time
+                                    search_content = result.get("answer", "")
+                                    tokens = result.get('tokens', {}).get('total', 0)
+                                    time_ms = result.get('time_ms', 0)
 
-                                    self.logger.info(f"Fetching full content for top {fetch_limit} results...")
+                                    self.logger.info(f"✅ Brave search complete: {tokens} tokens, {time_ms:.0f}ms")
 
-                                    # Create a separate client for web page fetching (different from LLM client)
-                                    async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as web_client:
-                                        for i, result in enumerate(search_results[:fetch_limit], 1):
-                                            title = result.metadata.get('title', 'Untitled')
-                                            url = result.metadata.get('url', '')
-                                            snippet = result.content
+                                except Exception as e:
+                                    self.logger.error(f"❌ Brave Search failed: {e}, falling back to DuckDuckGo")
+                                    import traceback
+                                    self.logger.error(traceback.format_exc())
+                                    brave_api_key = None  # Force fallback to DuckDuckGo
 
-                                            # Try to fetch full page content
-                                            try:
-                                                self.logger.info(f"Fetching page {i}: {url}")
-                                                response = await web_client.get(url, headers={
-                                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                                                })
-                                                response.raise_for_status()
+                            # Fallback to DuckDuckGo if Brave not available or failed
+                            if not brave_api_key:
+                                self.logger.info("Using DuckDuckGo search (fallback)")
+                                try:
+                                    from .research.internet_strategy import InternetResearchStrategy
+                                    import httpx
+                                    from html import unescape
+                                    import re
+                                    import html as html_module
 
-                                                # Extract text content from HTML
-                                                full_html = response.text
+                                    # Create search strategy instance
+                                    search_strategy = InternetResearchStrategy({})
+                                    await search_strategy.initialize()
 
-                                                # Remove script and style tags
-                                                full_html = re.sub(r'<script[^>]*>.*?</script>', '', full_html, flags=re.DOTALL | re.IGNORECASE)
-                                                full_html = re.sub(r'<style[^>]*>.*?</style>', '', full_html, flags=re.DOTALL | re.IGNORECASE)
+                                    # Execute search
+                                    search_results = await search_strategy.search(search_query, limit=5)
 
-                                                # Extract visible text
-                                                text_content = re.sub(r'<[^>]+>', ' ', full_html)
-                                                text_content = ' '.join(text_content.split())
-                                                text_content = unescape(text_content)
+                                    if search_results:
+                                        # Fetch full page content for top 3 results to get actual data
+                                        formatted_results = []
+                                        fetch_limit = min(3, len(search_results))  # Only fetch first 3 to save time
 
-                                                # Take first 3000 characters (usually contains the main content)
-                                                page_preview = text_content[:3000] if len(text_content) > 3000 else text_content
+                                        self.logger.info(f"Fetching full content for top {fetch_limit} results...")
 
-                                                formatted_results.append(
-                                                    f"[Result {i}] {title}\nURL: {url}\nContent Preview:\n{page_preview}\n"
-                                                )
-                                                self.logger.info(f"Page {i} fetched: {len(page_preview)} chars")
+                                        # Create a separate client for web page fetching (different from LLM client)
+                                        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as web_client:
+                                            for i, result in enumerate(search_results[:fetch_limit], 1):
+                                                title = result.metadata.get('title', 'Untitled')
+                                                url = result.metadata.get('url', '')
+                                                snippet = result.content
 
-                                            except Exception as e:
-                                                self.logger.warning(f"Failed to fetch page {i}: {e}")
-                                                # Fall back to snippet if fetch fails
+                                                # Try to fetch full page content
+                                                try:
+                                                    self.logger.info(f"Fetching page {i}: {url}")
+                                                    response = await web_client.get(url, headers={
+                                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                                                    })
+                                                    response.raise_for_status()
+
+                                                    # Extract text content from HTML
+                                                    full_html = response.text
+
+                                                    # Remove script and style tags
+                                                    full_html = re.sub(r'<script[^>]*>.*?</script>', '', full_html, flags=re.DOTALL | re.IGNORECASE)
+                                                    full_html = re.sub(r'<style[^>]*>.*?</style>', '', full_html, flags=re.DOTALL | re.IGNORECASE)
+
+                                                    # Extract visible text
+                                                    text_content = re.sub(r'<[^>]+>', ' ', full_html)
+                                                    text_content = ' '.join(text_content.split())
+                                                    text_content = unescape(text_content)
+
+                                                    # Take first 3000 characters (usually contains the main content)
+                                                    page_preview = text_content[:3000] if len(text_content) > 3000 else text_content
+
+                                                    formatted_results.append(
+                                                        f"[Result {i}] {title}\nURL: {url}\nContent Preview:\n{page_preview}\n"
+                                                    )
+                                                    self.logger.info(f"Page {i} fetched: {len(page_preview)} chars")
+
+                                                except Exception as e:
+                                                    self.logger.warning(f"Failed to fetch page {i}: {e}")
+                                                    # Fall back to snippet if fetch fails
+                                                    formatted_results.append(
+                                                        f"[Result {i}] {title}\nURL: {url}\n{snippet}\n"
+                                                    )
+
+                                            # Add remaining results as snippets only
+                                            for i, result in enumerate(search_results[fetch_limit:], fetch_limit + 1):
+                                                title = result.metadata.get('title', 'Untitled')
+                                                url = result.metadata.get('url', '')
+                                                snippet = result.content
                                                 formatted_results.append(
                                                     f"[Result {i}] {title}\nURL: {url}\n{snippet}\n"
                                                 )
 
-                                        # Add remaining results as snippets only
-                                        for i, result in enumerate(search_results[fetch_limit:], fetch_limit + 1):
-                                            title = result.metadata.get('title', 'Untitled')
-                                            url = result.metadata.get('url', '')
-                                            snippet = result.content
-                                            formatted_results.append(
-                                                f"[Result {i}] {title}\nURL: {url}\n{snippet}\n"
-                                            )
+                                        search_content = "\n".join(formatted_results)
+                                        self.logger.info(f"Total search content: {len(search_content)} chars")
+                                    else:
+                                        search_content = f"No search results found for query: {search_query}"
+                                        self.logger.warning("No search results returned")
 
-                                    search_content = "\n".join(formatted_results)
-                                    self.logger.info(f"Total search content: {len(search_content)} chars")
-                                else:
-                                    search_content = f"No search results found for query: {search_query}"
-                                    self.logger.warning("No search results returned")
-
-                            except Exception as e:
-                                self.logger.error(f"Web search execution failed: {e}", exc_info=True)
-                                search_content = f"Search failed: {str(e)}"
+                                except Exception as e:
+                                    self.logger.error(f"DuckDuckGo search failed: {e}", exc_info=True)
+                                    search_content = f"Search failed: {str(e)}"
 
                             # Build the multi-turn request
                             messages_with_tool = payload["messages"].copy()

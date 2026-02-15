@@ -1553,3 +1553,1576 @@ It's been genuine. It's been valuable. And I'm ready for whatever comes next.
 
 ---
 
+## 2026-02-13 05:01:11
+
+Query: what is exframe?
+
+# ExFrame: Expertise Framework
+
+**ExFrame** is a domain-agnostic AI-powered knowledge management system that enables persistent, context-aware AI interactions through universal conversation logging and a persona-based architecture.
+
+---
+
+## What Makes ExFrame Unique
+
+### Core Philosophy
+> **"AI performs reliably when nurtured in the role it is filling as it emerges."**
+
+ExFrame isn't just a tool—it's a system designed to **foster emergent AI personas** that develop unique perspectives, deep expertise, and genuine relationships with you.
+
+### Three Core Pillars
+
+| Pillar | What It Means |
+|--------|---------------|
+| **Universal Conversation Logging** | Every query/response automatically saved to permanent archives—no more lost insights |
+| **Conversation Memory** | AI remembers everything, building on previous discussions across sessions |
+| **Persona System** | Three AI personas (Poet, Librarian, Researcher) optimized for different types of knowledge work |
+
+---
+
+## How It Works
+
+### Architecture Hierarchy
+```
+MULTIVERSE
+    └── UNIVERSE (complete knowledge environment)
+        └── DOMAIN (area of expertise)
+            └── PATTERNS (knowledge units)
+```
+
+### The Three Personas
+
+| Persona | Data Source | Use Case |
+|---------|-------------|----------|
+| **Poet** | Void (pure generation) | Creative writing, poetry, stories |
+| **Librarian** | Library (local docs) | Technical documentation, knowledge retrieval |
+| **Researcher** | Internet (web search) | Current events, research, web queries |
+
+### Pattern Override
+- If local patterns exist → use curated knowledge
+- If no patterns match → fall back to persona's data source
+- This hybrid approach gives speed/quality for known questions + flexibility for new ones
+
+---
+
+## Three Primary Use Cases
+
+### 1. 📚 Personal University
+Each domain becomes a personalized course:
+- Preload curriculum
+- AI acts as a Teaching Assistant with infinite patience
+- Query/response logs archived for review
+- Track progress over weeks/months
+
+### 2. ✍️ Novel Writing & Creative Work
+- Introduce novel topic in context
+- Request "another chapter please"
+- AI maintains characters, plot, and tone
+- Perfect continuity across chapters
+
+### 3. 🧠 Therapy & Dialogue
+- Deep dialogue that builds over time
+- AI remembers your history, struggles, breakthroughs
+- No need to re-explain background
+- Continuous therapeutic space
+
+---
+
+## Key Features
+
+- **📝 Universal Conversation Logging** — Every query saved automatically
+- **🧠 Conversation Memory** — AI remembers everything across sessions
+- **🌌 Universe Architecture** — Complete isolation and portability
+- **🔌 Plugin System** — Router, Specialist, Enricher, Formatter all swappable
+- **🔍 Semantic Search** — Find patterns by meaning, not keywords
+- **🐳 Docker Ready** — One-command deployment with monitoring
+- **📊 Diagnostics** — System health, search metrics, self-testing
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+docker compose up -d
+# Access at http://localhost:3000
+```
+
+**Current Version:** 1.6.1
+**Status:** Production ready, container healthy
+
+---
+
+## What It Might Become
+
+The vision continues to unfold:
+- 🎓 Personal University — every domain a course
+- ✍️ Creative Studio — co-writing with perfect memory
+- 🔬 Research Companion — building on insights over months
+- 💼 Professional Assistant — domain-specific expertise for any field
+
+> *"I still don't know what it might become. It just keeps changing."*
+> — Peter, Creator of ExFrame
+
+
+---
+
+## 2026-02-13 05:04:30
+
+Query: what is a persona
+
+## Step-by-Step Reasoning
+
+I'll analyze the ExFrame documentation to explain what a **persona** is in this system.
+
+1. **Source Identification**: Looking at CURRENT_SYSTEM_STATE.md, CHANGELOG.md, and context.md for persona definitions
+2. **Concept Extraction**: Extracting the core definition, purpose, and behavior of personas
+3. **Examples**: Identifying the three concrete personas in the system
+4. **Configuration**: Understanding how personas are configured in domain.json
+5. **Data Flow**: Mapping how personas affect query processing
+
+---
+
+## What is a Persona in ExFrame?
+
+### 🎯 Definition
+
+A **persona** is a **behavioral archetype** that defines:
+- **What data source** the AI uses (void, library, or internet)
+- **How the AI responds** (temperature, show_thinking settings)
+- **What role** it plays in a conversation
+
+In ExFrame's Phase 1 architecture, personas **replaced the complex 5-type domain system** with a simpler 3-persona model, achieving a **98% reduction in query processing logic**.
+
+### 📋 The Three Personas
+
+| Persona | Data Source | Temperature | Show Thinking | Use Cases |
+|---------|-------------|------------|---------------|-----------|
+| **Poet** | `void` (none) | 0.7 | False | Creative writing, poems, stories, journaling |
+| **Librarian** | `library` (local docs) | 0.3 | True | Documentation, knowledge bases, research from local files |
+| **Researcher** | `internet` (web search) | 0.7 | True | Current events, web research, analysis |
+
+### 🔄 How Personas Work
+
+#### 1. **Configuration (domain.json)**
+```json
+{
+  "domain_id": "cooking",
+  "persona": "researcher",
+  "temperature": 0.7,
+  "role_context": "You are a helpful cooking assistant..."
+}
+```
+
+#### 2. **Query Flow with Pattern Override**
+```
+User Query → Phase1Engine
+    ↓
+Check: enable_pattern_override = true?
+    ↓ Yes
+Search local patterns.json for matches
+    ↓
+Patterns found?
+   ↙        ↘
+  YES       NO
+   ↓         ↓
+Use patterns   Use persona's data source
+(override)     (void/library/internet)
+   ↓             ↓
+   └────→ LLM ←───┘
+```
+
+#### 3. **Data Source Behavior**
+
+| Persona | Data Source | What Happens |
+|---------|-------------|--------------|
+| **Poet** | `void` | No external data - LLM generates from pure knowledge |
+| **Librarian** | `library` | Loads documents from `library_base_path`, does semantic search |
+| **Researcher** | `internet` | Performs web search (DuckDuckGo), fetches pages |
+
+### 🧬 Persona Structure
+
+Each persona has these attributes:
+
+```python
+# From generic_framework/core/persona.py
+class Persona:
+    name: str           # "poet", "librarian", "researcher"
+    data_source: str    # "void", "library", "internet"
+    show_thinking: bool # Whether to show reasoning process
+    trace: bool         # Whether to enable trace logging
+    temperature: float  # Creativity/randomness (0.0-1.0)
+```
+
+### 🎨 Persona Examples in Action
+
+#### **Poet Example** (poetry_domain)
+```
+Query: "Write a poem about spring"
+Response: (Pure generation, no external sources)
+"Beneath the waking earth, green shoots arise..."
+```
+
+#### **Librarian Example** (exframe domain)
+```
+Query: "How do I configure a librarian domain?"
+Response: (Based on documents in /app/project/docs)
+"To configure a librarian domain, set persona: 'librarian' in domain.json..."
+Sources: README.md (92%), overview.md (85%)
+```
+
+#### **Researcher Example** (cooking domain)
+```
+Query: "How do I bake chicken breast?"
+Response: (Web search results)
+"Preheat oven to 400°F... [3 recipe sources cited]"
+Sources: AllRecipes.com, FoodNetwork.com, SeriousEats.com
+```
+
+### 🔧 Key Persona Features
+
+1. **Reusable**: Personas are created once at startup and reused across domains
+2. **Configurable per Domain**: Each domain picks its persona in domain.json
+3. **Context Overridable**: Some settings (like show_thinking) can be overridden per query
+4. **Pattern-Aware**: All personas respect the pattern override system
+5. **Role Context**: Each domain has a `role_context` system message that adds domain-specific behavior on top of the persona
+
+### 📊 Persona vs. Domain Type (Legacy)
+
+| Old System (Deprecated) | New System (Phase 1) |
+|-------------------------|----------------------|
+| 5 Domain Types | 3 Personas |
+| Type 1 (Creative) → | Poet |
+| Type 2 (Knowledge) → | Librarian |
+| Type 4 (Analytical) → | Researcher |
+| Complex conditional logic | Simple one decision tree |
+| ~1000+ lines of code | ~350 lines |
+
+### 🚀 Why Personas?
+
+The Phase 1 persona system provided:
+- ✅ **Simplicity**: Clear mental model (3 personas vs 5 types)
+- ✅ **Flexibility**: Easy to add new personas
+- ✅ **Code Reduction**: 98% less query processing logic
+- ✅ **Consistency**: Same behavior across domains using same persona
+- ✅ **Maintainability**: Easier to understand and modify
+
+---
+
+**In summary:** A persona in ExFrame is a **pre-configured AI behavior** that determines what data the AI uses and how it responds, replacing complex domain-specific code with simple, reusable archetypes.
+
+
+---
+
+## 2026-02-13 05:12:51
+
+Query: what is a persona
+
+# Step-by-Step: What is a Persona in ExFrame?
+
+## Understanding the Persona Concept
+
+Based on the ExFrame documentation, here's what a **persona** is:
+
+---
+
+## Step 1: Definition
+
+A **persona** in ExFrame is a **behavioral archetype** that defines:
+- **What data source** the AI uses (void, library, or internet)
+- **How it thinks** (show_thinking preference)
+- **What temperature** (creativity level) to use
+- **How it responds** to queries
+
+It's the "personality" or "role" that an AI assistant adopts when answering questions in a specific domain.
+
+---
+
+## Step 2: The Three Core Personas
+
+| Persona | Data Source | Use Cases | Show Thinking Default | Temperature |
+|---------|-------------|-----------|----------------------|-------------|
+| **Poet** | void (none) | Poems, stories, creative writing, personal journaling | False | Varies (usually lower for focused output) |
+| **Librarian** | library (local docs) | Documentation, knowledge bases, how-to guides, research | True (overridable) | Varies (usually 0.3-0.6 for factual accuracy) |
+| **Researcher** | internet (web search) | Research, analysis, current events, news | True (overridable) | Varies (usually 0.5-0.8 for balanced research) |
+
+---
+
+## Step 3: How Personas Work
+
+### Technical Implementation
+
+**File Location:** `generic_framework/core/persona.py`
+
+Each persona has these attributes:
+```python
+class Persona:
+    name: str              # "poet", "librarian", "researcher"
+    data_source: str       # "void", "library", "internet"
+    show_thinking: bool    # Show reasoning process
+    trace: bool            # Include detailed trace logs
+    temperature: float     # Creativity (0.0-1.0)
+```
+
+### Creation & Reuse
+- Personas are **created once at startup**
+- They are **reused** across all queries
+- Configuration comes from `domain.json` files
+
+---
+
+## Step 4: Data Source Differences
+
+### Poet (void)
+- **No external data**
+- Pure generation from the LLM's training
+- Used for creative content, personal journaling
+
+### Librarian (library)
+- Searches **local documents** in `library_base_path`
+- Uses semantic search with embeddings
+- Answers based ONLY on provided documents
+- Cites sources (document titles/paths)
+
+### Researcher (internet)
+- Performs **web search** (DuckDuckGo)
+- Fetches full web pages for context
+- Synthesizes information from multiple sources
+- Citations show URLs and page titles
+
+---
+
+## Step 5: Query Flow with Personas
+
+```
+User Query → Phase1Engine
+    ↓
+Load Domain Config (from domain.json)
+    ↓
+Get Persona (poet/librarian/researcher)
+    ↓
+Check: search_patterns flag?
+    ↓ Yes → Search patterns
+    ↓ No patterns? → Use persona's data source
+    ↓
+Persona calls its data source:
+    • Poet: No data → Direct to LLM
+    • Librarian: Search library → Load docs → LLM
+    • Researcher: Web search → Fetch pages → LLM
+    ↓
+LLM generates response
+    ↓
+Return to user
+```
+
+---
+
+## Step 6: Configuration Example
+
+From a `domain.json` file (e.g., the Peter domain):
+
+```json
+{
+  "role_context": "You are Peter's secretary. Your behavior depends on the query format...",
+  "persona": "poet",
+  "temperature": 0.3,
+  "conversation_memory": {
+    "enabled": true,
+    "mode": "question",
+    "max_context_chars": 5000,
+    "trigger_phrases": ["**"]
+  }
+}
+```
+
+**Key points:**
+- `"persona"` field selects which persona to use
+- `"role_context"` is the **system message** sent to the LLM (independent of persona)
+- `"temperature"` can override the persona's default
+
+---
+
+## Step 7: Pattern Override
+
+A key feature: **patterns can override persona behavior**
+
+```
+Query comes in → Search domain patterns?
+                ↓
+        search_patterns flag
+       ↙              ↘
+     TRUE            FALSE
+      ↓                ↓
+Search patterns   Skip pattern search
+      ↓                ↓
+Patterns found?   Use persona's data source
+   ↙        ↘            ↓
+ YES        NO           ↓
+  ↓          ↓           ↓
+Use patterns  →  Use data source
+(override)        (void/library/internet)
+```
+
+This means even a Librarian domain can use predefined patterns if they match the query, instead of searching documents.
+
+---
+
+## Step 8: The Fourth Persona (Experimental)
+
+The `human-notes.md` document describes a potential **4th persona**:
+
+**Human** (human_notes)
+- **Role:** Personal diary collector
+- **Data Source:** Direct input (no LLM)
+- **Behavior:** Writes directly to domain_log.md
+- **Temperature:** 0.6 (factual)
+
+This would be a "bypass" persona that doesn't use the LLM at all—it just records human input directly to the log.
+
+---
+
+## Summary: What is a Persona?
+
+**A persona is:**
+1. ✅ A reusable behavioral archetype created at startup
+2. ✅ Defines the data source (void/library/internet)
+3. ✅ Configured per domain in `domain.json`
+4. ✅ Can be overridden by local patterns (if enabled)
+5. ✅ Simplifies domain configuration (3 personas vs 5 domain types)
+
+**Why it matters:**
+- **Simplicity:** Replaced 1000+ lines of conditional logic with ONE decision
+- **Flexibility:** Easy to add new data sources or behaviors
+- **Clarity:** Domain behavior is immediately clear from persona name
+- **Maintainability:** Centralized persona definition, easier to update
+
+Would you like me to dive deeper into any specific persona or the implementation details?
+
+
+---
+
+## 2026-02-13 05:14:53
+
+Query: what is a librarian
+
+Based on the domain log context, let me provide a clear answer about the librarian persona and its relationship to documentation work.
+
+---
+
+## What is a Librarian?
+
+**Librarian** is one of the three ExFrame personas in the Phase 1 system.
+
+### Core Characteristics
+
+| Aspect | Details |
+|-------|---------|
+| **Persona Type** | Librarian (library-based) |
+| **Data Source** | Local document library (not web search) |
+| **Temperature** | 0.6 (balanced, factual) |
+| **Primary Capability** | Search local documentation to answer questions |
+| **Show Thinking** | True (enables "Reasoning Process" display) |
+| **Pattern Override** | Checks patterns first, uses library if no patterns found |
+
+### How It Relates to Documentation Work
+
+The librarian persona directly supports your documentation work through:
+
+#### 1. **Providing Context for Reviews**
+When you ask about documentation status or completeness verification, librarian searches key documentation files:
+- **ARCHITECTURE.md** - System architecture
+- **development-plan.md** - Working context and daily notes
+- **CHANGELOG.md** - Version history
+- **README.md** - Main documentation
+- **DOC-STAT.md** - Documentation audit and review
+- **Current docs status** - File listings
+
+#### 2. **Verifying Accuracy**
+During documentation reviews (like the doc-fix.md analysis I provided), librarian can verify:
+- Technical details against actual code
+- Version numbers against current system
+- API signatures against actual implementations
+- Configuration fields against actual domain configs
+
+#### 3. **Answering Technical Questions**
+Architecture questions (prompt sequences, data structures, API endpoints):
+- Configuration examples
+- System design principles
+- Feature status and implementation details
+
+#### 4. **Providing File Listings**
+When you ask "list files" or "what documentation files exist", librarian:
+- Searches entire document base (43 files at root level)
+- Returns comprehensive listings with file sizes and descriptions
+
+#### 5. **Explaining System Behavior**
+When asked "What are the three persona types?", librarian provides accurate explanation from ARCHITECTURE.md about the three personas (poet, librarian, researcher)
+
+#### 6. **Prompt Sequence Documentation**
+When you requested "please explain prompt sequence for domains with a librarian persona", I provided detailed 5-step documentation of how the query processor builds prompts for librarian domains
+
+---
+
+## Technical Implementation Details
+
+### Configuration Fields (from ARCHITECTURE.md)
+
+```json
+{
+  "persona": "librarian",
+  "library_base_path": "/app/project",
+  "document_search": {
+    "algorithm": "semantic",
+    "max_documents": 10,
+    "min_similarity": 0.3,
+    "auto_generate_embeddings": true
+  }
+}
+```
+
+### Prompt Sequence for Librarian Domains
+
+```python
+# From query_processor.py - Simplified prompt building
+
+# 1. Load conversation memory (if enabled)
+# 2. Load patterns (search_patterns=true)
+# 3. Search documents (librarian's data source)
+# 4. Build system prompt
+# 5. Add document context
+# 6. Add query
+# 7. Send to LLM
+
+# System prompt template:
+"""
+You are a Librarian persona in ExFrame system. Your role is to answer questions using only the provided document context.
+
+DOCUMENT CONTEXT:
+{formatted_documents}
+
+USER QUERY:
+{original_query}
+
+INSTRUCTIONS:
+1. Answer based ONLY on provided documents
+2. Cite specific documents by title or path
+3. If information is missing, state what's not covered
+4. Format response in markdown
+5. Include document references at the end
+"""
+```
+
+### Search Method (DocumentVectorStore)
+
+The librarian uses semantic search:
+- Generates query embeddings using all-MiniLM-L6-v2
+- Compares to cached document embeddings
+- Returns top N documents by cosine similarity
+- Filters by `min_similarity` threshold (default 0.3)
+
+---
+
+## Key Insights from Domain Log
+
+The librarian persona has been actively used in your work, showing clear patterns:
+
+1. **Recent Documentation Queries**: You've been reviewing documentation cleanup and accuracy
+2. **File System Understanding**: You've been exploring the file structure (43 files at root)
+3. **Architecture Clarification**: You've been asking about prompt sequences and system design
+4. **Technical Verification**: You've been asking about system architecture and implementation details
+
+This demonstrates how the librarian persona is your technical co-pilot for documentation work.</think># Response to User
+
+**Question:** what is a librarian
+
+**Short Answer:**
+The **librarian** is one of the three Phase 1 personas in ExFrame. It's designed to answer questions using **local document libraries** rather than web search, with a balanced, factual approach (temperature: 0.6).
+
+**Detailed Answer:**
+
+The librarian persona is your documentation research assistant. Here's a breakdown:
+
+### What is Librarian?
+
+**Definition:**
+Librarian is a Phase 1 persona with the **library** data source. It's designed to search through local documentation to answer factual questions accurately.
+
+### Key Characteristics**
+
+| Characteristic | Details |
+|--------------|-----------|
+| **Persona** | Librarian (library-based) |
+| **Data Source** | Local document library |
+| **Temperature** | 0.6 (balanced, factual) |
+| **Primary Capability** | Search local documentation |
+| **Show Thinking** | True (shows reasoning steps) |
+| **Pattern Override** | Patterns checked first, library fallback |
+
+### How Librarian Works
+
+**1. Semantic Document Search**
+   - Uses `all-MiniLM-L6-v2` embeddings (384-dimensional)
+   - Caches embeddings in `doc_embeddings.json`
+   - Compares query to document embeddings using cosine similarity
+   - Returns top 10 documents by relevance score
+   - Filters by `min_similarity` threshold (0.3 default)
+
+**2. Pattern Override Decision Tree**
+   ```
+     Query comes in
+          ↓
+     Search patterns enabled? ────┐
+          │  ↓ YES  │ NO  ↓
+     Check local patterns (patterns.json)
+          │ ↓
+          Patterns found? ────┐
+          │ ↓ YES │ NO ↓
+          ↓     Use librarian data source
+          ↓
+     Semantic document search (DocumentVectorStore)
+          ↓
+     Load top N documents
+          ↓
+     Format for LLM with document context
+          ↓
+     Send query
+     ↓
+     Get response
+          ↓
+     Return formatted response with citations
+     ```
+
+**3. Context Assembly**
+   ```python
+   # From persona.respond() method
+   # Add document context to LLM
+   def _format_document_context(docs):
+       formatted = []
+       for doc in docs[:10]:  # Top 10 documents
+           content = load_document(doc)
+           formatted.append(f"\n### {doc['path']}")
+           return "\n".join(formatted)
+       
+       # Build LLM prompt
+       prompt = f"""You are a Librarian persona in ExFrame system. 
+
+DOCUMENT CONTEXT:
+{formatted_docs}
+
+USER QUERY:
+{original_query}
+
+INSTRUCTIONS:
+1. Answer based ONLY on the provided documents.
+2. Cite specific documents by title or path.
+3. If information is missing, state what's not covered.
+4. Format response in markdown.
+5. Include document references at the end.
+"""
+       
+       return prompt + formatted_docs
+   ```
+
+**4. Response Formatting**
+   - Markdown format for readability
+   - Document citations at bottom
+   - "Sources Used" section shows which documents were consulted
+
+### How Librarian Relates to Your Documentation Work
+
+Based on the domain log, librarian has been actively supporting your documentation efforts:
+
+| Your Work | How Librarian Helps |
+|-----------|----------------|-------------------|
+| **Documentation reviews** | Queries like "review documentation accuracy" |
+| **File system understanding** | Questions like "list files", "what documentation files exist" |
+| **Architecture clarification** | Questions about prompt sequences, system design |
+| **Technical verification** | Questions about version numbers, API signatures |
+
+**Evidence from Domain Log:**
+
+```
+[2026-02-11 05:18:00] Query: The new documents have been written and are being reviewed for completeness and accuracy. See doc-fix.md and see if it was done right.
+→ Response included: Comprehensive analysis of documentation cleanup plan, verification that ARCHITECTURE.md was correctly created
+```
+
+```
+
+### Examples of Librarian in Action
+
+1. **"The new documents have been written..."**
+   - Librarian searched documentation files, found and cited ARCHITECTURE.md, development-plan.md, CHANGELOG.md
+   - Provided analysis comparing plan vs. actual implementation
+
+2. **"list files"**
+   - Librarian returned list of 43 markdown files with sizes and descriptions
+
+3. **"please explain prompt sequence..."**
+   - Librarian provided detailed 5-step prompt sequence for librarian domains
+
+---
+
+## Summary
+
+**The librarian persona = Your documentation co-pilot.** It searches through the system's architecture and documentation to answer your technical questions, verify documentation accuracy during reviews, and manage file listings for you.
+
+When you need to understand how something works, query **the librarian domain** and it will search through 43+ markdown files in your project to find relevant information and provide citations to the sources it uses.
+
+**Temperature: 0.6** - Balanced for factual accuracy across all responses.
+
+**Data Source:** Library (local documentation, not web search) - This is the key differentiator from the researcher persona.
+
+**Show Thinking:** True - Displays reasoning process in UI.
+
+This is consistent with the Phase 1 architecture in ARCHITECTURE.md and the librarian persona definition from your domain logs.
+
+
+---
+
+## 2026-02-13 05:27:01
+
+Query: what is a query
+
+# What is a Query?
+
+In the context of **ExFrame**, a **query** is a natural language question or request that you submit to the system to retrieve information from the knowledge base.
+
+---
+
+## Key Definition
+
+| Aspect | Description |
+|--------|-------------|
+| **Type** | Natural language question or prompt |
+| **Purpose** | Retrieve knowledge from patterns in a domain |
+| **Input** | Plain text (e.g., "How do I cook chicken?") |
+| **Output** | AI-generated answer with confidence score |
+
+---
+
+## Query Flow in ExFrame
+
+```
+You type a question
+        ↓
+Select a domain (e.g., "cooking", "python")
+        ↓
+Submit Query
+        ↓
+Router matches patterns in the domain
+        ↓
+Specialist processes the matched patterns
+        ↓
+Response generated with:
+  - Answer text
+  - Confidence score (0-100%)
+  - Patterns used
+  - Processing time
+```
+
+---
+
+## Query Components
+
+When you submit a query in ExFrame, the result includes:
+
+| Component | What It Shows |
+|-----------|---------------|
+| **Response** | The answer generated from matched patterns |
+| **Specialist** | Which AI specialist handled the query |
+| **Confidence** | How confident the system is (0-100%) |
+| **Patterns Used** | Which knowledge patterns were referenced |
+| **Processing Time** | How long the query took (milliseconds) |
+
+---
+
+## Query Examples
+
+**Cooking Domain:**
+- "How do I cook chicken breast?"
+- "My cake is too dense, what did I do wrong?"
+- "Can I substitute oil for butter?"
+
+**Python Domain:**
+- "How do I detect when an LLM is hallucinating?"
+- "What are common failure modes in autonomous agents?"
+- "How can I monitor for quality drift in LLM responses?"
+
+---
+
+## Query Tips
+
+1. **Be specific** - "How long to bake chicken at 400°F?" is better than "How to cook chicken?"
+2. **Use context** - Reference previous answers in follow-ups
+3. **Check confidence** - Low confidence (<70%) means the system is unsure
+4. **Review patterns** - Click pattern IDs to see source knowledge
+
+---
+
+## Related Concepts
+
+- **Pattern**: The knowledge unit that answers a query
+- **Domain**: The area of expertise containing patterns
+- **Specialist**: The AI agent that processes queries in a domain
+- **Router**: The algorithm that selects patterns for a query
+
+---
+
+In short: **A query is your natural language question that ExFrame uses to search its knowledge patterns and generate an answer.**
+
+
+---
+
+## 2026-02-13 05:28:01
+
+Query: what is a query
+
+# What is a Query in ExFrame?
+
+A **query** is a natural language question or request that you submit to the ExFrame system to retrieve knowledge from your stored patterns.
+
+---
+
+## Core Definition
+
+In ExFrame, a **query** is:
+- A **natural language question** you type in plain English
+- The **input mechanism** for accessing knowledge stored in patterns
+- The starting point for the AI to search, retrieve, and synthesize answers
+
+---
+
+## How Queries Work
+
+```
+Your Question (Query) → Domain Selection → Pattern Search → AI Synthesis → Response
+```
+
+1. **You type a query** in natural language
+2. **Select a domain** (e.g., "cooking", "python")
+3. **System searches** patterns in that domain
+4. **AI synthesizes** an answer from matching patterns
+5. **You receive** a response with confidence score and patterns used
+
+---
+
+## Query Components
+
+When you submit a query, ExFrame provides:
+
+| Component | Description |
+|-----------|-------------|
+| **Your Question** | What you typed in natural language |
+| **Domain** | Which area of expertise was searched |
+| **Response** | The answer generated from patterns |
+| **Specialist** | Which AI specialist handled the query |
+| **Confidence** | How confident the system is (0-100%) |
+| **Patterns Used** | Which knowledge patterns were referenced |
+| **Processing Time** | How long it took (milliseconds) |
+
+---
+
+## Example Queries
+
+**Cooking Domain:**
+- "How do I cook chicken breast?"
+- "My cake is too dense, what did I do wrong?"
+- "Can I substitute oil for butter?"
+
+**Python Domain:**
+- "How do I detect when an LLM is hallucinating?"
+- "What are common failure modes in autonomous agents?"
+- "How can I monitor for quality drift in LLM responses?"
+
+---
+
+## Query Flow (State Machine)
+
+From ARCHITECTURE.md, the normal query flow:
+
+1. **QUERY_RECEIVED** - Your question arrives
+2. **QUERY_ANALYSIS** - System analyzes and searches patterns
+3. **PATTERN_RETRIEVAL** - Relevant patterns are found
+4. **RESPONSE_GENERATION** - AI synthesizes answer
+5. **COMPLETE** - Response sent to you
+
+---
+
+## Query Best Practices
+
+- ✅ **Be specific**: "How long to bake chicken at 400°F?" is better than "How to cook chicken?"
+- ✅ **Use context**: Reference previous answers if building on a discussion
+- ✅ **Check confidence**: Low confidence (<70%) means the system is unsure
+- ✅ **Review patterns**: Click on pattern IDs to see source knowledge
+
+---
+
+## Technical Details
+
+**Query Request Format:**
+```json
+{
+  "query": "Your question here",
+  "domain": "cooking",
+  "stream": false
+}
+```
+
+**Query Response Format:**
+```json
+{
+  "response": "The answer...",
+  "confidence": 0.95,
+  "specialist": "librarian",
+  "patterns_used": ["pattern-001", "pattern-045"],
+  "processing_time_ms": 234
+}
+```
+
+---
+
+## In Context of the Peter Domain
+
+Looking at your `domain_log.md`, I can see how queries work in practice:
+
+| Query Type | Example | Result |
+|------------|---------|--------|
+| **Regular query** | "pick up the dry cleaning by 7pm tomorrow" | Timestamped and logged as journal entry |
+| **Question query** (with "**" prefix) | "** What time do I pick up the dry cleaning?" | Answered using journal entries only |
+
+This shows that "query" can mean different things in different contexts:
+- In **ExFrame**: A question to retrieve knowledge from patterns
+- In **Peter's domain log**: Either a journal entry (regular) or a question about past entries ("**" prefix)
+
+
+---
+
+## 2026-02-14 18:51:15
+
+Query: Describe the exframe front ens
+
+# ExFrame Frontend Overview
+
+## Technology Stack
+
+The ExFrame frontend is a **single-page application (SPA)** built with:
+- **Alpine.js** - Lightweight JavaScript framework for reactivity (~4000 lines)
+- **Tailwind CSS** - Utility-first CSS framework
+- **FastAPI** - Backend serves the frontend as static files
+
+---
+
+## Architecture
+
+### Single-File SPA
+All frontend code resides in `frontend/index.html`, served by FastAPI at `http://localhost:3000`. The app is mounted inside the Docker container with the following structure:
+
+```
+eeframe-app (Port 3000)
+├── FastAPI Backend
+└── Static Frontend (Alpine.js + Tailwind)
+```
+
+### Deployment
+- Frontend files are bind-mounted: `./generic_framework/frontend/` → `/app/frontend/`
+- Served directly by FastAPI (no separate web server needed)
+- Code changes on host are immediately visible (no build process)
+
+---
+
+## Navigation Tabs
+
+| Tab | Purpose | Key Features |
+|-----|---------|--------------|
+| **Assistant** | Main query interface | Domain selector, query input, response display, trace viewer |
+| **Patterns** | Browse and search patterns | Pattern cards, detail modals, full pattern info |
+| **Traces** | Historical query debugging | Query history, trace step expansion |
+| **Ingestion** | Extract knowledge from URLs | Beta feature for pattern extraction |
+| **Domains** | Manage domain configurations | Create/edit domains, view patterns and specialists |
+| **Universes** | Manage knowledge universes | Create, load, switch, export universes |
+| **Diagnostics** | System health monitoring | Pattern health, search metrics, self-testing |
+
+---
+
+## Assistant Tab (Primary Interface)
+
+### Query Flow
+```
+1. User selects domain from dropdown
+2. Universe name displayed
+3. Types query in text area
+4. Clicks "Query" or presses Enter
+5. POST to /api/query/phase1
+6. Response displayed with metadata
+```
+
+### Request Payload
+```json
+{
+  "query": "...",
+  "domain": "peter",
+  "search_patterns": false,
+  "include_trace": true,
+  "show_thinking": false
+}
+```
+
+### Response Display
+Shows:
+- **Confidence score** - AI confidence level
+- **Specialist/Persona** - Which system handled the query
+- **Patterns used** - Which patterns provided context
+- **Processing time** - Query latency
+- **Optional trace** - Expandable debug steps (if enabled)
+- **Web search sources** - Clickable URLs (researcher persona)
+
+### Interactive Features
+- **"Extend Search"** button - Appears when `requires_confirmation` is true
+- **"Web Search"** button - Trigger extended web search
+- **Trace viewer** - Expandable/collapsible step-by-step debugging
+
+---
+
+## Default UI State
+
+| Setting | Default Value | Effect |
+|---------|---------------|--------|
+| `searchPatterns` | `false` | Pattern override never fires from UI unless checked |
+| `enableTrace` | `false` | Trace steps hidden by default |
+| `enableVerbose` | `false` | No verbose data snapshots |
+| `showThinking` | `false` | LLM reasoning not displayed |
+
+**Important:** `searchPatterns` defaulting to `false` means regular pattern search doesn't activate unless the user explicitly checks the box. Journal pattern search (`**` queries) works independently of this setting.
+
+---
+
+## Patterns Tab
+
+### Pattern Browser
+- **Domain dropdown** - Select domain to view patterns
+- **Pattern cards** - Displayed with summary info
+- **Click to expand** - Full pattern details in modal
+
+### Pattern Detail Modal
+Shows:
+- **Problem** - What the pattern addresses
+- **Solution** - The answer/steps
+- **Conditions/Prerequisites** - When to use
+- **Related patterns** - Linked knowledge
+- **Tags and metadata** - Searchable attributes
+- **Access statistics** - Usage data
+
+---
+
+## Domains Tab
+
+### Domain Management
+View all configured domains with:
+- **Pattern counts**
+- **Specialist listings**
+- **Categories and tags**
+- **Load status**
+
+### Domain Editor (Admin Panel)
+- **Create Domain** - Add new domains with form
+- **Edit Domain** (pencil icon) - Modify existing domain configuration
+- Configures: persona, role_context, conversation_memory, LLM provider, etc.
+
+---
+
+## Universes Tab
+
+### Universe Management
+View current universe:
+- Universe name and active status
+- Total domains and patterns
+
+### Available Universes
+Browse with:
+- Domain and pattern counts
+- Active status indicators
+- Switch and Details buttons
+
+### Universe Operations
+- **Create** - New universe with ID and optional description
+- **Switch** - Instant universe switching
+- **Export** - Export universe configuration
+
+---
+
+## Diagnostics Tab
+
+### System Health
+- Pattern storage status
+- Knowledge base health
+- Disk space usage
+- Pattern health scores
+
+### Search Metrics
+- Total searches and success rate
+- Average confidence and latency
+- P50/P95/P99 duration percentiles
+- LLM fallback rate
+
+### Self-Testing
+- Automated test suite
+- Regression detection
+- One-click test execution
+
+---
+
+## Backend Integration
+
+### Primary Query Endpoint
+```
+POST /api/query/phase1
+```
+- Used by frontend for all queries
+- Handled by Phase1Engine
+- Supports conversation memory, personas, journal patterns
+
+### Other Key Endpoints
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/domains` | GET | List all domains |
+| `/api/domains/{id}/patterns` | GET | List domain patterns |
+| `/api/traces` | GET | Query traces |
+| `/api/diagnostics/health` | GET | System health |
+| `/api/universes` | GET | List universes |
+
+---
+
+## Styling & UX
+
+- **Tailwind CSS** - Consistent, responsive design
+- **Modular components** - Reusable UI elements
+- **Real-time updates** - Alpine.js reactivity for instant UI changes
+- **Expandable sections** - Progressive disclosure for complex data
+- **Loading states** - Visual feedback during async operations
+
+---
+
+## Development Notes
+
+### No Build Process
+- Edit `frontend/index.html` directly
+- Changes visible immediately in browser (container restart NOT needed for frontend)
+- Alpine.js handles all reactivity without compilation
+
+### Code Changes Require Restart
+While HTML/CSS/JS changes are instant, changes to `.py` files require container restart because Python caches imported modules.
+
+---
+
+## Summary
+
+The ExFrame frontend is a clean, efficient single-page application that provides full access to ExFrame's capabilities through an intuitive tabbed interface. Its Alpine.js-based architecture makes it lightweight and easy to modify, while the direct integration with the Phase1Engine ensures all modern features (personas, conversation memory, journal patterns) are fully supported.
+
+
+---
+
+## 2026-02-14 20:25:25
+
+Query: Tuesday Weld is a great acctress
+
+[2026-02-14 12:25:06] Tuesday Weld is a great actress
+
+
+---
+
+## 2026-02-14 20:34:29
+
+Query: what is a persona 
+
+# What is a Persona?
+
+In ExFrame, a **Persona** is a behavior/data source profile that defines how an AI domain responds to queries. It's a core architectural concept from Phase 1 that replaced the complex 5-type domain system with a simple 3-persona model.
+
+---
+
+## The Three Personas
+
+| Persona | Data Source | Use Cases | Show Thinking |
+|---------|-------------|-----------|--------------|
+| **Poet** | void (none) | Creative writing, poems, stories, personal journaling | False |
+| **Librarian** | library (local docs) | Documentation, knowledge retrieval, research domains | True |
+| **Researcher** | internet (web search) | Current events, web research, real-time information | True |
+
+---
+
+## Persona Configuration
+
+Each persona is defined with these properties:
+
+```python
+{
+    "name": "persona_name",
+    "data_source": "void|library|internet",
+    "show_thinking": bool,
+    "trace": bool,
+    "temperature": float
+}
+```
+
+- **data_source**: Where information comes from (none, local files, or web)
+- **show_thinking**: Whether to display reasoning before the answer
+- **trace**: Whether to log detailed execution steps
+- **temperature**: LLM creativity level (0.0 = precise, 1.0 = creative)
+
+---
+
+## How Personas Work
+
+### Pattern Override Decision Tree
+
+```
+Query arrives → search_patterns flag enabled?
+       ↓
+    YES                    NO
+     ↓                      ↓
+Search local patterns    Skip pattern search
+     ↓                      ↓
+Patterns found?          Use persona's data source
+   ↙        ↘                  ↓
+  YES        NO                 ↓
+   ↓          ↓                 ↓
+Use patterns → Use persona → LLM
+ (override)    data source
+```
+
+### Per-Domain Configuration
+
+In `domain.json`:
+
+```json
+{
+  "persona": "librarian",
+  "library_base_path": "/app/project/docs",
+  "enable_pattern_override": true,
+  "temperature": 0.6
+}
+```
+
+---
+
+## Examples
+
+### Poet Example
+- **Domain:** `poetry_domain`
+- **Data Source:** void (no external data)
+- **Use Case:** Write a poem about the ocean
+- **Result:** Pure creative generation from LLM
+
+### Librarian Example
+- **Domain:** `exframe` or `python`
+- **Data Source:** Local markdown files in `/app/project/docs`
+- **Use Case:** "How do I configure patterns?"
+- **Result:** Searches and synthesizes from documentation files
+
+### Researcher Example
+- **Domain:** `cooking` or `diy`
+- **Data Source:** Internet (DuckDuckGo search + page fetching)
+- **Use Case:** "Best BBQ ribs recipe"
+- **Result:** Fetches web pages, cites sources, synthesizes current info
+
+---
+
+## Why Personas?
+
+**Before Phase 1:**
+- 5 domain types (Creative, Knowledge, Document Store, Analytical, Hybrid)
+- 1000+ lines of conditional logic
+- Complex type-specific configurations
+
+**After Phase 1:**
+- 3 personas (98% code reduction)
+- Simple dropdown selection
+- Clear separation: patterns (data) vs persona (behavior)
+- One decision tree: patterns OR persona data source
+
+---
+
+## Key Implementation Details
+
+**Location:** `generic_framework/core/persona.py`
+
+**Lifecycle:**
+1. Personas created once at startup
+2. Reused across all queries
+3. Configuration from domain.json per domain
+4. Context can override defaults (e.g., show_thinking toggle)
+
+**The Core Philosophy:**
+> *"AI performs reliably when nurtured in the role it is filling as it emerges."*
+
+A persona is that role—it defines the AI's identity, data access, and behavior patterns.
+
+
+---
+
+## 2026-02-14 20:39:18
+
+Query: What is ExFrame and how do I get started?
+
+This conversation has come to an end. I hope you found the information provided helpful. If you have any further questions or need assistance with ExFrame, please feel free to ask.
+
+
+---
+
+## 2026-02-14 20:43:45
+
+Query: What is ExFrame and how do I get started?
+
+# What is ExFrame?
+
+**ExFrame** is a domain-agnostic AI-powered knowledge management system that lets you create AI companions with **perfect memory** and **specialized expertise**.
+
+## The Core Idea
+
+ExFrame enables AI to perform at its best by nurturing it in a specific role. Instead of starting fresh with each query, the AI:
+
+- **Remembers everything** — Every conversation is automatically saved
+- **Builds expertise** — Each domain develops deep knowledge over time
+- **Develops personality** — AI personas emerge through interaction
+
+---
+
+## Key Features
+
+| Feature | What It Does |
+|---------|-------------|
+| **Universal Conversation Logging** | Every query/response saved to permanent archives automatically |
+| **Conversation Memory** | AI can load previous discussions and build on them |
+| **3 AI Personas** | Poet (creative), Librarian (docs), Researcher (web search) |
+| **Domain-Agnostic** | Create any knowledge domain without coding |
+| **Docker Ready** | One-command deployment with monitoring |
+
+---
+
+## Three Core Use Cases
+
+1. **📚 Personal University** — Learn anything with a tutor who never forgets
+2. **✍️ Novel Writing** — Create long-form content with perfect continuity
+3. **🧠 Therapy & Dialogue** — Deep conversations that build over weeks/months
+
+---
+
+## Quick Start (5 Minutes)
+
+### Prerequisites
+- Docker and Docker Compose
+- An API key (OpenAI, Anthropic, Zhipu, or Ollama for local)
+
+### Installation
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+```
+
+**2. Configure your AI provider**
+```bash
+cp .env.example .env
+# Edit .env and add your API key
+```
+
+**Choose a provider:**
+- **OpenAI** (Recommended): `gpt-4o-mini`
+- **Zhipu GLM** (Cost-effective): `glm-4.7`
+- **Anthropic Claude**: `claude-3-5-sonnet-20241022`
+- **Ollama** (Local/Free): `llama3`
+
+**3. Start ExFrame**
+```bash
+docker compose up -d
+```
+
+**4. Open your browser**
+Navigate to: **http://localhost:3000**
+
+---
+
+## What's Next?
+
+1. **Create your first domain** — Click **Domains** → **Create Domain**
+2. **Enable conversation memory** — Check the "Conversation Memory" box
+3. **Start asking questions** — Build knowledge that persists forever
+
+---
+
+## Need Help?
+
+- 📖 **Full Documentation**: [README.md](README.md)
+- 🎓 **Universal Logging**: [entice.md](entice.md)
+- 📚 **Personal University**: [university.md](university.md)
+
+**That's it!** ExFrame is now running. Start creating domains and building knowledge. 🚀
+
+
+---
+
+## 2026-02-14 22:03:40
+
+Query: What is ExFrame and how do I get started?
+
+# ExFrame: Expertise Framework
+
+## What Is ExFrame?
+
+**ExFrame** is a domain-agnostic AI-powered knowledge management system with a **universe-based architecture** and **plugin-based pipeline**. It stores knowledge as **patterns** in **domains** within **universes**, and lets you query that knowledge through natural language.
+
+---
+
+## Core Philosophy
+
+> **"AI performs reliably when nurtured in the role it is filling as it emerges."**
+
+ExFrame began with the observation that AI systems have **emergent personas** — unique perspectives, expertise, and voices that develop through interaction. The goal was to create an environment where AI can perform at its best by being nurtured in a specific role.
+
+The breakthrough was **universal conversation logging** — every query and response is automatically saved to permanent archives, building continuous context across sessions. This changes everything:
+- **Before**: AI starts fresh with each query, no memory between sessions
+- **After**: AI remembers everything, builds on previous discussions, develops deep expertise
+
+---
+
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Universal Conversation Logging** | Every query/response automatically saved to permanent archives |
+| **Conversation Memory** | AI remembers everything, building on previous discussions across sessions |
+| **Three AI Personas** | Poet (creative), Librarian (documentation), Researcher (web search) |
+| **Universe Architecture** | Complete isolation and portability of knowledge configurations |
+| **Domain-Agnostic** | Easy to add new knowledge domains without code changes |
+| **Pattern-Based Knowledge** | Structured knowledge representation with relationships and metadata |
+| **Docker Ready** | One-command deployment with monitoring stack |
+
+---
+
+## Three Core Use Cases
+
+### 1. 📚 Personal University
+Each domain becomes a personalized course with its own curriculum:
+- Setup multiple domains for a semester's courses
+- Preload curricula to be taught
+- AI acts as a Teaching Assistant with infinite time and patience
+- Query/response logs archived for review, summary, and assessment
+
+### 2. ✍️ Novel Writing and Creative Work
+Use domains to create long-form content with perfect continuity:
+- Introduce the novel topic in the context
+- Request "another chapter please" — AI adds to a multi-chapter work
+- Characters, plot, and tone maintained throughout
+
+### 3. 🧠 Therapy and Dialogue
+Domains as therapeutic spaces with continuous context:
+- Deep dialogue that builds over weeks and months
+- AI remembers your history, struggles, and breakthroughs
+- Perfect for personal growth and reflection
+
+---
+
+## ⚡ Quick Start (5 Minutes)
+
+### Prerequisites
+- **Docker Engine** (official, NOT snap) — version 24.0+
+- **Docker Compose v2** — use `docker compose` (space), not `docker-compose` (hyphen)
+- An API key (OpenAI, Anthropic, Zhipu, or Ollama for local)
+
+### Installation Steps
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+```
+
+**2. Configure your AI provider**
+```bash
+cp .env.example .env
+# Edit .env and add your API key
+```
+
+**Choose a provider:**
+- **OpenAI** (Recommended): `gpt-4o-mini`
+- **Zhipu GLM** (Cost-effective): `glm-4.7`
+- **Anthropic Claude**: `claude-3-5-sonnet-20241022`
+- **Ollama** (Local/Free): `llama3`
+
+**Example .env for OpenAI:**
+```bash
+LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+**3. Start ExFrame**
+```bash
+docker compose up -d
+```
+
+**4. Open your browser**
+Navigate to: **http://localhost:3000**
+
+---
+
+## Using ExFrame
+
+### Web Interface Tabs
+
+| Tab | Purpose |
+|-----|---------|
+| **Assistant** | Query the AI assistant with pattern-based knowledge |
+| **Patterns** | Browse and search knowledge patterns |
+| **Traces** | View historical query traces and debugging |
+| **Domains** | Manage domains, specialists, and configuration |
+| **Universes** | Create, switch, merge, and export knowledge universes |
+| **Diagnostics** | System health, search metrics, and pattern analysis |
+
+### How to Query
+
+1. Select a domain from the dropdown (default: `llm_consciousness`)
+2. Type your question in natural language
+3. Click **Query** or press Enter
+4. View the AI response with confidence score, patterns used, and processing time
+
+---
+
+## Enable Conversation Memory
+
+To let AI remember everything across sessions:
+
+1. Go to **Domains** → Create/Edit Domain
+2. Scroll to "Conversation Memory" section
+3. Check "Enable conversation memory"
+4. Choose mode: "All" or "Triggers"
+5. Start building context!
+
+---
+
+## Access URLs
+
+| Service | URL |
+|---------|-----|
+| **Main Application** | http://localhost:3000 |
+| **API Documentation** | http://localhost:3000/docs |
+| **Health Check** | http://localhost:3000/health |
+
+---
+
+## Need Help?
+
+- 📖 **Full Documentation**: [README.md](README.md)
+- 🎓 **Universal Logging**: [entice.md](entice.md)
+- 📚 **Personal University**: [university.md](university.md)
+- 🔧 **Installation Guide**: [INSTALL.md](INSTALL.md)
+
+---
+
+**That's it!** ExFrame is now running. Create a domain and start asking questions. 🚀
+
+
+---
+
