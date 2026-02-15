@@ -6,6 +6,50 @@ ExFrame integrates with Brave Search API to provide AI-grounded web search capab
 
 ---
 
+## Setup Instructions
+
+### 1. Get a Brave Search API Account
+
+**Sign up:** https://brave.com/search/api/
+
+1. Create an account (free tier available)
+2. Navigate to API section
+3. Generate an API key
+4. Copy the key (format: `BSA...`)
+
+**Pricing:**
+- **Free credits:** $5/month (~550 queries)
+- **Paid:** $4 per 1,000 requests + $5 per million tokens
+- **Average cost:** ~$0.004 per query
+
+### 2. Add API Key to .env
+
+Edit `/home/peter/development/eeframe/.env`:
+
+```bash
+# Brave Search API
+BRAVE_API_KEY=BSAiZTKiIPhjMs9E68Soe_FwolsWwH2  # Your key here
+BRAVE_SEARCH_MODE=single  # 'single' (fast) or 'research' (deep)
+```
+
+### 3. Restart Container
+
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+### 4. Test
+
+Query in cooking domain:
+```
+recipe for apple pie. Include all source URLs.
+```
+
+Expected: Response in 15-25 seconds with recipe.
+
+---
+
 ## API Details
 
 **Endpoint:** `POST https://api.search.brave.com/res/v1/chat/completions`
