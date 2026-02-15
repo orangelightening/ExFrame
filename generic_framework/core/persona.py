@@ -601,6 +601,30 @@ class Persona:
                 # Standard OpenAI format
                 if "choices" in data:
                     message = data["choices"][0]["message"]
+
+                    # Check for XML-style tool calls (GLM sometimes returns this format)
+                    content = message.get("content", "")
+                    if isinstance(content, str) and "<tool_call>" in content:
+                        self.logger.warning("GLM returned XML-style tool_calls - converting to JSON format")
+                        import re
+
+                        # Extract query from XML format
+                        query_match = re.search(r'<arg_value>(.*?)</arg_value>', content, re.DOTALL)
+                        if query_match:
+                            search_query = query_match.group(1).strip()
+                            self.logger.info(f"Extracted query from XML: {search_query}")
+
+                            # Create synthetic tool_call in JSON format
+                            message["tool_calls"] = [{
+                                "id": "xml_tool_call_0",
+                                "type": "function",
+                                "function": {
+                                    "name": "web_search",
+                                    "arguments": f'{{"query": "{search_query}"}}'
+                                }
+                            }]
+                            message["content"] = ""  # Clear XML content
+
                     # Check for tool_calls in OpenAI format
                     if "tool_calls" in message and message["tool_calls"]:
                         self.logger.info(f"GLM returned {len(message['tool_calls'])} tool_calls - implementing multi-turn")
