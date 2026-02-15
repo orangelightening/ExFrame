@@ -624,6 +624,11 @@ class Persona:
 
                             self.logger.info(f"Search query: {search_query}")
 
+                            # Initialize variables
+                            search_results = None
+                            search_content = None
+                            fetch_limit = 0
+
                             # Try Brave Search first (fast, ~7-9s with citations)
                             import os
                             brave_api_key = os.getenv("BRAVE_API_KEY")
