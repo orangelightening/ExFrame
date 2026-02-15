@@ -39,6 +39,8 @@ services:
       # Model cache directory for sentence-transformers
       - TRANSFORMERS_CACHE=/app/cache/models
       - HF_HOME=/app/cache/huggingface
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
 
       # Timezone for LLM date injection (default: Vancouver/Pacific)
       - APP_TIMEZONE=${APP_TIMEZONE:-America/Vancouver}
@@ -84,6 +86,8 @@ services:
       - eeframe_logs:/app/logs
     # DISABLED: Using manual uvicorn instead for development
     # restart: unless-stopped
+    extra_hosts:
+      - "model-runner.docker.internal:host-gateway"
     restart: "no"
     networks:
       - monitoring

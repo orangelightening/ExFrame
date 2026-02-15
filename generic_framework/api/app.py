@@ -486,6 +486,22 @@ async def startup_event():
         # Fallback to legacy loading
         await _legacy_domain_discovery()
 
+    # Pre-load embedding model at startup (before marking ready)
+    try:
+        import time
+        from core.embeddings import get_embedding_service
+        logger.info("Pre-loading embedding model...")
+        start = time.time()
+        service = get_embedding_service()
+        if service and service.is_available:
+            service.load_model()
+            elapsed = time.time() - start
+            logger.info(f"✓ Embedding model loaded in {elapsed:.1f}s")
+        else:
+            logger.info("✗ Embedding service not available")
+    except Exception as e:
+        logger.warning(f"✗ Failed to pre-load embedding model: {e}")
+
     logger.info(f"=" * 60)
     logger.info(f"ExFrame Runtime Ready")
     logger.info(f"=" * 60)

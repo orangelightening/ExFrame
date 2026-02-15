@@ -1184,27 +1184,42 @@ nano universes/default/domains/{domain}/domain_config.json
 2. Domain config `model` field (per-domain override)
 3. Hardcoded default: `glm-4.7`
 
-#### Advanced: Local Models with DMR
+#### Optional: Local Models for Fast Journaling (Advanced)
 
-ExFrame supports running local LLM models through **DMR (Docker Model Runner)**, an alternative to Ollama that provides better integration with Docker environments.
+**Note:** Local models are entirely optional. ExFrame works perfectly with remote models only (OpenAI, Anthropic, Zhipu). Local models provide a speed optimization for the poet persona's journal entries only (~230ms vs ~4s).
+
+If you use the poet persona for journaling and want faster responses, you can optionally run a local model through **DMR (Docker Model Runner)**.
 
 ##### What is DMR?
 
-DMR (Docker Model Runner) is a local model server that:
-- Runs LLMs locally on your hardware (CPU or GPU)
-- Provides an OpenAI-compatible API endpoint
-- Supports multiple model formats (GGUF, etc.)
-- Better Docker networking than Ollama
+DMR (Docker Model Runner) is a local model server for advanced users who want to optimize journal entry speed.
 
-##### When to Use Local vs Remote Models
+**Hardware Requirements:**
+- GPU: NVIDIA with 8GB+ VRAM (recommended), OR
+- CPU: 16-core+ with 32GB+ RAM
+- Disk: 10GB+ for model files
 
-| Scenario | Recommendation | Why |
-|----------|---------------|-----|
-| **Simple tasks** (journaling, formatting) | Local small models (llama3.2 3.2B) | Fast (~230ms), no API costs |
-| **Complex reasoning** (research, synthesis) | Remote models (GPT-4, Claude, GLM) | Better quality, no GPU needed |
-| **Mixed workload** | Dual-model routing (see below) | Best of both worlds |
-| **Privacy-critical** | Local models only | Data never leaves your server |
-| **Limited GPU memory** | Remote models | Avoid GPU out-of-memory errors |
+**When to use:**
+- You use poet persona for frequent journaling
+- You want ~230ms responses instead of ~4s
+- You have the hardware available
+
+**When NOT to use:**
+- Limited hardware (no GPU, <16GB RAM)
+- Occasional journaling (remote is fine)
+- Any other persona (already uses remote models)
+
+##### Local vs Remote: The Reality
+
+| What | Uses | Speed | Setup |
+|------|------|-------|-------|
+| **Librarian persona** | Remote model (.env) | ~4s | ✅ Default |
+| **Researcher persona** | Remote model (.env) | ~4s | ✅ Default |
+| **Poet journal entries** | Remote model (.env) | ~4s | ✅ Default |
+| **Poet ** searches** | Remote model (.env) | ~4s | ✅ Default |
+| **Poet journal (optimized)** | Local llama3.2 | ~230ms | ⚠️ Optional, requires GPU |
+
+**Bottom line:** 99% of ExFrame uses remote models. Local models only speed up poet journal entries.
 
 ##### GPU Memory Considerations
 

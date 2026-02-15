@@ -7,7 +7,8 @@
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- An API key from OpenAI, Anthropic, Zhipu, or Ollama (for local)
+- An API key from OpenAI, Anthropic, or Zhipu (recommended)
+- Optional: GPU for local models (advanced optimization only)
 
 ---
 
@@ -56,14 +57,14 @@ OPENAI_API_KEY=not-needed
 OPENAI_BASE_URL=http://host.docker.internal:11434/v1
 ```
 
-**DMR / Docker Model Runner (local/advanced):**
+**DMR / Docker Model Runner (optional - journal speed optimization only):**
 ```bash
 LLM_MODEL=ai/llama3.2
 OPENAI_API_KEY=not-needed
 OPENAI_BASE_URL=http://model-runner.docker.internal:12434/engines/v1
 ```
 
-> **Note**: For advanced local model configuration including GPU memory management and dual-model routing, see the "Advanced: Local Models with DMR" section in [README.md](README.md#advanced-local-models-with-dmr).
+> **Note**: Local models are optional and only optimize poet journal entry speed (~230ms vs ~4s). Requires GPU with 8GB+ VRAM. See [install-dmr.md](install-dmr.md) for setup. Most users should use remote models.
 
 ### 3️⃣ Start ExFrame
 
