@@ -181,6 +181,68 @@ async def process_query(
             patterns = journal_patterns
             logger.info(f"Journal pattern search found {len(patterns)} relevant entries")
 
+    # ==================== SIMPLE ECHO FOR POET (No AI needed) ====================
+    # For poet persona: if query doesn't start with **, just add timestamp and echo
+    # This eliminates the need for any AI/LLM for simple journal entries
+    # Configurable via domain config: "use_simple_echo": true (default for poet)
+    use_simple_echo = domain_config.get("use_simple_echo", persona_type == "poet")
+
+    if use_simple_echo and persona_type == "poet" and not query.strip().startswith("**"):
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        simple_response = f"[{timestamp}] {query}"
+
+        logger.info(f"⏱ Simple echo (no AI): 0.0ms - instant response")
+
+        response = {
+            "answer": simple_response,
+            "confidence": 1.0,
+            "source": "simple_echo",
+            "persona": persona_type,
+            "patterns_used": [],
+            "trace": []
+        }
+
+        # Log the journal entry
+        t3 = time.time()
+        logging_config = domain_config.get("logging", {"enabled": True})
+        if logging_config.get("enabled", True):
+            log_file = logging_config.get("output_file", "domain_log.md")
+            format_type = logging_config.get("format", "markdown")
+            log_entry = f"Query: {query}\n\n{simple_response}\n"
+
+            success = _append_to_log(
+                domain_name,
+                log_file,
+                query,
+                log_entry,
+                format_type,
+                custom_entry=True
+            )
+
+            if success:
+                response["logging_updated"] = True
+                logger.info(f"Response appended to domain log: {log_file}")
+
+        logger.info(f"⏱ Logging: {(time.time()-t3)*1000:.1f}ms")
+
+        # Pattern autogeneration for journal entries
+        auto_create_enabled = domain_config.get("auto_create_patterns", False)
+        if memory_config.get("mode") == "journal_patterns":
+            auto_create_enabled = True
+
+        if auto_create_enabled:
+            import asyncio
+            asyncio.create_task(_create_journal_pattern_async(domain_name, query, simple_response))
+            logger.info(f"Pattern autogeneration triggered for domain: {domain_name}")
+
+        total_time = (time.time() - t_start) * 1000
+        response["query_time_ms"] = total_time
+        logger.info(f"⏱ TOTAL QUERY TIME: {total_time:.1f}ms")
+
+        return response
+    # ==================== END SIMPLE ECHO ====================
+
     # THE DECISION: Override or not?
     # Prepare context with show_thinking flag
     context = context or {}
