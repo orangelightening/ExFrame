@@ -110,7 +110,12 @@ class Persona:
                 brave_answer += 'Source attributions are mentioned inline in the text above.\n\n'
                 brave_answer += '🔍 *Powered by [Brave Search](https://search.brave.com/) - Fast web research with AI synthesis*'
 
-                return brave_answer
+                # Return as dict for compatibility with query_processor
+                return {
+                    "content": brave_answer,
+                    "source": "brave-search",
+                    "confidence": 0.9
+                }
 
         # Determine show_thinking: context value overrides persona default
         context = context or {}
