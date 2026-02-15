@@ -306,15 +306,69 @@ logger.info(f"Brave search: query={query}, mode={mode}, "
 
 ---
 
-## Next Steps
+## Implementation Status
 
-1. ✅ Add `BRAVE_API_KEY` to `.env`
-2. ✅ Test API key with curl command
-3. ✅ Integrate into researcher persona
-4. ⬜ Test with sample queries
-5. ⬜ Monitor usage and costs
-6. ⬜ Enable in production
+### ✅ Completed (2026-02-14)
+1. ✅ Brave Search API integration
+2. ✅ Direct response (skips GLM synthesis)
+3. ✅ LaTeX cleanup (removes $ symbols)
+4. ✅ XML tool_call format handling
+5. ✅ Both code paths (tool-calling + data source)
+6. ✅ Live in production
+
+### 🧪 Testing Phase
+- **Status:** Actively testing query patterns
+- **Goal:** Determine best prompts for URL citations
+- **Cost:** ~$0.004/query (~1200 queries remaining)
 
 ---
 
-**Last Updated:** 2026-02-14
+## Current Performance (Actual)
+
+**Single-Search Mode (Default):**
+- **Speed:** 15-25 seconds
+- **Tokens:** ~7,500-8,500 per query
+- **Cost:** ~$0.042 per query
+- **Quality:** High - AI-synthesized answers
+
+**Comparison vs DuckDuckGo:**
+- **Before:** 60-100+ seconds, frequent failures
+- **After:** 15-25 seconds, stable
+- **Improvement:** 5x faster, 100% reliable
+
+---
+
+## URL Citations - User Testing
+
+**Current Understanding:**
+- Brave AI decides whether to include URLs
+- User can influence with prompt phrasing:
+  - "Include all source URLs"
+  - "with citations"
+  - "List sources at the end"
+- Results are **inconsistent** - requires experimentation
+
+**Recommendation:** Users craft their own prompts and test what works.
+
+---
+
+## Technical Optimizations
+
+### GLM Synthesis Removed
+- **Before:** Brave (15s) + GLM synthesis (55s) = 70s
+- **After:** Brave only (15-25s)
+- **Savings:** 45-55 seconds per query
+
+### LaTeX Cleanup
+- Brave uses LaTeX formatting: `$40$` minutes, `$1\frac{1}{2}$` cups
+- Automatically stripped via regex
+- Clean output without `$` symbols
+
+### Dual Code Path Support
+1. **Tool-calling:** GLM → web_search tool → Brave
+2. **Data source:** Researcher persona → data_source="internet" → Brave
+3. Both paths skip GLM and return Brave results directly
+
+---
+
+**Last Updated:** 2026-02-14 (Production deployment)

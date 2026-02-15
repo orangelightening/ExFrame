@@ -92,24 +92,30 @@ Output: "[2026-02-14 13:04:38] dogs love beef"
 
 ---
 
-### Internet Search Integration (Priority: High - BLOCKED)
-**Status**: Needs research and budget approval
+### ✅ Internet Search Integration - COMPLETED (2026-02-14)
+**Status**: Brave Search API integrated and working
 
-**Current situation:**
-- Web search functionality exists but not reliable
-- Need better search API integration
+**Implemented features:**
+- Brave Search API integration ($4/1000 requests + $5/million tokens)
+- Direct return (skips GLM synthesis for 5x speed improvement)
+- LaTeX formatting cleanup (removes $ symbols)
+- User-controlled prompts (experiment with phrasing for best results)
+- Two code paths: tool-calling and data source
 
-**Options to evaluate:**
-- Brave MCP Search toolkit (offers interesting options)
-- Rates/pricing TBD - user checking
+**Performance:**
+- Response time: 15-25 seconds (vs 60-100s with DuckDuckGo)
+- Cost: ~$0.004 per query
+- Reliability: Stable, no HTTP 500 errors
+- Quality: AI-synthesized answers with inline source mentions
 
-**Next steps:**
-- [ ] User checks Brave MCP pricing
-- [ ] Evaluate search quality vs cost
-- [ ] Budget approval for search API
-- [ ] Implementation if approved
+**URL Citations:**
+- Inconsistent - depends on query phrasing
+- User can request: "Include all source URLs" or "with citations"
+- Brave AI decides format (inline mentions vs structured URLs)
 
-**Notes**: User willing to pay for reliable search if rates are reasonable.
+**Status:** Live in production, testing phase ongoing
+
+**Free credit:** $4.87 remaining (~1200 queries)
 
 ---
 
