@@ -45,6 +45,10 @@ services:
       # Timezone for LLM date injection (default: Vancouver/Pacific)
       - APP_TIMEZONE=${APP_TIMEZONE:-America/Vancouver}
 
+      # Brave Search API (optional)
+      - BRAVE_API_KEY=${BRAVE_API_KEY:-}
+      - BRAVE_SEARCH_MODE=${BRAVE_SEARCH_MODE:-single}
+
       # Log level
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
