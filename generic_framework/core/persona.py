@@ -112,7 +112,7 @@ class Persona:
 
                 # Return as dict for compatibility with query_processor
                 return {
-                    "content": brave_answer,
+                    "answer": brave_answer,  # query_processor expects "answer" key
                     "source": "brave-search",
                     "confidence": 0.9
                 }
