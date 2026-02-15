@@ -1464,3 +1464,209 @@ Query: A recipe for banana cream pie
 
 ---
 
+## 2026-02-15 05:22:04
+
+Query: A recipe for german apple pie
+
+German Apple Pie, known as *Gedeckter Apfelkuchen* in Germany, is a beloved traditional dessert featuring a buttery shortcrust pastry enclosing a spiced apple filling, often enhanced with raisins, almonds, and a hint of rum. This version combines the flakiness of a pie with the elegance of a European cake, best served slightly chilled or at room temperature with a dusting of powdered sugar or a dollop of whipped cream.
+
+* Prep Time: 40 minutes  
+* Cook Time: 50–60 minutes  
+* Servings: 12  
+* Temperature: 180°C (350°F) top-to-bottom heat (or 160°C/320°F for convection)
+
+### Ingredients
+
+**All-Purpose Flour**: 450 g (3 ½ cups)  
+**Granulated Sugar**: 225 g (1 cup + 2 tbsp)  
+**Butter (cold, cubed)**: 300 g (1 ¼ cups)  
+**Egg (large)**: 1  
+**Vanilla Extract or Paste**: 1 tbsp  
+**Salt**: 1 pinch  
+**Lemon Zest**: from 1 lemon  
+**Tart Apples (e.g., Granny Smith)**: 1.5 kg (3 ¼ lbs), peeled and sliced  
+**Lemon Juice**: from 1 lemon (about 3 tbsp)  
+**Ground Cinnamon**: 1 tsp  
+**Cornstarch or Breadcrumbs**: 2 tbsp  
+**Rum-Soaked Raisins**: 75 g (⅓ cup), plus 1–2 tbsp soaking liquid  
+**Roasted Almonds (chopped)**: 75 g (⅓ cup)  
+**Powdered Sugar (for glaze)**: 150 g (1 ¼ cups)  
+**Additional Lemon Juice (for glaze)**: 3 tbsp  
+
+### Equipment Needed
+
+* 25 cm (10-inch) springform pan  
+* Rolling pin  
+* Parchment paper  
+* Mixing bowls  
+* Pastry cutter or fork  
+* Apple peeler (optional, for speed)  
+* Silicone brush (for glaze)  
+* Wire cooling rack  
+
+### Instructions
+
+1. **Prepare the dough**: Sift the flour into a large bowl and mix with baking powder (1 tsp, optional for extra lift), sugar, and salt. Add cold cubed butter, lemon zest, vanilla, and the egg. Knead quickly until a smooth dough forms. Do not overwork.  
+2. **Chill the dough**: Divide the dough into three portions—one slightly larger than the others. Shape into disks and a roll (or two disks and one roll). Wrap in plastic and refrigerate for at least 30 minutes (up to 2 hours).  
+3. **Preheat oven**: Set to 200°C (390°F) for initial baking.  
+4. **Roll the base**: On a floured surface, roll out the larger dough portion to fit the bottom of the springform pan. Line the pan and prick the base several times with a fork.  
+5. **Form the crust**: Roll the dough "snake" into two long strips. Press them around the edge of the base to form a raised crust (about 5 cm high). Chill the assembled base for 10 minutes.  
+6. **Prepare the filling**: Peel, core, and thinly slice the apples. Toss immediately with lemon juice to prevent browning. Mix in sugar, cinnamon, cornstarch, rum-soaked raisins (with some rum), and chopped almonds.  
+7. **Assemble the pie**: Sprinkle the bottom crust with breadcrumbs or ground nuts (to absorb moisture). Spread the apple mixture evenly over the base.  
+8. **Add the top crust**: Roll out the second dough disk and place it over the apples. Seal the edges by pressing firmly with fingers or a fork.  
+9. **Bake**: Place on a parchment-lined baking sheet. Bake at 200°C (390°F) for 30 minutes. Cover loosely with parchment if browning too quickly. Reduce heat to 175°C (350°F) and bake for another 30 minutes, or until the crust is golden and filling is bubbling.  
+10. **Cool and glaze**: Let cool completely on a wire rack (at least 2 hours). For clean slices, chill overnight. Mix powdered sugar with lemon juice to form a smooth glaze. Brush over the top and sprinkle with slivered almonds. Let set in the fridge for 15–20 minutes before slicing.
+
+### Safety Notes
+
+* Ensure eggs are fresh and stored properly.  
+* Bake until internal temperature reaches at least $93°C (200°F$) to ensure food safety.  
+* Cool completely before storing to prevent condensation and bacterial growth.
+
+### Substitutions
+
+* **Gluten-Free**: Use a 1:1 gluten-free flour blend; add ½ tsp xanthan gum if not included.  
+* **Dairy-Free**: Substitute butter with cold vegan shortening or coconut oil.  
+* **Raisins**: Omit or replace with dried cranberries or cherries.  
+* **Rum**: Replace with apple juice or 1 tsp rum extract.  
+* **Almonds**: Substitute with walnuts or omit for nut allergies.
+
+### Storage
+
+* **Room Temperature**: Cover and store for up to 1 day.  
+* **Refrigerator**: Keep in an airtight container for up to 4 days.  
+* **Make Ahead**: Assemble and refrigerate unbaked pie for up to 24 hours before baking.  
+* **Freezing**: Freeze baked and cooled pie (unglazed) for up to 3 months. Thaw in fridge and glaze before serving.
+
+### Pro Tips
+
+* Use cold butter and work quickly to ensure a flaky crust.  
+* Toss apples with cornstarch to prevent a soggy bottom.  
+* Chill the assembled pie before baking to help the crust hold its shape.  
+* For a shiny finish, brush the top crust with milk or egg wash before baking (optional).  
+* Slice with a sharp, wet knife for clean cuts through the glaze.
+
+This German Apple Pie is a perfect balance of sweet-tart apples, warm spice, and buttery pastry—ideal for autumn gatherings or as a comforting treat year-round.
+
+---
+
+**Sources:** This answer was generated by Brave Search AI, which synthesizes information from current web sources. Source attributions are mentioned inline in the text above.
+
+🔍 *Powered by [Brave Search](https://search.brave.com/) - Fast web research with AI synthesis*
+
+
+---
+
+## 2026-02-15 05:29:11
+
+Query: Recipe for apple pie. List sources at the end with URLs.
+
+An easy, old-fashioned apple pie can be made with a golden, crisp crust and a thick, saucy filling without pre-cooking the apples, using a combination of tart apples like Granny Smith and a blend of brown sugar, cinnamon, and spices. Several recipes offer variations, including lattice tops, different thickening agents like tapioca starch or flour, and baking techniques ranging from single to double-crust pies. Most recipes recommend cooling the pie for at least one hour before serving and using a mix of apples for balanced flavor and texture.
+
+- The **Serious Eats** recipe by BraveTart emphasizes macerating sliced apples (about 4.25 pounds) with brown sugar, cinnamon, salt, ginger, nutmeg, and cloves for at least 3 hours at room temperature before adding tapioca starch. The filling is placed in a chilled double pie crust, topped with a full crust with wide vents, and baked at 400°F (200°C) for about 75 minutes until the center reaches 195°F (91°C). It uses an egg wash made from egg, yolk, cream, and salt for a golden finish and serves 12.
+
+- **Sugar Spun Run** offers a quicker version with no maceration required. The filling combines 3 pounds of sliced tart apples (Granny Smith and Gala) with brown sugar, granulated sugar, flour, cinnamon, lemon juice, and vanilla, then poured into a pie crust. A second crust is added, vented, brushed with egg wash (egg + water), and sprinkled with coarse sugar. Baking starts at 425°F (220°C) for 15 minutes, then reduces to 350°F (175°C) for 45–55 minutes. It includes butter pieces on top of the filling and recommends cooling for several hours before serving, serving 10.
+
+- **The Food Charlatan** recipe pre-cooks the filling: 5 pounds of mixed apples (Granny Smith, Gala, Golden Delicious) are cooked in a skillet with sugars, flour, spices, lemon zest, and juice for 20 minutes until fork-tender, then cooled completely before filling the crust. This method ensures a consistent texture and deep flavor. The pie is chilled before baking at 425°F (220°C) and can be topped with a lattice or solid crust. It serves 10 and has a higher calorie count at 465 per serving.
+
+- **Alton Brown’s** version uses a homemade crust with apple brandy and a mix of Pink Lady, Honeycrisp, and Granny Smith apples. The filling includes sugar, tapioca flour, liquid pectin (like Certo), apple cider vinegar, and grains of paradise for a spicy note. The pie is baked without a pie bird, relying on slits in the top crust for venting. The dough requires chilling for at least 1 hour before rolling. This recipe serves 6.
+
+- **Natasha’s Kitchen** features a cooked filling where a butter-flour-sugar sauce is made first, then poured over cinnamon-tossed apples. The pie uses only Granny Smith apples (2.25 pounds) and includes a lattice top. Baking begins at 425°F for 15 minutes, then reduces to 350°F for 45 minutes. The pie rests for 1 hour before serving and serves 8.
+
+All recipes agree on using a double crust, chilling the assembled pie before baking, and serving with vanilla ice cream for best results.
+
+**Sources:**
+
+- [Easy, Old-Fashioned Apple Pie Recipe - Serious Eats](https://www.seriouseats.com/bravetart-easy-apple-pie-recipe)
+- [Easy Apple Pie - Sugar Spun Run](https://sugarspunrun.com/easy-apple-pie-recipe/)
+- [Best Apple Pie Recipe from Scratch - The Food Charlatan](https://thefoodcharlatan.com/apple-pie/)
+- [Sweet and Spicy Classic Apple Pie Recipe - Alton Brown](https://altonbrown.com/recipes/the-apple-pie/)
+- [The BEST Apple Pie Recipe - Natasha's Kitchen](https://natashaskitchen.com/apple-pie-recipe/)
+
+---
+
+**Sources:** This answer was generated by Brave Search AI, which synthesizes information from current web sources. Source attributions are mentioned inline in the text above.
+
+🔍 *Powered by [Brave Search](https://search.brave.com/) - Fast web research with AI synthesis*
+
+
+---
+
+## 2026-02-15 05:31:59
+
+Query: Recipe for apple pie. Include all source URLs.
+
+Apple pie recipes from various sources provide detailed instructions for creating a classic dessert with a flaky crust and spiced apple filling. Common ingredients include apples, sugar, cinnamon, flour, butter, and lemon juice, with preparation times ranging from about 1 hour 10 minutes to over 3 hours depending on the recipe. Below are summaries of the recipes along with their source URLs.
+
+**King Arthur Baking – Apple Pie**  
+URL: [https://www.kingarthurbaking.com/recipes/apple-pie-recipe](https://www.kingarthurbaking.com/recipes/apple-pie-recipe)  
+- **Prep time:** 45 minutes  
+- **Cook time:** 1 hour 5 minutes  
+- **Total time:** 2 hours  
+- **Servings:** 8  
+- **Crust:** Made with all-purpose flour, salt, vegetable shortening, cold butter, and ice water. Chilled for 30 minutes.  
+- **Filling:** 8 cups peeled, sliced apples tossed with lemon juice, sugar, flour, cornstarch (or Instant Clearjel), salt, cinnamon, nutmeg, allspice, and optional boiled cider or apple juice concentrate.  
+- **Assembly:** Roll bottom crust to 13", place in 9" pie pan, add filling, top with 11" crust or lattice. Vent, brush with milk or egg wash, sprinkle with coarse sugar.  
+- **Baking:** Start at 425°F for 20 minutes, then reduce to 375°F for 40 minutes until filling bubbles.  
+- **Rating:** 4.7/5 from 200 reviews.
+
+**Food Network – Apple Pie**  
+URL: [https://www.foodnetwork.com/recipes/food-network-kitchen/apple-pie-recipe-2011423](https://www.foodnetwork.com/recipes/food-network-kitchen/apple-pie-recipe-2011423)  
+- **Prep time:** 1 hour 30 minutes  
+- **Cook time:** 2 hours  
+- **Total time:** 3 hours 30 minutes  
+- **Servings:** 6  
+- **Crust:** Made with flour, sugar, salt, cold diced butter, and an egg-water mixture. Can be made by hand or food processor. Chilled for at least 1 hour.  
+- **Filling:** Apples are cooked in a skillet with butter and sugar until softened, then strained. Juices are reduced and caramelized, then mixed back with apples and spices.  
+- **Assembly:** Roll both crusts to 11–12", line pie plate, add cooled filling, top with second crust, flute edges, brush with egg, sprinkle sugar.  
+- **Baking:** Bake at 375°F for about 50 minutes until golden.  
+- **Rating:** 4.4/5 from 184 reviews.
+
+**Sugar Spun Run – Easy Apple Pie**  
+URL: [https://sugarspunrun.com/easy-apple-pie-recipe/](https://sugarspunrun.com/easy-apple-pie-recipe/)  
+- **Prep time:** 15 minutes  
+- **Cook time:** 55 minutes  
+- **Total time:** 1 hour 10 minutes  
+- **Servings:** 10  
+- **Crust:** Homemade or store-bought. If homemade, dough is chilled at least 45 minutes.  
+- **Filling:** 3 lbs firm tart apples (Granny Smith and Gala blend), tossed with brown sugar, granulated sugar, flour, cinnamon, salt, lemon juice, and vanilla.  
+- **Assembly:** Roll crusts to 12", place bottom crust in pie plate, add filling, dot with butter, cover with top crust, crimp edges, cut vents, brush with egg wash, sprinkle coarse sugar.  
+- **Baking:** 15 minutes at 425°F, then 45–55 minutes at 350°F until apples are tender.  
+- **Note:** No pre-cooking of filling. Best served warm with vanilla ice cream.  
+- **Rating:** Not specified.
+
+**Taste of Home – Apple Pie**  
+URL: [https://www.tasteofhome.com/recipes/apple-pie/](https://www.tasteofhome.com/recipes/apple-pie/)  
+- **Prep time:** 20 minutes  
+- **Cook time:** 1 hour  
+- **Total time:** 1 hour 20 minutes  
+- **Servings:** 8  
+- **Crust:** Use favorite double pie crust recipe. Chilled before rolling.  
+- **Filling:** Mix brown sugar, granulated sugar, flour, cinnamon, ginger, nutmeg. Toss with lemon juice–treated apple slices.  
+- **Assembly:** Bottom crust rolled to 1/8" thick. Top crust formed into a lattice. Brush with egg white wash, sprinkle with turbinado sugar and cinnamon.  
+- **Baking:** 60–70 minutes at 375°F on the lowest rack until crust is golden and filling bubbles.  
+- **Rating:** 4.5/5 from 229 reviews.
+
+**Betty Crocker – Apple Pie**  
+URL: [https://www.bettycrocker.com/recipes/apple-pie-recipe/c9a4acc6-85aa-4128-b0b0-1a17bdbe05e0](https://www.bettycrocker.com/recipes/apple-pie-recipe/c9a4acc6-85aa-4128-b0b0-1a17bdbe05e0)  
+- **Prep time:** 45 minutes  
+- **Cook time:** 40–50 minutes  
+- **Total time:** 2 hours 20 minutes  
+- **Servings:** 8  
+- **Crust:** Made with flour, salt, cold shortening, and cold water. Chilled about 45 minutes.  
+- **Filling:** Sugar, flour, cinnamon, nutmeg, salt, and 8 cups tart apples. Dot with butter.  
+- **Assembly:** Top crust vented with slits. Edge covered with foil for first part of baking to prevent over-browning.  
+- **Baking:** 40–50 minutes at 425°F. Remove foil last 15 minutes.  
+- **Rating:** 4.6/5 from 54 reviews.
+
+All recipes recommend using tart, firm apples like Granny Smith and suggest serving the pie warm with vanilla ice cream. Chilling the dough before baking helps achieve a flakier crust, and venting the top crust prevents sogginess by allowing steam to escape
+
+---
+
+**Sources:** This answer was generated by Brave Search AI, which synthesizes information from current web sources. Source attributions are mentioned inline in the text above.
+
+🔍 *Powered by [Brave Search](https://search.brave.com/) - Fast web research with AI synthesis*
+
+
+---
+
