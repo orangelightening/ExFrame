@@ -11,6 +11,7 @@ import gzip
 import json
 import os
 from datetime import datetime
+import zoneinfo
 from typing import List, Dict, Any, Optional
 import logging
 
@@ -69,10 +70,19 @@ class KnowledgeCartography:
             # Load existing history
             history = self._load_history_raw()
 
+            # Get timezone-aware timestamp
+            tz_name = os.getenv("APP_TIMEZONE", "America/Vancouver")
+            try:
+                tz = zoneinfo.ZoneInfo(tz_name)
+                timestamp = datetime.now(tz).isoformat()
+            except Exception as e:
+                logger.warning(f"Invalid timezone '{tz_name}', falling back to UTC: {e}")
+                timestamp = datetime.utcnow().isoformat()
+
             # Create new entry
             entry = {
                 "id": len(history) + 1,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": timestamp,
                 "query": query,
                 "response": response,
                 "metadata": metadata or {}
