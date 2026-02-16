@@ -1,6 +1,6 @@
 # Knowledge Cartography - Quick Start
 
-**Status:** Phase 1 Complete ✅ (as of 2026-02-15)
+**Status:** Phase 1 & 2a Complete ✅ (as of 2026-02-15)
 
 ExFrame now captures and stores all query/response pairs with compression, enabling conversational memory and dialectical knowledge mapping.
 
@@ -28,6 +28,56 @@ python3 scripts/view_history.py peter --limit 10
 
 # Just statistics
 python3 scripts/view_history.py peter --stats-only
+```
+
+### Analyze Your History (Phase 2a)
+
+**Group queries into sessions:**
+```bash
+# Find exploration sessions (30 min gap)
+python3 scripts/show_sessions.py peter
+
+# Custom gap threshold
+python3 scripts/show_sessions.py peter --gap 15
+```
+
+**Trace query chains:**
+```bash
+# Show queries before/after entry #5
+python3 scripts/trace_chain.py peter --entry 5
+
+# Custom chain length
+python3 scripts/trace_chain.py peter --entry 5 --before 5 --after 10
+```
+
+**Find related queries:**
+```bash
+# Find queries related to entry #5
+python3 scripts/find_related.py peter --entry 5
+
+# Use specific strategy (temporal, pattern, keyword)
+python3 scripts/find_related.py peter --entry 5 --strategy temporal
+```
+
+**Track concepts over time:**
+```bash
+# Show top concepts
+python3 scripts/concept_timeline.py peter --top 20
+
+# Timeline for specific concept
+python3 scripts/concept_timeline.py peter --concept "embedding"
+
+# Show co-occurring concepts
+python3 scripts/concept_timeline.py peter --concept "embedding" --cooccurrence
+```
+
+**Analyze exploration depth:**
+```bash
+# Find deep explorations (3+ related queries)
+python3 scripts/analyze_depth.py peter --min-depth 3
+
+# Depth analysis for specific concept
+python3 scripts/analyze_depth.py peter --concept "patterns"
 ```
 
 ### Configure a Domain
@@ -95,7 +145,9 @@ Enable/disable features in `domain.json`:
 
 ---
 
-## What's Working Now (Phase 1)
+## What's Working Now
+
+### Phase 1: Storage & Context ✅
 
 ✅ **Compressed Storage**
 - All queries and responses stored with gzip compression
@@ -116,6 +168,38 @@ Enable/disable features in `domain.json`:
 - Per-domain settings in `domain.json`
 - Opt-in simple echo for journal domains
 - Configurable context window and limits
+
+### Phase 2a: Relationship Analysis ✅
+
+✅ **Session Detection**
+- Group queries by time gaps (`show_sessions.py`)
+- Identify exploration periods and breaks
+- Analyze session duration, sources, confidence
+
+✅ **Chain Tracing**
+- Trace query chains before/after entries (`trace_chain.py`)
+- Understand how questions evolved
+- Show exploration flow through time
+
+✅ **Related Query Finding**
+- Find related queries by temporal, pattern, or keyword similarity (`find_related.py`)
+- Multiple strategies: time proximity, shared patterns, keyword overlap
+- Discover connections between queries
+
+✅ **Concept Tracking**
+- Extract and track concepts over time (`concept_timeline.py`)
+- Show when concepts appeared and how often
+- Identify co-occurring concepts
+
+✅ **Exploration Depth**
+- Measure how deeply topics were explored (`analyze_depth.py`)
+- Identify deep dives vs shallow touches
+- Track follow-up patterns
+
+**Architecture:** Append-only storage with derived relationships
+- All relationships computed on-demand from timestamps
+- No modification of stored history
+- Analysis can evolve without data migration
 
 ---
 
@@ -155,33 +239,38 @@ Enable/disable features in `domain.json`:
 
 ---
 
-## What's Next (Phases 2-6)
+## What's Next
 
-### Phase 2: Analytics (Next)
-- Pattern effectiveness scoring
-- Knowledge gap detection
-- Confidence trends over time
-- Domain health metrics
+### Phase 2b: Advanced Analytics (Next)
+- Pattern effectiveness scoring (which patterns work best?)
+- Knowledge gap detection (what's missing from the domain?)
+- Confidence trends over time (is quality improving?)
+- Domain health metrics (usage patterns, answer quality)
+- Query complexity analysis (simple vs complex questions)
 
 ### Phase 3: Evocation Tracking
+- Store evoked questions from Socratic mode
 - Question → Answer → Next Question chains
 - Socratic tutoring improvements
-- Exploration depth analysis
+- Measure teaching effectiveness
 
-### Phase 4: Concept Extraction
-- Mine concepts from Q/R pairs
+### Phase 4: Advanced Concept Analysis
+- LLM-based concept extraction (vs simple keyword extraction)
 - Build concept co-occurrence networks
 - Cross-domain concept discovery
+- Semantic similarity between queries
 
 ### Phase 5: Learning Paths
 - Visualize progression from basic → advanced
 - Detect prerequisites and dependencies
 - Adaptive recommendations
+- Personalized learning suggestions
 
-### Phase 6: Knowledge Graph
+### Phase 6: Knowledge Graph Visualization
 - Interactive visual explorer
 - "Tao Viewer" (dialectical visualization)
 - Graph-based knowledge navigation
+- Web-based UI for exploration
 
 See [kcart.md](kcart.md) for complete roadmap.
 
