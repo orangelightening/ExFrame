@@ -193,8 +193,8 @@ async def process_query(
     # ==================== SIMPLE ECHO FOR POET (No AI needed) ====================
     # For poet persona: if query doesn't start with **, just add timestamp and echo
     # This eliminates the need for any AI/LLM for simple journal entries
-    # Configurable via domain config: "use_simple_echo": true (default for poet)
-    use_simple_echo = domain_config.get("use_simple_echo", persona_type == "poet")
+    # Configurable via domain config: "use_simple_echo": true (opt-in, default false)
+    use_simple_echo = domain_config.get("use_simple_echo", False)
 
     if use_simple_echo and persona_type == "poet" and not query.strip().startswith("**"):
         import os
