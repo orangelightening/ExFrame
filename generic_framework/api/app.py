@@ -255,6 +255,32 @@ except Exception as e:
     logger.warning(f"✗ Error mounting Personas API: {e}")
 
 # =============================================================================
+# MOUNT TAO API (KNOWLEDGE CARTOGRAPHY)
+# =============================================================================
+# Mount the Tao API router for knowledge analysis and visualization
+try:
+    from tao.api import router as tao_router
+    app.include_router(tao_router)
+    logger.info("✓ Tao (Knowledge Cartography) API mounted at /api/tao")
+except ImportError as e:
+    logger.warning(f"✗ Could not mount Tao API: {e}")
+except Exception as e:
+    logger.warning(f"✗ Error mounting Tao API: {e}")
+
+# =============================================================================
+# MOUNT BRAINUSE API (HIRING INTELLIGENCE)
+# =============================================================================
+# Mount the BrainUse API router for candidate vetting and assessment
+try:
+    from tao.vetting.api_router import router as brainuse_router
+    app.include_router(brainuse_router)
+    logger.info("✓ BrainUse (Hiring Intelligence) API mounted at /api/brainuse")
+except ImportError as e:
+    logger.warning(f"✗ Could not mount BrainUse API: {e}")
+except Exception as e:
+    logger.warning(f"✗ Error mounting BrainUse API: {e}")
+
+# =============================================================================
 # CLAUDE CODE COMMUNICATION API
 # =============================================================================
 # Simple HTTP API for communication between Claude Code instances
@@ -336,6 +362,24 @@ frontend_dist_path = Path(__file__).parent.parent / "frontend" / "dist"
 frontend_assets_path = frontend_dist_path / "assets"
 if frontend_assets_path.exists():
     app.mount("/assets", StaticFiles(directory=str(frontend_assets_path)), name="assets")
+
+# Mount Tao static assets
+tao_assets_path = Path(__file__).parent.parent / "tao" / "frontend" / "assets"
+if not tao_assets_path.exists():
+    # Fallback for Docker
+    tao_assets_path = Path("/app/tao/frontend/assets")
+if tao_assets_path.exists():
+    app.mount("/tao/assets", StaticFiles(directory=str(tao_assets_path)), name="tao_assets")
+    logger.info(f"✓ Tao static assets mounted at /tao/assets")
+
+# Mount BrainUse static assets
+brainuse_assets_path = Path(__file__).parent.parent / "tao" / "vetting" / "frontend" / "assets"
+if not brainuse_assets_path.exists():
+    # Fallback for Docker
+    brainuse_assets_path = Path("/app/tao/vetting/frontend/assets")
+if brainuse_assets_path.exists():
+    app.mount("/brainuse/assets", StaticFiles(directory=str(brainuse_assets_path)), name="brainuse_assets")
+    logger.info(f"✓ BrainUse static assets mounted at /brainuse/assets")
 
 # Global state
 engines: Dict[str, GenericAssistantEngine] = {}  # Legacy: for backward compatibility
@@ -502,6 +546,18 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"✗ Failed to pre-load embedding model: {e}")
 
+    # Initialize BrainUse database
+    try:
+        from tao.vetting import init_database, create_tables
+        logger.info("Initializing BrainUse database...")
+        init_database()
+        create_tables()
+        logger.info("✓ BrainUse database initialized")
+    except ImportError:
+        logger.info("✗ BrainUse vetting module not available (database not initialized)")
+    except Exception as e:
+        logger.warning(f"✗ Failed to initialize BrainUse database: {e}")
+
     logger.info(f"=" * 60)
     logger.info(f"ExFrame Runtime Ready")
     logger.info(f"=" * 60)
@@ -614,6 +670,16 @@ async def shutdown_event():
     # Cleanup universes
     if universe_manager:
         await universe_manager.unload_all()
+
+    # Cleanup BrainUse database
+    try:
+        from tao.vetting import close_database
+        close_database()
+        logger.info("✓ BrainUse database connection closed")
+    except ImportError:
+        pass
+    except Exception as e:
+        logger.warning(f"✗ Error closing BrainUse database: {e}")
 
     # Legacy cleanup
     for engine in engines.values():
@@ -862,13 +928,13 @@ async def root():
     if html_path.exists():
         with open(html_path) as f:
             return f.read()
-    
+
     # Fallback to old location for development
     html_path = Path(__file__).parent.parent / "frontend" / "index.html"
     if html_path.exists():
         with open(html_path) as f:
             return f.read()
-    
+
     return """
     <html>
     <head><title>Generic Assistant Framework</title></head>
@@ -878,6 +944,54 @@ async def root():
     </body>
     </html>
     """
+
+
+@app.get("/tao", response_class=HTMLResponse)
+async def serve_tao():
+    """Serve Tao knowledge analysis page."""
+    # In Docker: /app/tao/frontend/tao.html
+    # In dev: eeframe/tao/frontend/tao.html (relative to project root)
+    tao_html = Path(__file__).parent.parent / "tao" / "frontend" / "tao.html"
+    if not tao_html.exists():
+        # Fallback: Try from /app (Docker container structure)
+        tao_html = Path("/app/tao/frontend/tao.html")
+    if tao_html.exists():
+        with open(tao_html) as f:
+            return f.read()
+    else:
+        raise HTTPException(status_code=404, detail=f"Tao frontend not found at {tao_html}")
+
+
+@app.get("/brainuse", response_class=HTMLResponse)
+async def serve_brainuse():
+    """Serve BrainUse hiring intelligence dashboard."""
+    # In Docker: /app/tao/vetting/frontend/index.html
+    # In dev: eeframe/tao/vetting/frontend/index.html
+    brainuse_html = Path(__file__).parent.parent / "tao" / "vetting" / "frontend" / "index.html"
+    if not brainuse_html.exists():
+        # Fallback: Try from /app (Docker container structure)
+        brainuse_html = Path("/app/tao/vetting/frontend/index.html")
+    if brainuse_html.exists():
+        with open(brainuse_html) as f:
+            return f.read()
+    else:
+        raise HTTPException(status_code=404, detail=f"BrainUse frontend not found at {brainuse_html}")
+
+
+@app.get("/brainuse/report/{candidate_id}", response_class=HTMLResponse)
+async def serve_brainuse_report(candidate_id: str):
+    """Serve BrainUse assessment report page."""
+    # In Docker: /app/tao/vetting/frontend/report.html
+    # In dev: eeframe/tao/vetting/frontend/report.html
+    report_html = Path(__file__).parent.parent / "tao" / "vetting" / "frontend" / "report.html"
+    if not report_html.exists():
+        # Fallback: Try from /app (Docker container structure)
+        report_html = Path("/app/tao/vetting/frontend/report.html")
+    if report_html.exists():
+        with open(report_html) as f:
+            return f.read()
+    else:
+        raise HTTPException(status_code=404, detail=f"BrainUse report page not found at {report_html}")
 
 
 # SPA catch-all route removed - using simple Alpine.js UI instead

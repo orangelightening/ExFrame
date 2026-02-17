@@ -61,6 +61,7 @@ ENV PATH=/usr/local/bin:$PATH
 # Copy application code (includes the frontend/index.html)
 COPY generic_framework/ $APP_HOME/
 COPY expertise_scanner/ $APP_HOME/expertise_scanner/
+COPY tao/ $APP_HOME/tao/
 
 # Create necessary directories with proper permissions
 RUN mkdir -p $APP_HOME/data \

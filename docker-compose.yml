@@ -51,6 +51,13 @@ services:
 
       # Log level
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+      # Database configuration (BrainUse PostgreSQL)
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=brainuse
+      - POSTGRES_USER=brainuse
+      - POSTGRES_PASSWORD=brainuse_dev_password
     volumes:
       # Persist domain registry
       - eeframe_data:/app/data
@@ -77,6 +84,9 @@ services:
       # Mount tests directory for state machine test suite
       - ./tests:/app/tests:ro
 
+      # Mount Tao subsystem for live development
+      - ./tao:/app/tao:rw
+
       # Mount built frontend (bind mount for live updates)
       # - ./frontend/dist:/app/frontend/dist:ro  # TEMPORARILY DISABLED TO RESTORE NICE UI
 
@@ -101,6 +111,28 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: exframe-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=brainuse
+      - POSTGRES_USER=brainuse
+      - POSTGRES_PASSWORD=brainuse_dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brainuse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   prometheus:
     image: prom/prometheus:v2.48.0
@@ -211,6 +243,11 @@ volumes:
     driver: local
   loki_data:
     driver: local
+
+  # Database volumes
+  postgres_data:
+    driver: local
+    name: exframe_postgres_data
 
 networks:
   monitoring:

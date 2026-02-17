@@ -1,5 +1,5 @@
 # Current System State - ExFrame
-**Date:** 2026-02-13
+**Date:** 2026-02-15
 **Status:** Operational
 
 ## Overview
@@ -95,6 +95,70 @@ This is the most critical config field — without it, the LLM has no domain-spe
   - Legacy query endpoints
 
 Domain configs contain fields for both engines. Do NOT remove old-schema fields (`plugins`, `specialists`, `knowledge_base`, etc.) until full migration to Phase 1 is complete.
+
+### Tao Subsystem (Knowledge Cartography)
+**Status:** Phase 2a Complete (2026-02-15)
+**Location:** `tao/` directory
+
+Tao is a standalone subsystem for capturing, analyzing, and visualizing learning journeys through query/response history.
+
+**Architecture:**
+```
+tao/
+├── storage/          # Compressed Q/R history (knowledge_cartography.py moved here)
+├── analysis/         # 5 analysis modules (sessions, chains, relations, concepts, depth)
+├── api/              # REST API with 8 endpoints mounted at /api/tao/*
+├── cli/              # Command-line tools (python -m tao.cli.*)
+├── frontend/         # Web UI at http://localhost:3000/tao
+└── docs/             # Complete documentation (API.md, TESTING.md, README.md)
+```
+
+**Storage:**
+- Files: `universes/MINE/domains/{domain}/query_history.json.gz`
+- Format: Compressed JSON (70-80% size reduction)
+- Typical: ~400KB per 1,000 Q/R pairs
+- Append-only, never modifies history
+
+**Integration:**
+- `query_processor.py` imports from `tao.storage` (not `core/knowledge_cartography.py`)
+- Conversational memory: Last 20 Q/R pairs loaded automatically
+- Real-time: No caching, immediate visibility in Tao UI
+
+**Analysis Features:**
+- **Sessions**: Group queries by time gaps
+- **Chains**: Trace before/after query sequences
+- **Relations**: Find related queries (temporal/pattern/keyword)
+- **Concepts**: Extract and rank keywords
+- **Depth**: Identify deep explorations (3+ related queries)
+
+**Access:**
+- Web UI: http://localhost:3000/tao (3 tabs: Sessions, Concepts, Depth)
+- REST API: `/api/tao/sessions`, `/api/tao/concepts`, etc. (8 endpoints)
+- CLI: `python -m tao.cli.view_history`, `show_sessions`, etc.
+- Legacy scripts: `scripts/*.py` still work (deprecated wrappers)
+
+**Documentation:** See `KNOWLEDGE_CARTOGRAPHY.md`, `tao/docs/API.md`, `tao/docs/TESTING.md`
+
+**Future Phases:**
+- Phase 2b: Advanced analytics (pattern effectiveness, knowledge gaps)
+- Phase 3: Evocation tracking (Socratic question chains)
+- Phase 4: Advanced concept analysis (LLM-based, semantic networks)
+- Phase 5: Learning paths (progression tracking)
+- Phase 6: Knowledge graph visualization
+
+## Recent Changes (2026-02-15)
+
+### Completed
+- **Tao Subsystem Refactoring** — Complete extraction of knowledge cartography into standalone subsystem:
+  - Moved `core/knowledge_cartography.py` → `tao/storage/storage.py`
+  - Created 5 analysis modules in `tao/analysis/` (sessions, chains, relations, concepts, depth)
+  - Built REST API with 8 endpoints at `/api/tao/*`
+  - Created web UI at `/tao` with 3 tabs (Sessions, Concepts, Depth) and 2 modals (Chain, Related)
+  - Implemented CLI tools as modules (`python -m tao.cli.*`)
+  - Updated all imports in `query_processor.py` to use `tao.storage`
+  - Created comprehensive documentation (API.md, TESTING.md)
+  - Updated ARCHITECTURE.md with Tao subsystem section
+  - Updated README.md with Tao mention and link
 
 ## Recent Changes (2026-02-13)
 

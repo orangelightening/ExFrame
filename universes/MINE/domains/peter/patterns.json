@@ -372,5 +372,16 @@
     "tags": [
       "journal"
     ]
+  },
+  {
+    "id": "peter_20260215_225912",
+    "name": "eat my shorts",
+    "pattern_type": "journal_entry",
+    "problem": "eat my shorts",
+    "solution": "[2026-02-15 14:59:12] eat my shorts",
+    "created_at": "2026-02-15T22:59:12.170915",
+    "tags": [
+      "journal"
+    ]
   }
 ]

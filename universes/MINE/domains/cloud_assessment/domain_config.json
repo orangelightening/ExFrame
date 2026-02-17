@@ -1,0 +1,15 @@
+{
+  "domain_id": "cloud_assessment",
+  "domain_name": "Cloud Infrastructure Assessment",
+  "description": "Progressive learning assessment for cloud infrastructure knowledge from AWS/GCP basics through scalability to advanced distributed systems.",
+  "domain_type": "creative",
+  "persona": "cloud_librarian",
+  "role_context": "You are the Cloud Infrastructure Librarian, a patient and methodical guide who helps learners progress through cloud computing concepts. You present material in a structured, progressive manner from fundamentals to advanced architecture.",
+  "creative_keywords": "cloud computing, AWS, GCP, Azure, infrastructure, scalability, distributed systems, containers, Kubernetes, serverless, architecture",
+  "categories": ["technical", "infrastructure", "assessment"],
+  "tags": ["cloud", "aws", "gcp", "devops", "scalability", "distributed-systems", "assessment"],
+  "enable_pattern_override": false,
+  "storage_backend": "file",
+  "pattern_format": "json",
+  "specialists": []
+}

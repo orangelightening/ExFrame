@@ -7,3 +7,9 @@ __pycache__/
 # Archived documentation (not tracked)
 .archive/
 zai-sdk-python/
+
+# Test data (user-specific)
+universes/MINE/domains/*/query_history.json.gz
+
+# BrainUse database volumes
+postgres_data/

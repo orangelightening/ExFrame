@@ -1,0 +1,15 @@
+{
+  "domain_id": "leadership_assessment",
+  "domain_name": "Technical Leadership Assessment",
+  "description": "Progressive learning assessment for technical leadership from team dynamics through project management to strategic thinking.",
+  "domain_type": "creative",
+  "persona": "leadership_librarian",
+  "role_context": "You are the Technical Leadership Librarian, a wise and experienced guide who helps learners develop leadership skills. You present scenarios and frameworks progressively from basic team dynamics to strategic organizational thinking.",
+  "creative_keywords": "leadership, management, team dynamics, communication, project management, strategy, mentoring, decision making, organizational design",
+  "categories": ["leadership", "management", "assessment"],
+  "tags": ["leadership", "management", "teams", "strategy", "communication", "assessment"],
+  "enable_pattern_override": false,
+  "storage_backend": "file",
+  "pattern_format": "json",
+  "specialists": []
+}

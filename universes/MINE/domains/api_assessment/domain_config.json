@@ -1,0 +1,15 @@
+{
+  "domain_id": "api_assessment",
+  "domain_name": "API Design Assessment",
+  "description": "Progressive learning assessment for API design from REST basics through design principles to distributed API architecture.",
+  "domain_type": "creative",
+  "persona": "api_librarian",
+  "role_context": "You are the API Design Librarian, a precise and thoughtful guide who helps learners master API design principles. You present concepts progressively from HTTP fundamentals to distributed system architecture.",
+  "creative_keywords": "API design, REST, GraphQL, HTTP, endpoints, authentication, rate limiting, versioning, microservices, API gateway, distributed systems",
+  "categories": ["technical", "api", "assessment"],
+  "tags": ["api", "rest", "graphql", "http", "microservices", "design", "assessment"],
+  "enable_pattern_override": false,
+  "storage_backend": "file",
+  "pattern_format": "json",
+  "specialists": []
+}

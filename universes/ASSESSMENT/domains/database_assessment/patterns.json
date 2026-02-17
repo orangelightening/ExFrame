@@ -1,0 +1,70 @@
+{
+  "patterns": [
+    {
+      "id": "db_basics",
+      "name": "SQL Fundamentals",
+      "level": 1,
+      "keywords": ["SELECT", "JOIN", "WHERE", "primary key", "foreign key", "index"],
+      "example_questions": [
+        "What is the difference between INNER JOIN and LEFT JOIN?",
+        "What is a primary key and why is it important?",
+        "How do indexes improve query performance?",
+        "Explain the difference between DELETE and TRUNCATE"
+      ]
+    },
+    {
+      "id": "db_design",
+      "name": "Schema Design and Optimization",
+      "level": 2,
+      "keywords": ["normalization", "denormalization", "schema", "query plan", "transaction", "isolation"],
+      "example_questions": [
+        "What is database normalization and when would you denormalize?",
+        "How do you read and optimize a query execution plan?",
+        "Explain ACID properties",
+        "What are transaction isolation levels?"
+      ]
+    },
+    {
+      "id": "db_distributed",
+      "name": "Distributed Data Systems",
+      "level": 3,
+      "keywords": ["sharding", "replication", "partitioning", "NoSQL", "caching", "consistency"],
+      "example_questions": [
+        "How do you partition data across multiple databases?",
+        "Explain the trade-offs between SQL and NoSQL databases",
+        "What is database replication and what are the different strategies?",
+        "How do you maintain consistency in a distributed database?"
+      ]
+    },
+    {
+      "id": "db_expert",
+      "name": "Advanced Database Systems",
+      "level": 4,
+      "keywords": ["consensus", "CAP theorem", "raft", "paxos", "time-series", "storage engine"],
+      "example_questions": [
+        "Explain the CAP theorem and its implications",
+        "How does Raft consensus algorithm work?",
+        "How would you design a time-series database?",
+        "What are the trade-offs of different storage engines (InnoDB, RocksDB, etc.)?"
+      ]
+    }
+  ],
+  "assessment_guidance": {
+    "starting_level": 1,
+    "escalation_trigger": "Shows performance intuition",
+    "time_per_level": "15-20 minutes",
+    "ideal_trajectory": "L1(5min) -> L2(20min) -> L3(30min) -> L4(20min)",
+    "red_flags": [
+      "Unable to reason about query performance",
+      "No consideration of scale",
+      "Doesn't ask about data size or access patterns",
+      "Stuck on syntax without understanding concepts"
+    ],
+    "green_flags": [
+      "Asks about data volume and access patterns",
+      "Explores trade-offs (speed vs consistency)",
+      "Compares different database types",
+      "Reaches consistency/CAP topics naturally"
+    ]
+  }
+}

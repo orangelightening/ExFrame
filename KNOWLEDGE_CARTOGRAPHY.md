@@ -1,8 +1,8 @@
-# Knowledge Cartography - Quick Start
+# Knowledge Cartography (Tao) - Quick Start
 
-**Status:** Phase 1 & 2a Complete ✅ (as of 2026-02-15)
+**Status:** Phase 2a Complete ✅ | Tao Subsystem Refactored (2026-02-15)
 
-ExFrame now captures and stores all query/response pairs with compression, enabling conversational memory and dialectical knowledge mapping.
+ExFrame now captures and stores all query/response pairs with compression, enabling conversational memory and dialectical knowledge mapping. The knowledge cartography functionality has been extracted into a standalone **Tao** subsystem with web UI, REST API, and CLI tools.
 
 ---
 
@@ -18,36 +18,66 @@ ExFrame now captures and stores all query/response pairs with compression, enabl
 
 ## Quick Start
 
-### View Your History
+### 🌐 Web Interface (Recommended)
+
+The easiest way to explore your knowledge map:
+
+```
+http://localhost:3000/tao
+```
+
+**Features:**
+- **Sessions Tab**: View exploration sessions with expandable query details
+- **Concepts Tab**: See most frequent keywords across your queries
+- **Depth Tab**: Identify deep explorations (multiple related queries)
+- **Interactive Modals**: View query chains and find related queries
+- **Real-time Updates**: New queries appear immediately
+
+### 📊 REST API
+
+Access analysis programmatically:
+
 ```bash
-# See all queries in a domain
+# Get sessions
+curl http://localhost:3000/api/tao/sessions/peter | jq
+
+# Get top concepts
+curl http://localhost:3000/api/tao/concepts/peter | jq
+
+# Get query chain
+curl http://localhost:3000/api/tao/chains/peter/5 | jq
+
+# Find related queries
+curl http://localhost:3000/api/tao/related/peter/5 | jq
+
+# Get deep explorations
+curl http://localhost:3000/api/tao/depth/peter | jq
+
+# Get full history
+curl http://localhost:3000/api/tao/history/peter | jq
+```
+
+See `tao/docs/API.md` for complete API documentation.
+
+### 💻 Command Line Tools
+
+**New module-based CLI** (recommended):
+```bash
+# View history
+python -m tao.cli.view_history peter
+
+# Show sessions
+python -m tao.cli.show_sessions peter --gap 30
+
+# Trace query chain
+python -m tao.cli.trace_chain peter --entry 5
+```
+
+**Legacy scripts** (still work):
+```bash
 python3 scripts/view_history.py peter
-
-# Last 10 entries only
-python3 scripts/view_history.py peter --limit 10
-
-# Just statistics
-python3 scripts/view_history.py peter --stats-only
-```
-
-### Analyze Your History (Phase 2a)
-
-**Group queries into sessions:**
-```bash
-# Find exploration sessions (30 min gap)
 python3 scripts/show_sessions.py peter
-
-# Custom gap threshold
-python3 scripts/show_sessions.py peter --gap 15
-```
-
-**Trace query chains:**
-```bash
-# Show queries before/after entry #5
 python3 scripts/trace_chain.py peter --entry 5
-
-# Custom chain length
-python3 scripts/trace_chain.py peter --entry 5 --before 5 --after 10
 ```
 
 **Find related queries:**

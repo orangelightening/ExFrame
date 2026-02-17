@@ -1,0 +1,70 @@
+{
+  "patterns": [
+    {
+      "id": "api_basics",
+      "name": "REST API Fundamentals",
+      "level": 1,
+      "keywords": ["GET", "POST", "PUT", "DELETE", "HTTP", "status code", "JSON"],
+      "example_questions": [
+        "What are the different HTTP methods and when do you use each?",
+        "What do common HTTP status codes mean (200, 404, 500)?",
+        "How do you structure a JSON response?",
+        "What is the difference between query parameters and path parameters?"
+      ]
+    },
+    {
+      "id": "api_design",
+      "name": "RESTful Design Principles",
+      "level": 2,
+      "keywords": ["REST", "versioning", "rate limiting", "pagination", "authentication", "error handling"],
+      "example_questions": [
+        "What are RESTful design principles?",
+        "How do you version an API?",
+        "How do you implement rate limiting?",
+        "What is a good error handling strategy for APIs?"
+      ]
+    },
+    {
+      "id": "api_advanced",
+      "name": "Advanced API Patterns",
+      "level": 3,
+      "keywords": ["GraphQL", "gateway", "OAuth", "JWT", "webhook", "idempotency"],
+      "example_questions": [
+        "What are the trade-offs between REST and GraphQL?",
+        "How does OAuth2 work?",
+        "What is an API gateway and when do you need one?",
+        "How do you design idempotent API endpoints?"
+      ]
+    },
+    {
+      "id": "api_expert",
+      "name": "Distributed API Systems",
+      "level": 4,
+      "keywords": ["gRPC", "protobuf", "BFF", "composition", "tracing", "governance"],
+      "example_questions": [
+        "When would you use gRPC instead of REST?",
+        "What is the Backend for Frontend (BFF) pattern?",
+        "How do you implement distributed tracing for APIs?",
+        "How do you enforce API governance across an organization?"
+      ]
+    }
+  ],
+  "assessment_guidance": {
+    "starting_level": 1,
+    "escalation_trigger": "Shows client-centric thinking",
+    "time_per_level": "10-15 minutes",
+    "ideal_trajectory": "L1(5min) -> L2(15min) -> L3(20min) -> L4(15min)",
+    "red_flags": [
+      "Designs APIs without considering clients",
+      "No thought about versioning or evolution",
+      "Ignores error handling",
+      "Unable to compare REST/GraphQL/gRPC"
+    ],
+    "green_flags": [
+      "Asks about client needs and constraints",
+      "Considers API evolution over time",
+      "Explores caching and performance",
+      "Thinks about developer experience"
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "patterns": [
+    {
+      "id": "cloud_foundations",
+      "name": "Cloud Infrastructure Basics",
+      "level": 1,
+      "keywords": ["EC2", "S3", "VPC", "IAM", "container", "virtual machine", "storage"],
+      "example_questions": [
+        "What is the difference between EC2 and Lambda?",
+        "Explain the purpose of a VPC",
+        "What are the different types of storage in AWS?",
+        "How does IAM control access to resources?"
+      ]
+    },
+    {
+      "id": "cloud_scaling",
+      "name": "Scalability and Availability",
+      "level": 2,
+      "keywords": ["load balancer", "auto-scaling", "availability zone", "redundancy", "failover"],
+      "example_questions": [
+        "How do you design a highly available application in AWS?",
+        "Explain the difference between horizontal and vertical scaling",
+        "What is the purpose of a load balancer?",
+        "How do you ensure data durability in the cloud?"
+      ]
+    },
+    {
+      "id": "cloud_architecture",
+      "name": "Distributed Architecture",
+      "level": 3,
+      "keywords": ["microservices", "event-driven", "multi-region", "CDN", "caching", "message queue"],
+      "example_questions": [
+        "How would you design a multi-region application?",
+        "Explain the trade-offs between monolith and microservices",
+        "How do you handle data consistency in distributed systems?",
+        "What is eventual consistency and when is it acceptable?"
+      ]
+    },
+    {
+      "id": "cloud_expert",
+      "name": "Cloud at Scale",
+      "level": 4,
+      "keywords": ["disaster recovery", "cost optimization", "compliance", "observability", "chaos engineering"],
+      "example_questions": [
+        "How do you design a disaster recovery strategy for a global application?",
+        "Explain how you would optimize costs for a large-scale system",
+        "How do you ensure HIPAA compliance in the cloud?",
+        "What is chaos engineering and how do you implement it?"
+      ]
+    }
+  ],
+  "assessment_guidance": {
+    "starting_level": 1,
+    "escalation_trigger": "Demonstrates systems thinking",
+    "time_per_level": "15-25 minutes",
+    "ideal_trajectory": "L1(5min) -> L2(20min) -> L3(35min) -> L4(20min)",
+    "red_flags": [
+      "Focus on individual services without systems context",
+      "No consideration of failure modes",
+      "Ignores cost implications",
+      "Unable to reason about trade-offs"
+    ],
+    "green_flags": [
+      "Considers multiple approaches",
+      "Asks about scale and constraints",
+      "Explores failure scenarios",
+      "Reasons about cost vs performance"
+    ]
+  }
+}

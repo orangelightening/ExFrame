@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Report - BrainUse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* Print styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .print-break { page-break-after: always; }
+        }
+
+        /* Gradient backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        /* Recommendation badges */
+        .rec-hire {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+        }
+        .rec-maybe {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.3);
+        }
+        .rec-pass {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Metric cards */
+        .metric-card {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Progress bars */
+        .progress-bar {
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            transition: width 1s ease;
+        }
+
+        /* Percentile indicator */
+        .percentile-marker {
+            position: relative;
+            height: 40px;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+            border-radius: 20px;
+        }
+        .percentile-dot {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid #10b981;
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Strength/Concern items */
+        .strength-item {
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            border-left: 4px solid #10b981;
+        }
+        .concern-item {
+            background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Chart containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div x-data="reportApp()" x-init="init()" x-cloak>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <svg class="animate-spin h-16 w-16 text-emerald-400 mx-auto" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-4 text-gray-400">Loading assessment report...</p>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error && !loading" class="min-h-screen flex items-center justify-center p-4">
+            <div class="text-center max-w-md">
+                <svg class="w-16 h-16 text-red-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2 class="mt-4 text-xl font-bold text-white">Failed to Load Report</h2>
+                <p class="mt-2 text-gray-400" x-text="error"></p>
+                <button
+                    @click="window.location.href = '/brainuse'"
+                    class="mt-6 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Report Content -->
+        <div x-show="!loading && !error" class="min-h-screen">
+
+            <!-- Header -->
+            <header class="gradient-bg border-b border-gray-700 sticky top-0 z-50 shadow-lg no-print">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-16">
+                        <div class="flex items-center space-x-4">
+                            <button
+                                @click="window.location.href = '/brainuse'"
+                                class="text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <div>
+                                <h1 class="text-xl font-bold text-white">Assessment Report</h1>
+                                <p class="text-sm text-gray-400" x-text="candidate?.name"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <button
+                                @click="window.print()"
+                                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                </svg>
+                                <span>Print</span>
+                            </button>
+                            <button
+                                @click="downloadPDF()"
+                                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Download PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+                <!-- Executive Summary -->
+                <section class="mb-8">
+                    <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                            <!-- Recommendation Badge -->
+                            <div>
+                                <div class="flex items-center space-x-4 mb-4">
+                                    <div
+                                        class="px-6 py-3 rounded-lg text-white text-2xl font-bold"
+                                        :class="'rec-' + report?.recommendation">
+                                        <span x-text="formatRecommendation(report?.recommendation)"></span>
+                                    </div>
+                                    <div class="text-sm">
+                                        <div class="text-gray-400">Confidence</div>
+                                        <div class="text-2xl font-bold text-white" x-text="Math.round((report?.confidence || 0) * 100) + '%'"></div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-300 leading-relaxed max-w-2xl" x-text="report?.summary"></p>
+                            </div>
+
+                            <!-- Tao Index -->
+                            <div class="flex-shrink-0">
+                                <div class="text-center bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-lg p-6 border border-emerald-500/30">
+                                    <div class="text-sm text-emerald-400 font-medium mb-2">Tao Index</div>
+                                    <div class="text-5xl font-bold text-emerald-400" x-text="assessment?.tao_index.toFixed(1)"></div>
+                                    <div class="text-sm text-gray-400 mt-2">
+                                        <span x-text="Math.round(assessment?.percentile)"></span>th percentile
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Key Metrics Grid -->
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-4">Key Metrics</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                        <!-- Learning Velocity -->
+                        <div class="metric-card rounded-lg p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-medium text-gray-400">Learning Velocity</h3>
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                            </div>
+                            <div class="text-3xl font-bold text-white mb-2" x-text="assessment?.learning_velocity.toFixed(2)"></div>
+                            <div class="text-xs text-gray-500">levels per day</div>
+                            <div class="mt-3">
+                                <div class="progress-bar">
+                                    <div
+                                        class="progress-fill bg-gradient-to-r from-emerald-500 to-emerald-400"
+                                        :style="'width: ' + Math.min((assessment?.learning_velocity / 0.5) * 100, 100) + '%'"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sophistication -->
+                        <div class="metric-card rounded-lg p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-medium text-gray-400">Question Sophistication</h3>
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-3xl font-bold text-white mb-2" x-text="assessment?.avg_sophistication.toFixed(1)"></div>
+                            <div class="text-xs text-gray-500">out of 4.0</div>
+                            <div class="mt-3">
+                                <div class="progress-bar">
+                                    <div
+                                        class="progress-fill bg-gradient-to-r from-blue-500 to-blue-400"
+                                        :style="'width: ' + (assessment?.avg_sophistication / 4 * 100) + '%'"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chain Depth -->
+                        <div class="metric-card rounded-lg p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-medium text-gray-400">Persistence</h3>
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-3xl font-bold text-white mb-2" x-text="assessment?.chain_depth.toFixed(1)"></div>
+                            <div class="text-xs text-gray-500">queries per chain</div>
+                            <div class="mt-3">
+                                <div class="progress-bar">
+                                    <div
+                                        class="progress-fill bg-gradient-to-r from-purple-500 to-purple-400"
+                                        :style="'width: ' + Math.min((assessment?.chain_depth / 6) * 100, 100) + '%'"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interest Ratio -->
+                        <div class="metric-card rounded-lg p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-medium text-gray-400">Discipline</h3>
+                                <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-3xl font-bold text-white mb-2" x-text="assessment?.interest_ratio.toFixed(2)"></div>
+                            <div class="text-xs text-gray-500">interest ratio</div>
+                            <div class="mt-3">
+                                <div class="progress-bar">
+                                    <div
+                                        class="progress-fill bg-gradient-to-r from-yellow-500 to-yellow-400"
+                                        :style="'width: ' + (assessment?.interest_ratio * 100) + '%'"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Percentile Visualization -->
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-4">Performance vs Benchmark</h2>
+                    <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+                        <div class="max-w-3xl mx-auto">
+                            <div class="mb-6">
+                                <div class="flex justify-between text-sm text-gray-400 mb-2">
+                                    <span>Below Average</span>
+                                    <span>Average</span>
+                                    <span>Exceptional</span>
+                                </div>
+                                <div class="percentile-marker">
+                                    <div
+                                        class="percentile-dot"
+                                        :style="'left: ' + (assessment?.percentile || 50) + '%'"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0%</span>
+                                    <span>50%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-white mb-2">
+                                    <span x-text="Math.round(assessment?.percentile)"></span>th Percentile
+                                </p>
+                                <p class="text-gray-400" x-text="report?.vs_benchmark"></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Strengths & Concerns -->
+                <section class="mb-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                        <!-- Strengths -->
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                                <svg class="w-6 h-6 text-emerald-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Strengths
+                            </h2>
+                            <div class="space-y-3">
+                                <template x-for="(strength, index) in report?.strengths" :key="index">
+                                    <div class="strength-item rounded-lg p-4">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="flex-shrink-0 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold" x-text="index + 1"></div>
+                                            <p class="text-gray-200 flex-1" x-text="strength"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Concerns -->
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                                <svg class="w-6 h-6 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                Areas for Follow-Up
+                            </h2>
+                            <div class="space-y-3">
+                                <template x-for="(concern, index) in report?.concerns" :key="index">
+                                    <div class="concern-item rounded-lg p-4">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="flex-shrink-0 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">!</div>
+                                            <p class="text-gray-200 flex-1" x-text="concern"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="!report?.concerns || report.concerns.length === 0">
+                                    <div class="text-center py-8 text-gray-500">
+                                        <svg class="w-12 h-12 mx-auto mb-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <p>No significant concerns identified</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Domain Breakdown -->
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-4">Domain Performance</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="(scores, domain) in assessment?.domain_scores" :key="domain">
+                            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                                <h3 class="text-lg font-semibold text-white mb-4" x-text="formatDomain(domain)"></h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span class="text-gray-400">Velocity</span>
+                                            <span class="text-white font-medium" x-text="scores.velocity.toFixed(2)"></span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill bg-emerald-500" :style="'width: ' + Math.min((scores.velocity / 0.5) * 100, 100) + '%'"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span class="text-gray-400">Sophistication</span>
+                                            <span class="text-white font-medium" x-text="scores.sophistication.toFixed(1) + '/4.0'"></span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill bg-blue-500" :style="'width: ' + (scores.sophistication / 4 * 100) + '%'"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span class="text-gray-400">Queries</span>
+                                            <span class="text-white font-medium" x-text="scores.queries"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- Learning Trajectory -->
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-4">Learning Trajectory</h2>
+                    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                        <p class="text-gray-300 leading-relaxed" x-text="report?.learning_trajectory"></p>
+                    </div>
+                </section>
+
+                <!-- Interview Recommendations -->
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-4">Interview Recommendations</h2>
+                    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                        <div class="space-y-4">
+                            <template x-for="(question, index) in report?.follow_up_questions" :key="index">
+                                <div class="flex items-start space-x-4 p-4 bg-gray-700/50 rounded-lg">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold" x-text="index + 1"></div>
+                                    <p class="text-gray-200 flex-1" x-text="question"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Standout Metrics -->
+                <template x-if="report?.standout_metrics && report.standout_metrics.length > 0">
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-bold text-white mb-4">Standout Performance</h2>
+                        <div class="bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 rounded-lg p-6 border border-emerald-500/30">
+                            <div class="flex flex-wrap gap-4">
+                                <template x-for="metric in report?.standout_metrics" :key="metric">
+                                    <div class="flex items-center space-x-2 px-4 py-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
+                                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                        </svg>
+                                        <span class="text-emerald-300 font-medium text-sm" x-text="metric"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </section>
+                </template>
+
+                <!-- Assessment Details -->
+                <section class="mb-8 print-break">
+                    <h2 class="text-2xl font-bold text-white mb-4">Assessment Details</h2>
+                    <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y divide-gray-700">
+                            <div class="p-6">
+                                <div class="text-gray-400 text-sm mb-1">Total Queries</div>
+                                <div class="text-2xl font-bold text-white" x-text="assessment?.total_queries"></div>
+                            </div>
+                            <div class="p-6">
+                                <div class="text-gray-400 text-sm mb-1">Sessions</div>
+                                <div class="text-2xl font-bold text-white" x-text="assessment?.total_sessions"></div>
+                            </div>
+                            <div class="p-6">
+                                <div class="text-gray-400 text-sm mb-1">Time Spent</div>
+                                <div class="text-2xl font-bold text-white" x-text="Math.round(assessment?.total_time_minutes) + 'min'"></div>
+                            </div>
+                            <div class="p-6">
+                                <div class="text-gray-400 text-sm mb-1">Tao Index</div>
+                                <div class="text-2xl font-bold text-emerald-400" x-text="assessment?.tao_index.toFixed(1)"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer class="mt-12 pt-8 border-t border-gray-700 text-center text-sm text-gray-500">
+                    <p>Generated by BrainUse Hiring Intelligence</p>
+                    <p class="mt-1">Powered by Tao Knowledge Cartography</p>
+                    <p class="mt-4 text-xs" x-text="'Report generated: ' + new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})"></p>
+                </footer>
+
+            </main>
+        </div>
+
+    </div>
+
+    <script src="/brainuse/assets/report.js"></script>
+</body>
+</html>

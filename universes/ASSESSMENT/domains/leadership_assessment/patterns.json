@@ -1,0 +1,72 @@
+{
+  "patterns": [
+    {
+      "id": "leadership_basics",
+      "name": "Team Communication",
+      "level": 1,
+      "keywords": ["communication", "meeting", "feedback", "delegation", "priority"],
+      "example_questions": [
+        "How do you prioritize tasks for your team?",
+        "What makes a meeting effective vs ineffective?",
+        "How do you give constructive feedback?",
+        "When should you delegate a task?"
+      ]
+    },
+    {
+      "id": "leadership_management",
+      "name": "Performance Management",
+      "level": 2,
+      "keywords": ["performance", "mentoring", "coaching", "roadmap", "coordination"],
+      "example_questions": [
+        "How do you handle an underperforming team member?",
+        "What is your approach to technical mentoring?",
+        "How do you balance technical debt with feature delivery?",
+        "How do you coordinate between multiple teams?"
+      ]
+    },
+    {
+      "id": "leadership_strategy",
+      "name": "Strategic Leadership",
+      "level": 3,
+      "keywords": ["strategy", "hiring", "culture", "stakeholder", "organizational design"],
+      "example_questions": [
+        "How do you build a high-performing engineering team?",
+        "What is your technical hiring philosophy?",
+        "How do you manage stakeholder expectations?",
+        "How do you balance short-term delivery with long-term vision?"
+      ]
+    },
+    {
+      "id": "leadership_executive",
+      "name": "Executive Leadership",
+      "level": 4,
+      "keywords": ["transformation", "metrics", "incentives", "board", "M&A", "culture change"],
+      "example_questions": [
+        "How do you transform engineering culture at scale?",
+        "What engineering metrics do you track and why?",
+        "How do you communicate technical strategy to the board?",
+        "How do you integrate engineering teams after an acquisition?"
+      ]
+    }
+  ],
+  "assessment_guidance": {
+    "starting_level": 1,
+    "escalation_trigger": "Shows framework thinking beyond tactics",
+    "time_per_level": "10-15 minutes",
+    "ideal_trajectory": "L1(5min) -> L2(15min) -> L3(20min) -> L4(15min)",
+    "interest_ratio_indicator": true,
+    "boring_domain_notes": "This is often the 'boring domain' for IC candidates. High performers will maintain engagement and learning velocity despite low interest.",
+    "red_flags": [
+      "Dismissive of management concepts",
+      "No follow-up questions",
+      "Low engagement/energy",
+      "Surface-level answers"
+    ],
+    "green_flags": [
+      "Maintains curiosity despite low interest",
+      "Asks about frameworks and mental models",
+      "Recognizes people vs process issues",
+      "Still reaches L3 within time budget"
+    ]
+  }
+}

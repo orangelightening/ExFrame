@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional, List
 import logging
 from pathlib import Path
 from .personas import get_persona
-from .knowledge_cartography import get_kcart
+from tao.storage import get_kcart
 
 
 logger = logging.getLogger("query_processor")

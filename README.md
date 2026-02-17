@@ -236,6 +236,7 @@ Open http://localhost:3000 and:
 
 - **📝 Universal Conversation Logging**: Every query/response automatically saved to permanent archives
 - **🧠 Conversation Memory**: Enable AI to remember everything and build on previous discussions
+- **🗺️ Tao (Knowledge Cartography)**: Analyze your learning journey with sessions, chains, concepts, and exploration depth - see [KNOWLEDGE_CARTOGRAPHY.md](KNOWLEDGE_CARTOGRAPHY.md)
 - **Universe Management**: Create, load, switch, merge, and export knowledge universes
 - **Plugin Architecture**: Router, Specialist, Enricher, and Formatter plugins for extensibility
 - **Pure Semantic Search**: AI-powered semantic search using embeddings (100% semantic, 0% keyword)

@@ -30,10 +30,11 @@
 17. [Specialist System (Legacy Only)](#17-specialist-system-legacy-only)
 18. [State Machine (Legacy Only)](#18-state-machine-legacy-only)
 19. [Frontend](#19-frontend)
-20. [API Reference](#20-api-reference)
-21. [File Map](#21-file-map)
-22. [Monitoring Stack](#22-monitoring-stack)
-23. [Known Issues & Technical Debt](#23-known-issues--technical-debt)
+20. [Tao Subsystem (Knowledge Cartography)](#20-tao-subsystem-knowledge-cartography)
+21. [API Reference](#21-api-reference)
+22. [File Map](#22-file-map)
+23. [Monitoring Stack](#23-monitoring-stack)
+24. [Known Issues & Technical Debt](#24-known-issues--technical-debt)
 
 ---
 
@@ -677,7 +678,230 @@ Phase1Engine does not use the state machine — it returns a simple trace list o
 
 ---
 
-## 20. API Reference
+## 20. Tao Subsystem (Knowledge Cartography)
+
+**Status:** Phase 2a Complete (February 2026)
+
+Tao is a standalone subsystem that captures, analyzes, and visualizes the user's learning journey through query/response history. It embodies the dialectical view of knowledge: Questions (Yin) seeking the unknown, Answers (Yang) providing the known, and their transformation (Tao) as the learning process.
+
+### Philosophy
+
+**Tao (道)** represents the flow between questions and answers:
+- **Yin (Questions)** - Dark, seeking, unknown. What we ask reveals what we don't know.
+- **Yang (Answers)** - Bright, providing, known. What we find becomes crystallized knowledge.
+- **Tao (Transformation)** - The dialectical process of coming to know.
+
+### Architecture Overview
+
+```
+tao/
+├── storage/           # Compressed Q/R history storage
+├── analysis/          # Relationship analysis modules
+├── api/               # REST API endpoints
+├── cli/               # Command-line tools
+├── frontend/          # Web UI (Alpine.js)
+└── docs/              # Documentation
+```
+
+### Storage Layer
+
+**File:** `tao/storage/storage.py` (formerly `core/knowledge_cartography.py`)
+
+Provides append-only storage of query/response pairs with gzip compression:
+
+```python
+class KnowledgeCartography:
+    def save_query_response(self, query, response, metadata):
+        """Save Q/R pair to compressed history file."""
+        entry = {
+            "id": next_id,
+            "timestamp": timezone_aware_timestamp,
+            "query": query,
+            "response": response,
+            "metadata": {
+                "source": "library|void|internet",
+                "confidence": 0.0-1.0,
+                "patterns_used": [...],
+                "persona": "poet|librarian|researcher"
+            },
+            "evoked_questions": []  # For Socratic mode (Phase 3)
+        }
+        # Append to query_history.json.gz
+
+    def load_recent_context(self, limit=20):
+        """Load last N Q/R pairs for conversational memory."""
+        # Used by query_processor for context injection
+```
+
+**Storage Location:** `universes/MINE/domains/{domain}/query_history.json.gz`
+
+**Compression:** 70-80% size reduction, typical 400KB per 1,000 entries
+
+### Analysis Modules
+
+**Directory:** `tao/analysis/`
+
+Five analysis modules extract relationships and patterns from query history:
+
+| Module | Purpose | Key Functions |
+|--------|---------|---------------|
+| `sessions.py` | Session detection | `find_sessions()` - Group queries by time gaps |
+| `chains.py` | Chain tracing | `get_chain()` - Trace before/after query sequences |
+| `relations.py` | Related queries | `find_related()` - Temporal, pattern, keyword similarity |
+| `concepts.py` | Concept tracking | `get_top_concepts()` - Extract and rank keywords |
+| `depth.py` | Exploration depth | `find_deep_explorations()` - Identify deep dives |
+
+**Key Principle:** All relationships computed on-demand from timestamps. No modification of stored history.
+
+### REST API
+
+**File:** `tao/api/router.py`
+
+Eight API endpoints mounted at `/api/tao/*`:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /sessions/{domain}` | Get exploration sessions grouped by time gaps |
+| `GET /sessions/{domain}/summary` | Get session statistics |
+| `GET /chains/{domain}/{entry_id}` | Get query chain (before/after specific entry) |
+| `GET /related/{domain}/{entry_id}` | Find related queries (temporal/pattern/keyword) |
+| `GET /concepts/{domain}` | Get top concepts with frequency |
+| `GET /concepts/{domain}/{concept}/cooccur` | Get co-occurring concepts |
+| `GET /depth/{domain}` | Get deep explorations (3+ related queries) |
+| `GET /history/{domain}` | Get full Q/R history |
+
+**Integration:** Router mounted in `api/app.py`:
+```python
+from tao.api import router as tao_router
+app.include_router(tao_router)
+```
+
+See `tao/docs/API.md` for complete endpoint documentation.
+
+### Web UI
+
+**Files:** `tao/frontend/tao.html`, `tao/frontend/assets/tao.js`
+
+Alpine.js SPA with 3 analysis tabs and 2 modal views:
+
+**Tabs:**
+1. **Sessions** - Exploration sessions with expandable Q/R detail cards
+2. **Concepts** - Top concepts with frequency and timeline
+3. **Depth** - Deep explorations (multiple related queries)
+
+**Modals:**
+1. **Chain Modal** - Timeline view with before/target/after sections (color-coded: blue/green/purple)
+2. **Related Modal** - Related queries with similarity scores and strategy badges
+
+**Progressive Disclosure UX:**
+- Session summaries → Click "View" → Full Q/R expands inline
+- Action buttons (View Chain, Find Related) → Open modals for deep exploration
+- Multiple queries can be expanded simultaneously for comparison
+
+**Served at:** `http://localhost:3000/tao`
+
+**Navigation:** "Analysis" link in ExFrame header navigates to Tao interface.
+
+### CLI Tools
+
+**Directory:** `tao/cli/`
+
+Command-line wrappers for analysis modules:
+
+```bash
+# View query history
+python -m tao.cli.view_history peter --limit 20
+
+# Show sessions
+python -m tao.cli.show_sessions peter --gap 30
+
+# Trace query chain
+python -m tao.cli.trace_chain peter --entry 5
+
+# Find related queries
+python -m tao.cli.find_related peter --entry 5 --strategy all
+
+# Track concepts
+python -m tao.cli.concept_timeline peter --top 20
+
+# Analyze depth
+python -m tao.cli.analyze_depth peter --min-depth 3
+```
+
+**Legacy Scripts:** `scripts/*.py` still work as deprecated wrappers for backward compatibility.
+
+### Integration with ExFrame
+
+**Query Processing:** `core/query_processor.py` imports and uses Tao storage:
+
+```python
+from tao.storage import get_kcart
+
+kcart = get_kcart(domain_name)
+
+# Load conversational context
+recent_history = kcart.load_recent_context(limit=20)
+context["conversation_memory"] = format_history(recent_history)
+
+# Process query...
+
+# Save Q/R pair
+kcart.save_query_response(
+    query=query,
+    response=response,
+    metadata={
+        "source": persona.data_source,
+        "confidence": confidence_score,
+        "patterns_used": [p["id"] for p in patterns],
+        "persona": config.get("persona")
+    }
+)
+```
+
+**Conversational Memory:** Last 20 Q/R pairs automatically loaded and injected into LLM context for continuity across queries.
+
+**Real-time Updates:** No caching. Tao reads directly from `query_history.json.gz`, so new queries appear immediately in the analysis interface.
+
+### Configuration
+
+Per-domain in `domain.json`:
+
+```json
+{
+  "query_history": {
+    "enabled": true,
+    "compression": "gzip",
+    "context_window": 20,
+    "max_entries": null,
+    "store_evoked_questions": true
+  }
+}
+```
+
+### Performance
+
+- **Storage:** ~400KB per 1,000 entries (compressed)
+- **Context loading:** ~60-80ms for 20 entries
+- **API response times:** <500ms for typical queries
+- **Overhead per query:** Negligible compared to LLM call (500-8000ms)
+
+### Future Phases
+
+**Phase 2b:** Advanced analytics (pattern effectiveness, knowledge gaps, confidence trends)
+
+**Phase 3:** Evocation tracking (Socratic question chains)
+
+**Phase 4:** Advanced concept analysis (LLM-based extraction, semantic networks)
+
+**Phase 5:** Learning paths (progression tracking, adaptive recommendations)
+
+**Phase 6:** Knowledge graph visualization (interactive graph UI, "Tao Viewer")
+
+See `tao/docs/README.md` and `KNOWLEDGE_CARTOGRAPHY.md` for complete documentation.
+
+---
+
+## 21. API Reference
 
 ### Query Endpoints
 
@@ -748,7 +972,7 @@ Phase1Engine does not use the state machine — it returns a simple trace list o
 
 ---
 
-## 21. File Map
+## 22. File Map
 
 ```
 generic_framework/
@@ -792,6 +1016,36 @@ generic_framework/
 └── frontend/
     └── index.html                      # Alpine.js SPA (~4000 lines)
 
+tao/
+├── __init__.py                         # Module exports
+├── storage/
+│   ├── __init__.py
+│   └── storage.py                      # KnowledgeCartography (moved from core/)
+├── analysis/
+│   ├── __init__.py
+│   ├── sessions.py                     # Session detection
+│   ├── chains.py                       # Chain tracing
+│   ├── relations.py                    # Related query finder
+│   ├── concepts.py                     # Concept extraction
+│   └── depth.py                        # Exploration depth
+├── api/
+│   ├── __init__.py
+│   ├── models.py                       # Pydantic models
+│   └── router.py                       # FastAPI router (/api/tao/*)
+├── cli/
+│   ├── __init__.py
+│   ├── view_history.py                 # CLI: view history
+│   ├── show_sessions.py                # CLI: show sessions
+│   └── trace_chain.py                  # CLI: trace chains
+├── frontend/
+│   ├── tao.html                        # Alpine.js analysis UI
+│   └── assets/
+│       └── tao.js                      # Tao frontend logic
+└── docs/
+    ├── README.md                       # Tao documentation
+    ├── API.md                          # API reference
+    └── TESTING.md                      # Testing guide
+
 universes/MINE/
 ├── universe.json
 └── domains/
@@ -799,18 +1053,20 @@ universes/MINE/
     │   ├── domain.json                 # poet, journal_patterns, qwen3 via DMR
     │   ├── patterns.json               # journal_entry patterns
     │   ├── embeddings.json             # pattern embeddings
+    │   ├── query_history.json.gz       # compressed Q/R history (Tao)
     │   └── domain_log.md
     └── exframe/
         ├── domain.json                 # librarian, semantic search
         ├── patterns.json
         ├── embeddings.json
         ├── doc_embeddings.json         # document embeddings
+        ├── query_history.json.gz       # compressed Q/R history (Tao)
         └── domain_log.md
 ```
 
 ---
 
-## 22. Monitoring Stack
+## 23. Monitoring Stack
 
 | Service | Port | Image |
 |---------|------|-------|
@@ -822,7 +1078,7 @@ universes/MINE/
 
 ---
 
-## 23. Known Issues & Technical Debt
+## 24. Known Issues & Technical Debt
 
 1. **Two engines coexist** — GenericAssistantEngine is required at startup but serves no user queries. It adds ~2000 lines of active code that could be removed once Phase 1 migration is complete.
 

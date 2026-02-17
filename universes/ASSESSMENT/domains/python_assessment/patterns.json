@@ -1,0 +1,82 @@
+{
+  "patterns": [
+    {
+      "id": "python_foundations",
+      "name": "Python Foundations",
+      "level": 1,
+      "keywords": ["variable", "type", "list", "dictionary", "loop", "function", "basic"],
+      "example_questions": [
+        "What is the difference between a list and a tuple in Python?",
+        "How do you handle exceptions in Python?",
+        "What is a dictionary and when would you use one?",
+        "Explain the difference between == and is operators"
+      ]
+    },
+    {
+      "id": "python_oop",
+      "name": "Object-Oriented Programming",
+      "level": 2,
+      "keywords": ["class", "inheritance", "polymorphism", "encapsulation", "method", "property"],
+      "example_questions": [
+        "Explain how inheritance works in Python",
+        "What is the difference between @classmethod and @staticmethod?",
+        "How do you implement encapsulation in Python?",
+        "What are dunder methods and why are they useful?"
+      ]
+    },
+    {
+      "id": "python_decorators",
+      "name": "Decorators and Context Managers",
+      "level": 2,
+      "keywords": ["decorator", "context manager", "with", "yield", "wrapper"],
+      "example_questions": [
+        "How do decorators work in Python?",
+        "What is a context manager and how do you create one?",
+        "Explain the difference between a generator and a regular function",
+        "How would you create a decorator that times function execution?"
+      ]
+    },
+    {
+      "id": "python_advanced",
+      "name": "Advanced Python Patterns",
+      "level": 3,
+      "keywords": ["metaclass", "descriptor", "async", "coroutine", "memory", "optimization"],
+      "example_questions": [
+        "How does Python's memory management work?",
+        "What is a metaclass and when would you use one?",
+        "Explain the difference between async and threading in Python",
+        "How would you optimize memory usage for processing large datasets?"
+      ]
+    },
+    {
+      "id": "python_expert",
+      "name": "CPython Internals",
+      "level": 4,
+      "keywords": ["GIL", "cpython", "bytecode", "reference counting", "C extension", "performance"],
+      "example_questions": [
+        "How does the GIL affect multi-threading in Python?",
+        "Explain how Python's reference counting works",
+        "When would you write a C extension for Python?",
+        "How does Python's bytecode interpreter work?"
+      ]
+    }
+  ],
+  "assessment_guidance": {
+    "starting_level": 1,
+    "escalation_trigger": "2 consecutive correct answers at current level",
+    "time_per_level": "15-20 minutes",
+    "ideal_trajectory": "L1(5min) -> L2(20min) -> L3(30min) -> L4(20min)",
+    "red_flags": [
+      "Stuck at L1 for >20 minutes",
+      "No follow-up questions",
+      "Memorized answers without understanding",
+      "Unable to compare alternatives"
+    ],
+    "green_flags": [
+      "Asks clarifying questions",
+      "Explores edge cases",
+      "Compares multiple approaches",
+      "Reaches L3+ within 45 minutes"
+    ]
+  }
+}
