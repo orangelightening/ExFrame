@@ -206,9 +206,9 @@ Synthesizing candidate: Test Engineer
   Profile: average (velocity: 0.35 levels/day)
   Domains: cloud_assessment, leadership_assessment, api_assessment
 
-  ✓ Saved 42 entries to universes/MINE/domains/cloud_assessment/query_history.json.gz
-  ✓ Saved 38 entries to universes/MINE/domains/leadership_assessment/query_history.json.gz
-  ✓ Saved 41 entries to universes/MINE/domains/api_assessment/query_history.json.gz
+  ✓ Saved 42 entries to domains/cloud_assessment/query_history.json.gz
+  ✓ Saved 38 entries to domains/leadership_assessment/query_history.json.gz
+  ✓ Saved 41 entries to domains/api_assessment/query_history.json.gz
 
 ✓ Candidate synthesized: Test Engineer
   Total queries: 121
@@ -332,7 +332,7 @@ You can add pattern files to make responses more realistic:
 
 ```bash
 # Create patterns file
-cat > universes/MINE/domains/cloud_assessment/patterns.json << 'EOF'
+cat > domains/cloud_assessment/patterns.json << 'EOF'
 [
   {
     "pattern_id": "cloud_001",
@@ -358,7 +358,7 @@ But for testing BrainUse, synthesized responses are fine - we're testing **learn
 
 **Symptom:** Complete assessment fails with "No history found"
 **Cause:** Query history not in correct location
-**Fix:** Check file exists at `universes/MINE/domains/{domain}/query_history.json.gz`
+**Fix:** Check file exists at `domains/{domain}/query_history.json.gz`
 
 ### Issue: "All metrics are zero"
 
@@ -380,7 +380,7 @@ Once you're ready for real candidates:
 
 1. **Remove synthesized data:**
    ```bash
-   rm universes/MINE/domains/*/query_history.json.gz
+   rm domains/*/query_history.json.gz
    ```
 
 2. **Candidate explores naturally:**

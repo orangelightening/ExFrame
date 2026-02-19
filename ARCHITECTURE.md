@@ -58,7 +58,7 @@ Single Docker container running FastAPI on port 3000, with source code bind-moun
 ```
 Docker Host
 ├── generic_framework/     → mounted to /app/ (core, api, plugins, frontend)
-├── universes/MINE/        → mounted to /app/universes/ (domain configs + data)
+├── domains/               → mounted to /app/domains/ (domain configs + data)
 └── docker-compose.yml     → app + monitoring stack (Prometheus, Grafana, Loki)
 ```
 
@@ -67,7 +67,7 @@ Docker Host
 ./generic_framework/core   → /app/core
 ./generic_framework/api    → /app/api
 ./generic_framework/plugins → /app/plugins
-./universes                → /app/universes
+./domains                  → /app/domains
 .                          → /app/project (read-only, for document search)
 ```
 
@@ -79,14 +79,12 @@ Docker Host
 
 **File:** `api/app.py` → `startup_event()`
 
-1. Fix file permissions on universe JSON files (git clone may set restrictive modes)
-2. Create `UniverseManager(base_path="/app/universes", default="MINE")`
-3. Load default universe → `universe.activate()`:
-   - For each domain directory in `universes/MINE/domains/`:
-     - Create `GenericDomain(config)` → loads domain.json, wires specialists, enrichers, knowledge base
-     - Create `GenericAssistantEngine(domain)` → wraps domain for query processing
-     - Store in global `engines[domain_id]` dict
-4. If universe loading fails → fall back to legacy domain discovery from `/app/data/patterns`
+1. Fix file permissions on domain JSON files (git clone may set restrictive modes)
+2. Load domains from `DOMAINS_BASE` directory (`/app/domains` by default)
+3. For each domain directory in `domains/`:
+   - Create `Phase1Engine` for domain processing
+   - Store in global `engines[domain_id]` dict
+4. If domain loading fails → log error and continue with other domains
 
 **Result:** Global `engines` dict of `GenericAssistantEngine` instances. The `Phase1Engine` is NOT created at startup — it's instantiated per-request.
 
@@ -210,7 +208,7 @@ GenericAssistantEngine.process_query()
 ### Domain Directory Structure
 
 ```
-universes/MINE/domains/{domain_id}/
+domains/{domain_id}/
 ├── domain.json         # Configuration
 ├── patterns.json       # Knowledge patterns
 ├── embeddings.json     # Pattern embeddings (semantic search)
@@ -733,7 +731,7 @@ class KnowledgeCartography:
         # Used by query_processor for context injection
 ```
 
-**Storage Location:** `universes/MINE/domains/{domain}/query_history.json.gz`
+**Storage Location:** `domains/{domain}/query_history.json.gz`
 
 **Compression:** 70-80% size reduction, typical 400KB per 1,000 entries
 
@@ -968,7 +966,6 @@ See `tao/docs/README.md` and `KNOWLEDGE_CARTOGRAPHY.md` for complete documentati
 | `/health` | GET | Container health |
 | `/` | GET | Serve frontend |
 | `/api/traces` | GET | Query traces |
-| `/api/universes` | GET | List universes |
 
 ---
 
@@ -989,7 +986,6 @@ generic_framework/
 │   ├── domain_factory.py              # Legacy Type 1-5 factory
 │   ├── specialist_plugin.py            # Specialist ABC
 │   ├── enrichment_plugin.py            # Enricher ABC
-│   ├── universe.py                     # UniverseManager
 │   ├── state/
 │   │   └── query_state_machine.py      # QueryStateMachine (legacy)
 │   └── research/
@@ -1046,9 +1042,7 @@ tao/
     ├── API.md                          # API reference
     └── TESTING.md                      # Testing guide
 
-universes/MINE/
-├── universe.json
-└── domains/
+domains/
     ├── peter/
     │   ├── domain.json                 # poet, journal_patterns, qwen3 via DMR
     │   ├── patterns.json               # journal_entry patterns

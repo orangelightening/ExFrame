@@ -128,7 +128,7 @@ Enable/disable features in `domain.json`:
 ```
 
 ### Storage Location
-- Files: `universes/MINE/domains/{domain}/query_history.json.gz`
+- Files: `domains/{domain}/query_history.json.gz`
 - Format: Compressed JSON (70-80% size reduction)
 - Typical: ~400KB per 1,000 query/response pairs
 
@@ -310,13 +310,13 @@ See [kcart.md](kcart.md) for complete roadmap.
 
 ### Clear History (Fresh Start)
 ```bash
-rm universes/MINE/domains/*/query_history.json.gz
+rm domains/*/query_history.json.gz
 ```
 Files will auto-recreate on next query.
 
 ### Check Storage Usage
 ```bash
-ls -lh universes/MINE/domains/*/query_history.json.gz
+ls -lh domains/*/query_history.json.gz
 ```
 
 ### Export History as JSON
@@ -364,7 +364,7 @@ python3 scripts/view_history.py peter | grep "Confidence: 0\.[0-5]"
 ### History Not Being Created
 1. Check domain.json has `"query_history": {"enabled": true}`
 2. Check container logs: `docker logs eeframe-app --tail 50`
-3. Verify permissions on universes/MINE/domains/{domain}/
+3. Verify permissions on domains/{domain}/
 
 ### Wrong Timezone
 - Set `APP_TIMEZONE=America/Vancouver` in `.env`
@@ -372,7 +372,7 @@ python3 scripts/view_history.py peter | grep "Confidence: 0\.[0-5]"
 - Old entries keep old timezone, new entries use new timezone
 
 ### Viewer Shows Nothing
-- Check file exists: `ls universes/MINE/domains/{domain}/query_history.json.gz`
+- Check file exists: `ls domains/{domain}/query_history.json.gz`
 - Try: `python3 scripts/view_history.py {domain} --stats-only`
 - Check if domain name is correct
 

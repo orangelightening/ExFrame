@@ -84,7 +84,7 @@
 ### New Directories
 - ✅ `tao/` - Complete Tao subsystem (storage + analysis + vetting)
 - ✅ `data/personas/` - Librarian personas
-- ✅ `universes/MINE/domains/*_assessment/` - Assessment domains
+- ✅ `domains/*_assessment/` - Assessment domains
 
 ---
 
@@ -168,9 +168,9 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```bash
 git add tao/
 git add data/personas/
-git add universes/MINE/domains/cloud_assessment/
-git add universes/MINE/domains/leadership_assessment/
-git add universes/MINE/domains/api_assessment/
+git add domains/cloud_assessment/
+git add domains/leadership_assessment/
+git add domains/api_assessment/
 git add scripts/synthesize_test_candidate.py
 git add *.md  # All documentation
 ```

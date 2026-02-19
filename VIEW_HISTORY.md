@@ -45,7 +45,7 @@ For each query/response pair:
 
 ## Storage Location
 
-History files: `universes/MINE/domains/{domain}/query_history.json.gz`
+History files: `domains/{domain}/query_history.json.gz`
 
 These are automatically created and updated by the system. They're compressed with gzip to save space (typically 70-80% size reduction).
 
@@ -134,7 +134,7 @@ python3 scripts/view_history.py mydomain | grep "Patterns:"
 2. **Filter first** - Use `--source` or `--min-confidence` to narrow down large histories
 3. **Pipe to less** - For long histories: `python3 scripts/view_history.py peter | less`
 4. **Combine filters** - You can use multiple filters together
-5. **Check file size** - See storage used: `ls -lh universes/MINE/domains/*/query_history.json.gz`
+5. **Check file size** - See storage used: `ls -lh domains/*/query_history.json.gz`
 
 ## Next Steps
 

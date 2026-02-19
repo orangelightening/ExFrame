@@ -130,7 +130,7 @@ None critical
 
 **Current state:**
 - Total markdown files: 43
-- Document embeddings: `universes/MINE/domains/exframe/doc_embeddings.json` (493K)
+- Document embeddings: `domains/exframe/doc_embeddings.json` (493K)
 - Last regenerated: 2026-02-10 21:07
 
 **When to regenerate embeddings:**

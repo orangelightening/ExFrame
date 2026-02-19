@@ -191,15 +191,15 @@ Open http://localhost:3000 and:
 
 ---
 
-**ExFrame** is a unified, domain-agnostic AI-powered knowledge management system with a **universe-based architecture** and **plugin-based pipeline**. It provides:
+**ExFrame** is a unified, domain-agnostic AI-powered knowledge management system with a **domain-based architecture** and **plugin-based pipeline**. It provides:
 
-- **Universe Architecture**: Complete isolation and portability of knowledge configurations
+- **Domain Architecture**: Complete knowledge organization by topic area
 - **Plugin Pipeline**: Router → Specialist → Enricher → Formatter - all swappable
 - **Domain-Agnostic**: Easy to add new knowledge domains without code changes
 - **Pattern-Based Knowledge**: Structured knowledge representation with relationships and metadata
-- **Dynamic Domain Loading**: Auto-discovery of domains within active universe
+- **Dynamic Domain Loading**: Auto-discovery of domains from file system
 - **Generic Domain System**: Universal domain class with plugin loading
-- **Multi-Universe Support**: Create, switch, merge, and export knowledge universes
+- **Multi-Domain Support**: Create, configure, and manage multiple knowledge domains
 - **Diagnostics System**: Search metrics, pattern health analysis, self-testing
 - **Query Tracing**: Full visibility into AI decision-making process
 - **Docker Ready**: One-command deployment with monitoring stack
@@ -207,10 +207,9 @@ Open http://localhost:3000 and:
 
 ### Core Philosophy
 
-> **Universes are first-class entities. Patterns are data. All transformation logic is pluggable.**
+> **Domains are first-class entities. Patterns are data. All transformation logic is pluggable.**
 
-- ✅ **Universes** are complete, portable knowledge environments
-- ✅ **Domains** are organizers within universes (each domain contains patterns for a specific topic)
+- ✅ **Domains** are complete knowledge organizers (each domain contains patterns for a specific topic)
 - ✅ **Patterns** are data (JSON files in domain directories)
 - ✅ **Routers** determine query handling strategies
 - ✅ **Specialists** are plugins (transformation logic)
@@ -221,12 +220,11 @@ Open http://localhost:3000 and:
 
 | Term | Definition |
 |------|------------|
-| **Universe** | A complete, portable knowledge environment containing multiple domains. Universes can be created, switched, merged, and exported. |
-| **Domain** | A knowledge organizer within a universe, focused on a specific topic (e.g., cooking, python, diy). Each domain has its own patterns, plugins, and configuration. |
+| **Domain** | A knowledge organizer focused on a specific topic (e.g., cooking, python, diy). Each domain has its own patterns, plugins, and configuration. |
 | **Pattern** | A unit of knowledge stored as JSON with fields like problem, solution, description, and metadata. |
 | **Specialist** | A plugin that processes queries for specific domains, emerging as an "AI persona" from accumulated patterns. |
-| **Universe → Domain → Pattern** | The containment hierarchy: Universes contain Domains, Domains contain Patterns. |
-- ✅ **Domains** are orchestrators (configuration within universes)
+| **Domain → Pattern** | The containment hierarchy: Domains contain Patterns. |
+- ✅ **Domains** are orchestrators (configuration and pattern storage)
 - ✅ **Routers** determine query handling strategies
 - ✅ **Specialists** are plugins (transformation logic)
 - ✅ **Enrichers** enhance responses (LLM, related patterns, code generation)
@@ -237,7 +235,7 @@ Open http://localhost:3000 and:
 - **📝 Universal Conversation Logging**: Every query/response automatically saved to permanent archives
 - **🧠 Conversation Memory**: Enable AI to remember everything and build on previous discussions
 - **🗺️ Tao (Knowledge Cartography)**: Analyze your learning journey with sessions, chains, concepts, and exploration depth - see [KNOWLEDGE_CARTOGRAPHY.md](KNOWLEDGE_CARTOGRAPHY.md)
-- **Universe Management**: Create, load, switch, merge, and export knowledge universes
+- **Domain Management**: Create, configure, and manage multiple knowledge domains
 - **Plugin Architecture**: Router, Specialist, Enricher, and Formatter plugins for extensibility
 - **Pure Semantic Search**: AI-powered semantic search using embeddings (100% semantic, 0% keyword)
 - **Domain Management**: Create and manage knowledge domains through the web UI
@@ -509,7 +507,7 @@ Each domain stores patterns in a knowledge base:
 - **SQLite Knowledge Base** - SQLite with FTS5 full-text search
 - **Document Store** - For structured document collections
 
-Patterns are stored in `universes/{universe}/domains/{domain}/patterns.json`.
+Patterns are stored in `domains/{domain}/patterns.json`.
 
 #### 2. Knowledge Base Plugins
 
@@ -549,7 +547,7 @@ class MyKnowledgeBase(KnowledgeBasePlugin):
 
 ### Domain Configuration
 
-Each domain is configured in `universes/{universe}/domains/{domain}/domain.json`:
+Each domain is configured in `domains/{domain}/domain.json`:
 
 ```json
 {
@@ -596,14 +594,14 @@ Each domain is configured in `universes/{universe}/domains/{domain}/domain.json`
 
 1. Create domain directory:
 ```bash
-mkdir -p universes/MINE/domains/my_topic
+mkdir -p domains/my_topic
 ```
 
 2. Create `domain.json` with persona configuration
 
 3. Add `patterns.json` with initial patterns
 
-4. Reload universe via API or restart server
+4. Reload via API or restart server
 
 ### For More Information
 
@@ -1176,7 +1174,7 @@ If you want different models for different domains (e.g., use a cheaper model fo
 
 **Option 2: Edit domain config**
 ```bash
-nano universes/default/domains/{domain}/domain_config.json
+nano domains/{domain}/domain.json
 # Find "enrichers" section and add "model": "your-model"
 ```
 
@@ -1269,7 +1267,7 @@ To use a local DMR model for a specific domain, add `llm_config` to the domain's
 - `ai/llama3` - Capable 8B model
 - `ai/qwen3` - Capable 8B model (Chinese/English)
 
-**Location**: `universes/{universe}/domains/{domain}/domain.json`
+**Location**: `domains/{domain}/domain.json`
 
 ##### Dual-Model Routing (Advanced)
 
@@ -1529,14 +1527,13 @@ docker compose logs -f eeframe-app
 3. **Traces**: View historical query traces and debugging information
 4. **Ingestion**: Extract patterns from URLs (beta)
 5. **Domains**: Manage domains, specialists, and configuration
-6. **Universes**: Manage knowledge universes - create, load, switch, and export
-7. **Diagnostics**: System health, search metrics, and pattern analysis
+6. **Diagnostics**: System health, search metrics, and pattern analysis
+7. **Analysis**: View Tao knowledge cartography (learning journey analysis)
 
 ### Using the Assistant
 
-1. Select a domain from the dropdown (default: llm_consciousness)
-2. The current universe is displayed next to "Universe:"
-3. Type your question in the text area
+1. Select a domain from the dropdown
+2. Type your question in the text area
 4. Click "Query" or press Enter
 5. View the AI response with:
    - Confidence score
@@ -1569,20 +1566,16 @@ docker compose logs -f eeframe-app
 3. Click **Create Domain** to add a new domain
 4. Click **Edit** (pencil icon) to modify a domain
 
-### Managing Universes
+### Using Analysis (Tao)
 
-1. Go to the **Universes** tab
-2. View current universe with:
-   - Universe name and active status
-   - Total domains and patterns
-3. Browse available universes with:
-   - Domain and pattern counts
-   - Active status indicators
-   - Switch and Details buttons
-4. Create new universes with:
-   - Universe ID
-   - Optional description
-5. Switch between universes instantly
+1. Click the **Analysis** link in the header
+2. Select a domain from the dropdown
+3. View knowledge cartography:
+   - **Sessions**: Exploration sessions grouped by time
+   - **Concepts**: Top concepts and frequencies
+   - **Depth**: Deep explorations (multiple related queries)
+4. Click "View Chain" to see query sequences
+5. Click "Find Related" to discover connected queries
 
 ### Using Diagnostics
 
@@ -2022,7 +2015,7 @@ When setting `library_base_path`, you specify paths **inside the container**, no
 
 | Your Host Path | Container Path (use in domain config) | Status |
 |----------------|---------------------------|--------|
-| `./universes/MINE/docs` | `/app/universes/MINE/docs` | ✅ Already mounted |
+| `./domains/{domain}/docs` | `/app/domains/{domain}/docs` | ✅ Already mounted |
 | `./docs` (in project root) | `/app/project/docs` | ✅ Already mounted |
 | `~/my-library` | ⚠️ **NOT accessible** | ❌ Needs bind mount |
 | `/home/user/notes` | ⚠️ **NOT accessible** | ❌ Needs bind mount |
@@ -2031,7 +2024,7 @@ When setting `library_base_path`, you specify paths **inside the container**, no
 ```yaml
 volumes:
   - .:/app/project          # Project root → /app/project
-  - ./universes:/app/universes  # Universes → /app/universes
+  - ./domains:/app/domains  # Domains → /app/domains
 ```
 
 #### Using Existing Mounts (Easy)
@@ -2048,14 +2041,14 @@ echo "# Test Doc" > ./my-library/test.md
 library_base_path: /app/project/my-library
 ```
 
-**Example 2 - Universe directory:**
+**Example 2 - Domain directory:**
 ```bash
-# Create library in universe
-mkdir -p ./universes/MINE/docs
-echo "# Guide" > ./universes/MINE/docs/guide.md
+# Create library in domain
+mkdir -p ./domains/my_domain/docs
+echo "# Guide" > ./domains/my_domain/docs/guide.md
 
 # In domain config, use:
-library_base_path: /app/universes/MINE/docs
+library_base_path: /app/domains/my_domain/docs
 ```
 
 #### Adding Custom Mounts (Advanced)
@@ -2070,7 +2063,7 @@ services:
   eeframe-app:
     volumes:
       - .:/app/project
-      - ./universes:/app/universes
+      - ./domains:/app/domains
       # ADD YOUR CUSTOM MOUNT HERE:
       - ~/my-notes:/app/my-notes:ro          # Read-only
       - /home/user/library:/app/library:ro   # Another example
@@ -2136,7 +2129,7 @@ volumes:
 | Scenario | Solution |
 |----------|----------|
 | Library inside project directory | Use `/app/project/YOUR_DIR` - no changes needed |
-| Library in universes directory | Use `/app/universes/YOUR_DIR` - no changes needed |
+| Library in domain directory | Use `/app/domains/YOUR_DIR` - no changes needed |
 | Library outside project | Add bind mount to docker-compose.yml first |
 | `~` or `$HOME` in path | Replace with absolute path or add bind mount |
 | Permission denied | Add `:ro` suffix to mount for read-only access |
@@ -2261,8 +2254,8 @@ The resulting `domain.json` will include:
 
 ```bash
 # 1. Create local docs directory
-mkdir -p universes/MINE/domains/my_docs/library
-cd universes/MINE/domains/my_docs/library
+mkdir -p domains/my_docs/library
+cd domains/my_docs/library
 
 # 2. Add some documentation
 cat > getting_started.md <<'EOF'
@@ -2293,7 +2286,7 @@ EOF
 
 # 4. Create domain in UI
 # - Persona: Librarian
-# - Library Base Path: /app/universes/MINE/domains/my_docs/library
+# - Library Base Path: /app/domains/my_docs/library
 # - Save
 
 # 5. Test query

@@ -115,7 +115,7 @@ python3 scripts/analyze_depth.py peter --concept "patterns"
 
 **Storage Layer:**
 ```
-universes/MINE/domains/{domain}/query_history.json.gz
+domains/{domain}/query_history.json.gz
 ├── Append-only (never modify old entries)
 ├── Compressed with gzip (70-80% reduction)
 └── Simple JSON array structure

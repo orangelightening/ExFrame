@@ -56,7 +56,7 @@ The `role_context` field is the **system message** sent to the LLM on every quer
 This is the most critical config field — without it, the LLM has no domain-specific instructions.
 
 ### Domain Configuration (Peter Domain Example)
-**File:** `universes/MINE/domains/peter/domain.json`
+**File:** `domains/peter/domain.json`
 **Key settings:**
 ```json
 {
@@ -81,7 +81,7 @@ This is the most critical config field — without it, the LLM has no domain-spe
 }
 ```
 
-**Domain Log:** `universes/MINE/domains/peter/domain_log.md`
+**Domain Log:** `domains/peter/domain_log.md`
 - Stores conversation history with timestamps (audit trail)
 - NOT used for retrieval in `journal_patterns` mode (patterns.json + embeddings.json used instead)
 
@@ -114,7 +114,7 @@ tao/
 ```
 
 **Storage:**
-- Files: `universes/MINE/domains/{domain}/query_history.json.gz`
+- Files: `domains/{domain}/query_history.json.gz`
 - Format: Compressed JSON (70-80% size reduction)
 - Typical: ~400KB per 1,000 Q/R pairs
 - Append-only, never modifies history

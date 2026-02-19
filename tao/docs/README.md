@@ -189,7 +189,7 @@ In `domain.json`:
 
 ## Data Storage
 
-Query history is stored in: `universes/{universe}/domains/{domain}/query_history.json.gz`
+Query history is stored in: `domains/{domain}/query_history.json.gz`
 
 ### Entry Format
 
