@@ -9,7 +9,7 @@ __pycache__/
 zai-sdk-python/
 
 # Test data (user-specific)
-universes/MINE/domains/*/query_history.json.gz
+domains/*/query_history.json.gz
 
 # BrainUse database volumes
 postgres_data/
