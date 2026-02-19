@@ -1,0 +1,102 @@
+{
+  "domain_id": "exframe_training",
+  "domain_name": "ExFrame Training",
+  "description": "Updated description - test",
+  "version": "1.0.0",
+  "created_at": "2026-02-19T04:14:55.913660Z",
+  "updated_at": "2026-02-19T06:45:13.156269",
+  "categories": [
+    "training",
+    "education"
+  ],
+  "tags": [
+    "exframe",
+    "learning"
+  ],
+  "domain_type": "creative",
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
+  },
+  "plugins": [
+    {
+      "plugin_id": "generalist",
+      "name": "General",
+      "description": "",
+      "module": "plugins.generalist",
+      "class": "GeneralistPlugin",
+      "enabled": true,
+      "config": {
+        "name": "General",
+        "description": "",
+        "keywords": [],
+        "categories": [],
+        "threshold": 0.3
+      }
+    }
+  ],
+  "enrichers": [],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true,
+    "similarity_threshold": 0.5
+  },
+  "temperature": 0.5,
+  "persona": "librarian",
+  "logging": {
+    "enabled": true,
+    "output_file": "domain_log.md",
+    "format": "markdown"
+  },
+  "role_context": "Updated test context for training domain",
+  "specialists": [
+    {
+      "specialist_id": "generalist",
+      "name": "General",
+      "description": "",
+      "expertise_keywords": [],
+      "expertise_categories": [],
+      "confidence_threshold": 0.3
+    }
+  ],
+  "llm_min_confidence": 0.3,
+  "similarity_threshold": 0.3,
+  "max_patterns": 10,
+  "document_store_type": "exframe_instance",
+  "show_sources": true,
+  "max_research_steps": 10,
+  "research_timeout": 300,
+  "report_format": "structured",
+  "enable_web_search": false,
+  "require_confirmation": true,
+  "research_on_fallback": false,
+  "library_base_path": "/app/project"
+}

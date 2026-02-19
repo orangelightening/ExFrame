@@ -1,0 +1,76 @@
+{
+  "domain_id": "train_exframe",
+  "domain_name": "This domain will train technical staff at exframe ",
+  "description": "This domain is the instructor/librarian for the  exframe domain.",
+  "version": "1.0.0",
+  "created_at": "2026-02-19T03:13:50.774362Z",
+  "updated_at": "2026-02-19T06:53:47.342961",
+  "categories": [
+    "socratic method",
+    "rote"
+  ],
+  "tags": [
+    "ok"
+  ],
+  "domain_type": "",
+  "pattern_schema": {
+    "required_fields": [
+      "id",
+      "name",
+      "pattern_type",
+      "problem",
+      "solution"
+    ],
+    "optional_fields": [
+      "description",
+      "steps",
+      "conditions",
+      "related_patterns",
+      "prerequisites",
+      "alternatives",
+      "confidence",
+      "sources",
+      "tags",
+      "examples",
+      "domain",
+      "created_at",
+      "updated_at",
+      "times_accessed",
+      "user_rating",
+      "origin",
+      "origin_query",
+      "llm_generated",
+      "status"
+    ]
+  },
+  "plugins": [],
+  "enrichers": [],
+  "knowledge_base": {
+    "type": "json",
+    "storage_path": "patterns.json",
+    "pattern_format": "embedded",
+    "auto_save": true,
+    "similarity_threshold": 0.5
+  },
+  "temperature": 0.5,
+  "persona": "librarian",
+  "library_base_path": "/app/project",
+  "logging": {
+    "enabled": true,
+    "output_file": "domain_log.md",
+    "format": "markdown"
+  },
+  "role_context": "You are the exframe librarian/tutor. In this instance you will try to teach the user about exframe using the current query plus the historical sequential file of compressed query/response pairs. ",
+  "specialists": [],
+  "llm_min_confidence": 0.3,
+  "similarity_threshold": 0.3,
+  "max_patterns": 10,
+  "document_store_type": "exframe_instance",
+  "show_sources": true,
+  "max_research_steps": 10,
+  "research_timeout": 300,
+  "report_format": "structured",
+  "enable_web_search": false,
+  "require_confirmation": true,
+  "research_on_fallback": false
+}

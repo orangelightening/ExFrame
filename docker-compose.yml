@@ -34,7 +34,7 @@ services:
       # Path configuration (optional, defaults shown)
       - PATTERN_STORAGE_BASE=/app/data/patterns
       - DOMAIN_REGISTRY_PATH=/app/data
-      - UNIVERSES_BASE=/app/universes
+      - DOMAINS_BASE=/app/domains
 
       # Model cache directory for sentence-transformers
       - TRANSFORMERS_CACHE=/app/cache/models
@@ -68,8 +68,8 @@ services:
       # Mount host pattern directories (bind mount for live sync)
       - ./data/patterns:/app/data/patterns:rw
 
-      # Mount universes directory (bind mount for live sync)
-      - ./universes:/app/universes:rw
+      # Mount domains directory (bind mount for live sync)
+      - ./domains:/app/domains:rw
 
       # Mount generic_framework subdirectories to override image copies
       - ./generic_framework/core:/app/core:rw

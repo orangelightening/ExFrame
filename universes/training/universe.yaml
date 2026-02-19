@@ -1,0 +1,14 @@
+universe:
+  created_at: '2026-02-19T02:02:34.573607'
+  created_by: system
+  defaults: {}
+  description: Test of Training/learning
+  domains: {}
+  domains_path: domains
+  is_default: false
+  load_on_startup: false
+  merge_strategy: merge
+  name: Training
+  plugins_path: plugins
+  universe_id: training
+  version: 1.0.0

@@ -39,7 +39,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.factory import DomainFactory
 from core.domain import DomainConfig
 from core.generic_domain import GenericDomain  # NEW: Use GenericDomain
-from core.universe import UniverseManager, UniverseMergeStrategy
 from core.phase1_engine import Phase1Engine  # Phase 1: New simplified engine
 from assist.engine import GenericAssistantEngine
 from diagnostics.search_metrics import SearchMetrics, SearchTrace, SearchOutcome
@@ -382,8 +381,7 @@ if brainuse_assets_path.exists():
     logger.info(f"✓ BrainUse static assets mounted at /brainuse/assets")
 
 # Global state
-engines: Dict[str, GenericAssistantEngine] = {}  # Legacy: for backward compatibility
-universe_manager: Optional[UniverseManager] = None  # New: Universe-based architecture
+engines: Dict[str, GenericAssistantEngine] = {}  # Domain engines registry
 
 
 async def _regenerate_domain_embeddings(domain_id: str) -> None:
@@ -475,60 +473,44 @@ def _ensure_writable_permissions(universes_base: Path) -> None:
 @app.on_event("startup")
 async def startup_event():
     """
-    Initialize the ExFrame runtime with UniverseManager.
+    Initialize the ExFrame runtime.
 
-    Loads the default universe on startup, maintaining backward compatibility
-    by populating the legacy engines dictionary.
+    Loads all domains from the domains/ directory.
     """
-    global universe_manager, engines
+    global engines
 
-    # Get the universes base path
+    # Get the domains base path
     if os.getenv("APP_HOME"):
-        universes_base = Path("/app/universes")
+        domains_base = Path("/app/domains")
     else:
-        universes_base = Path(os.getenv("UNIVERSES_BASE",
-                                        "/home/peter/development/eeframe/universes"))
+        domains_base = Path(os.getenv("DOMAINS_BASE",
+                                      "/home/peter/development/eeframe/domains"))
 
     logger.info(f"=" * 60)
     logger.info(f"ExFrame Runtime Starting")
-    logger.info(f"Universes base: {universes_base}")
+    logger.info(f"Domains base: {domains_base}")
     logger.info(f"=" * 60)
 
-    # Fix permissions on universe domain files
+    # Fix permissions on domain files
     # This ensures files from git clone are writable by the container user
-    _ensure_writable_permissions(universes_base)
+    _ensure_writable_permissions(domains_base)
 
-    # Initialize UniverseManager
-    universe_manager = UniverseManager(
-        universes_base_path=universes_base,
-        default_universe_id="MINE"
-    )
-
-    # Load default universe
+    # Load all domains
     try:
-        default_universe = await universe_manager.load_default()
-        await default_universe.activate()
-
-        # Populate legacy engines dict for backward compatibility
-        for domain_id, engine in default_universe.engines.items():
-            engines[domain_id] = engine
-
-        logger.info(f"✓ Default universe loaded: {default_universe.universe_id}")
-        logger.info(f"  Domains: {', '.join(default_universe.list_domains())}")
+        await _load_all_domains(domains_base)
+        logger.info(f"✓ Loaded {len(engines)} domains")
 
         # Get pattern counts
-        for domain_id in default_universe.list_domains():
-            domain = default_universe.get_domain(domain_id)
-            if domain and hasattr(domain, 'knowledge_base') and domain.knowledge_base:
-                pattern_count = len(domain.knowledge_base._patterns)
-                logger.info(f"    - {domain_id}: {pattern_count} patterns")
+        for domain_id, engine in engines.items():
+            if hasattr(engine, 'domain') and hasattr(engine.domain, 'knowledge_base'):
+                kb = engine.domain.knowledge_base
+                if kb and hasattr(kb, '_patterns'):
+                    pattern_count = len(kb._patterns)
+                    logger.info(f"    - {domain_id}: {pattern_count} patterns")
 
     except Exception as e:
-        logger.error(f"✗ Failed to load default universe: {e}")
-        logger.info(f"  Falling back to legacy domain discovery...")
-
-        # Fallback to legacy loading
-        await _legacy_domain_discovery()
+        logger.error(f"✗ Failed to load domains: {e}")
+        logger.exception(e)
 
     # Pre-load embedding model at startup (before marking ready)
     try:
@@ -561,6 +543,42 @@ async def startup_event():
     logger.info(f"=" * 60)
     logger.info(f"ExFrame Runtime Ready")
     logger.info(f"=" * 60)
+
+
+async def _load_all_domains(domains_base: Path) -> None:
+    """
+    Load all domains from the domains directory.
+    """
+    global engines
+
+    if not domains_base.exists():
+        logger.warning(f"Domains directory not found: {domains_base}")
+        return
+
+    # Iterate through domain directories
+    for domain_dir in sorted(domains_base.iterdir()):
+        if not domain_dir.is_dir():
+            continue
+
+        domain_id = domain_dir.name
+        domain_json = domain_dir / "domain.json"
+
+        # Check if domain.json exists
+        if not domain_json.exists():
+            logger.debug(f"Skipping {domain_id}: no domain.json found")
+            continue
+
+        try:
+            # Create Phase1Engine (stateless, domain loaded at query time)
+            engine = Phase1Engine(enable_trace=True)
+
+            # Register in global engines dict
+            engines[domain_id] = engine
+
+            logger.debug(f"✓ Loaded domain: {domain_id}")
+
+        except Exception as e:
+            logger.error(f"✗ Failed to load domain {domain_id}: {e}")
 
 
 async def _legacy_domain_discovery() -> None:
@@ -690,231 +708,6 @@ async def shutdown_event():
 # UNIVERSE MANAGEMENT ENDPOINTS
 # =============================================================================
 
-class UniverseCreateRequest(BaseModel):
-    """Request to create a new universe."""
-    universe_id: str
-    name: str
-    description: str = ""
-    base_on: Optional[str] = None
-
-
-class UniverseMergeRequest(BaseModel):
-    """Request to merge universes."""
-    source: str
-    target: str
-    strategy: str = "merge_patterns"  # source_wins, target_wins, merge, fail
-
-
-@app.get("/api/universes")
-async def list_universes() -> Dict[str, Any]:
-    """List all available universes."""
-    if not universe_manager:
-        return {"universes": [], "loaded": [], "message": "UniverseManager not initialized"}
-
-    available = universe_manager.list_universes()
-    loaded = universe_manager.list_loaded_universes()
-
-    # Get metadata for loaded universes
-    universes_meta = []
-    for universe_id in loaded:
-        universe = await universe_manager.get_universe(universe_id)
-        if universe:
-            meta = universe.get_meta()
-            universes_meta.append({
-                "universe_id": meta.universe_id,
-                "name": meta.name,
-                "description": meta.description,
-                "state": meta.state.value,
-                "domain_count": meta.domain_count,
-                "total_patterns": meta.total_patterns,
-                "version": meta.version,
-                "loaded_at": meta.loaded_at,
-                "is_active": meta.state.value == "active"
-            })
-
-    return {
-        "available": available,
-        "loaded": loaded,
-        "universes": universes_meta
-    }
-
-
-@app.get("/api/universes/{universe_id}")
-async def get_universe_info(universe_id: str) -> Dict[str, Any]:
-    """Get information about a specific universe."""
-    if not universe_manager:
-        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
-
-    universe = await universe_manager.get_universe(universe_id)
-    if not universe:
-        # Check if universe exists but is not loaded
-        if universe_id in universe_manager.list_universes():
-            return {
-                "universe_id": universe_id,
-                "state": "unloaded",
-                "message": "Universe exists but is not loaded. Load it first."
-            }
-        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found")
-
-    meta = universe.get_meta()
-    return {
-        "universe_id": meta.universe_id,
-        "name": meta.name,
-        "description": meta.description,
-        "state": meta.state.value,
-        "domain_count": meta.domain_count,
-        "total_patterns": meta.total_patterns,
-        "version": meta.version,
-        "created_at": meta.created_at,
-        "loaded_at": meta.loaded_at,
-        "checksum": meta.checksum,
-        "domains": universe.list_domains()
-    }
-
-
-@app.post("/api/universes/{universe_id}/load")
-async def load_universe(universe_id: str) -> Dict[str, Any]:
-    """Load a universe on-demand."""
-    if not universe_manager:
-        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
-
-    try:
-        universe = await universe_manager.load_universe(universe_id)
-        await universe.activate()
-
-        meta = universe.get_meta()
-        return {
-            "universe_id": universe_id,
-            "status": "loaded",
-            "state": meta.state.value,
-            "domains": universe.list_domains(),
-            "message": f"Universe '{universe_id}' loaded successfully"
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to load universe: {e}")
-
-
-@app.post("/api/universes")
-async def create_universe(request: UniverseCreateRequest) -> Dict[str, Any]:
-    """Create a new universe."""
-    if not universe_manager:
-        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
-
-    try:
-        universe = await universe_manager.create_universe(
-            universe_id=request.universe_id,
-            name=request.name,
-            description=request.description,
-            base_on=request.base_on
-        )
-
-        meta = universe.get_meta()
-        return {
-            "universe_id": request.universe_id,
-            "status": "created",
-            "state": meta.state.value,
-            "domains": universe.list_domains(),
-            "message": f"Universe '{request.universe_id}' created successfully"
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create universe: {e}")
-
-
-@app.post("/api/admin/universes/merge")
-async def merge_universes(request: UniverseMergeRequest) -> Dict[str, Any]:
-    """Merge source universe into target universe."""
-    if not universe_manager:
-        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
-
-    # Validate strategy
-    try:
-        strategy = UniverseMergeStrategy(request.strategy)
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid strategy: {request.strategy}. Must be one of: source_wins, target_wins, merge_patterns, fail_on_conflict"
-        )
-
-    try:
-        result = await universe_manager.merge_universes(request.source, request.target, strategy)
-        return {
-            "status": "merged",
-            "result": result,
-            "message": f"Merged {result['merged_domains']} domains from {request.source} to {request.target}"
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to merge universes: {e}")
-
-
-@app.get("/api/universes/{universe_id}/domains")
-async def list_universe_domains(universe_id: str) -> Dict[str, Any]:
-    """List domains in a specific universe."""
-    if not universe_manager:
-        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
-
-    universe = await universe_manager.get_universe(universe_id)
-    if not universe:
-        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found")
-
-    domains_info = []
-    for domain_id in universe.list_domains():
-        domain = universe.get_domain(domain_id)
-        if domain:
-            pattern_count = len(domain.knowledge_base._patterns) if hasattr(domain, 'knowledge_base') and domain.knowledge_base else 0
-            domains_info.append({
-                "domain_id": domain_id,
-                "domain_name": domain.config.domain_name,
-                "patterns": pattern_count,
-                "specialists": len(domain.list_specialists())
-            })
-
-    return {
-        "universe_id": universe_id,
-        "domains": domains_info
-    }
-
-
-@app.post("/api/universes/{universe_id}/domains/{domain_id}/query")
-async def query_universe_domain(
-    universe_id: str,
-    domain_id: str,
-    request: QueryRequest
-) -> Response:
-    """
-    Process a query in a specific universe.
-
-    This is the universe-aware version of the query endpoint.
-    """
-    if not universe_manager:
-        raise HTTPException(status_code=503, detail="UniverseManager not initialized")
-
-    universe = await universe_manager.get_universe(universe_id)
-    if not universe:
-        raise HTTPException(status_code=404, detail=f"Universe '{universe_id}' not found")
-
-    engine = universe.get_engine(domain_id)
-    if not engine:
-        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found in universe '{universe_id}'")
-
-    try:
-        result = await engine.process_query(
-            request.query,
-            request.context,
-            request.include_trace
-        )
-
-        return QueryResponse(**result)
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 # =============================================================================
 # LEGACY ENDPOINTS (for backward compatibility)
 # =============================================================================
@@ -1025,7 +818,7 @@ async def get_domain_info(domain_id: str) -> DomainInfo:
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 
     engine = engines[domain_id]
-    status = await engine.get_domain_status()
+    status = await engine.get_domain_status(domain_id)
 
     return DomainInfo(
         domain_id=status["domain"],
@@ -1540,7 +1333,8 @@ async def get_domain_log(domain_id: str) -> Dict[str, Any]:
     from pathlib import Path
 
     universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-    domain_path = Path(universes_base) / "MINE" / "domains" / domain_id
+    target_universe = universe_manager.current_universe_id if universe_manager else "MINE"
+    domain_path = Path(universes_base) / target_universe / "domains" / domain_id
 
     if not domain_path.exists():
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
@@ -1590,7 +1384,8 @@ async def archive_domain_log(domain_id: str) -> Dict[str, Any]:
 
     # Get domain path
     universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-    domain_path = Path(universes_base) / "MINE" / "domains" / domain_id
+    target_universe = universe_manager.current_universe_id if universe_manager else "MINE"
+    domain_path = Path(universes_base) / target_universe / "domains" / domain_id
 
     if not domain_path.exists():
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
@@ -1602,7 +1397,7 @@ async def archive_domain_log(domain_id: str) -> Dict[str, Any]:
 
     # Create archive directory in universe space (writable)
     universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-    archive_dir = Path(universes_base) / "MINE" / "logs" / "archived"
+    archive_dir = Path(universes_base) / target_universe / "logs" / "archived"
     archive_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate timestamped filename
@@ -1645,7 +1440,8 @@ async def clear_domain_log(domain_id: str) -> Dict[str, Any]:
 
     # Get domain path
     universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-    domain_path = Path(universes_base) / "MINE" / "domains" / domain_id
+    target_universe = universe_manager.current_universe_id if universe_manager else "MINE"
+    domain_path = Path(universes_base) / target_universe / "domains" / domain_id
 
     if not domain_path.exists():
         raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
@@ -2055,15 +1851,15 @@ async def list_all_domains() -> Dict[str, Any]:
 @app.get("/api/admin/domains/{domain_id}")
 async def get_domain_config(domain_id: str) -> Dict[str, Any]:
     """Get full domain configuration including specialists."""
-    # Load from domain.json file first (source of truth)
-    # Then merge with registry if needed
+    # Load from domain.json file (source of truth)
     from pathlib import Path
     import os
-    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-    domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
+    import json
+
+    domains_base = os.getenv("DOMAINS_BASE", "/app/domains")
+    domain_file = Path(domains_base) / domain_id / "domain.json"
 
     if domain_file.exists():
-        import json
         with open(domain_file) as f:
             domain_config = json.load(f)
     else:
@@ -2072,50 +1868,28 @@ async def get_domain_config(domain_id: str) -> Dict[str, Any]:
         if domain_id in registry["domains"]:
             domain_config = registry["domains"][domain_id]
         else:
-            # Fall back to loading from universe system
-            if not universe_manager or not universe_manager.universes:
-                raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
-
-            # Get the active universe
-            active_universe = None
-            from core.universe import UniverseState
-            for universe in universe_manager.universes.values():
-                if universe.state == UniverseState.ACTIVE:
-                    active_universe = universe
-                    break
-
-            if not active_universe:
-                # Try to load MINE universe
-                try:
-                    active_universe = await universe_manager.load_universe("MINE")
-                except Exception as e:
-                    raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
-
-            domain = active_universe.get_domain(domain_id)
-            if not domain:
-                raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
-
-            # At this point, domain file should have been loaded above
-            # If we're here, something went wrong
             raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
 
-    # Add live specialist data if domain is loaded
+    # Add live specialist data if domain is loaded (old engine architecture)
+    # Phase1Engine is stateless so we just return the config as-is
     if domain_id in engines:
         engine = engines[domain_id]
-        live_specialists = []
-        for spec_id in engine.domain.list_specialists():
-            spec = engine.domain.get_specialist(spec_id)
-            if spec:
-                # Specialist plugins use config with keys: name, keywords, categories, threshold
-                live_specialists.append({
-                    "specialist_id": spec.specialist_id,
-                    "name": spec.name,
-                    "description": spec.config.get("description", ""),
-                    "keywords": spec.config.get("keywords", []),
-                    "categories": spec.config.get("categories", []),
-                    "confidence_threshold": spec.config.get("threshold", 0.5)
-                })
-        domain_config["specialists"] = live_specialists
+        # Check if this is an old-style engine with domain attribute
+        if hasattr(engine, 'domain') and engine.domain:
+            live_specialists = []
+            for spec_id in engine.domain.list_specialists():
+                spec = engine.domain.get_specialist(spec_id)
+                if spec:
+                    # Specialist plugins use config with keys: name, keywords, categories, threshold
+                    live_specialists.append({
+                        "specialist_id": spec.specialist_id,
+                        "name": spec.name,
+                        "description": spec.config.get("description", ""),
+                        "keywords": spec.config.get("keywords", []),
+                        "categories": spec.config.get("categories", []),
+                        "confidence_threshold": spec.config.get("threshold", 0.5)
+                    })
+            domain_config["specialists"] = live_specialists
 
     return domain_config
 
@@ -2245,10 +2019,10 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
         if request.conversation_memory:
             domain_config["conversation_memory"] = request.conversation_memory
 
-    # Create domain.json file in the universe structure
+    # Create domain.json file
     try:
-        universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-        domain_file = Path(universes_base) / "MINE" / "domains" / request.domain_id / "domain.json"
+        domains_base = os.getenv("DOMAINS_BASE", "/app/domains")
+        domain_file = Path(domains_base) / request.domain_id / "domain.json"
         domain_file.parent.mkdir(parents=True, exist_ok=True)
 
         with open(domain_file, 'w') as f:
@@ -2288,25 +2062,13 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
 
     # Auto-load the domain into active engines
     try:
-        if universe_manager:
-            # Get the MINE universe (default)
-            current_universe = await universe_manager.get_universe("MINE")
-            if current_universe:
-                # Import DomainUniverseConfig
-                from core.universe import DomainUniverseConfig
+        # Create Phase1Engine (stateless, domain loaded at query time)
+        engine = Phase1Engine(enable_trace=True)
 
-                # Create minimal config for domain loading
-                domain_universe_config = DomainUniverseConfig(
-                    domain_id=request.domain_id,
-                    enabled=True,
-                    priority=0
-                )
+        # Register in global engines dict
+        engines[request.domain_id] = engine
 
-                # Try to load this specific domain
-                domain = await current_universe._load_domain(request.domain_id, domain_universe_config)
-                if domain:
-                    engines[request.domain_id] = current_universe.engines[request.domain_id]
-                    logger.info(f"✓ Auto-loaded domain: {request.domain_id}")
+        logger.info(f"✓ Auto-loaded domain: {request.domain_id}")
     except Exception as e:
         logger.warning(f"Failed to auto-load domain {request.domain_id}: {e}")
         logger.warning("Domain created but requires container restart to use")
@@ -2325,8 +2087,8 @@ async def create_domain(request: DomainCreate) -> Dict[str, Any]:
 async def update_domain(domain_id: str, request: DomainUpdate) -> Dict[str, Any]:
     """Update an existing domain. Supports domain type system changes."""
     registry = _load_domain_registry()
-    universes_base = os.getenv("UNIVERSES_BASE", "/app/universes")
-    domain_file = Path(universes_base) / "MINE" / "domains" / domain_id / "domain.json"
+    domains_base = os.getenv("DOMAINS_BASE", "/app/domains")
+    domain_file = Path(domains_base) / domain_id / "domain.json"
 
     # Try to get existing domain config from registry or file
     domain_config = None
@@ -2986,14 +2748,16 @@ def get_search_metrics_instance() -> SearchMetrics:
 
 
 def _get_universes_domains_path() -> Path:
-    """Get the path to the domains directory within the default universe."""
+    """Get the path to the domains directory within the current universe."""
     # Check if running in Docker (APP_HOME env var is set)
     if os.getenv("APP_HOME"):
         universes_base = Path("/app/universes")
     else:
         universes_base = Path(os.getenv("UNIVERSES_BASE",
                                         "/home/peter/development/eeframe/universes"))
-    return universes_base / "MINE" / "domains"
+    # Use current active universe
+    target_universe = universe_manager.current_universe_id if universe_manager else "MINE"
+    return universes_base / target_universe / "domains"
 
 
 def get_pattern_analyzer_instance() -> PatternAnalyzer:

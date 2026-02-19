@@ -496,6 +496,7 @@ class UniverseManager:
         """
         self.universes_base_path = universes_base_path
         self.default_universe_id = default_universe_id
+        self.current_universe_id = default_universe_id  # Track currently active universe
         self.universes: Dict[str, Universe] = {}
         self._lock = asyncio.Lock()
 

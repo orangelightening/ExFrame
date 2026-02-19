@@ -339,20 +339,38 @@ def get_kcart(domain_path: str, domain_config: Dict) -> KnowledgeCartography:
     return KnowledgeCartography(domain_path, kcart_config)
 
 
-def load_history(domain: str, universe: str = "MINE") -> List[Dict]:
+def load_history(domain: str) -> List[Dict]:
     """
     Utility function to load query history for a domain.
 
     Args:
         domain: Domain name
-        universe: Universe name (default: MINE)
 
     Returns:
         List of query history entries
     """
-    history_file = f"universes/{universe}/domains/{domain}/query_history.json.gz"
+    # Determine domains base path
+    possible_bases = [
+        os.getenv("DOMAINS_BASE", ""),
+        "/app/domains",
+        "domains",
+        os.path.join(os.getcwd(), "domains")
+    ]
+
+    domains_base = None
+    for base_path in possible_bases:
+        if base_path and os.path.exists(base_path):
+            domains_base = base_path
+            break
+
+    if not domains_base:
+        domains_base = "domains"  # Fallback default
+
+    # Construct history file path
+    history_file = os.path.join(domains_base, domain, "query_history.json.gz")
 
     if not os.path.exists(history_file):
+        logger.warning(f"No history file found at {history_file}")
         return []
 
     try:

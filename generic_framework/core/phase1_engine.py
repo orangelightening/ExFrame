@@ -118,6 +118,62 @@ class Phase1Engine:
                 'engine_version': 'phase1'
             }
 
+    async def get_domain_status(self, domain_name: str = None) -> Dict[str, Any]:
+        """
+        Get domain status information.
+
+        Args:
+            domain_name: Domain name to get status for
+
+        Returns:
+            Domain status dict
+        """
+        from .query_processor import _load_domain_config
+
+        if not domain_name:
+            return {
+                'domain': 'unknown',
+                'domain_name': 'Unknown',
+                'patterns_loaded': 0,
+                'specialists_available': [],
+                'categories': []
+            }
+
+        try:
+            # Load domain config
+            config = _load_domain_config(domain_name)
+
+            # Count patterns
+            from pathlib import Path
+            import json
+            import os
+
+            domains_base = os.getenv("DOMAINS_BASE", "/app/domains")
+            patterns_file = Path(domains_base) / domain_name / "patterns.json"
+
+            pattern_count = 0
+            if patterns_file.exists():
+                with open(patterns_file, 'r') as f:
+                    patterns = json.load(f)
+                    pattern_count = len(patterns) if isinstance(patterns, list) else 0
+
+            return {
+                'domain': domain_name,
+                'domain_name': config.get('domain_name', domain_name),
+                'patterns_loaded': pattern_count,
+                'specialists_available': [s.get('specialist_id') for s in config.get('specialists', [])],
+                'categories': config.get('categories', [])
+            }
+        except Exception as e:
+            logger.error(f"Failed to get domain status for {domain_name}: {e}")
+            return {
+                'domain': domain_name,
+                'domain_name': domain_name,
+                'patterns_loaded': 0,
+                'specialists_available': [],
+                'categories': []
+            }
+
     def get_available_personas(self) -> list:
         """Get list of available persona names"""
         return list_personas()

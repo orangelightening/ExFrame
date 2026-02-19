@@ -69,10 +69,6 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-400">Universe:</span>
-                            <span class="text-sm text-teal-400 font-semibold" x-text="currentUniverse"></span>
-                        </div>
-                        <div class="flex items-center gap-2">
                             <span class="text-sm text-gray-400">Domain:</span>
                             <form @submit.prevent="" autocomplete="off" class="contents">
                                 <select x-model="currentDomain"
@@ -2037,110 +2033,12 @@
                 </div>
             </div>
 
-            <!-- UNIVERSES VIEW -->
-            <div x-show="currentView === 'universes'" x-transition>
-                <h2 class="text-2xl font-bold mb-6">Universe Management</h2>
-
-                <!-- Current Universe Info -->
-                <div class="glass rounded-xl p-6 mb-6 border border-teal-500/30">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                        </svg>
-                        Current Universe
-                    </h3>
-                    <div class="flex items-center gap-4">
-                        <span class="text-2xl font-bold text-teal-400" x-text="currentUniverse"></span>
-                        <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-sm font-medium">Active</span>
-                        <span class="text-gray-400">
-                            <span class="text-emerald-400 font-semibold" x-text="availableDomains.length"></span> domains,
-                            <span class="text-emerald-400 font-semibold" x-text="totalPatternCount"></span> total patterns
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Available Universes -->
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Available Universes</h3>
-                        <button @click="loadUniverses()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors">
-                            Refresh
-                        </button>
-                    </div>
-
-                    <div class="space-y-3" id="universe-list">
-                        <template x-for="universe in availableUniverses" :key="universe.universe_id">
-                            <div class="p-4 rounded-lg border transition-all"
-                                 :class="universe.universe_id === currentUniverse
-                                    ? 'border-teal-500 bg-teal-500/10'
-                                    : 'border-gray-700 hover:border-gray-600 bg-gray-800/50'">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-4">
-                                        <div>
-                                            <h4 class="font-semibold text-lg" :class="universe.universe_id === currentUniverse ? 'text-teal-400' : 'text-gray-300'" x-text="universe.universe_id"></h4>
-                                            <p class="text-sm text-gray-500 mt-1">
-                                                <span x-text="universe.domain_count || 0"></span> domains ·
-                                                <span x-text="universe.total_patterns || 0"></span> patterns
-                                            </p>
-                                        </div>
-                                        <div x-show="universe.is_active" class="px-2 py-1 rounded bg-teal-500/20 text-teal-400 text-xs font-medium">
-                                            Active
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <button x-show="universe.universe_id !== currentUniverse"
-                                                @click="switchUniverse(universe.universe_id)"
-                                                class="px-4 py-2 bg-teal-500 hover:bg-teal-600 rounded-lg text-sm font-medium transition-colors">
-                                            Switch
-                                        </button>
-                                        <button @click="viewUniverseDetails(universe.universe_id)"
-                                                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors">
-                                            Details
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                        <div x-show="availableUniverses.length === 0" class="text-center py-8 text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                            <p>No universes found</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Create Universe Section -->
-                <div class="glass rounded-xl p-6 mt-6">
-                    <h3 class="text-lg font-semibold mb-4">Create New Universe</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm text-gray-400 mb-2">Universe ID</label>
-                            <input type="text" x-model="newUniverseId" placeholder="my_universe"
-                                   class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 focus:ring-2 focus:ring-teal-500/20 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-400 mb-2">Description</label>
-                            <input type="text" x-model="newUniverseDescription" placeholder="Optional description"
-                                   class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 focus:ring-2 focus:ring-teal-500/20 outline-none">
-                        </div>
-                    </div>
-                    <div class="mt-4 flex gap-3">
-                        <button @click="createUniverse()"
-                                :disabled="!newUniverseId"
-                                class="px-6 py-2 bg-teal-500 hover:bg-teal-600 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-colors">
-                            Create Universe
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- DIAGNOSTICS VIEW -->
             <div x-show="currentView === 'diagnostics'" x-transition>
                 <h2 class="text-2xl font-bold mb-2">System Diagnostics</h2>
                 <p class="text-gray-400 text-sm mb-6">
-                    Universe: <span class="text-emerald-400 font-medium" x-text="currentUniverse"></span>
-                    <span x-show="availableDomains.length === 0" class="text-yellow-400 ml-3">(No domains in this universe)</span>
+                    <span x-text="availableDomains.length"></span> domains available
+                    <span x-show="availableDomains.length === 0" class="text-yellow-400 ml-3">(No domains found)</span>
                 </p>
 
                 <!-- System Health Overview -->
@@ -2467,10 +2365,6 @@
                 loading: false,
                 lastQuery: '',
                 currentDomain: 'exframe',
-                currentUniverse: 'MINE',
-                availableUniverses: [],
-                newUniverseId: '',
-                newUniverseDescription: '',
                 availableDomains: [],
                 patternCount: 0,
                 totalPatternCount: 0,
@@ -2671,7 +2565,6 @@
                     { id: 'sources', label: 'Sources' },
                     { id: 'domains', label: 'Domains' },
                     { id: 'surveyor', label: 'Surveyor' },
-                    { id: 'universes', label: 'Universes' },
                     { id: 'diagnostics', label: 'Diagnostics' },
                 ],
                 exampleQueries: {},  // Populated from recent traces per domain
@@ -2731,11 +2624,17 @@
 
                 async init() {
                     console.log('=== INIT START ===');
+
+                    // Restore domain from localStorage if available
+                    const savedDomain = localStorage.getItem('currentDomain');
+                    if (savedDomain) {
+                        this.currentDomain = savedDomain;
+                        console.log('Restored domain from localStorage:', savedDomain);
+                    }
                     console.log('Initial currentDomain:', this.currentDomain);
 
-                    await this.loadCurrentUniverse();
-                    await this.loadUniverses();
-                    console.log('After loadCurrentUniverse, availableDomains:', this.availableDomains);
+                    await this.loadDomains();
+                    console.log('After loadDomains, availableDomains:', this.availableDomains);
 
                     // Load domain info BEFORE updating display properties
                     await this.loadDomainInfo();
@@ -2786,180 +2685,26 @@
                     console.log('=== INIT END ===');
                 },
 
-                async loadCurrentUniverse() {
+                async loadDomains() {
                     try {
-                        const res = await fetch('/api/universes');
+                        const res = await fetch('/api/domains');
                         const data = await res.json();
-                        // Get the active/default universe
-                        if (data.universes && data.universes.length > 0) {
-                            // Find the active universe or default to 'default'
-                            const activeUniverse = data.universes.find(u => u.is_active) || data.universes.find(u => u.universe_id === 'MINE') || data.universes[0];
-                            this.currentUniverse = activeUniverse.universe_id;
 
-                            // Load the universe to get its domains
-                            const loadRes = await fetch(`/api/universes/${this.currentUniverse}/load`, {
-                                method: 'POST'
-                            });
-                            if (loadRes.ok) {
-                                const loadData = await loadRes.json();
-                                if (loadData.domains && Array.isArray(loadData.domains)) {
-                                    this.availableDomains = loadData.domains;
-                                } else {
-                                    this.availableDomains = [];
-                                }
+                        if (data.domains && Array.isArray(data.domains)) {
+                            this.availableDomains = data.domains;
+                            // Set currentDomain to first available if current one is invalid
+                            if (!this.availableDomains.includes(this.currentDomain)) {
+                                this.currentDomain = this.availableDomains.length > 0 ? this.availableDomains[0] : null;
+                                console.log('Reset currentDomain to:', this.currentDomain);
                             }
-
-                            console.log('Loaded current universe:', this.currentUniverse, 'Domains:', this.availableDomains);
+                        } else {
+                            this.availableDomains = [];
                         }
+
+                        console.log('Loaded domains:', this.availableDomains);
                     } catch (error) {
-                        console.error('Failed to load current universe:', error);
-                        this.currentUniverse = 'MINE';
+                        console.error('Failed to load domains:', error);
                         this.availableDomains = [];
-                    }
-                },
-
-                async loadUniverses() {
-                    try {
-                        const res = await fetch('/api/universes');
-                        const data = await res.json();
-
-                        // Show all available universes from disk, not just loaded ones
-                        // The API returns: {available: [], loaded: [], universes: []}
-                        // We want to display all available universes
-                        const availableIds = data.available || [];
-                        const loadedUniverses = data.universes || [];
-
-                        // Merge available IDs with loaded metadata
-                        this.availableUniverses = availableIds.map(id => {
-                            const meta = loadedUniverses.find(u => u.universe_id === id);
-                            return meta || {
-                                universe_id: id,
-                                name: id.charAt(0).toUpperCase() + id.slice(1),
-                                description: 'Available but not loaded',
-                                state: 'available',
-                                domain_count: 0,
-                                total_patterns: 0,
-                                is_active: false
-                            };
-                        });
-
-                        // Update total pattern count from current universe data
-                        const currentUniv = this.availableUniverses.find(u => u.universe_id === this.currentUniverse);
-                        if (currentUniv) {
-                            this.totalPatternCount = currentUniv.total_patterns || 0;
-                        } else {
-                            this.totalPatternCount = 0;
-                        }
-
-                        console.log('Loaded universes:', this.availableUniverses);
-                    } catch (error) {
-                        console.error('Failed to load universes:', error);
-                    }
-                },
-
-                async switchUniverse(universeId) {
-                    try {
-                        const res = await fetch(`/api/universes/${universeId}/load`, {
-                            method: 'POST'
-                        });
-                        const data = await res.json();
-
-                        if (res.ok) {
-                            this.currentUniverse = universeId;
-                            // Update available domains from the loaded universe response
-                            if (data.domains && Array.isArray(data.domains)) {
-                                this.availableDomains = data.domains;
-                                // Set current domain to first available, or null if empty
-                                this.currentDomain = data.domains.length > 0 ? data.domains[0] : null;
-                            } else {
-                                this.availableDomains = [];
-                                this.currentDomain = null;
-                            }
-
-                            // Force Alpine to detect the change
-                            await this.$nextTick();
-
-                            // Update pattern count from current universe
-                            await this.loadUniverses();
-                            // Update domains list for Domains tab
-                            await this.loadAllDomains();
-
-                            // Clear or reload domain info based on whether we have domains
-                            if (this.currentDomain) {
-                                await this.loadDomainInfo();
-                            } else {
-                                // Explicitly clear all domain-specific data for empty universe
-                                this.domainConfig = null;
-                                this.response = '';
-                                this.patterns_used = [];
-                                this.patterns = [];
-                                this.patternCount = 0;
-                                this.specialists = [];
-                                this.categories = [];
-                                this.domainDescription = '';
-                                this.domainLastUpdate = '';
-                                this.currentExampleQueriesDisplay = [];
-                                this.queryPlaceholder = '';
-                            }
-
-                            console.log('Switched to universe:', universeId, 'Domains:', this.availableDomains, 'currentDomain:', this.currentDomain);
-                            // Show success message after UI updates
-                            setTimeout(() => {
-                                alert(data.message || `Switched to ${universeId}`);
-                            }, 100);
-                        } else {
-                            alert('Failed to switch universe: ' + (data.detail || data.message || 'Unknown error'));
-                        }
-                    } catch (error) {
-                        console.error('Failed to switch universe:', error);
-                        alert('Failed to switch universe: ' + error.message);
-                    }
-                },
-
-                async viewUniverseDetails(universeId) {
-                    try {
-                        const res = await fetch(`/api/universes/${universeId}`);
-                        const data = await res.json();
-                        console.log('Universe details:', data);
-                        // Could show a modal with more details here
-                        alert(`Universe: ${data.universe_id}\nDomains: ${(data.domains || []).join(', ')}\nDescription: ${data.description || 'No description'}`);
-                    } catch (error) {
-                        console.error('Failed to load universe details:', error);
-                    }
-                },
-
-                async createUniverse() {
-                    if (!this.newUniverseId) {
-                        alert('Please enter a universe ID');
-                        return;
-                    }
-
-                    try {
-                        const res = await fetch('/api/universes', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                universe_id: this.newUniverseId,
-                                name: this.newUniverseId.charAt(0).toUpperCase() + this.newUniverseId.slice(1),  // Capitalize first letter for name
-                                description: this.newUniverseDescription || ''
-                            })
-                        });
-
-                        const data = await res.json();
-
-                        if (res.ok) {
-                            alert(`Universe "${this.newUniverseId}" created successfully!`);
-                            this.newUniverseId = '';
-                            this.newUniverseDescription = '';
-                            await this.loadUniverses();
-                        } else {
-                            // Extract error message from detail field (FastAPI error format)
-                            const errorMsg = data.detail || data.message || 'Unknown error';
-                            alert('Failed to create universe: ' + errorMsg);
-                        }
-                    } catch (error) {
-                        console.error('Failed to create universe:', error);
-                        alert('Failed to create universe: ' + error.message);
                     }
                 },
 
@@ -2978,14 +2723,15 @@
 
                         this.availableDomains = data.domains;
 
-                        // Set currentDomain to API's default, but prioritize exframe_methods if available
-                        let apiDefault = data.default || data.domains[0];
-                        if (data.domains.includes('exframe')) {
-                            apiDefault = 'exframe';
-                            console.log('Overriding to exframe_methods as default');
+                        // Preserve currentDomain if it's still valid in the new domain list
+                        // Otherwise use the first domain (don't hardcode 'exframe' preference)
+                        if (!data.domains.includes(this.currentDomain)) {
+                            let newDefault = data.domains.length > 0 ? data.domains[0] : null;
+                            console.log('Current domain no longer valid, switching to:', newDefault);
+                            this.currentDomain = newDefault;
+                        } else {
+                            console.log('Keeping currentDomain:', this.currentDomain, 'in universe:', this.currentUniverse);
                         }
-                        console.log('Setting currentDomain to:', apiDefault);
-                        this.currentDomain = apiDefault;
 
                         // Wait for Alpine to process
                         await this.$nextTick();
@@ -3007,6 +2753,9 @@
                         this.currentDomain = selectEl.value;
                         console.log('Forced currentDomain to:', this.currentDomain);
                     }
+
+                    // Save to localStorage for persistence across page navigation
+                    localStorage.setItem('currentDomain', this.currentDomain);
 
                     // Clear current patterns first to avoid showing stale data
                     this.patterns = [];
@@ -3294,6 +3043,14 @@
                 async processQuery() {
                     if (!this.query || this.loading) return;
 
+                    // Safety check: Ensure currentDomain belongs to current universe
+                    if (!this.availableDomains.includes(this.currentDomain)) {
+                        console.error('Domain mismatch detected! currentDomain:', this.currentDomain, 'not in availableDomains:', this.availableDomains);
+                        alert(`Error: Domain "${this.currentDomain}" not found in universe "${this.currentUniverse}". Refreshing domain list...`);
+                        await this.loadAllDomains();
+                        return;
+                    }
+
                     this.loading = true;
                     this.response = '';
                     this.specialist = '';
@@ -3305,6 +3062,8 @@
                     this.processingTime = 0;  // Reset processing time
                     this.trace = null;
                     this.selectedTrace = null;
+
+                    console.log(`🔍 Querying: Universe="${this.currentUniverse}", Domain="${this.currentDomain}", Query="${this.query}"`);
 
                     try {
                         const res = await fetch('/api/query/phase1', {
@@ -3832,8 +3591,18 @@
 
                 async loadAllDomains() {
                     try {
-                        // Only load domains that belong to the current universe
-                        const domainIds = this.availableDomains || [];
+                        // First refresh the domain list from the API for current universe
+                        const domainsRes = await fetch('/api/domains');
+                        const domainsData = await domainsRes.json();
+                        const domainIds = domainsData.domains || [];
+
+                        // Update availableDomains to reflect current universe's domains
+                        this.availableDomains = domainIds;
+
+                        // If currentDomain is not in the list, reset to first domain or null
+                        if (!domainIds.includes(this.currentDomain)) {
+                            this.currentDomain = domainIds.length > 0 ? domainIds[0] : null;
+                        }
 
                         // Fetch details for each domain in the current universe
                         this.allDomains = await Promise.all(
@@ -4609,8 +4378,7 @@
                             health: healthData,
                             search_metrics: metricsData,
                             pattern_health: Object.keys(patternHealth).length > 0 ? patternHealth : null,
-                            generated_at: new Date().toISOString(),
-                            universe_id: this.currentUniverse
+                            generated_at: new Date().toISOString()
                         };
                     } catch (error) {
                         console.error('Failed to load diagnostics:', error);

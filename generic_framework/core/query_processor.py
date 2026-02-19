@@ -65,7 +65,28 @@ async def process_query(
     # Initialize KCart for this domain to track all query/response pairs
     # This enables dialectical knowledge mapping and conversational context
     from pathlib import Path as PathlibPath
-    domain_path = PathlibPath("/app/universes/MINE/domains") / domain_name
+    import os
+
+    # Extract domain path from the config's pattern_storage_path if available
+    # Otherwise use standard domains directory
+    domain_path = None
+    if "pattern_storage_path" in domain_config:
+        domain_path = PathlibPath(domain_config["pattern_storage_path"])
+    else:
+        # Use standard domains directory
+        domains_base = os.getenv("DOMAINS_BASE", "/app/domains")
+        domains_base_path = PathlibPath(domains_base)
+
+        # Try standard location first
+        if domains_base_path.exists():
+            potential_path = domains_base_path / domain_name
+            if potential_path.exists():
+                domain_path = potential_path
+
+        # Fallback to local domains directory
+        if not domain_path:
+            domain_path = PathlibPath("domains") / domain_name
+
     kcart = get_kcart(str(domain_path), domain_config)
     # ==================== END KCART INIT ====================
 
@@ -431,11 +452,13 @@ def _load_domain_config(domain_name: str) -> Dict[str, Any]:
     import json
     from pathlib import Path
 
-    # Try common universe paths
+    # Try standard domains paths
+    import os
+    domains_base = os.getenv("DOMAINS_BASE", "/app/domains")
+
     possible_paths = [
-        f"/app/domains/{domain_name}/domain.json",  # Container path
-        f"universes/MINE/domains/{domain_name}/domain.json",  # Local path
-        f"domains/{domain_name}/domain.json"  # Alternate
+        f"{domains_base}/{domain_name}/domain.json",  # Container path
+        f"domains/{domain_name}/domain.json"  # Local path
     ]
 
     for path in possible_paths:

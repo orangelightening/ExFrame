@@ -7,7 +7,7 @@
 function taoApp() {
     return {
         // State
-        currentDomain: 'peter',
+        currentDomain: localStorage.getItem('currentDomain') || 'peter',
         availableDomains: [],
         activeTab: 'sessions',
         loading: false,
@@ -36,6 +36,7 @@ function taoApp() {
          */
         async init() {
             console.log('Tao: Initializing...');
+            console.log('Tao: Restored domain from localStorage:', this.currentDomain);
             await this.loadDomains();
             await this.loadDomain();
         },
@@ -82,6 +83,10 @@ function taoApp() {
             }
 
             console.log('Tao: Loading domain:', this.currentDomain);
+
+            // Save to localStorage when domain changes
+            localStorage.setItem('currentDomain', this.currentDomain);
+
             this.loading = true;
             this.error = null;
 

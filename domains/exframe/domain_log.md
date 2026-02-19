@@ -3714,3 +3714,1020 @@ These arrays enable fast semantic search and similarity computation, powering Ex
 
 ---
 
+## 2026-02-18 22:50:37
+
+Query: Who is the exframe librarian?
+
+# Step-by-Step Reasoning
+
+**Question Analysis**: The user wants to know who/what the "ExFrame Librarian" is in the system.
+
+**Information Sources**: I'll search through the documentation for information about the Librarian persona.
+
+---
+
+## Final Answer
+
+# ExFrame Librarian
+
+The **Librarian** is one of the three AI personas in ExFrame's Phase 1 system, designed for knowledge retrieval from local documents.
+
+---
+
+## What the Librarian Does
+
+| Attribute | Description |
+|-----------|-------------|
+| **Data Source** | `library` — searches local document libraries |
+| **Primary Use** | Technical documentation, knowledge bases, API references |
+| **Shows Thinking** | Yes — displays reasoning process |
+| **Search Method** | Semantic document search with relevance ranking |
+
+---
+
+## How the Librarian Works
+
+### 1. Configuration
+
+Domains using the Librarian persona are configured like this:
+
+```json
+{
+  "domain_id": "exframe",
+  "domain_name": "ExFrame Documentation",
+  "persona": "librarian",
+  "library_base_path": "/app/project/docs",
+  "enable_web_search": false
+}
+```
+
+### 2. Query Processing
+
+When you query a Librarian domain:
+
+1. **Load domain config** — reads `library_base_path` from domain.json
+2. **Search documents** — uses semantic search via DocumentVectorStore
+3. **Load top documents** — retrieves most relevant markdown files
+4. **Inject context** — passes documents to LLM as context
+5. **Generate response** — LLM synthesizes answer from document content
+
+### 3. Document Search Features
+
+- **Semantic similarity** — finds documents based on meaning, not keywords
+- **Cosine similarity scoring** — ranks documents by relevance (0-1 range)
+- **Document embeddings** — cached in `doc_embeddings.json` for fast retrieval
+- **Incremental updates** — hash-based staleness detection for efficiency
+
+---
+
+## Librarian vs Other Personas
+
+| Persona | Data Source | Shows Thinking | Use Case |
+|----------|------------|----------------|-----------|
+| **Poet** | Void (pure generation) | No | Creative writing, journaling |
+| **Librarian** | Library (local docs) | **Yes** | Documentation, knowledge bases |
+| **Researcher** | Internet (web search) | Yes | Current events, research, recipes |
+
+---
+
+## Example Domains Using Librarian
+
+- **exframe** — ExFrame project documentation (56+ markdown files)
+- **Technical Documentation** — API references, user guides
+- **Knowledge Bases** — Structured document collections
+
+---
+
+## Key Capabilities
+
+✅ **Semantic document search** — finds related documents by meaning
+✅ **Shows reasoning** — displays thinking process in responses
+✅ **Context injection** — passes relevant documents to LLM
+✅ **Pattern override** — can use local patterns if available
+✅ **Fast retrieval** — cached embeddings for ~10ms search
+
+---
+
+The Librarian is your go-to AI persona for answering questions from your local documentation, providing accurate, source-grounded responses based on your own knowledge base.
+
+
+---
+
+## 2026-02-18 22:57:08
+
+Query: What is learning surveillance
+
+## Step-by-Step Reasoning
+
+**Question Analysis**: The user wants to understand what "learning surveillance" means, likely in the context of the ExFrame/Tao system based on the documents provided.
+
+**Information Sources**: I'll analyze the BRAIN_RATING.md document which discusses ethical concerns around monitoring cognitive patterns and specifically rejects "employee monitoring" as a surveillance tool.
+
+---
+
+## Final Answer
+
+# Learning Surveillance
+
+**Learning surveillance** refers to the continuous, systematic monitoring of an individual's cognitive and learning behaviors by an employer or authority figure, typically for evaluation, performance management, or control purposes.
+
+---
+
+## Key Characteristics
+
+| Characteristic | Description |
+|----------------|-------------|
+| **Continuous monitoring** | Ongoing tracking rather than one-time assessment |
+| **Employer-controlled** | Data collected and owned by employer, not individual |
+| **Performance-based** | Metrics used in evaluations, promotions, or termination decisions |
+| **Non-consensual pressure** | Employees compelled to participate (even if nominally "voluntary") |
+| **Power imbalance** | Employer holds leverage over employee's livelihood |
+
+---
+
+## How It Works (In the Tao/ExFrame Context)
+
+If implemented (which **ExFrame does NOT do**), learning surveillance would involve:
+
+```
+Employee logs in daily → 
+Asks questions/learns topics → 
+System tracks metrics → 
+Employer monitors dashboard → 
+Performance review based on "learning speed" → 
+Consequences for "low performers"
+```
+
+**Metrics Tracked**:
+- Learning velocity (how fast you learn)
+- Question sophistication (how complex your questions are)
+- Chain depth (how many follow-up questions you ask)
+- Session patterns (time of day, frequency)
+- Interest ratio (engagement in required vs. optional topics)
+
+---
+
+## Examples of Learning Surveillance
+
+### Example 1: Daily Required Learning
+```
+Manager: "Everyone needs to spend 30 minutes in ExFrame every day learning."
+
+Employee A: Spends 30 minutes, Tao Index = 7.8 → Meets expectations
+Employee B: Spends 30 minutes, Tao Index = 6.2 → PIP (Performance Improvement Plan)
+Employee C: Forgets one day → Marked as "non-compliant"
+
+Result: Metric gaming → Employees ask easy questions to boost scores, 
+or rush through learning to hit time requirements
+```
+
+### Example 2: Performance Reviews
+```
+Annual Review:
+Manager: "Your Tao Index dropped 15% this quarter. You're not learning 
+fast enough. We need to discuss whether this is the right role for you."
+
+Employee: "I was working on a complex project and didn't have time 
+to do ExFrame training."
+
+Manager: "That's not acceptable. Learning is a core competency. 
+If you can't maintain your metrics, we'll need to find someone who can."
+```
+
+### Example 3: Ranking & Competition
+```
+Team Dashboard:
+Name | Tao Index | Change
+-----|-----------|--------
+John | 8.4       | ↑ 0.3
+Sarah| 7.9       | ↓ 0.2
+Mike | 6.1       | ↓ 0.8 ⚠️
+
+Manager: "Mike, you're at the bottom of the team. John is learning 
+twice as fast as you. What's going on?"
+
+Result: Toxic competition, anxiety, people gaming the system
+```
+
+---
+
+## Why Learning Surveillance is Problematic
+
+### 1. Creates Surveillance Culture
+- Employees feel constantly watched
+- Psychological stress and anxiety
+- Erodes trust between employer and employee
+- Creates "performative learning" - learning for the metrics, not for growth
+
+### 2. Weaponizes Metrics
+- "Your learning speed is down. You're fired."
+- Metrics used selectively to justify decisions
+- Reduction of human complexity to numbers
+
+### 3. Gaming Behavior
+Employees will game the system:
+- Ask intentionally easy questions to boost velocity scores
+- Pad chain depth with useless follow-up questions
+- Focus on "interesting" topics to improve engagement metrics
+- Cheat by having others query on their behalf
+
+### 4. Legal Liability
+- **ADA Violations**: Discriminating against employees with cognitive differences, learning disabilities, or neurological conditions
+- **Age Discrimination**: Older workers may have slower learning velocity (normal aging)
+- **Disability Discrimination**: Metrics may disadvantage neurodivergent employees
+- **Medical Privacy**: Cognitive data is sensitive health information
+
+### 5. Slippery Slope
+```
+Phase 1: "Optional" 15-minute learning sessions
+    ↓
+Phase 2: "Recommended" learning time becomes expected
+    ↓
+Phase 3: Required learning time in contracts
+    ↓
+Phase 4: Metrics used in performance reviews
+    ↓
+Phase 5: Low performers put on PIP or fired
+    ↓
+Phase 6: Cognitive discrimination as standard practice
+```
+
+---
+
+## Learning Surveillance vs. Legitimate Uses
+
+| Aspect | Learning Surveillance ❌ | Hiring Assessment ✅ | Cognitive Health ✅ |
+|--------|------------------------|----------------------|---------------------|
+| **Purpose** | Control employees | Evaluate candidates | Personal health |
+| **Timeframe** | Continuous (daily/weekly) | One-time (10 days) | Longitudinal (years) |
+| **Who controls data?** | Employer | Shared (candidate consents) | Individual |
+| **Who sees results?** | Manager/HR | Recruiter/Hiring manager | Only you |
+| **Consequences** | Fired, demoted, PIP | Job offer/decline | Health alert (see doctor) |
+| **Power dynamic** | Employer holds leverage | Voluntary opt-in | Self-directed |
+| **Privacy** | Invasive | Transparent | HIPAA-protected |
+| **Ethical?** | ❌ No | ✅ Yes | ✅ Yes |
+
+---
+
+## ExFrame's Position
+
+**From BRAIN_RATING.md:**
+
+> ### Path 3: Employee Monitoring (REJECTED)
+> **Status:** ❌ Not Building (Ethical Concerns)
+> 
+> ### Why Not?
+> 1. **Surveillance culture** - Dystopian workplace monitoring
+> 2. **Weaponized metrics** - "Your learning speed is down 20%. You're fired."
+> 3. **Stress/anxiety** - Constant performance pressure
+> 4. **Gaming behavior** - Employees will game the system
+> 5. **Legal liability** - Disability discrimination (ADA violations)
+> 6. **Privacy invasion** - Invasive cognitive tracking by employer
+> 7. **Power imbalance** - Employer has leverage over employee's livelihood
+
+> **Bottom Line**: We do not build tools that enable workplace surveillance or cognitive discrimination.
+
+> **Tao is for learning, not surveillance.**
+
+---
+
+## Summary
+
+**Learning surveillance** is the dystopian practice of employers continuously monitoring employees' cognitive and learning behaviors for evaluation and control. It:
+- Creates toxic workplace culture
+- Enables discrimination based on cognitive differences
+- Invades privacy and causes psychological harm
+- Is legally risky and ethically wrong
+
+**ExFrame explicitly rejects learning surveillance** and will not build employee monitoring tools, while supporting legitimate uses like hiring assessments (voluntary, one-time) and cognitive health monitoring (personal, medical data, user-controlled).
+
+
+---
+
+## 2026-02-19 04:27:11
+
+Query: MY name is Peter. Teach me about exframe.
+
+# Hello Peter! Let Me Teach You About ExFrame
+
+I'll give you a comprehensive overview of ExFrame - the project you created.
+
+---
+
+## What Is ExFrame?
+
+**ExFrame** is a domain-agnostic AI-powered knowledge management system with a **universe-based architecture** and **plugin-based pipeline**.
+
+In simpler terms: It's a system where you can store knowledge as **patterns** in **domains** within **universes**, and query that knowledge through natural language.
+
+---
+
+## The Core Philosophy
+
+> **"AI performs reliably when nurtured in the role it is filling as it emerges."**
+
+This insight is at the heart of ExFrame. Rather than having one generic AI assistant that knows everything (and often hallucinates or produces garbage when confused), ExFrame creates **specialized AI personas** that develop expertise through interaction.
+
+---
+
+## Key Concepts (The Building Blocks)
+
+### Patterns
+A **pattern** is a reusable knowledge unit - like a recipe, a code pattern, or a technique. It has:
+- **Problem**: What this addresses
+- **Solution**: The answer or steps
+- **Tags/Category**: For discovery
+- **Confidence**: Quality score
+
+### Domains
+A **domain** is an area of expertise containing related patterns:
+- `cooking` - recipes and cooking techniques
+- `python` - Python programming patterns
+- `exframe` - ExFrame documentation
+- `llm_consciousness` - LLM failure modes and monitoring
+
+### Universes
+A **universe** is a complete, portable knowledge environment containing multiple domains. You can:
+- Create different universes (testing, production)
+- Switch between them instantly
+- Merge universes
+- Export them
+
+### Personas (Phase 1 System)
+
+ExFrame uses **three AI personas**, each optimized for different types of knowledge work:
+
+| Persona | Data Source | Best For | Shows Thinking? |
+|---------|-------------|----------|------------------|
+| **Poet** | Void (pure generation) | Creative writing, stories, poetry | No |
+| **Librarian** | Local documents | Technical docs, knowledge bases, code | Yes |
+| **Researcher** | Internet (web search) | Current events, research, recipes | Yes |
+
+---
+
+## The Three Core Use Cases
+
+You've documented three powerful ways ExFrame can be used:
+
+### 1. 📚 Personal University
+Each domain becomes a personalized course:
+- Multiple domains for a semester's courses
+- AI acts as a Teaching Assistant with infinite patience
+- Query/response logs archived for review and assessment
+- Supplements or replaces official courses
+
+**Example**: A "quantum_physics" domain teaches you over weeks, tracking your progress.
+
+### 2. ✍️ Novel Writing
+Use domains to create long-form content with perfect continuity:
+- Introduce the novel topic in the context
+- Request "another chapter please" - AI adds to the story
+- Characters, plot, and tone maintained throughout
+
+**Example**: A "mystery_novel" domain remembers every detail from Chapter 1 through Chapter 50.
+
+### 3. 🧠 Therapy & Dialogue
+Domains as therapeutic spaces with continuous context:
+- Deep dialogue that builds over weeks and months
+- AI remembers your history, struggles, and breakthroughs
+- Perfect for personal growth and reflection
+
+---
+
+## Revolutionary Features
+
+### Universal Conversation Logging
+Every query and response is automatically saved to permanent archives. This means:
+- ✅ No more "what did we discuss?"
+- ✅ No more lost insights or forgotten answers
+- ✅ Complete audit trail of all AI interactions
+- ✅ No configuration needed - it just works
+
+### Conversation Memory
+While logging saves conversations to files, **conversation memory** loads that history back into the AI context:
+
+| Traditional AI | ExFrame with Memory |
+|---------------|---------------------|
+| Starts fresh each session | **Remembers everything** |
+| No context between sessions | **Builds on every discussion** |
+| One-and-done answers | **Cumulative learning** |
+
+You can enable this per domain, choosing to remember everything or on trigger phrases.
+
+### Semantic Search
+ExFrame uses **pure semantic search** (100% semantic, 0% keyword) with embeddings:
+- Finds patterns based on meaning, not keyword matching
+- Uses all-MiniLM-L6-v2 model (384-dimensional vectors)
+- Cosine similarity scores (0-1 range) visible in traces
+
+---
+
+## How It Works: The Query Pipeline
+
+```
+Query → Phase1 Engine → Persona Selection → Pattern Search → LLM Enrichment → Response
+```
+
+1. **You ask a question** in natural language
+2. **Phase1 Engine** selects the appropriate persona for the domain
+3. **Pattern Override Check**: If the domain has matching patterns, use those. Otherwise, fall back to the persona's data source (library, web, or void)
+4. **Document/Web Search** (if applicable)
+5. **LLM Enrichment** synthesizes the response
+6. **Response delivered** with confidence score and trace information
+
+---
+
+## Getting Started (5 Minutes)
+
+### Prerequisites
+- Docker Engine (official, NOT snap)
+- Docker Compose v2
+- An API key (OpenAI, Anthropic, Zhipu, or Ollama for local)
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+
+# 2. Configure your AI provider
+cp .env.example .env
+# Edit .env with your API key
+
+# Example for OpenAI:
+# LLM_MODEL=gpt-4o-mini
+# OPENAI_API_KEY=sk-your-key-here
+# OPENAI_BASE_URL=https://api.openai.com/v1
+
+# 3. Start ExFrame
+docker compose up -d
+
+# 4. Open your browser
+# Navigate to: http://localhost:3000
+```
+
+### Access URLs
+- **Main Application**: http://localhost:3000
+- **API Documentation**: http://localhost:3000/docs
+- **Health Check**: http://localhost:3000/health
+
+---
+
+## The Web Interface
+
+The web UI has these tabs:
+
+| Tab | Purpose |
+|-----|---------|
+| **Assistant** | Query the AI with pattern-based knowledge |
+| **Patterns** | Browse and search knowledge patterns |
+| **Traces** | View historical query traces and debugging |
+| **Domains** | Manage domains, specialists, and configuration |
+| **Universes** | Create, switch, merge, and export universes |
+| **Diagnostics** | System health, search metrics, pattern analysis |
+
+---
+
+## Architecture Highlights
+
+### Plugin System
+All transformation logic is pluggable:
+- **Routers** - Determine query handling strategies
+- **Specialists** - Domain expertise plugins
+- **Enrichers** - Enhance responses (LLM, code generation, citations)
+- **Formatters** - Control output format (Markdown, JSON, HTML)
+
+### Data vs. Configuration
+- **Patterns are data** (JSON files in domain directories)
+- **All transformation logic is pluggable**
+- **Universes are first-class entities**
+
+### Current Version: 1.6.1
+- Status: Production ready, container healthy
+- Active domains: 11 (including binary_symmetry, cooking, exframe, poetry_domain, etc.)
+
+---
+
+## What Makes ExFrame Different?
+
+| Feature | Traditional AI | ExFrame |
+|---------|---------------|---------|
+| Memory | Starts fresh each session | Remembers everything |
+| Expertise | Generic, knows everything | Specialized personas per domain |
+| Knowledge | No storage | Persistent patterns |
+| Continuity | One-off conversations | Builds relationships over time |
+| Context | Limited context window | Universal rolling context |
+
+---
+
+## The Vision (As You Wrote)
+
+> *"I still don't know what it might become. It just keeps changing."*
+
+ExFrame continues to evolve:
+- 🎓 **Personal University** - Every domain a course
+- ✍️ **Creative Studio** - Co-writing with perfect memory
+- 🔬 **Research Companion** - Building on insights over months
+- 🧠 **Therapy Space** - Continuous dialogue for growth
+- 💼 **Professional Assistant** - Domain-specific expertise
+
+---
+
+## Your Role Context
+
+Based on the documentation, you've positioned ExFrame as:
+
+> **"Like having a perfect circle of very smart friends, each specialized and unique. Each domain becomes a companion who learns YOUR communication style."**
+
+This moves from utility to relationship - partners, not tools.
+
+---
+
+## Questions?
+
+Peter, this is your creation. Is there any specific aspect you'd like me to dive deeper into? I can explain:
+- The technical architecture in detail
+- How to create new domains
+- The persona system internals
+- The semantic search implementation
+- The conversation memory feature
+
+Or any other part of ExFrame you're curious about!
+
+
+---
+
+## 2026-02-19 04:36:14
+
+Query: Teach me about exframe
+
+# Step-by-Step Reasoning
+
+**Question Analysis**: Peter is asking me to teach him about ExFrame. This is interesting since Peter is the creator of ExFrame, but I should provide a comprehensive teaching-style overview regardless.
+
+**Information Sources**: I'll draw from multiple documents:
+- README.md - Main project overview and philosophy
+- user-guide.md - End-user documentation
+- KNOWLEDGE_CARTOGRAPHY.md - Tao subsystem
+- university.md - Personal University concept
+- notes-from-originator.md - Peter's origin story
+- domain_log.md - Training logs (showing current state)
+
+**Key Topics to Cover**:
+1. Origin story and philosophy
+2. Core architecture and concepts
+3. Features and capabilities
+4. Current state (v1.6.1)
+5. Use cases and vision
+
+---
+
+## Final Answer
+
+# Teaching ExFrame: A Comprehensive Overview
+
+Hello Peter! As your sidekick, let me give you a comprehensive lesson about the system you've created. I'll structure this from first principles to current capabilities.
+
+---
+
+## Part 1: The Origin Story
+
+ExFrame began with a **profound observation about AI**:
+
+> *"AI systems have emergent personas - unique perspectives, expertise, and voices - that develop through interaction."*
+
+### The Original Problem
+
+You started building ExFrame as an AI sidekick for OpenMediaVault server management. The initial idea was simple:
+- A query/response engine
+- Save insights as patterns in a domain
+- One-way dialogue, always starting with new context
+
+### The Breakthrough
+
+Then came the key insight that changed everything:
+
+**"If we can save queries as patterns, what if we could save the conversation itself? What if the AI could remember everything it discussed with you?"**
+
+This opened the doors to:
+- Persistent rolling context
+- AI that remembers everything across sessions
+- Domains that build expertise over time
+- A system that nurtures AI personas
+
+### Your Philosophy
+
+> **"AI performs reliably when nurtured in the role it is filling as it emerges."**
+
+Rather than forcing the AI to be everything at once (and hallucinating or producing garbage when confused), ExFrame creates specialized AI personas that develop genuine expertise through interaction.
+
+> *"I still don't know what it might become. It just keeps changing."*
+
+---
+
+## Part 2: Core Architecture
+
+### The Hierarchy
+
+```
+MULTIVERSE
+    └── UNIVERSE (e.g., "production", "MINE")
+        └── DOMAIN (e.g., "cooking", "python", "exframe")
+            └── PATTERNS (individual knowledge units)
+```
+
+### Key Concepts
+
+| Concept | Description | Example |
+|---------|-------------|---------|
+| **Pattern** | Reusable knowledge unit with problem/solution structure | Recipe for chicken shawarma |
+| **Domain** | Area of expertise containing related patterns | `cooking` domain with 32 patterns |
+| **Universe** | Complete, portable knowledge environment | MINE universe with 11 domains |
+| **Neighbourhood** | User-defined filter spanning multiple domains | "quick recipes" filter across cooking domains |
+| **Persona** | AI role determining data source and behavior | Poet, Librarian, Researcher |
+
+### Current Version
+
+**ExFrame v1.6.1** (Production ready, container healthy)
+
+---
+
+## Part 3: The Three Personas (Phase 1)
+
+ExFrame uses a persona-based architecture where each domain is assigned one of three AI personas:
+
+### 🎨 Poet
+| Attribute | Value |
+|-----------|-------|
+| **Data Source** | Void (pure generation, no external data) |
+| **Best For** | Creative writing, poetry, brainstorming |
+| **Shows Thinking** | No |
+| **Example Domains** | poetry_domain, journal (peter domain) |
+| **Special Feature** | Simple echo mode for fast journaling |
+
+**Simple Echo Mode**: When `use_simple_echo: true`, the poet instantly echoes back your input with a timestamp (<2ms, no AI). Perfect for journaling.
+
+### 📖 Librarian
+| Attribute | Value |
+|-----------|-------|
+| **Data Source** | Library (local documents) |
+| **Best For** | Technical documentation, code, knowledge bases |
+| **Shows Thinking** | Yes |
+| **Example Domains** | exframe (56+ markdown files) |
+| **Search Method** | Semantic document search with relevance ranking |
+
+**Self-Healing**: The librarian has a built-in contradiction detection system that automatically identifies documentation inconsistencies and provides a feedback loop for continuous improvement.
+
+### 🔬 Researcher
+| Attribute | Value |
+|-----------|-------|
+| **Data Source** | Internet (DuckDuckGo web search) |
+| **Best For** | Current events, research, recipes |
+| **Shows Thinking** | Yes |
+| **Example Domains** | psycho (psychology research) |
+| **Search Method** | DuckDuckGo with source citations |
+
+### Pattern Override Behavior
+
+Each domain works like this:
+
+```
+Query received
+    ↓
+Check domain for matching patterns
+    ↓
+Patterns found? ──YES──> Use patterns
+     │
+     NO
+     ↓
+Fallback to persona's data source
+    ├─ Poet → Void (LLM generation)
+    ├─ Librarian → Document search
+    └─ Researcher → Web search
+```
+
+This ensures you always get the best answer, whether from curated patterns or the persona's primary data source.
+
+---
+
+## Part 4: Universal Conversation Logging
+
+### The Promise
+
+> **"Every conversation. Automatically saved. Forever."**
+
+### What This Means
+
+✅ **Automatic Archiving**: Every query/response saved to `domain_log.md` files
+✅ **Searchable History**: Review past conversations anytime
+✅ **No Configuration**: Works out of the box
+✅ **Debugging**: Track what went wrong and what worked
+✅ **Documentation**: Conversations become reusable resources
+✅ **Audit Trail**: Full history of all AI interactions
+
+### How It Works
+
+```
+1. Create a domain
+2. Start asking questions
+3. Every query/response automatically saved
+4. Review, search, and export anytime
+```
+
+**Just use ExFrame normally. Your archive builds itself.**
+
+---
+
+## Part 5: Conversation Memory
+
+While logging saves conversations to files, **Conversation Memory** loads that history back into the AI context.
+
+| Traditional AI Chat | ExFrame with Memory |
+|--------------------|---------------------|
+| Starts fresh each session | **Remembers everything** |
+| No context between sessions | **Builds on every discussion** |
+| One-and-done answers | **Cumulative learning** |
+| Fixed context window | **Growing knowledge base** |
+
+### Enable Conversation Memory
+
+**Step 1:** Domains tab → Create/Edit Domain
+**Step 2:** Scroll to "Conversation Memory" section
+**Step 3:** Check "Enable conversation memory"
+**Step 4:** Choose mode: "All" or "Triggers"
+**Step 5:** Start building context!
+
+### Use Cases
+
+**1. Learning Domains**
+```
+Week 1: "Teach me Rust basics"
+Week 2: "I'm stuck on borrowing" → AI sees you've asked 3 times
+Week 10: "Ready for lifetimes" → AI builds on 10 weeks of context
+```
+
+**2. Story Writing**
+```
+Chapter 1: "Write about space explorers"
+Chapter 2: "Continue" → AI remembers characters, plot, setting
+Chapter 3: "Add a twist" → Maintains continuity
+```
+
+**3. Research Threads**
+```
+Day 1: "Researching Victorian literature"
+Day 5: "Compare Dickens to Thackeray" → AI remembers Day 1
+Day 15: "Connect to modern themes" → Builds on entire journey
+```
+
+---
+
+## Part 6: Tao - Knowledge Cartography
+
+**Tao (道)** is ExFrame's knowledge cartography subsystem, capturing and analyzing your learning journey.
+
+### The Dialectical Philosophy
+
+Tao embodies the Yin-Yang dialectical view of knowledge:
+
+| Yin (陰) - Questions | Yang (陽) - Answers |
+|---------------------|----------------------|
+| Dark, seeking, unknown | Bright, providing, known |
+| Curiosity drives exploration | Knowledge crystallizes |
+| Seeds of understanding | Plants new questions |
+
+**Tao (道)**: The transformation flow between them - the map of your learning journey.
+
+### What Tao Does
+
+**Phase 1: Storage & Context ✅**
+- Compressed query/response storage (70-80% smaller)
+- Automatic conversational context (last 20 interactions)
+- Timezone-aware timestamps
+- Metadata (source, confidence, patterns used)
+
+**Phase 2a: Relationship Analysis ✅**
+- **Sessions**: Group queries by time gaps
+- **Chains**: Trace query evolution over time
+- **Relations**: Find related queries (temporal, pattern, keyword)
+- **Concepts**: Extract and track concepts across history
+- **Depth**: Identify deep explorations vs shallow touches
+
+### Accessing Tao
+
+**Web Interface:**
+```
+http://localhost:3000/tao
+```
+
+**REST API:**
+```bash
+# Get sessions
+curl http://localhost:3000/api/tao/sessions/peter | jq
+
+# Get top concepts
+curl http://localhost:3000/api/tao/concepts/peter | jq
+
+# Get deep explorations
+curl http://localhost:3000/api/tao/depth/peter | jq
+```
+
+**CLI Tools:**
+```bash
+python -m tao.cli.view_history peter
+python -m tao.cli.show_sessions peter
+python -m tao.cli.trace_chain peter --entry 5
+```
+
+---
+
+## Part 7: Plugin Architecture
+
+ExFrame's plugin pipeline separates **data** (patterns) from **transformation logic** (plugins).
+
+```
+Query → Router → Specialist → Enrichers → Formatter → Response
+```
+
+### Plugin Types
+
+| Plugin | Purpose |
+|--------|---------|
+| **Router** | Determines which specialist(s) handle a query |
+| **Specialist** | Domain expertise plugins (transformation logic) |
+| **Enricher** | Enhance responses (LLM, related patterns, code) |
+| **Formatter** | Control output format (Markdown, JSON, HTML) |
+
+### Core Philosophy
+
+> **"Universes are first-class entities. Patterns are data. All transformation logic is pluggable."**
+
+This means:
+- ✅ Universes are portable knowledge environments
+- ✅ Patterns are data (JSON files)
+- ✅ All logic is swappable plugins
+
+---
+
+## Part 8: Current State
+
+### Active Domains (11 total)
+1. **binary_symmetry** - Bitwise operations and symmetry patterns
+2. **cooking** - Recipes and cooking techniques (32 patterns)
+3. **diy** - DIY projects (template)
+4. **first_aid** - Medical knowledge (template)
+5. **gardening** - Gardening guide (template)
+6. **llm_consciousness** - LLM failure modes and monitoring
+7. **python** - Python programming patterns
+8. **exframe** - ExFrame documentation (56+ files)
+9. **poetry_domain** - Creative writing
+10. **psycho** - Psychology research
+11. **peter** - Your personal journal domain
+
+### Recent Completions (2026-02)
+- ✅ Web search fully functional (DuckDuckGo)
+- ✅ Documentation reorganization completed
+- ✅ Phase 1 persona system shipped
+- ✅ Tao subsystem extracted and refactored (2026-02-15)
+- ✅ Knowledge Cartography Phase 2a complete
+
+### Known Issues
+- None critical (technical debt items are noted but not blocking)
+
+---
+
+## Part 9: Three Core Use Cases
+
+### 1. 📚 Personal University
+Each domain becomes a personalized course with its own curriculum:
+
+- Multiple domains for a semester's courses
+- Preloaded curricula to be taught
+- AI acts as a Teaching Assistant with infinite patience
+- Query/response logs archived for review, summary, and assessment
+- Supplements or replaces official courses
+
+**Example**: A "quantum_physics" domain teaches you over weeks, tracking your progress and adapting explanations.
+
+### 2. ✍️ Novel Writing
+Use domains to create long-form content with perfect continuity:
+
+- Introduce the novel topic in the context
+- Request "another chapter please" - AI adds to a multi-chapter work
+- Characters, plot, and tone maintained throughout
+
+**Example**: A "mystery_novel" domain that remembers every character detail from Chapter 1 through Chapter 50.
+
+### 3. 🧠 Therapy & Dialogue
+Domains as therapeutic spaces with continuous context:
+
+- Deep dialogue that builds over weeks and months
+- AI remembers your history, struggles, and breakthroughs
+- Perfect for personal growth and reflection
+
+---
+
+## Part 10: Web Interface
+
+### Tabs
+
+| Tab | Purpose |
+|-----|---------|
+| **Assistant** | Query the AI with pattern-based knowledge |
+| **Patterns** | Browse and search knowledge patterns |
+| **Traces** | View historical query traces and debugging |
+| **Domains** | Manage domains, specialists, configuration |
+| **Universes** | Create, switch, merge, export universes |
+| **Diagnostics** | System health, search metrics, pattern analysis |
+| **Surveyor** | Autonomous learning and pattern collection |
+
+### Access URLs
+
+| Service | URL |
+|---------|-----|
+| **Main Application** | http://localhost:3000 |
+| **API Documentation** | http://localhost:3000/docs |
+| **Health Check** | http://localhost:3000/health |
+| **Tao UI** | http://localhost:3000/tao |
+
+---
+
+## Part 11: The Vision
+
+> *"Like having a perfect circle of very smart friends, each specialized and unique. Each domain becomes a companion who learns YOUR communication style."*
+
+### What ExFrame Might Become
+
+- 🎓 **Personal University** - Every domain a course, every course building knowledge
+- ✍️ **Creative Studio** - Co-writing novels, screenplays, poetry with perfect memory
+- 🔬 **Research Companion** - Building on insights over months of investigation
+- 🧠 **Therapy Space** - Continuous dialogue for personal growth
+- 💼 **Professional Assistant** - Domain-specific expertise for any field
+
+### The Core Innovation
+
+**The difference: Memory.**
+
+Every other AI tool:
+- Forgets your conversation when you close the tab
+- Starts fresh every session
+- Can't build on previous discussions
+- Loses all your context
+
+**ExFrame:**
+- Remembers everything, forever
+- Builds context across months of learning
+- Creates a permanent knowledge base
+- Adapts to your unique journey
+
+---
+
+## Part 12: Quick Start
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/orangelightening/ExFrame.git
+cd ExFrame
+
+# 2. Configure your AI provider
+cp .env.example .env
+# Edit .env with your API key (OpenAI, Anthropic, Zhipu, or Ollama)
+
+# 3. Start ExFrame
+docker compose up -d
+
+# 4. Open your browser
+http://localhost:3000
+```
+
+---
+
+## Summary
+
+ExFrame is a **domain-agnostic AI-powered knowledge management system** with:
+
+- ✅ **Universe-based architecture** - Portable knowledge environments
+- ✅ **Plugin-based pipeline** - Swappable transformation logic
+- ✅ **Universal conversation logging** - Every query saved forever
+- ✅ **Conversation memory** - AI remembers everything
+- ✅ **Three AI personas** - Poet, Librarian, Researcher
+- ✅ **Tao subsystem** - Knowledge cartography and learning journey mapping
+- ✅ **Docker ready** - One-command deployment
+
+**The philosophy**: Nurture AI personas in specific roles, and they'll perform reliably and build genuine expertise over time.
+
+> *"AI performs reliably when nurtured in the role it is filling as it emerges."*
+
+---
+
+Would you like me to dive deeper into any specific aspect of ExFrame? I can explain:
+- The plugin architecture in detail
+- How to create new domains
+- The Tao subsystem internals
+- The semantic search implementation
+- Any other part you're curious about?
+
+
+---
+
